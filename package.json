@@ -2,7 +2,11 @@
   "name": "@nge/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "madge:analyze": "bash scripts/madge/analyze.sh",
+    "madge:check": "bash scripts/madge/quick-check.sh",
+    "madge:source": "bash scripts/madge/source-check.sh"
+  },
   "private": true,
   "dependencies": {
     "@angular/cdk": "~21.2.0",
@@ -79,6 +83,7 @@
     "jest-environment-jsdom": "~30.3.0",
     "jest-preset-angular": "~16.0.0",
     "jest-util": "~30.3.0",
+    "madge": "^8.0.0",
     "nx": "22.7.5",
     "postcss": "^8.5.15",
     "prettier": "~3.6.2",
