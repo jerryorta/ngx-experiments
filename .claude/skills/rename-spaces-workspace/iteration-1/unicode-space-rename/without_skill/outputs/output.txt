@@ -1,0 +1,8 @@
+Renamed file in /tmp/rsp-fixtures/old-eval-1/
+
+The original filename contained a mix of regular ASCII spaces (U+0020) and one Unicode Narrow No-Break Space (U+202F, encoded as bytes e2 80 af) between "9.15.23" and "AM".
+
+Old name: walkthrough with client Broker sideScreen Recording 2026-04-14 at 9.15.23 AM.mov
+New name: walkthrough_with_client_Broker_sideScreen_Recording_2026-04-14_at_9.15.23_AM.mov
+
+All spaces (including the Unicode Narrow No-Break Space U+202F) were replaced with underscores.

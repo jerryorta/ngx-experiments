@@ -1,0 +1,54 @@
+{
+  "name": "Concierge property search (active / closed / combined + map + entry points)",
+  "epicKey": "REX-385",
+  "jql": "parent = REX-385 AND status = \"To Do\"",
+  "storyOrdering": "epic-description",
+  "groupLabel": "Wave",
+  "completionMessage": "All REX-385 property-search stories are complete!",
+  "phaseNote": "Wave 1 reconciles the Algolia call path through the backend `algoliaQuery` dispatcher (REX-470 is BACKEND — not an nx project, deploy-first via `npm run d.fn -- prod`; REX-471 is the app-side repoint). All UI page systems use a colocated component-scoped @ngrx/signals SignalStore mediating the global facades. Active (Algolia) and closed (BBO/BigQuery) are separate paths per the REX-364 split.",
+  "hybridMode": true,
+  "commitScope": "concierge",
+  "buildCommand": "npm run b.app.concierge",
+  "app": "apps/concierge/app",
+  "libraries": {
+    "ui": "libs/concierge/ui",
+    "store": "libs/concierge/store",
+    "designLibrary": "libs/concierge/design-library"
+  },
+  "routingFiles": [
+    "apps/concierge/app/src/app/app.routes.ts",
+    "libs/concierge/ui/src/lib/desktop-shell/desktop-shell.routes.ts",
+    "libs/concierge/ui/src/lib/mobile-shell/mobile-shell.routes.ts"
+  ],
+  "conventions": [
+    "Port patterns, NEVER copy/paste legacy code — `apps/real-estate` + `libs/real-estate/ui/.../mls-property-search` are reference only; rebuild to concierge conventions",
+    "Each page system (page root + section children) holds interaction state in a COLOCATED component-scoped @ngrx/signals SignalStore provided on the page root (`providers: [...]`, NEVER `providedIn: 'root'`); child sections `inject()` it — NO input()/output() prop-drilling of shared state. See docs/ai-instructions/multi-component-signal-store.instructions.md",
+    "The component SignalStore MEDIATES the global @ngrx/store facades: read via withComputed, write by delegating to facade methods. It supplements, never replaces, the global domain store. Global slices stay the source of truth",
+    "Algolia leaves the app bundle: active-listing search routes through the backend `algoliaQuery` onCall dispatcher (extend the discriminator — dispatcher-over-narrow-callables), NOT the in-browser `@algolia/client-search` client. Mirrors the REX-399 contact-lookup path",
+    "Active vs closed are separate paths (REX-364 split): active = Algolia (Active/Pending); closed = BigQuery `bbo_properties` via the `mlsQuery` callable. NEVER the MLSGrid REST API directly from app code",
+    "New global slices (e.g. +saved-searches) follow the existing +starred-properties layout; use the ngrx-global-store skill; Firestore write flow per docs/ai-instructions/ngrx-mutation-flow.instructions.md; normalize serverTimestamp → ISO at the watch read boundary",
+    "Backend stories (e.g. REX-470) are NOT in nx — own lint/build under apps/concierge/backend/functions; deploy-first via `npm run d.fn -- prod`; the locally-served app calls deployed prod functions",
+    "Signals: input() / output() — NO @Input() / @Output()",
+    "DI: inject() — NO constructor injection",
+    "Control flow: @if, @for, @switch — NO *ngIf / *ngFor",
+    "NO Angular Material — use @angular/cdk instead",
+    "NO shadows — tonal elevation via surface color tokens only",
+    "NO 1px borders — surface color shifts only",
+    "NO pill shapes — use design system radius tokens only",
+    "Tailwind first; fall back to SCSS BEM only for complex layouts or animations Tailwind cannot express; use GSAP only for sophisticated animations that CSS cannot achieve",
+    "Concierge uses its own cg-* design library (libs/concierge/design-library) — NEVER libs/shared/ui-design-library (dlc-*)",
+    "Testing: Jest only — NEVER Jasmine",
+    "Separate files: .ts, .html, .scss, .spec.ts — NEVER inline template/styles",
+    "App components: default encapsulation + :host {} for styles; Design library components: ViewEncapsulation.None + host: { class: 'cg-component-name' }",
+    "Seed fixtures must satisfy every new guard/condition the story introduces in the SAME diff so cross-actor scenarios pass on a fresh /seed-concierge-reset-*",
+    "HARD GATE — DO NOT report a UI story complete (and do NOT hand off to /epic-story-complete) until the corresponding cross-actor scenario from `reference_concierge_cross_actor_preflight.md` (Claude memory) has been EXECUTED end-to-end via `/concierge-cross-actor-test` and the verifier-side state confirms the flow worked through the UI. A test plan document is NOT sufficient. If the scenario reveals a gap, fix it on the current branch per [[actor-testing-fix-gaps-in-place]] and RE-RUN to PASS. If no runnable scenario exists for this story's slice yet, file/extend one in the cross-actor catalog BEFORE shipping. Note: pure backend/no-UI stories (e.g. REX-470) and emit-only telemetry stories follow their own done-checks (unit + deploy), not cross-actor."
+  ],
+  "designReferences": null,
+  "epicEvolutionRules": [
+    "Capture architectural shifts in THIS epic. When a story surfaces a constraint, pivot, or gap, update the subsequent stories that depend on the decision; do not silently absorb the change in the current story, and do not split the work into a separate epic.",
+    "Update downstream discovery / research stories with upstream decisions before they are picked up — discovery work should not re-derive choices that have already been settled in earlier stories of this epic.",
+    "Add newly-discovered work as CHILD tickets of THIS epic — never as prose in the epic description. Create them 'To Do' if ready to be worked next (`/epic-next`'s JQL only picks up 'To Do' stories), or 'Backlog' if deferred / not-yet-ready. Reference each in the wave plan as a one-line `KEY — summary` entry.",
+    "The epic description holds ONLY: the overall description, the architectural-lock bullets, and the wave order (one line per story, `KEY — summary`). NEVER put per-story implementation detail, acceptance criteria, locked-invariant prose, or follow-up specs in the epic; that detail lives in the child ticket whose scope it is. Keep the wave plan and the actual story set in sync as scope evolves.",
+    "Seed fixtures must satisfy every new guard / condition the story introduces. When a story adds a permission gate, role check, status filter, or any data-driven UI condition, update the corresponding mock + seed fixture in the SAME diff so cross-actor scenarios pass on a fresh `/seed-concierge-reset-*`."
+  ]
+}

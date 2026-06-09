@@ -1,0 +1,18 @@
+{
+  "enabledPlugins": {
+    "nx@nx-claude-plugins": true,
+    "commit-commands@claude-code-plugins": true,
+    "feature-dev@claude-code-plugins": true,
+    "ralph-wiggum@claude-code-plugins": true,
+    "example-skills@anthropic-agent-skills": true,
+    "frontend-design@claude-code-plugins": true
+  },
+  "extraKnownMarketplaces": {
+    "nx-claude-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "nrwl/nx-ai-agents-config"
+      }
+    }
+  }
+}

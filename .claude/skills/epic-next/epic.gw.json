@@ -1,0 +1,38 @@
+{
+  "name": "Showcase the design library on the site via embedded Storybook",
+  "epicKey": "GW-24",
+  "jql": "parent = GW-24 AND status = \"To Do\"",
+  "storyOrdering": "epic-description",
+  "groupLabel": "Wave",
+  "completionMessage": "All GW-24 stories are complete!",
+  "phaseNote": null,
+  "hybridMode": false,
+  "commitScope": "giga-marketing",
+  "buildCommand": "npm run b.app.giga-marketing",
+  "app": "apps/giga-marketing/app",
+  "libraries": {
+    "ui": "libs/giga-marketing/ui",
+    "store": "libs/giga-marketing/store",
+    "designLibrary": "libs/giga-marketing/design-library",
+    "themes": "libs/giga-marketing/themes"
+  },
+  "routingFiles": ["apps/giga-marketing/app/src/app/app.routes.ts"],
+  "conventions": [
+    "Route gating: register routes in app.routes.ts tagged with a PageRouteKey and filtered by feature-flags.ts (FEATURE_FLAGS.pageRoutes); disabled routes fall through to the catch-all redirect home",
+    "Signals: input() / output() — NO @Input() / @Output()",
+    "DI: inject() — NO constructor injection",
+    "Control flow: @if, @for, @switch — NO *ngIf / *ngFor",
+    "Tailwind utility classes first; SCSS BEM only for complex layouts/animations",
+    "Testing: Jest only — NEVER Jasmine",
+    "Separate files: .ts, .html, .scss, .spec.ts — NEVER inline template/styles",
+    "App components: default encapsulation + :host {} for styles",
+    "Design library components: ViewEncapsulation.None + host: { class: 'dlc-...' }"
+  ],
+  "designReferences": null,
+  "epicEvolutionRules": [
+    "Capture architectural shifts in THIS epic. When a story surfaces a constraint, pivot, or gap, update the subsequent stories that depend on the decision; do not silently absorb the change in the current story, and do not split the work into a separate epic.",
+    "Update downstream discovery / research stories with upstream decisions before they are picked up — discovery work should not re-derive choices that have already been settled in earlier stories of this epic.",
+    "Add newly-discovered work as CHILD tickets of THIS epic — never as prose in the epic description. Create them 'To Do' if ready to be worked next (`/epic-next`'s JQL only picks up 'To Do' stories), or 'Backlog' if deferred / not-yet-ready. Reference each in the wave plan as a one-line `KEY — summary` entry.",
+    "The epic description holds ONLY: the overall description, the wave order (one line per story, `KEY — summary`), and — at most — a few high-level pivot / architectural-lock bullets. NEVER put per-story implementation detail, acceptance criteria, locked-invariant prose, or follow-up specs in the epic; that detail lives in the child ticket whose scope it is (or the linked design docs). Scope must be readable from the child ticket alone. Keep the wave plan and the actual story set in sync as scope evolves — never let them drift, and never let an entry grow past one line."
+  ]
+}

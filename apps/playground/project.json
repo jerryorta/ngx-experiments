@@ -21,7 +21,7 @@
             "input": "apps/playground/public"
           }
         ],
-        "styles": ["apps/playground/src/styles.scss"]
+        "styles": ["apps/playground/src/tailwind.css", "apps/playground/src/styles.scss"]
       },
       "configurations": {
         "production": {
@@ -79,6 +79,35 @@
         "port": 4200,
         "staticFilePath": "dist/apps/playground/browser",
         "spa": true
+      }
+    },
+    "storybook": {
+      "executor": "@storybook/angular:start-storybook",
+      "options": {
+        "port": 4400,
+        "configDir": "apps/playground/.storybook",
+        "browserTarget": "playground:build",
+        "compodoc": false
+      },
+      "configurations": {
+        "ci": {
+          "quiet": true
+        }
+      }
+    },
+    "build-storybook": {
+      "executor": "@storybook/angular:build-storybook",
+      "outputs": ["{options.outputDir}"],
+      "options": {
+        "outputDir": "dist/storybook/playground",
+        "configDir": "apps/playground/.storybook",
+        "browserTarget": "playground:build",
+        "compodoc": false
+      },
+      "configurations": {
+        "ci": {
+          "quiet": true
+        }
       }
     }
   }

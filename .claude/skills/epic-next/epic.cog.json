@@ -1,0 +1,38 @@
+{
+  "name": "Routing Validation — Verify All Screens Are Navigable Without Direct URL Entry",
+  "epicKey": "EC-100",
+  "jql": "parent = EC-100 AND status = \"To Do\"",
+  "storyOrdering": "epic-description",
+  "groupLabel": "Wave",
+  "completionMessage": "All EC-100 routing validation stories are complete!",
+  "phaseNote": null,
+  "hybridMode": false,
+  "commitScope": "cognition",
+  "app": "apps/evolving-cognition/app",
+  "libraries": {
+    "ui": null,
+    "store": null,
+    "designLibrary": null
+  },
+  "routingFiles": ["apps/evolving-cognition/app/src/app/app.routes.ts"],
+  "conventions": [
+    "Signals: input() / output() — NO @Input() / @Output()",
+    "DI: inject() — NO constructor injection",
+    "Control flow: @if, @for, @switch — NO *ngIf / *ngFor",
+    "NO Angular Material — use @angular/cdk instead",
+    "NO shadows — tonal elevation via --cog-surface-* tokens only",
+    "NO 1px borders — surface color shifts only",
+    "NO pill shapes — --cog-radius-md (8px) everywhere",
+    "Tailwind first; fall back to SCSS BEM only for complex layouts or animations Tailwind cannot express; use GSAP only for sophisticated animations that CSS cannot achieve",
+    "Testing: Jest only — NEVER Jasmine",
+    "Separate files: .ts, .html, .scss, .spec.ts — NEVER inline template/styles",
+    "App components: default encapsulation + :host {} for styles",
+    "Design library components: ViewEncapsulation.None + host: { class: 'cog-component-name' }"
+  ],
+  "designReferences": {
+    "boardsIndex": "docs-projects/projects/cognition-redesign/cognition-stitch-boards.md",
+    "spec": ".stitch/cognition/DESIGN.md",
+    "agentsFile": "libs/cognition/design-library/AGENTS.md",
+    "tokens": "libs/cognition/themes/src/lib/styles/_cog-tokens.scss"
+  }
+}

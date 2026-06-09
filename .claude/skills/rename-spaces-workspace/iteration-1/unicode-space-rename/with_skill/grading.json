@@ -1,0 +1,19 @@
+{
+  "assertions": [
+    {
+      "text": "File renamed despite U+202F narrow no-break space (hint-matching works)",
+      "passed": true,
+      "evidence": "filesystem_state.txt shows all-underscore name"
+    },
+    {
+      "text": "Renamed file uses only underscores \u2014 no Unicode space characters remain",
+      "passed": true,
+      "evidence": "filesystem_state.txt: walkthrough_with_client_Broker_sideScreen_Recording_2026-04-14_at_9.15.23_AM.mov"
+    },
+    {
+      "text": "Claude output shows old name \u2192 new name",
+      "passed": true,
+      "evidence": "output.txt shows U+202F explanation and mapping"
+    }
+  ]
+}
