@@ -24,13 +24,14 @@
     "Control flow: @if, @for, @switch — NEVER *ngIf / *ngFor",
     "Separate files: .ts, .html, .scss, .spec.ts — NEVER inline template/styles",
     "Testing: Jest only — NEVER Jasmine",
-    "Domain isolation: got-you re-implements its OWN NgRx slices/watch/write services — NEVER import another domain's store. Reuse shared non-NgRx infra directly: @gigasoftware/firebase (NgPatFirestoreService, NgPatFirestoreCollectionQuery, withParentRefs) + @gigasoftware/store (QueryEngineCache)",
+    "Domain isolation: got-you re-implements its OWN NgRx slices/watch/write services — NEVER import another domain's store. Reuse shared non-NgRx infra directly: @gigasoftware/firebase (GigaFirestoreService, GigaFirestoreCollectionQuery, withParentRefs) + @gigasoftware/store (QueryEngineCache)",
     "Models/enums/path-helpers → libs/got-you/api; store slices + firestore-write/firestore-timestamp concerns → libs/got-you/store/src/lib/<concern>",
     "Membership single-encoded on /groups/{g}/members/{uid}; discover via collectionGroup('members').where(uid==, status==active). NO memberUIDs[] array",
     "One level of subcollection depth — flatten grandchildren to group-level siblings joined by reference fields; needs & slots are own collections (planId / planId+needId)",
     "Firestore is source of truth — reducers never optimistically mutate entity state; writes round-trip through onSnapshot. Stamp parentId/parentType at the snapshot boundary",
     "Timestamps: write serverTimestamp(), normalize to ISO-8601 string on read (one convention everywhere)",
-    "Pattern-match concierge analogs (libs/concierge/store, libs/concierge/api/database-paths, +account/account-auth-bridge, invitations/handlers/consume.ts) but write got-you's own code"
+    "Pattern-match concierge analogs (libs/concierge/store, libs/concierge/api/database-paths, +account/account-auth-bridge, invitations/handlers/consume.ts) but write got-you's own code",
+    "Name-refactor (epic ARCH-75, completed 2026-06-10): ALL legacy NgPat/ng-pat names were renamed repo-wide to Giga/giga — Jira tickets/specs written earlier may cite stale names. When a referenced file/symbol doesn't exist, apply the mapping before assuming it's missing: files ng-pat-foo.ts → giga-foo.ts; classes/interfaces/types/enums NgPatX → GigaX; fns/consts/actions/feature-keys ngPatX → gigaX; mid-name selectors/factories selectNgPatX / createNgPatX / connectNgPatX → selectGigaX / createGigaX / connectGigaX; SCREAMING tokens NG_PAT_X → GIGA_X; pipe names ngPatDate → gigaDate, ngPatSecondsToMilliseconds → gigaSecondsToMilliseconds; attribute directive ngPatBypassSW → gigaBypassSW; the 'NagPat' typo → Giga too. Fallback: grep the stem after the prefix (e.g. FirestoreCollectionQuery). EXCEPTION: deprecated libs/shared/material + libs/shared/ui-design-library still use NgPat names (excluded from the rename, being deleted) — references to THEIR symbols (NgPatFirebaseLoginService, NgPatSidenav*, NgPatAppIdleOfflineComponent, NG_PAT_AUTH_PROVIDERS_CONFIG, …) are still correct."
   ],
   "designReferences": {
     "dataArchitecture": "libs/got-you/docs/data-architecture.md",

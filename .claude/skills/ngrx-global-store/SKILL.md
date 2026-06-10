@@ -148,7 +148,7 @@ Pick your template based on what you're building:
 | `libs/concierge/store/src/lib/+onboarding-draft/` | Same as +account but with a sub-doc path and a stale-guard in the reducer. Has the clear-on-finalize cross-slice effect pattern. |
 | `libs/concierge/store/src/lib/+brokerage/` | Single-doc with a mutable source key (the active brokerage id) that rewires the subscription when the selected id changes. |
 | `libs/concierge/store/src/lib/+onboarding-write/` | Write-only slice — no subscription, just actions → effect → atomic batched `writeBatch`. |
-| `libs/real-estate/store/src/lib/+brokerages/brokerage-entity.service.ts` | Collection slice with `NgPatFirestoreCollectionQuery` + `aggregateUpdates` — entity-style CRUD via snapshots. |
+| `libs/real-estate/store/src/lib/+brokerages/brokerage-entity.service.ts` | Collection slice with `GigaFirestoreCollectionQuery` + `aggregateUpdates` — entity-style CRUD via snapshots. |
 | `libs/real-estate/store/src/lib/+chat/chat-firestore-watch.service.ts` | Nested collection driven by a parent entity via `QueryEngineCache`. |
 
 Always read before scaffolding:
@@ -187,7 +187,7 @@ Write files in dependency order so each can reference the previous:
 2. `<feature>.actions.ts` — `createActionGroup({ source: 'Feature', events: { ... } })`. Include `loadedFromSnapshotChanges({ doc })`, `snapshotMissing()`, plus dedicated `update*` / `create*` / `delete*` action + Success + Failure triples.
 3. `<feature>.reducer.ts` — `<feature>FeatureKey = 'kebab-case'`; initial state via `createWriteStateInitial()` + feature-specific fields; handlers using `onWriteStarted/Succeeded/Failed`.
 4. `<feature>.selectors.ts` — `createFeature({ name, reducer })` gives auto-generated selectors; add derived `selectWriteError`, `selectAnyWriteInFlight`, `selectIsWriteInFlight(writeId)` via `extraSelectors`.
-5. `<feature>-write.service.ts` (if writes) — `@Injectable({ providedIn: 'root' })` class, inject `NgPatFirestoreService` + `Store` (for `selectUid`), expose `update<X>$(patch): Observable<void>` methods that wrap `firestoreService.upsertDoc$(path, payload)`.
+5. `<feature>-write.service.ts` (if writes) — `@Injectable({ providedIn: 'root' })` class, inject `GigaFirestoreService` + `Store` (for `selectUid`), expose `update<X>$(patch): Observable<void>` methods that wrap `firestoreService.upsertDoc$(path, payload)`.
 6. `<feature>-firestore-watch.service.ts` (if subscription) — implements `WebsocketConnectableService`, has `connectionKey = <feature>FeatureKey`, constructs `connection = new WebsocketServiceConnector(this, this.store)`, `onConnect({ uid })` opens `onSnapshot(path)` → dispatches `loadedFromSnapshotChanges` or `snapshotMissing`, `onDisconnect()` unsubscribes.
 7. `<feature>.effects.ts` — wrap each write in `firestoreWriteEffect({ trigger, work, onSuccess, onFailure })`. Add cross-slice effects (e.g. clear-on-signout) here, not in the reducer.
 8. `<feature>.facade.ts` (optional) — `@Injectable({ providedIn: 'root' })` wrapping the store with ergonomic methods + signals (`toSignal(store.select(...))`). Components inject the facade, not the store directly.

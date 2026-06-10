@@ -28,7 +28,8 @@
     "Pure layout + date logic stays in pure functions (libs/shared/calendar core + libs/shared/date); the store calls them from withComputed",
     "NOT D3 — HTML + CSS Grid + @angular/cdk/drag-drop (DOM-native DnD)",
     "Stories live INSIDE the lib and are composed by apps/storybook-app (add the glob to apps/storybook-app/.storybook/main.ts stories array); serve via npm run storybook (nx storybook storybook-app); shared GigaStorybookReviewContainerComponent from libs/shared/storybook",
-    "Date math: libs/shared/date (date-fns-backed); reuse NgPatTimeStamp from @gigasoftware/api for input normalization"
+    "Date math: libs/shared/date (date-fns-backed); reuse GigaTimeStamp from @gigasoftware/api for input normalization",
+    "Name-refactor (epic ARCH-75, completed 2026-06-10): ALL legacy NgPat/ng-pat names were renamed repo-wide to Giga/giga — Jira tickets/specs written earlier may cite stale names. When a referenced file/symbol doesn't exist, apply the mapping before assuming it's missing: files ng-pat-foo.ts → giga-foo.ts; classes/interfaces/types/enums NgPatX → GigaX; fns/consts/actions/feature-keys ngPatX → gigaX; mid-name selectors/factories selectNgPatX / createNgPatX / connectNgPatX → selectGigaX / createGigaX / connectGigaX; SCREAMING tokens NG_PAT_X → GIGA_X; pipe names ngPatDate → gigaDate, ngPatSecondsToMilliseconds → gigaSecondsToMilliseconds; attribute directive ngPatBypassSW → gigaBypassSW; the 'NagPat' typo → Giga too. Fallback: grep the stem after the prefix (e.g. FirestoreCollectionQuery). EXCEPTION: deprecated libs/shared/material + libs/shared/ui-design-library still use NgPat names (excluded from the rename, being deleted) — references to THEIR symbols (NgPatFirebaseLoginService, NgPatSidenav*, NgPatAppIdleOfflineComponent, NG_PAT_AUTH_PROVIDERS_CONFIG, …) are still correct."
   ],
   "designReferences": null,
   "epicEvolutionRules": [

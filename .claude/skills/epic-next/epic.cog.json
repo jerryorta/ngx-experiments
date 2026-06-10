@@ -27,7 +27,8 @@
     "Testing: Jest only — NEVER Jasmine",
     "Separate files: .ts, .html, .scss, .spec.ts — NEVER inline template/styles",
     "App components: default encapsulation + :host {} for styles",
-    "Design library components: ViewEncapsulation.None + host: { class: 'cog-component-name' }"
+    "Design library components: ViewEncapsulation.None + host: { class: 'cog-component-name' }",
+    "Name-refactor (epic ARCH-75, completed 2026-06-10): ALL legacy NgPat/ng-pat names were renamed repo-wide to Giga/giga — Jira tickets/specs written earlier may cite stale names. When a referenced file/symbol doesn't exist, apply the mapping before assuming it's missing: files ng-pat-foo.ts → giga-foo.ts; classes/interfaces/types/enums NgPatX → GigaX; fns/consts/actions/feature-keys ngPatX → gigaX; mid-name selectors/factories selectNgPatX / createNgPatX / connectNgPatX → selectGigaX / createGigaX / connectGigaX; SCREAMING tokens NG_PAT_X → GIGA_X; pipe names ngPatDate → gigaDate, ngPatSecondsToMilliseconds → gigaSecondsToMilliseconds; attribute directive ngPatBypassSW → gigaBypassSW; the 'NagPat' typo → Giga too. Fallback: grep the stem after the prefix (e.g. FirestoreCollectionQuery). EXCEPTION: deprecated libs/shared/material + libs/shared/ui-design-library still use NgPat names (excluded from the rename, being deleted) — references to THEIR symbols (NgPatFirebaseLoginService, NgPatSidenav*, NgPatAppIdleOfflineComponent, NG_PAT_AUTH_PROVIDERS_CONFIG, …) are still correct."
   ],
   "designReferences": {
     "boardsIndex": "docs-projects/projects/cognition-redesign/cognition-stitch-boards.md",
