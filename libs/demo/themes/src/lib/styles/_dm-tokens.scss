@@ -1,0 +1,45 @@
+// =============================================================================
+// Demo CSS Variable Token Contract
+// =============================================================================
+// This file documents all --dm-* CSS custom properties used across the app.
+// Actual values are defined in theme files: dm/_dm-dark.scss, dm/_dm-light.scss
+// =============================================================================
+
+// --- Color: Primary ---
+// --dm-primary              Main brand/action color
+// --dm-primary-container    Subtle tinted surface for primary content
+// --dm-on-primary           Text/icon color on primary-colored surfaces
+
+// --- Color: Surface ---
+// --dm-surface              Page background
+// --dm-surface-container    Slightly elevated surface (cards, panels)
+// --dm-surface-container-low   Even subtler elevation
+// --dm-surface-container-high  Higher elevation (modals, dropdowns)
+// --dm-on-surface           Primary text color
+// --dm-on-surface-variant   Secondary/muted text and icons
+
+// --- Color: Borders ---
+// --dm-outline              Stronger border (inputs, focused states)
+// --dm-outline-variant      Subtle border (dividers, inactive elements)
+
+// --- Color: Semantic States ---
+// --dm-error                Error state fill
+// --dm-on-error             Text/icon on error surface
+// --dm-success              Success/completed state fill
+// --dm-on-success           Text/icon on success surface
+// --dm-warning              Warning state fill
+// --dm-on-warning           Text/icon on warning surface
+
+// --- Typography ---
+// --dm-font-family          App font stack
+// --dm-font-weight-regular  400
+// --dm-font-weight-medium   500
+// --dm-font-weight-bold     600
+
+// --- Shape ---
+// --dm-radius-sm            Small radius — tight elements
+// --dm-radius-md            Medium radius — buttons, inputs
+// --dm-radius-lg            Large radius — panels, cards
+
+// --- Motion ---
+// --dm-transition-duration  Standard transition duration

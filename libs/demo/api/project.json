@@ -1,0 +1,26 @@
+{
+  "name": "demo-api",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/demo/api/src",
+  "projectType": "library",
+  "tags": ["models", "lib"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/demo/api",
+        "main": "libs/demo/api/src/index.ts",
+        "tsConfig": "libs/demo/api/tsconfig.lib.json",
+        "assets": ["libs/demo/api/*.md"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/demo/api/jest.config.cts"
+      }
+    }
+  }
+}

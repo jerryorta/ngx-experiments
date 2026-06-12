@@ -3,6 +3,8 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
+    "s.app.demo": "npx nx run demo-app:serve:local-dev --skip-nx-cache --port 4201",
+    "b.app.demo": "npx nx run demo-app:build --configuration=production --skip-nx-cache",
     "madge:analyze": "bash scripts/madge/analyze.sh",
     "madge:check": "bash scripts/madge/quick-check.sh",
     "madge:source": "bash scripts/madge/source-check.sh"
@@ -81,8 +83,10 @@
     "eslint-plugin-playwright": "^1.6.2",
     "jest": "~30.3.0",
     "jest-environment-jsdom": "~30.3.0",
+    "jest-environment-node": "~30.3.0",
     "jest-preset-angular": "~16.0.0",
     "jest-util": "~30.3.0",
+    "jsonc-eslint-parser": "^2.1.0",
     "madge": "^8.0.0",
     "nx": "22.7.5",
     "postcss": "^8.5.15",

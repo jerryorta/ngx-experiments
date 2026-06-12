@@ -1,0 +1,21 @@
+// =============================================================================
+// Demo — Theme Entry Point
+// =============================================================================
+// Import order: theme vars → base
+// Nothing emits CSS at @use time — only when dm-theme-mixin() is invoked.
+// =============================================================================
+
+@use "dm/dm-dark";
+@use "dm/dm-light";
+@use "dm-base";
+
+@mixin dm-theme-mixin() {
+  @include dm-dark.dm-dark-theme();
+  @include dm-light.dm-light-theme();
+  @include dm-base.dm-base();
+
+  .dm-dark,
+  .dm-light {
+    @include dm-base.dm-theme-surface();
+  }
+}

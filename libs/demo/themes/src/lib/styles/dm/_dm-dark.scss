@@ -1,0 +1,49 @@
+// =============================================================================
+// Demo — Dark Theme
+// Applied via: html.dm-dark
+// =============================================================================
+
+@mixin dm-dark-theme() {
+  html.dm-dark {
+    // --- Primary ---
+    --dm-primary: #7aa2ff;
+    --dm-primary-container: rgba(122, 162, 255, 0.12);
+    --dm-on-primary: #0b0d12;
+
+    // --- Surface ---
+    --dm-surface: #0b0d12;
+    --dm-surface-container-low: #10131a;
+    --dm-surface-container: #151924;
+    --dm-surface-container-high: #1c2230;
+
+    // --- Text ---
+    --dm-on-surface: #d6dae3;
+    --dm-on-surface-variant: #8a91a0;
+
+    // --- Borders ---
+    --dm-outline: #2c3342;
+    --dm-outline-variant: #1f2532;
+
+    // --- Semantic states ---
+    --dm-error: #ff5d5d;
+    --dm-on-error: #0b0d12;
+    --dm-success: #3ddc97;
+    --dm-on-success: #0b0d12;
+    --dm-warning: #ffb340;
+    --dm-on-warning: #0b0d12;
+
+    // --- Typography ---
+    --dm-font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+    --dm-font-weight-regular: 400;
+    --dm-font-weight-medium: 500;
+    --dm-font-weight-bold: 600;
+
+    // --- Shape ---
+    --dm-radius-sm: 4px;
+    --dm-radius-md: 6px;
+    --dm-radius-lg: 8px;
+
+    // --- Motion ---
+    --dm-transition-duration: 150ms;
+  }
+}

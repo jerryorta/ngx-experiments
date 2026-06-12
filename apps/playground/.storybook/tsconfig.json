@@ -12,6 +12,8 @@
     "../src/**/*.stories.mdx",
     "../../../libs/shared/charts/src/**/*.stories.ts",
     "../../../libs/shared/charts/src/**/*.component.ts",
+    "../../../libs/demo/design-library/src/**/*.stories.ts",
+    "../../../libs/demo/design-library/src/**/*.component.ts",
     "*.js",
     "*.ts"
   ]

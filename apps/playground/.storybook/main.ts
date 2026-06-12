@@ -4,6 +4,7 @@ const config: StorybookConfig = {
   stories: [
     '../src/app/**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
     '../../../libs/shared/charts/src/**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
+    '../../../libs/demo/design-library/src/**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
   ],
   addons: [],
   framework: {

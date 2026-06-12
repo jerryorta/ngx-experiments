@@ -1,0 +1,32 @@
+{
+  "name": "demo-design-library",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/demo/design-library/src",
+  "prefix": "dm",
+  "projectType": "library",
+  "tags": ["demo", "design", "lib"],
+  "generators": {
+    "@nx/angular:component": {
+      "style": "scss",
+      "changeDetection": "OnPush",
+      "viewEncapsulation": "None",
+      "displayBlock": true,
+      "skipTests": false,
+      "inlineStyle": false,
+      "inlineTemplate": false
+    }
+  },
+  "targets": {
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/demo/design-library/jest.config.cts",
+        "tsConfig": "libs/demo/design-library/tsconfig.spec.json"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

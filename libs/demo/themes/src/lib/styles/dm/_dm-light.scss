@@ -1,0 +1,49 @@
+// =============================================================================
+// Demo — Light Theme (placeholder)
+// Applied via: html.dm-light
+// =============================================================================
+
+@mixin dm-light-theme() {
+  html.dm-light {
+    // --- Primary ---
+    --dm-primary: #2952cc;
+    --dm-primary-container: #dde6ff;
+    --dm-on-primary: #ffffff;
+
+    // --- Surface ---
+    --dm-surface: #fafafa;
+    --dm-surface-container-low: #f2f2f2;
+    --dm-surface-container: #ebebeb;
+    --dm-surface-container-high: #e0e0e0;
+
+    // --- Text ---
+    --dm-on-surface: #1c1b1f;
+    --dm-on-surface-variant: #49454f;
+
+    // --- Borders ---
+    --dm-outline: #79747e;
+    --dm-outline-variant: #cac4d0;
+
+    // --- Semantic states ---
+    --dm-error: #ba1a1a;
+    --dm-on-error: #ffffff;
+    --dm-success: #2e7d32;
+    --dm-on-success: #ffffff;
+    --dm-warning: #e65100;
+    --dm-on-warning: #ffffff;
+
+    // --- Typography ---
+    --dm-font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+    --dm-font-weight-regular: 400;
+    --dm-font-weight-medium: 500;
+    --dm-font-weight-bold: 600;
+
+    // --- Shape ---
+    --dm-radius-sm: 4px;
+    --dm-radius-md: 6px;
+    --dm-radius-lg: 8px;
+
+    // --- Motion ---
+    --dm-transition-duration: 150ms;
+  }
+}

@@ -21,7 +21,10 @@
             "input": "apps/playground/public"
           }
         ],
-        "styles": ["apps/playground/src/tailwind.css", "apps/playground/src/styles.scss"]
+        "styles": ["apps/playground/src/tailwind.css", "apps/playground/src/styles.scss"],
+        "stylePreprocessorOptions": {
+          "includePaths": ["libs/demo/themes/src/lib/styles"]
+        }
       },
       "configurations": {
         "production": {
