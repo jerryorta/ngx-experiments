@@ -1,0 +1,42 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Bullet Chart - Interactive Controls</h2>
+    <p class="intro-text">
+      Use the Storybook controls panel to adjust bullet chart configuration in real-time.
+      All changes are applied immediately to the chart below.
+    </p>
+
+    <div class="interaction-row">
+      <button class="story-action-button" (click)="randomizeProgress()">
+        Randomize Progress
+      </button>
+    </div>
+
+    <div class="chart-container">
+      <nge-chart [config]="config()">
+        <ng-template #ngeChartTooltip let-content>
+          <div class="bullet-tooltip-content">
+            <div class="bullet-tooltip-label">{{ content?.label }}</div>
+            <div class="bullet-tooltip-value">
+              {{ content?.extra?.progress }}<br/> ({{ ((content?.extra?.progress - content?.extra?.min) / (content?.extra?.max - content?.extra?.min) * 100) | number:'1.1-1' }}%)
+            </div>
+          </div>
+        </ng-template>
+      </nge-chart>
+    </div>
+
+    <div class="controls-info">
+      <h4>Available Controls</h4>
+      <ul>
+        <li><strong>Data:</strong> Adjust progress, min, max, and color</li>
+        <li><strong>Dimensions:</strong> Bar height, indicator heights/widths</li>
+        <li><strong>Margins:</strong> Control chart margins</li>
+        <li><strong>Tooltip:</strong> Enable/disable, size, and styling</li>
+        <li><strong>Theme:</strong> Colors for all chart elements</li>
+      </ul>
+    </div>
+  </div>
+</nge-storybook-review-container>

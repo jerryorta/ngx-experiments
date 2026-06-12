@@ -1,0 +1,36 @@
+.nge-charts-tooltip {
+  --nge-charts-tooltip-background-color: var(--chart-surface, #fff);
+  --nge-charts-tooltip-text-color: var(--chart-on-surface, #1d1b20);
+  --nge-charts-tooltip-outline-color: var(--chart-outline, #79747e);
+  --nge-charts-tooltip-font-weight: 500;
+
+  position: relative;
+  display: block;
+  overflow: visible; // Allow shadow to be visible
+
+  // SVG with drop shadow for elevation effect
+  .tooltip-bubble {
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1));
+  }
+
+  // Single path for the entire bubble with divot
+  .tooltip-bubble-path {
+    fill: var(--nge-charts-tooltip-background-color);
+    stroke: var(--nge-charts-tooltip-outline-color);
+    stroke-width: 1;
+  }
+
+  .nge-charts-tooltip-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: var(--nge-charts-tooltip-text-color);
+    font-weight: var(--nge-charts-tooltip-font-weight);
+  }
+}

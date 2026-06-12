@@ -1,0 +1,37 @@
+.nge-chart-legend {
+  display: block;
+
+  .nge-chart-legend-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    justify-content: center;
+
+    &--vertical {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+  }
+
+  .nge-chart-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .nge-chart-legend-swatch {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .nge-chart-legend-label {
+    font-size: 12px;
+    color: var(--chart-on-surface, #333);
+    white-space: nowrap;
+  }
+}

@@ -1,0 +1,110 @@
+.nge-grouped-bar-chart-usage-stories {
+  display: block;
+  padding: 20px;
+
+  .stories-container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    margin-bottom: 8px;
+  }
+
+  .intro-text {
+    margin-bottom: 32px;
+    color: var(--chart-on-surface-variant, #666);
+    font-size: 16px;
+  }
+
+  .story-section {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--chart-outline-variant, #ccc);
+
+    &--highlight {
+      background: var(--chart-surface-variant, #f5f5f5);
+      padding: 20px;
+      border-radius: 8px;
+      border: 2px solid var(--chart-primary, #1976d2);
+    }
+
+    h4 {
+      margin-bottom: 8px;
+      color: var(--chart-on-surface, #333);
+    }
+
+    .story-description {
+      margin-bottom: 16px;
+      color: var(--chart-on-surface-variant, #666);
+      font-size: 14px;
+      line-height: 1.5;
+
+      code {
+        background: var(--chart-surface-container, #eee);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 13px;
+      }
+    }
+  }
+
+  .code-block {
+    margin-bottom: 16px;
+    background: var(--chart-inverse-surface, #313033);
+    border-radius: 8px;
+    overflow: hidden;
+
+    pre {
+      margin: 0;
+      padding: 16px;
+      color: var(--chart-inverse-on-surface, #f4eff4);
+      font-family: "Fira Code", "Consolas", monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      overflow-x: auto;
+      white-space: pre;
+    }
+  }
+
+  .chart-container {
+    height: 300px;
+    border: 1px solid var(--chart-outline-variant, #e0e0e0);
+    border-radius: 8px;
+    padding: 16px;
+    background: var(--chart-surface, #fff);
+    overflow: visible;
+
+    &--horizontal {
+      height: 350px;
+    }
+  }
+
+  .interaction-row {
+    margin-bottom: 12px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .action-button {
+    padding: 8px 16px;
+    background: var(--chart-primary, #1976d2);
+    color: var(--chart-on-primary, #fff);
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: var(--chart-primary-container, #1565c0);
+    }
+
+    &:active {
+      transform: translateY(1px);
+    }
+  }
+}

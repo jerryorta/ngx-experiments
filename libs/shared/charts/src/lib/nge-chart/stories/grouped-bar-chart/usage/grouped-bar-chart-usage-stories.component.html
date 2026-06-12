@@ -1,0 +1,125 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+<div class="stories-container">
+  <h2>Grouped Bar Chart - Usage Examples</h2>
+  <p class="intro-text">
+    Grouped bar charts show side-by-side bars grouped by category.
+    Ideal for comparing metrics across groups (e.g., Active vs Closed with Avg/Min/Max).
+  </p>
+
+  <!-- EXAMPLE 1: Basic Grouped Bar Chart (Vertical) -->
+  <section class="story-section">
+    <h4>1. Basic Grouped Bar Chart (Vertical)</h4>
+    <p class="story-description">
+      CMA-style data: Active vs Closed groups, each with Avg/Min/Max bars side-by-side.
+      Uses <code>createGroupedBarChartConfig()</code> with <code>labelFormat</code> and
+      <code>yAxisTickFormat</code>.
+    </p>
+    <div class="code-block">
+      <pre>
+data: NgeGroupedBarDataPoint[] = [
+  {{ '{' }} groupId: 'Active', label: 'Avg $/sqft', value: 185, color: '#4CAF50' {{ '}' }},
+  {{ '{' }} groupId: 'Active', label: 'Min', value: 142, color: '#81C784' {{ '}' }},
+  {{ '{' }} groupId: 'Active', label: 'Max', value: 225, color: '#2E7D32' {{ '}' }},
+  {{ '{' }} groupId: 'Closed', label: 'Avg $/sqft', value: 178, color: '#2196F3' {{ '}' }},
+  {{ '{' }} groupId: 'Closed', label: 'Min', value: 135, color: '#64B5F6' {{ '}' }},
+  {{ '{' }} groupId: 'Closed', label: 'Max', value: 210, color: '#1565C0' {{ '}' }},
+];
+
+config = createGroupedBarChartConfig({{ '{' }}
+  data: this.data,
+  showLabels: true,
+  labelFormat: (v) => '$' + v,
+  showXAxis: true,
+  showYAxis: true,
+  yAxisTickFormat: (d) => '$' + d,
+{{ '}' }});</pre>
+    </div>
+    <div class="chart-container">
+      <nge-chart [config]="basicGroupedConfig" />
+
+    </div>
+  </section>
+
+  <!-- EXAMPLE 2: Horizontal Grouped Bar Chart -->
+  <section class="story-section">
+    <h4>2. Horizontal Grouped Bar Chart</h4>
+    <p class="story-description">
+      Same data rendered horizontally with <code>orientation: 'horizontal'</code>.
+    </p>
+    <div class="code-block">
+      <pre>
+config = createGroupedBarChartConfig({{ '{' }}
+  data: this.data,
+  orientation: 'horizontal',
+  showLabels: true,
+  labelFormat: (v) => '$' + v,
+  showXAxis: true,
+  showYAxis: true,
+  xAxisTickFormat: (d) => '$' + d,
+{{ '}' }});</pre>
+    </div>
+    <div class="chart-container chart-container--horizontal">
+      <nge-chart [config]="horizontalGroupedConfig" />
+
+    </div>
+  </section>
+
+  <!-- EXAMPLE 3: Grouped Bar with Tooltip -->
+  <section class="story-section">
+    <h4>3. Grouped Bar with Tooltip</h4>
+    <p class="story-description">
+      Tooltips show group + label + value on hover.
+      Enable with <code>tooltip: {{ '{' }} enabled: true {{ '}' }}</code>.
+    </p>
+    <div class="code-block">
+      <pre>
+config = createGroupedBarChartConfig({{ '{' }}
+  data: this.data,
+  showLabels: true,
+  tooltip: {{ '{' }}
+    enabled: true,
+    position: 'follow-mouse',
+    width: 160,
+  {{ '}' }},
+{{ '}' }});</pre>
+    </div>
+    <div class="chart-container">
+      <nge-chart [config]="tooltipGroupedConfig" />
+
+    </div>
+  </section>
+
+  <!-- EXAMPLE 4: Dynamic Data with Signals -->
+  <section class="story-section story-section--highlight">
+    <h4>4. Dynamic Data with Signals</h4>
+    <p class="story-description">
+      <strong>Recommended pattern:</strong> Use a computed signal to rebuild the config when data changes.
+      Click "Randomize Data" to see animated updates.
+    </p>
+    <div class="code-block">
+      <pre>
+data = signal&lt;NgeGroupedBarDataPoint[]&gt;([...]);
+
+config = computed(() =>
+  createGroupedBarChartConfig({{ '{' }}
+    data: this.data(),
+    showLabels: true,
+  {{ '}' }})
+);
+
+&lt;nge-chart [config]="config()" /&gt;</pre>
+    </div>
+    <div class="interaction-row">
+      <button class="action-button" (click)="randomizeGroupedData()">
+        Randomize Data
+      </button>
+    </div>
+    <div class="chart-container">
+      <nge-chart [config]="dynamicGroupedConfig()" />
+    </div>
+  </section>
+</div>
+</nge-storybook-review-container>

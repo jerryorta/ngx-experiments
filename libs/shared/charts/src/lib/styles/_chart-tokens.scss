@@ -1,0 +1,96 @@
+// =============================================================================
+// Chart Design Tokens — Default Values (light theme)
+//
+// This file defines the visual token contract for the nge-chart library.
+// All --chart-* tokens are set here with sensible light-theme defaults so
+// charts render correctly even when no domain theme is active.
+//
+// Domain themes (MW, CG, etc.) override these defaults by re-declaring the
+// same custom properties inside their theme class selectors. Because class
+// selectors have higher specificity than :root, theme values always win.
+//
+// To add chart support to a new theme, map every token listed here to an
+// appropriate value from that theme's own token set.
+// =============================================================================
+
+:root {
+  // ---------------------------------------------------------------------------
+  // Surface tokens
+  // Used for: chart backgrounds, card panels, container fills
+  // ---------------------------------------------------------------------------
+
+  // Primary background — the main surface behind a chart
+  --chart-surface: #ffffff;
+
+  // Alternate/muted background — used for info boxes, highlighted story sections
+  --chart-surface-variant: #f5f5f5;
+
+  // Container background — used for code blocks, inline code highlights
+  --chart-surface-container: #eeeeee;
+
+  // Lighter container — used where a subtler container fill is needed
+  --chart-surface-container-low: #f8f8f8;
+
+  // Darkest container — used for bullet/diverging chart background bars
+  --chart-surface-container-highest: #e0e0e0;
+
+  // Inverted surface — background for elements that invert (e.g. dark tooltips on light themes)
+  --chart-inverse-surface: #333333;
+
+  // Text on inverted surface — e.g. label text inside a dark tooltip bubble
+  --chart-inverse-on-surface: #ffffff;
+
+  // ---------------------------------------------------------------------------
+  // Content tokens
+  // Used for: axis labels, tick marks, data labels, legend text
+  // ---------------------------------------------------------------------------
+
+  // Primary content color — main axis labels, value labels, legend text
+  --chart-on-surface: #1d1b20;
+
+  // Secondary/muted content — axis descriptions, helper text, dimmed labels
+  --chart-on-surface-variant: #666666;
+
+  // ---------------------------------------------------------------------------
+  // Border tokens
+  // Used for: axis lines, grid lines, chart card outlines
+  // ---------------------------------------------------------------------------
+
+  // Primary border — axis domain lines, card dividers
+  --chart-outline: #79747e;
+
+  // Subtle border — grid lines, low-contrast card outlines, chart containers
+  --chart-outline-variant: #e0e0e0;
+
+  // ---------------------------------------------------------------------------
+  // Accent tokens
+  // Used for: data series colors, interactive highlights, statistical markers
+  //
+  // Series color assignment:
+  //   Series 1 / primary accent   → --chart-primary
+  //   Series 2 / secondary accent → --chart-secondary  (e.g. median lines)
+  //   Series 3 / tertiary accent  → --chart-tertiary   (e.g. mean lines)
+  //   Error / failure state       → --chart-error
+  // ---------------------------------------------------------------------------
+
+  // Primary data series color — bar fills, line strokes, area fills, progress bars
+  --chart-primary: #1976d2;
+
+  // Primary hover/selected state — hovered bars, selected data points
+  --chart-primary-container: #bbdefb;
+
+  // Text on primary-colored elements — labels drawn inside primary-colored shapes
+  --chart-on-primary: #ffffff;
+
+  // Second data series — median reference lines, second line in multi-series charts
+  --chart-secondary: #625b71;
+
+  // Secondary container / hover state — secondary element backgrounds
+  --chart-secondary-container: #e8def8;
+
+  // Third data series — mean reference lines, third line in multi-series charts
+  --chart-tertiary: #7d5260;
+
+  // Error / failure state — error indicators, out-of-range markers
+  --chart-error: #b3261e;
+}

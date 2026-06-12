@@ -1,0 +1,176 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+<div class="stories-container">
+  <h2>Bullet Chart - Theming Examples</h2>
+  <p class="intro-text">
+    Examples demonstrating how to customize bullet chart appearance using themes.
+    Override colors for background bar, progress bar, progress indicator, and limit indicators.
+  </p>
+
+  <!-- Default Theme -->
+  <section class="story-section">
+    <h4>Default Theme</h4>
+    <p class="story-description">
+      The default appearance using Material Design system colors.
+    </p>
+    <div class="chart-container">
+      <nge-chart [config]="defaultConfig" />
+    </div>
+  </section>
+
+  <!-- Color Themes Grid -->
+  <section class="story-section">
+    <h4>Color Themes</h4>
+    <p class="story-description">
+      Custom color themes applied via the <code>theme.bullet</code> configuration.
+    </p>
+    <div class="themes-grid">
+      <div class="theme-item">
+        <span class="theme-label">Blue Theme</span>
+        <div class="chart-container">
+          <nge-chart [config]="blueConfig" />
+        </div>
+      </div>
+      <div class="theme-item">
+        <span class="theme-label">Green Theme</span>
+        <div class="chart-container">
+          <nge-chart [config]="greenConfig" />
+        </div>
+      </div>
+      <div class="theme-item">
+        <span class="theme-label">Purple Theme</span>
+        <div class="chart-container">
+          <nge-chart [config]="purpleConfig" />
+        </div>
+      </div>
+      <div class="theme-item">
+        <span class="theme-label">Orange Theme</span>
+        <div class="chart-container">
+          <nge-chart [config]="orangeConfig" />
+        </div>
+      </div>
+    </div>
+    <div class="code-block">
+      <pre>
+const blueConfig: NgeChartConfig = {{ '{' }}
+  ...createBulletChartConfig({{ '{' }} data: this.data {{ '}' }}),
+  theme: {{ '{' }}
+    bullet: {{ '{' }}
+      backgroundBar: {{ '{' }} color: '#E3F2FD' {{ '}' }},
+      progressBar: {{ '{' }} color: '#2196F3' {{ '}' }},
+      progressIndicator: {{ '{' }} color: '#1565C0' {{ '}' }},
+      limitIndicator: {{ '{' }} color: '#1976D2' {{ '}' }},
+    {{ '}' }},
+  {{ '}' }},
+{{ '}' }};</pre>
+    </div>
+  </section>
+
+  <!-- Dark Theme -->
+  <section class="story-section story-section--dark">
+    <h4>Dark Theme</h4>
+    <p class="story-description">
+      A dark theme suitable for dark mode interfaces.
+    </p>
+    <div class="chart-container chart-container--dark">
+      <nge-chart [config]="darkConfig" />
+    </div>
+    <div class="code-block">
+      <pre>
+theme: {{ '{' }}
+  bullet: {{ '{' }}
+    backgroundBar: {{ '{' }} color: '#424242' {{ '}' }},
+    progressBar: {{ '{' }} color: '#00BCD4' {{ '}' }},
+    progressIndicator: {{ '{' }} color: '#00ACC1' {{ '}' }},
+    limitIndicator: {{ '{' }} color: '#9E9E9E' {{ '}' }},
+  {{ '}' }},
+{{ '}' }}</pre>
+    </div>
+  </section>
+
+  <!-- Custom Colors -->
+  <section class="story-section">
+    <h4>Custom Colors via Data</h4>
+    <p class="story-description">
+      Set the <code>color</code> property on the data point to override the default theme color.
+      This is the recommended way to apply semantic colors (success, warning, error).
+    </p>
+    <div class="status-grid">
+      <div class="status-item">
+        <span class="status-label status-label--success">Green (Success)</span>
+        <div class="chart-container">
+          <nge-chart [config]="customSuccessConfig" />
+        </div>
+      </div>
+      <div class="status-item">
+        <span class="status-label status-label--warn">Orange (Warning)</span>
+        <div class="chart-container">
+          <nge-chart [config]="customWarnConfig" />
+        </div>
+      </div>
+      <div class="status-item">
+        <span class="status-label status-label--error">Red (Error)</span>
+        <div class="chart-container">
+          <nge-chart [config]="customErrorConfig" />
+        </div>
+      </div>
+    </div>
+    <div class="code-block">
+      <pre>
+// Set color on the data point
+data: {{ '{' }}
+  min: 0,
+  max: 100,
+  progress: 85,
+  color: '#00C853', // Custom green
+  units: '%',
+{{ '}' }}</pre>
+    </div>
+  </section>
+
+  <!-- Custom Dimensions -->
+  <section class="story-section">
+    <h4>Custom Dimensions</h4>
+    <p class="story-description">
+      Customize bar height and indicator dimensions for different visual weights.
+    </p>
+    <div class="chart-container chart-container--tall">
+      <nge-chart [config]="thickBarConfig" />
+    </div>
+    <div class="code-block">
+      <pre>
+createBulletChartConfig({{ '{' }}
+  data: this.data,
+  barHeight: 20,
+  progressIndicatorHeight: 50,
+  progressIndicatorWidth: 10,
+  limitIndicatorHeight: 50,
+  limitIndicatorWidth: 4,
+{{ '}' }})</pre>
+    </div>
+  </section>
+
+  <!-- Gradient Style -->
+  <section class="story-section">
+    <h4>Transparency Effects</h4>
+    <p class="story-description">
+      Use RGBA colors to create transparency effects for a softer appearance.
+    </p>
+    <div class="chart-container">
+      <nge-chart [config]="gradientStyleConfig" />
+    </div>
+    <div class="code-block">
+      <pre>
+theme: {{ '{' }}
+  bullet: {{ '{' }}
+    backgroundBar: {{ '{' }} color: 'rgba(103, 58, 183, 0.15)' {{ '}' }},
+    progressBar: {{ '{' }} color: 'rgba(103, 58, 183, 0.7)' {{ '}' }},
+    progressIndicator: {{ '{' }} color: '#673AB7' {{ '}' }},
+  {{ '}' }},
+{{ '}' }}</pre>
+    </div>
+  </section>
+</div>
+</nge-storybook-review-container>

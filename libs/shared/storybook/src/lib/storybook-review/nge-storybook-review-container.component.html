@@ -1,0 +1,50 @@
+<div class="nge-storybook-review-container__storybook-content">
+  <ng-content />
+</div>
+<div class="nge-storybook-review-container__storybook-footer">
+  @if (storybookFilePath()) {
+    <span class="nge-storybook-review-container__storybook-footer--link">
+      Code:
+      <a
+        class="nge-storybook-review-container__storybook-footer--link--a"
+        [href]="githubUrl()"
+        target="_blank"
+        rel="noopener noreferrer"
+        [attr.aria-label]="'Open ' + storybookFilePath() + ' in GitHub'"
+        >{{ storybookFilePath() }}</a
+      >
+    </span>
+  }
+
+  @if (trackingNumber()) {
+    <span class="nge-storybook-review-container__storybook-footer--link">
+      {{ trackingNumber() }}
+    </span>
+  }
+
+  @if (figmaUrl()) {
+    <span class="nge-storybook-review-container__storybook-footer--link"
+      ><a
+        class="nge-storybook-review-container__storybook-footer--link--a"
+        [href]="figmaUrl()"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Open in Figma"
+        >Figma</a
+      ></span
+    >
+  }
+
+  @if (uxUrl()) {
+    <span class="nge-storybook-review-container__storybook-footer--link"
+      ><a
+        class="nge-storybook-review-container__storybook-footer--link--a"
+        [href]="uxUrl()"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Open in Stitch"
+        >Stitch</a
+      ></span
+    >
+  }
+</div>

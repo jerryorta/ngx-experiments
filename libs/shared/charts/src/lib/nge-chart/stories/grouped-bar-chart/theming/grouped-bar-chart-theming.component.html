@@ -1,0 +1,105 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+<div class="stories-container">
+  <h2>Grouped Bar Chart - Theming Examples</h2>
+
+  <!-- 1. Default Theme -->
+  <section class="story-section">
+    <h4>Default Theme (Material Design)</h4>
+    <p class="story-description">No theme or per-bar colors provided - uses Material Design CSS variables</p>
+    <div class="chart-container">
+      <nge-chart [config]="defaultConfig" />
+    </div>
+  </section>
+
+  <!-- 2. Custom Colors -->
+  <section class="story-section">
+    <h4>Custom Colors</h4>
+    <p class="story-description">Custom bar colors via <code>config.theme['grouped-bar'].bar</code></p>
+    <div class="chart-container">
+      <nge-chart [config]="customColorsConfig" />
+    </div>
+  </section>
+
+  <!-- 3. Per-Bar Colors -->
+  <section class="story-section">
+    <h4>Per-Bar Colors</h4>
+    <p class="story-description">Individual colors via <code>data[].color</code> - overrides theme</p>
+    <div class="chart-container">
+      <nge-chart [config]="perBarColorConfig" />
+    </div>
+  </section>
+
+  <!-- 4. Large Typography Theme -->
+  <section class="story-section">
+    <h4>Large Typography Theme</h4>
+    <p class="story-description">Custom font sizes via <code>config.theme['grouped-bar'].label</code> and <code>config.theme.axis</code></p>
+    <div class="chart-container">
+      <nge-chart [config]="largeTypographyConfig" />
+    </div>
+  </section>
+
+  <!-- 5. Horizontal with Theme -->
+  <section class="story-section">
+    <h4>Horizontal + Purple Theme</h4>
+    <p class="story-description">Horizontal orientation with custom bar radius</p>
+    <div class="chart-container chart-container--horizontal">
+      <nge-chart [config]="horizontalConfig" />
+    </div>
+  </section>
+
+  <!-- 6. With Legend -->
+  <section class="story-section story-section--highlight">
+    <h4>Legend Positions</h4>
+    <p class="story-description">
+      <strong>Legend auto-generates from group data.</strong> Configure position with
+      <code>legend: {{ '{' }} enabled: true, position: 'bottom' | 'top' {{ '}' }}</code>
+    </p>
+    <div class="chart-row">
+      <div class="chart-column">
+        <h5>Position: Bottom</h5>
+        <div class="chart-container chart-container--small">
+          <nge-chart [config]="legendBottomConfig" />
+        </div>
+      </div>
+      <div class="chart-column">
+        <h5>Position: Top</h5>
+        <div class="chart-container chart-container--small">
+          <nge-chart [config]="legendTopConfig" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Multiple Charts -->
+  <section class="story-section story-section--highlight">
+    <h4>Multiple Charts with Different Color Themes</h4>
+    <p class="story-description">
+      <strong>Same component, different data and colors.</strong> Each chart uses
+      <code>&lt;nge-chart&gt;</code> with per-bar colors for themed groupings.
+    </p>
+    <div class="chart-row">
+      <div class="chart-column">
+        <h5>Revenue (Blue)</h5>
+        <div class="chart-container chart-container--small">
+          <nge-chart [config]="revenueConfig" />
+        </div>
+      </div>
+      <div class="chart-column">
+        <h5>Expenses (Red)</h5>
+        <div class="chart-container chart-container--small">
+          <nge-chart [config]="expenseConfig" />
+        </div>
+      </div>
+      <div class="chart-column">
+        <h5>Profit (Green)</h5>
+        <div class="chart-container chart-container--small">
+          <nge-chart [config]="profitConfig" />
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</nge-storybook-review-container>

@@ -1,0 +1,146 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+<div class="stories-container">
+  <h2>Composite Charts - Layered Visualizations</h2>
+  <p class="intro-text">
+    Composite charts combine multiple layer types (bar, line, etc.) in a single visualization.
+    Layers are rendered in order, with later layers appearing on top of earlier ones.
+  </p>
+
+  <!-- Bar + Line Composite Chart -->
+  <section class="story-section story-section--highlight">
+    <h4>Bar Chart with Trend Lines</h4>
+    <p class="story-description">
+      Combining a bar chart with multiple trend lines. The bar layer is rendered first (in back),
+      and the line layer is rendered on top. Each bar has a unique color, and each line series
+      has a distinct color. A custom <code>scaleFactory</code> ensures both layers share the
+      same scales.
+    </p>
+    <div class="code-block">
+      <pre>
+// Bar data - each bar with unique color
+barData = [
+  {{ '{' }} label: 'Jan', value: 120, color: '#42A5F5' {{ '}' }},
+  {{ '{' }} label: 'Feb', value: 150, color: '#66BB6A' {{ '}' }},
+  // ...
+];
+
+// Line data - multiple series
+lineData = [
+  {{ '{' }} x: 'Jan', y: 160, seriesId: 'Target' {{ '}' }},
+  {{ '{' }} x: 'Jan', y: 120, seriesId: 'Avg' {{ '}' }},
+  {{ '{' }} x: 'Jan', y: 115, seriesId: 'Forecast' {{ '}' }},
+  // ...
+];
+
+config: NgeChartConfig = {{ '{' }}
+  base: {{ '{' }}
+    margin: {{ '{' }} bottom: 50, left: 60, right: 20, top: 20 {{ '}' }},
+    showXAxis: true,
+    showYAxis: true,
+    xAxisLabel: 'Month',
+    yAxisLabel: 'Revenue ($K)',
+  {{ '}' }},
+  layers: [
+    // Bar layer (rendered first, in back)
+    {{ '{' }}
+      type: 'bar',
+      data: this.barData,
+      barPadding: 0.3,
+      barRadius: 4,
+    {{ '}' }},
+    // Line layer (rendered second, on top)
+    {{ '{' }}
+      type: 'line',
+      data: this.lineData,
+      curveType: 'monotone',
+      showPoints: true,
+      seriesColors: ['#D32F2F', '#1976D2', '#7B1FA2'],
+    {{ '}' }},
+  ],
+  scaleFactory: (config, dimensions) => {{ '{' }}
+    // Custom scale factory that works for both layers
+    const labels = barData.map(d => d.label);
+    const allValues = [...barData.map(d => d.value), ...lineData.map(d => d.y)];
+    const maxValue = Math.max(...allValues) * 1.1;
+
+    const xScale = scaleBand&lt;string&gt;()
+      .domain(labels)
+      .range([0, dimensions.boundedWidth])
+      .padding(0.2);
+
+    const yScale = scaleLinear()
+      .domain([0, maxValue])
+      .range([dimensions.boundedHeight, 0]);
+
+    return {{ '{' }} x: xScale, y: yScale {{ '}' }};
+  {{ '}' }},
+{{ '}' }};
+
+&lt;nge-chart [config]="compositeConfig" /&gt;</pre>
+    </div>
+    <div class="chart-container chart-container--large">
+      <nge-chart [config]="compositeConfig">
+        <!-- Custom tooltip template -->
+        <ng-template #ngeChartTooltip let-content>
+          @if (content) {
+            <div class="composite-tooltip">
+              <div class="tooltip-header">{{ content.label }}</div>
+              <!-- Bar tooltip content -->
+              @if (content.extra?.barColor) {
+                <div class="tooltip-row tooltip-row--bar">
+                  <span class="tooltip-color-dot" [style.background-color]="content.extra.barColor"></span>
+                  <span class="tooltip-label">Revenue</span>
+                  <span class="tooltip-value">{{ content.value }}</span>
+                </div>
+                @if (content.extra?.lineSeries) {
+                  <div class="tooltip-divider"></div>
+                  @for (series of content.extra.lineSeries; track series.name) {
+                    <div class="tooltip-row">
+                      <span class="tooltip-color-dot" [style.background-color]="series.color"></span>
+                      <span class="tooltip-label">{{ series.name }}</span>
+                      <span class="tooltip-value">${{ series.value }}K</span>
+                    </div>
+                  }
+                }
+              }
+              <!-- Line tooltip content -->
+              @if (content.extra?.seriesColor) {
+                <div class="tooltip-row">
+                  <span class="tooltip-color-dot" [style.background-color]="content.extra.seriesColor"></span>
+                  <span class="tooltip-label">{{ content.extra.seriesName }}</span>
+                  <span class="tooltip-value">{{ content.value }}</span>
+                </div>
+              }
+            </div>
+          }
+        </ng-template>
+      </nge-chart>
+    </div>
+  </section>
+
+  <section class="story-section">
+    <h4>How Composite Charts Work</h4>
+    <div class="info-grid">
+      <div class="info-card">
+        <h5>Layer Ordering</h5>
+        <p>Layers are rendered in array order. First layer = bottom, last layer = top.</p>
+      </div>
+      <div class="info-card">
+        <h5>Shared Scales</h5>
+        <p>All layers share the same x and y scales from <code>scaleFactory</code>.</p>
+      </div>
+      <div class="info-card">
+        <h5>Custom Scale Factory</h5>
+        <p>Combine data from all layers when calculating scale domains.</p>
+      </div>
+      <div class="info-card">
+        <h5>Layer Independence</h5>
+        <p>Each layer is configured independently with its own styles and behaviors.</p>
+      </div>
+    </div>
+  </section>
+</div>
+</nge-storybook-review-container>

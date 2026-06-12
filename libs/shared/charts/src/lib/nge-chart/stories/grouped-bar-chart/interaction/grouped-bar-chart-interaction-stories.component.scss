@@ -1,0 +1,40 @@
+.nge-grouped-bar-chart-interaction-stories {
+  display: block;
+  padding: 20px;
+
+  .interaction-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .interaction-row {
+    margin-bottom: 12px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .chart-wrapper {
+    height: 400px;
+    border: 1px solid var(--chart-outline-variant, #e0e0e0);
+    border-radius: 8px;
+    padding: 16px;
+    background: var(--chart-surface, #fff);
+    overflow: visible; // Allow tooltips to extend beyond container
+  }
+}
+
+.story-action-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  background: var(--chart-primary, #3f51b5);
+  color: var(--chart-on-primary, #fff);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover {
+    filter: brightness(1.1);
+  }
+}

@@ -1,0 +1,27 @@
+<div class="nge-chart-layout" [class]="legendLayoutClass()">
+  @if (config().legend; as legend) {
+    @if (legend.enabled && (legend.position === 'top' || legend.position === 'left')) {
+      <nge-chart-legend [items]="legend.items" [orientation]="legendOrientation()" />
+    }
+  }
+
+  <div class="nge-chart-container"></div>
+
+  @if (config().legend; as legend) {
+    @if (legend.enabled && legend.position !== 'top' && legend.position !== 'left') {
+      <nge-chart-legend [items]="legend.items" [orientation]="legendOrientation()" />
+    }
+  }
+</div>
+
+<!-- Tooltip always in DOM, positioned/shown via D3 for performance -->
+<nge-charts-tooltip [calc]="tooltipCalc" style="display: none">
+  @if (customTooltipTemplate(); as template) {
+    <ng-container *ngTemplateOutlet="template; context: { $implicit: tooltipContent() }" />
+  } @else if (tooltipContent()) {
+    <div class="nge-chart-default-tooltip">
+      <div class="tooltip-label">{{ tooltipContent()?.label }}</div>
+      <div class="tooltip-value">{{ tooltipContent()?.value }}</div>
+    </div>
+  }
+</nge-charts-tooltip>

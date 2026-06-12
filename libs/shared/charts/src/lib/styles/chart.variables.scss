@@ -1,0 +1,11 @@
+@mixin light-theme-vars() {
+  //--nge-chart-background: hsla(0, 0%, 100%, 0.5);
+  --nge-chart-background-color: #ffffff;
+  --nge-chart-background-opacity: 0.25;
+}
+
+@mixin dark-theme-vars() {
+  //--nge-chart-background: hsla(0, 0%, 50%, 0.5); 8080807F
+  --nge-chart-background-color: #808080;
+  --nge-chart-background-opacity: 0.25;
+}

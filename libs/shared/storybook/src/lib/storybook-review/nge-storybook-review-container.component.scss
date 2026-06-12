@@ -1,0 +1,60 @@
+$footer-height: 40px;
+
+// --- Storybook review token defaults (dark-mode) ---
+// Override these in your app theme files to support light/dark modes.
+// See: libs/media-workbench/themes and libs/concierge/themes for bridge blocks.
+:root {
+  --sb-review-text: rgba(255, 255, 255, 0.5); // Muted label, link, and heading color
+  --sb-review-border: #787878; // Footer border
+}
+
+.nge-storybook-review-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  width: 100%;
+
+  &__storybook-content {
+    flex: 1;
+    display: block;
+    padding: 1.25rem;
+    overflow-x: hidden;
+  }
+
+  &__storybook-footer {
+    flex-shrink: 0;
+    height: $footer-height;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    padding-top: 0.3125rem;
+    padding-bottom: 0.3125rem;
+    border-top: 1px solid var(--sb-review-border);
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+
+    &--link:not(:first-child) {
+      margin-left: 1.25rem;
+    }
+
+    &--link {
+      color: var(--sb-review-text);
+      font-size: 0.625rem;
+
+      &--a {
+        display: inline-block;
+        text-decoration: underline;
+        cursor: pointer;
+        color: var(--sb-review-text);
+      }
+    }
+  }
+
+  h4.review {
+    margin-top: 25px;
+    margin-bottom: 15px;
+    color: var(--sb-review-text);
+  }
+}

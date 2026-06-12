@@ -1,0 +1,243 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+<div class="stories-container">
+  <h2>Bullet Chart - Usage Examples</h2>
+  <p class="intro-text">
+    Practical examples showing common usage patterns for the unified chart component with bullet charts.
+    Bullet charts are ideal for showing progress toward a goal or comparing a value against a range.
+  </p>
+
+  <!-- EXAMPLE 1: Basic Usage -->
+  <section class="story-section">
+    <h4>1. Basic Usage</h4>
+    <p class="story-description">
+      Simplest way to create a bullet chart using <code>createBulletChartConfig()</code>.
+      Provide min, max, and progress values.
+    </p>
+    <div class="code-block">
+      <pre>
+data: NgeBulletDataPoint = {{ '{' }}
+  min: 0,
+  max: 100,
+  progress: 75,
+  units: '%',
+{{ '}' }};
+
+config = createBulletChartConfig({{ '{' }}
+  data: this.data,
+{{ '}' }});
+
+&lt;nge-chart [config]="config" /&gt;</pre>
+    </div>
+    <div class="chart-container chart-container--bullet">
+      <nge-chart [config]="basicConfig" />
+    </div>
+  </section>
+
+  <!-- EXAMPLE 2: With Tooltip -->
+  <section class="story-section">
+    <h4>2. With Tooltip</h4>
+    <p class="story-description">
+      Enable tooltips to show the current progress value on hover.
+    </p>
+    <div class="code-block">
+      <pre>
+config = createBulletChartConfig({{ '{' }}
+  data: this.data,
+  tooltip: {{ '{' }}
+    enabled: true,
+    height: 50,
+    width: 80,
+  {{ '}' }},
+{{ '}' }});</pre>
+    </div>
+    <div class="chart-container chart-container--bullet">
+      <nge-chart [config]="tooltipConfig" />
+    </div>
+  </section>
+
+  <!-- EXAMPLE 3: Grade Colors -->
+  <section class="story-section">
+    <h4>3. Grade Colors</h4>
+    <p class="story-description">
+      Use dynamic coloring based on grade thresholds. Calculate the color based on the percentage:
+      <strong>Failing (&lt;70%)</strong> = Red, <strong>C Grade (70-80%)</strong> = Yellow/Orange, <strong>Good (&gt;80%)</strong> = Green.
+    </p>
+    <div class="code-block">
+      <pre>
+getGradeColor(percentage: number): string {{ '{' }}
+  if (percentage < 70) return '#F44336';      // red - failing
+  else if (percentage <= 80) return '#FF9800'; // yellow - C grade
+  else return '#4CAF50';                       // green - good
+{{ '}' }}
+
+data = {{ '{' }} min: 0, max: 100, progress: 75, color: this.getGradeColor(75), units: '%' {{ '}' }};</pre>
+    </div>
+    <div class="status-grid">
+      <div class="status-item">
+        <span class="status-label status-label--success">A Grade (92%)</span>
+        <div class="chart-container chart-container--bullet">
+          <nge-chart [config]="gradeAConfig" />
+        </div>
+      </div>
+      <div class="status-item">
+        <span class="status-label status-label--warn">C Grade (75%)</span>
+        <div class="chart-container chart-container--bullet">
+          <nge-chart [config]="gradeCConfig" />
+        </div>
+      </div>
+      <div class="status-item">
+        <span class="status-label status-label--error">Failing (45%)</span>
+        <div class="chart-container chart-container--bullet">
+          <nge-chart [config]="gradeFailConfig" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXAMPLE 4: Click Handling -->
+  <section class="story-section">
+    <h4>4. Click Handling</h4>
+    <p class="story-description">
+      Handle clicks by providing an <code>onClick</code> callback in the config.
+    </p>
+    <div class="code-block">
+      <pre>
+config = createBulletChartConfig({{ '{' }}
+  data: this.data,
+  onClick: (event) => {{ '{' }}
+    console.log('Clicked:', event.data.progress);
+  {{ '}' }},
+{{ '}' }});</pre>
+    </div>
+    <div class="interaction-display">
+      <strong>Last clicked:</strong> {{ lastClickedProgress() }}
+    </div>
+    <div class="chart-container chart-container--bullet">
+      <nge-chart [config]="clickableConfig" />
+    </div>
+  </section>
+
+  <!-- EXAMPLE 5: Dynamic Data with Signals -->
+  <section class="story-section story-section--highlight">
+    <h4>5. Dynamic Data with Signals</h4>
+    <p class="story-description">
+      <strong>Recommended pattern:</strong> Use a computed signal to rebuild the config when data changes.
+      This ensures the chart animates smoothly when progress updates.
+    </p>
+    <div class="code-block">
+      <pre>
+dynamicProgress = signal(50);
+
+dynamicData = computed(() => ({{ '{' }}
+  min: 0,
+  max: 100,
+  progress: this.dynamicProgress(),
+  units: '%',
+{{ '}' }}));
+
+dynamicConfig = computed(() =>
+  createBulletChartConfig({{ '{' }}
+    data: this.dynamicData(),
+    tooltip: {{ '{' }} enabled: true {{ '}' }},
+  {{ '}' }})
+);
+
+&lt;nge-chart [config]="dynamicConfig()" /&gt;</pre>
+    </div>
+    <div class="interaction-row">
+      <button class="action-button" (click)="decrementProgress()">- 10%</button>
+      <span class="progress-display">{{ dynamicProgress() }}%</span>
+      <button class="action-button" (click)="incrementProgress()">+ 10%</button>
+      <button class="action-button action-button--secondary" (click)="randomizeProgress()">Random</button>
+    </div>
+    <div class="chart-container chart-container--bullet">
+      <nge-chart [config]="dynamicConfig()" />
+    </div>
+  </section>
+
+  <!-- EXAMPLE 6: Custom Ranges -->
+  <section class="story-section">
+    <h4>6. Custom Ranges</h4>
+    <p class="story-description">
+      Bullet charts support any numeric range, not just 0-100.
+      Use the <code>units</code> property to display the appropriate suffix.
+    </p>
+    <div class="code-block">
+      <pre>
+data = {{ '{' }}
+  min: 100,
+  max: 500,
+  progress: 350,
+  units: ' MHz',
+{{ '}' }};
+
+config = createBulletChartConfig({{ '{' }}
+  data: this.data,
+  tooltip: {{ '{' }}
+    enabled: true,
+    formatContent: (data) => ({{ '{' }}
+      label: 'CPU Speed',
+      value: `${{ '{' }}data.progress{{ '}' }}${{ '{' }}data.units{{ '}' }}`,
+    {{ '}' }}),
+  {{ '}' }},
+{{ '}' }});</pre>
+    </div>
+    <div class="chart-container chart-container--bullet">
+      <nge-chart [config]="customRangeConfig" />
+    </div>
+  </section>
+
+  <!-- EXAMPLE 7: Custom Tooltip Format -->
+  <section class="story-section">
+    <h4>7. Custom Tooltip Format</h4>
+    <p class="story-description">
+      Use <code>formatContent</code> to customize the tooltip content.
+      Return an object with <code>label</code>, <code>value</code>, and optional <code>extra</code> data.
+    </p>
+    <div class="code-block">
+      <pre>
+config = createBulletChartConfig({{ '{' }}
+  data: {{ '{' }} min: 0, max: 1000, progress: 742, units: ' GB' {{ '}' }},
+  tooltip: {{ '{' }}
+    enabled: true,
+    formatContent: (data) => ({{ '{' }}
+      label: 'Storage Used',
+      value: `${{ '{' }}data.progress{{ '}' }}${{ '{' }}data.units{{ '}' }}`,
+      extra: {{ '{' }} remaining: `${{ '{' }}data.max - data.progress{{ '}' }} GB free` {{ '}' }},
+    {{ '}' }}),
+    height: 70,
+    width: 140,
+  {{ '}' }},
+{{ '}' }});</pre>
+    </div>
+    <div class="chart-container chart-container--bullet">
+      <nge-chart [config]="storageConfig" />
+    </div>
+  </section>
+
+  <!-- EXAMPLE 8: Custom Dimensions -->
+  <section class="story-section">
+    <h4>8. Custom Dimensions</h4>
+    <p class="story-description">
+      Customize the height and width of the progress bar, progress indicator, and limit indicators.
+    </p>
+    <div class="code-block">
+      <pre>
+config = createBulletChartConfig({{ '{' }}
+  data: this.data,
+  barHeight: 16,
+  progressIndicatorHeight: 40,
+  progressIndicatorWidth: 8,
+  limitIndicatorHeight: 40,
+  limitIndicatorWidth: 4,
+{{ '}' }});</pre>
+    </div>
+    <div class="chart-container chart-container--bullet chart-container--tall">
+      <nge-chart [config]="customDimensionsConfig" />
+    </div>
+  </section>
+</div>
+</nge-storybook-review-container>

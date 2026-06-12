@@ -1,0 +1,202 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+<div class="stories-container">
+  <h2>Line Chart - Usage Examples</h2>
+  <p class="intro-text">
+    Practical examples showing common usage patterns for the unified chart component with line charts.
+    Line charts support single and multi-series via the <code>seriesId</code> property.
+  </p>
+
+  <!-- EXAMPLE 1: Basic Single Line -->
+  <section class="story-section">
+    <h4>1. Basic Single Line</h4>
+    <p class="story-description">
+      Simplest way to create a line chart using <code>createLineChartConfig()</code>.
+      Each data point has <code>x</code> (label) and <code>y</code> (value) properties.
+    </p>
+    <div class="code-block">
+      <pre>
+data = [
+  {{ '{' }} x: 'Jan', y: 30 {{ '}' }},
+  {{ '{' }} x: 'Feb', y: 45 {{ '}' }},
+  // ...
+];
+
+config = createLineChartConfig({{ '{' }}
+  data: this.data,
+  showPoints: true,
+  showXAxis: true,
+  showYAxis: true,
+  xAxisLabel: 'Month',
+  yAxisLabel: 'Value',
+{{ '}' }});
+
+&lt;nge-chart [config]="config" /&gt;</pre>
+    </div>
+    <div class="chart-container">
+      <nge-chart [config]="basicConfig" />
+    </div>
+  </section>
+
+  <!-- EXAMPLE 2: Multi-Series Line Chart -->
+  <section class="story-section story-section--highlight">
+    <h4>2. Multi-Series Line Chart</h4>
+    <p class="story-description">
+      <strong>Hybrid series detection:</strong> Add a <code>seriesId</code> property to data points
+      to automatically group them into separate lines. Use <code>seriesColors</code> to customize
+      the color of each series. Series are assigned colors in order of first appearance.
+    </p>
+    <div class="code-block">
+      <pre>
+data = [
+  {{ '{' }} x: 'Jan', y: 30, seriesId: 'Sales' {{ '}' }},
+  {{ '{' }} x: 'Feb', y: 45, seriesId: 'Sales' {{ '}' }},
+  {{ '{' }} x: 'Jan', y: 5, seriesId: 'Returns' {{ '}' }},
+  {{ '{' }} x: 'Feb', y: 8, seriesId: 'Returns' {{ '}' }},
+  // ...
+];
+
+config = createLineChartConfig({{ '{' }}
+  data: this.data,
+  seriesColors: ['#2196F3', '#4CAF50', '#FF9800'],
+  showPoints: true,
+  showXAxis: true,
+  showYAxis: true,
+{{ '}' }});</pre>
+    </div>
+    <div class="chart-container">
+      <nge-chart [config]="multiSeriesConfig" />
+    </div>
+  </section>
+
+  <!-- EXAMPLE 3: Area Chart -->
+  <section class="story-section">
+    <h4>3. Area Chart</h4>
+    <p class="story-description">
+      Enable <code>showArea: true</code> to fill the area under the line.
+      Works great with <code>curveType: 'monotone'</code> for smooth curves.
+    </p>
+    <div class="code-block">
+      <pre>
+config = createLineChartConfig({{ '{' }}
+  data: this.data,
+  showArea: true,
+  curveType: 'monotone',
+  showPoints: true,
+{{ '}' }});</pre>
+    </div>
+    <div class="chart-container">
+      <nge-chart [config]="areaConfig" />
+    </div>
+  </section>
+
+  <!-- EXAMPLE 4: Curve Types -->
+  <section class="story-section">
+    <h4>4. Curve Types</h4>
+    <p class="story-description">
+      Choose from three curve interpolation types:
+      <code>'linear'</code> (default), <code>'monotone'</code> (smooth), or <code>'step'</code>.
+    </p>
+    <div class="curve-comparison">
+      <div class="curve-example">
+        <h5>Linear</h5>
+        <div class="chart-container chart-container--small">
+          <nge-chart [config]="linearConfig" />
+        </div>
+      </div>
+      <div class="curve-example">
+        <h5>Monotone</h5>
+        <div class="chart-container chart-container--small">
+          <nge-chart [config]="monotoneConfig" />
+        </div>
+      </div>
+      <div class="curve-example">
+        <h5>Step</h5>
+        <div class="chart-container chart-container--small">
+          <nge-chart [config]="stepConfig" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXAMPLE 5: Click Handling -->
+  <section class="story-section">
+    <h4>5. Click Handling</h4>
+    <p class="story-description">
+      Handle point clicks by providing an <code>onClick</code> callback.
+      Requires <code>showPoints: true</code> to enable clickable points.
+    </p>
+    <div class="code-block">
+      <pre>
+config = createLineChartConfig({{ '{' }}
+  data: this.data,
+  showPoints: true,
+  onClick: (event) => {{ '{' }}
+    console.log('Clicked:', event.data.x, event.data.y);
+  {{ '}' }},
+{{ '}' }});</pre>
+    </div>
+    <div class="interaction-display">
+      <strong>Last clicked:</strong> {{ lastClickedPoint() }}
+    </div>
+    <div class="chart-container">
+      <nge-chart [config]="clickConfig" />
+    </div>
+  </section>
+
+  <!-- EXAMPLE 6: Dynamic Data with Signals -->
+  <section class="story-section story-section--highlight">
+    <h4>6. Dynamic Data with Signals</h4>
+    <p class="story-description">
+      <strong>Recommended pattern:</strong> Use a computed signal to rebuild the config when data changes.
+      The chart will animate smoothly between data states.
+    </p>
+    <div class="code-block">
+      <pre>
+data = signal&lt;NgeLineDataPoint[]&gt;([...]);
+
+config = computed(() =>
+  createLineChartConfig({{ '{' }}
+    data: this.data(),
+    showPoints: true,
+  {{ '}' }})
+);
+
+&lt;nge-chart [config]="config()" /&gt;</pre>
+    </div>
+    <div class="interaction-row">
+      <button class="action-button" (click)="randomizeData()">
+        Randomize Data
+      </button>
+    </div>
+    <div class="chart-container">
+      <nge-chart [config]="dynamicConfig()" />
+    </div>
+  </section>
+
+  <!-- EXAMPLE 7: Tooltip on Hover -->
+  <section class="story-section">
+    <h4>7. Tooltip on Hover</h4>
+    <p class="story-description">
+      Enable tooltips by adding <code>tooltip: {{ '{' }} enabled: true {{ '}' }}</code>.
+      Tooltips appear when hovering over data points.
+    </p>
+    <div class="code-block">
+      <pre>
+config = createLineChartConfig({{ '{' }}
+  data: this.data,
+  showPoints: true,
+  tooltip: {{ '{' }}
+    enabled: true,
+    position: 'follow-mouse',
+  {{ '}' }},
+{{ '}' }});</pre>
+    </div>
+    <div class="chart-container">
+      <nge-chart [config]="tooltipConfig" />
+    </div>
+  </section>
+</div>
+</nge-storybook-review-container>

@@ -13,7 +13,11 @@
     "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "paths": {}
+    "paths": {
+      "@nge/rxjs": ["./libs/shared/rxjs/src/index.ts"],
+      "@nge/storybook": ["./libs/shared/storybook/src/index.ts"],
+      "@nge/charts": ["./libs/shared/charts/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }
