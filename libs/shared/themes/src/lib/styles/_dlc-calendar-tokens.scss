@@ -1,0 +1,48 @@
+// =============================================================================
+// CG (dlc) — Calendar Token Bridge
+// Component:  <nge-calendar>  (libs/shared/calendar — @nge/calendar)
+// =============================================================================
+// Maps the calendar's `--nge-calendar-*` contract tokens onto the running CG
+// (dlc) persona's `--dlc-*` values via CSS-variable indirection, so the shared
+// calendar inherits whatever persona / mode is active. Included ONCE for all six
+// persona classes in `dlc-themes.scss` — NOT duplicated per persona.
+//
+// The calendar's structural tokens (font-size-*, line-height, spacing-*,
+// border-width, month-bar-*, tg-*) are intentionally LEFT at their library
+// literals — the CG personas have no semantic equivalent to map them to.
+// =============================================================================
+
+@mixin dlc-calendar-tokens() {
+  // ── Surface ────────────────────────────────────────────────────────────────
+  --nge-calendar-surface: var(--dlc-surface);
+  --nge-calendar-surface-container: var(--dlc-surface-container);
+  --nge-calendar-on-surface: var(--dlc-on-surface);
+  --nge-calendar-on-surface-variant: var(--dlc-on-surface-variant);
+
+  // ── Accent + events (brand primary) ──────────────────────────────────────────
+  --nge-calendar-accent: var(--dlc-primary);
+  --nge-calendar-on-accent: var(--dlc-on-primary);
+  --nge-calendar-event-bg: var(--dlc-primary);
+  --nge-calendar-event-fg: var(--dlc-on-primary);
+
+  // ── Borders ──────────────────────────────────────────────────────────────────
+  --nge-calendar-outline: var(--dlc-outline);
+  --nge-calendar-outline-variant: var(--dlc-outline-variant);
+
+  // ── State highlights ─────────────────────────────────────────────────────────
+  // today = subtle primary tint · selected = accent tint (distinct from today) ·
+  // hover = the theme's highest-elevation surface · now-line + error = semantic red.
+  --nge-calendar-today: var(--dlc-primary-container);
+  --nge-calendar-hover: var(--dlc-surface-container-high);
+  --nge-calendar-selected: var(--dlc-secondary-container);
+  --nge-calendar-error: var(--dlc-error);
+  --nge-calendar-now-indicator: var(--dlc-error);
+
+  // ── Typography ───────────────────────────────────────────────────────────────
+  --nge-calendar-font-family: var(--dlc-font-family-body);
+
+  // ── Shape ────────────────────────────────────────────────────────────────────
+  --nge-calendar-radius-sm: var(--dlc-radius-sm);
+  --nge-calendar-radius-md: var(--dlc-radius-md);
+  --nge-calendar-radius-lg: var(--dlc-radius-lg);
+}

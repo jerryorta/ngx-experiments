@@ -11,6 +11,7 @@
 @use "service-provider/dlc-service-provider-dark";
 @use "service-provider/dlc-service-provider-light";
 @use "dlc-base";
+@use "dlc-calendar-tokens";
 
 @mixin dlc-theme-mixin() {
   @include dlc-professional-dark.dlc-professional-dark-theme();
@@ -28,6 +29,7 @@
   .dlc-service-provider-dark,
   .dlc-service-provider-light {
     @include dlc-base.dlc-theme-surface();
-    // Bridge the shared <giga-calendar> tokens to this persona's --dlc-* values.
+    // Bridge the shared <nge-calendar> tokens to this persona's --dlc-* values.
+    @include dlc-calendar-tokens.dlc-calendar-tokens();
   }
 }
