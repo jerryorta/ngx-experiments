@@ -91,7 +91,7 @@ Stories are located in these libraries:
 
 | Library | Path | Components |
 |---------|------|------------|
-| UI Design Library | `libs/shared/ui-design-library/src/lib/components/` | Input, Button, Autocomplete, etc. |
+| UI Design Library | `libs/shared/ui-design-library-deprecated/src/lib/components/` | Input, Button, Autocomplete, etc. |
 | Charts | `libs/shared/charts/src/lib/giga-chart/stories/` | Bar, Line, Bullet, Grouped Bar, Composite |
 | Real Estate UI | `libs/real-estate/ui/src/lib/` | CMA Property Card, etc. |
 | Evolving Cognition UI | `libs/evolving-cognition/ui/src/lib/` | Quiz grades, Bookmarks |

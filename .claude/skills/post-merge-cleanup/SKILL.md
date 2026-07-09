@@ -1,4 +1,6 @@
-Clean up after a PR merge: delete the merged feature branch (local + remote) and transition the Jira ticket to Done: $ARGUMENTS
+Clean up after a PR merge: delete the merged branch (local + remote) and transition the Jira ticket to Done: $ARGUMENTS
+
+> **Two modes:** (1) **PR-mode boards** — run per story on the merged `feat/<key>-<slug>` branch (deletes it + transitions the story → Done). (2) **Epic-branch-mode boards** (`mergeMode:"epic-branch"`) — stories were already taken to Done by `/epic-story-complete`, so here you run this **once per epic** on the merged epic branch (e.g. `/post-merge-cleanup feat/rex-548-finish-messaging-migration`) to delete the epic branch + transition the **epic** ticket → Done. The branch-name key parse picks up whichever key the branch encodes (story or epic).
 
 ## Determine the branch to clean up
 
@@ -62,6 +64,7 @@ Save the branch name for later steps.
    git branch -D <branch-name>
    ```
    - If the branch doesn't exist locally, that's fine — report it was not found locally.
+   - Defensive (only if someone used native `isolation: worktree` agents): if `<branch-name>` is still checked out in a `git worktree`, run `git worktree remove <dir>` then `git worktree prune` before deleting it.
 
 2. **Check if the remote branch exists, then delete it:**
    ```
@@ -80,7 +83,7 @@ Save the branch name for later steps.
 
 ## Transition Jira Ticket to Done
 
-1. **Extract the ticket key** from the branch name. Branch names follow the pattern `feat/<KEY>-description` or `fix/<KEY>-description` (e.g., `feat/CON-204-lead-detail-refresh` → `CON-204`). Parse the key as the segment between the first `/` and the second `-`-separated word that is not uppercase (i.e., match the pattern `[A-Z]+-\d+`).
+1. **Extract the ticket key** from the branch name. Branch names follow the pattern `feat/<KEY>-description` or `fix/<KEY>-description` (e.g., `feat/CON-204-lead-detail-refresh` → `CON-204`). Parse the key as the segment between the first `/` and the second `-`-separated word that is not uppercase (i.e., match the pattern `[A-Z]+-\d+`). Keys may be lowercase in the branch (`rex-548`) — uppercase them for the Jira API. For an epic-branch-mode **epic branch** (e.g. `feat/rex-548-finish-messaging-migration`) the same parse yields the **epic** key (`REX-548`), so this transitions the **epic** → Done.
 
 2. **If a ticket key is found**, load the required Atlassian MCP tools using the ToolSearch tool:
    - `select:mcp__claude_ai_Atlassian__getAccessibleAtlassianResources`
@@ -107,6 +110,12 @@ Save the branch name for later steps.
    ```
    mcp__claude_ai_Atlassian__transitionJiraIssue(cloudId, issueIdOrKey, transition={id: "<transition-id>"})
    ```
+
+5b. **Close the ticket's sub-tasks → Done.** A decomposed story's sub-tasks reach Done with the story; this sweeps any still open (typically already closed by `/epic-story-complete`). For an epic-branch-mode **epic** key this is a no-op — epics have no sub-tasks.
+   ```
+   mcp__claude_ai_Atlassian__getJiraIssue(cloudId, issueIdOrKey, fields=["subtasks"])
+   ```
+   For each sub-task **not already "Done"**, read its transitions and transition it to **Done** (match by name, never guess the id). On any error, note it and continue — do not fail cleanup over a sub-task.
 
 6. **If no ticket key was found** in the branch name, skip this step silently.
 7. **If any Atlassian MCP call fails or returns an error** (at any step — cloud ID lookup, issue fetch, transitions fetch, or transition), do not retry. Instead, inform the user:
@@ -148,5 +157,6 @@ Post-merge cleanup complete:
 - Deleted local branch: <branch-name> (or "not found locally")
 - Deleted remote branch: <branch-name> (or "already removed")
 - Jira <KEY>: transitioned to Done (or "no ticket found" or "already Done")
+- Sub-tasks: <N> → Done (or "none")
 - Plan file: deleted <filename> (or "no matching plan found")
 ```

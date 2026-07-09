@@ -213,8 +213,8 @@ When unsure about conventions, read an existing story as a reference:
 
 | Component | Path |
 |-----------|------|
-| Input | `libs/shared/ui-design-library/src/lib/components/input/stories/input/` |
-| Input Code | `libs/shared/ui-design-library/src/lib/components/input/stories/input-code/` |
-| Button | `libs/shared/ui-design-library/src/lib/components/button/stories/buttons/` |
-| Autocomplete | `libs/shared/ui-design-library/src/lib/components/autocomplete/stories/` |
+| Input | `libs/shared/ui-design-library-deprecated/src/lib/components/input/stories/input/` |
+| Input Code | `libs/shared/ui-design-library-deprecated/src/lib/components/input/stories/input-code/` |
+| Button | `libs/shared/ui-design-library-deprecated/src/lib/components/button/stories/buttons/` |
+| Autocomplete | `libs/shared/ui-design-library-deprecated/src/lib/components/autocomplete/stories/` |
 | Charts | `libs/shared/charts/src/lib/giga-chart/stories/` |

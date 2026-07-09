@@ -9,10 +9,10 @@ For Media Workbench files (`libs/media-workbench/` or `apps/media-workbench/`) u
 2. If the file is an HTML template (\*.html), also read the associated:
    - TypeScript component file (\*.component.ts) - check for `host` property classes and inline `template` with color classes
    - SCSS file (\*.component.scss or \*.scss) - check for hardcoded color values
-3. Read the theming documentation at `docs/ai-instructions/theming.md`
+3. Read the theming documentation at `docs/ai-instructions/legacy/theming.md`
 4. Read the sample color tokens:
-   - Dark theme: `libs/shared/ui-design-library/src/lib/themes/theming/sample-color-tokens-dark.scss`
-   - Light theme: `libs/shared/ui-design-library/src/lib/themes/theming/sample-color-tokens-light.scss`
+   - Dark theme: `libs/shared/ui-design-library-deprecated/src/lib/themes/theming/sample-color-tokens-dark.scss`
+   - Light theme: `libs/shared/ui-design-library-deprecated/src/lib/themes/theming/sample-color-tokens-light.scss`
 5. Analyze all related files for:
    - Hardcoded Tailwind colors (e.g., `text-gray-500`, `bg-blue-600`, `border-red-400`)
    - Inline color styles (e.g., `style="color: #fff"`, `[style.color]="'red'"`)
@@ -51,7 +51,7 @@ Before applying theming fixes, check the component's file structure:
    - Update the `.ts` file to use `templateUrl` and `styleUrl` pointing to the new files
    - Ensure the SCSS content is wrapped in the component's host class (e.g., `.dlc-component-name { ... }`) per UI Design Library conventions
 2. This applies to ALL components (library and application)
-3. See `COMPONENT-ARCHITECTURE-BEST-PRACTICES.md` for the required file structure
+3. See `libs/shared/ui-design-library/COMPONENT-ARCHITECTURE-BEST-PRACTICES.md` for the required file structure
 
 ## Phase 2: Auto-Fix (Safe Changes)
 

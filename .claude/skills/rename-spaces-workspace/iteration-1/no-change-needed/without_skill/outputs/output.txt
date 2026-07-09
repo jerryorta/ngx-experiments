@@ -1,1 +1,0 @@
-No rename needed: `/tmp/rsp-fixtures/old-eval-2/already_clean_file.txt` already has no spaces in its filename. The file was left unchanged.

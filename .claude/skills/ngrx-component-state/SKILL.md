@@ -1,11 +1,51 @@
 ---
-name: ngrx-signal-store
-description: Create or refactor an `@ngrx/signals` SignalStore following the Gigasoftware workspace conventions. Hybrid skill — authoritative API guidance comes from a local NgRx clone (kept current via `git pull`); layout conventions come from the in-workspace Real-Estate CMA store. Use when the user wants to create a signalStore, scaffold a new `with-*` feature, extract component state into a store, convert an `@Injectable` class to a signalStore, or migrate a `@ngrx/component-store` to signalStore. Do NOT use for global classic `@ngrx/store` slices — the `ngrx-global-store` skill handles those.
+name: ngrx-component-state
+description: Place a component's reactive state and property/method logic in its correct home so the component class keeps only `input()`/`output()`, the injected store/facade, and template glue. Decides per concern — a colocated component-scoped `@ngrx/signals` SignalStore (local UI/interaction state), consumption of the global `@ngrx/store` via its domain facade (app/domain-wide persistent data), or pure functions (algorithms); a component often needs more than one. Applies to NEW components (born thin) and EXISTING ones (extract + thin). Hybrid skill — authoritative signalStore API guidance comes from a local NgRx clone (kept current via `git pull`); layout conventions come from the in-workspace Real-Estate CMA store. Use when a component (new or existing) has internal reactive state, computed getters, or method logic that needs a home; to scaffold a signalStore or a `with-*` feature; to convert an `@Injectable`/`@ngrx/component-store` to a signalStore; or to thin a fat component. Delegates global-slice authoring (actions/reducer/effects/selectors/facade) to the `ngrx-global-store` skill — do NOT author a global slice here.
 ---
 
-# NgRx SignalStore
+# NgRx Component State
+
+Get a component's state and logic **out of the component** and into its correct home, so the class keeps only `input()`/`output()`, the injected store/facade, and template glue. The home is decided per concern (see **Routing** below): a colocated component-scoped SignalStore for local UI/interaction state, the domain **facade** for global/persistent data, or pure functions for algorithms — a component system often needs more than one. This skill owns the **component side** (the decision, the local SignalStore, the facade wiring); it delegates global-slice authoring to the `ngrx-global-store` skill.
 
 Hybrid skill: authoritative signalStore API docs live in a local NgRx clone (kept current via `git pull`). Layout + composition conventions come from `libs/real-estate/ui/src/lib/cma/store/`.
+
+---
+
+## Workspace standard (authoritative — read first)
+
+Authoritative source: `docs/ai/CONSTRAINTS.md` § Component-Scoped State, plus `docs/ai-instructions/reference/multi-component-signal-store.instructions.md`. Every store this skill creates or refactors toward MUST satisfy these invariants; they win over any older framing below.
+
+- **No size or line-count threshold.** ALL of a component's internal reactive state — writable `signal()`s, stateful `computed()`/`linkedSignal()`s, `effect()`s, `toSignal` bridges, RxJS subscriptions, and the orchestration around them — moves into ONE component-scoped SignalStore. A component with a single internal signal still extracts. The component class keeps ONLY `input()` / `output()` (its public boundary), the injected store, and template-only glue.
+- **Component-scoped, NEVER `providedIn: 'root'` for component/feature state.** Provide the store on the component via `providers: [Store]` (for a system, its root component) — one instance per component instance, correct lifecycle + isolation. Reserve `providedIn: 'root'` for genuinely app-global *signal* state; app-/domain-wide *persistent* data is not that — it belongs in the global classic `@ngrx/store`, consumed via facades.
+- **Colocated.** The store lives in its own folder next to the component / system root it serves — never a shared / central store directory; it ships and is tested with its component.
+- **Multi-component systems** (a root orchestrating a tree of children that share state / interaction): ONE store provided at the root; children `inject()` it. `input()` / `output()` stay ONLY at the root's public boundary — NEVER prop-drill shared state as `input()` nor bubble interactions as `output()` between internal components.
+- **State, not logic.** The store holds reactive UI state; derived view-models are `withComputed`; algorithms stay in **pure functions** the store calls.
+- **Supplements, never replaces, the global store.** The component SignalStore holds ephemeral local UI / interaction state; the global `@ngrx/store` (via facades/selectors) stays the system of record for app-/domain-wide persistent data, `@ngrx/entity`, and Firestore websocket subscriptions. A system typically runs BOTH. Never migrate a global slice into a component store, nor promote local UI state into the global store.
+- **Exemption is by KIND, not size.** Design-library presentational primitives keep their intrinsic widget mechanics (CVA internals — a reveal/open toggle, hover/focus state) as plain component signals; zero-state components need no store. Don't force these into a SignalStore.
+
+---
+
+## Routing — decide the home(s) first
+
+Before scaffolding anything, route **each** piece of state / logic the component holds (or, for a new component, will hold). A component system commonly needs more than one home — route each concern independently; don't force a single bucket.
+
+| The concern is… | Home | What to do |
+|---|---|---|
+| Ephemeral, local UI / interaction state (toggles, wizard step, selection, debounced input) | **Component-scoped SignalStore** | Scaffold it — Phases 0–5 below |
+| App-/domain-wide persistent data (Firestore/websockets, `@ngrx/entity`, shared across unrelated consumers) | **Global `@ngrx/store` via its domain facade** | Wire the facade — see **Global path**. If the slice doesn't exist yet, hand off to the `ngrx-global-store` skill, then return |
+| A derived getter / property | `withComputed` (signal path) or a facade **selector** (global path) | Move it off the component |
+| An algorithm / method body | A **pure function** the store or selector calls | Move it off the component |
+| Intrinsic widget mechanics in a design-library presentational primitive (CVA internals, open/hover/focus) | **Plain component `signal()`** — by-kind exemption | Leave it; no store |
+| Nothing reactive (zero-state / pure presentational leaf) | — | Stop; no store, no facade |
+
+Outcomes:
+
+- **Local state present** → continue to Phase 0 and scaffold the SignalStore.
+- **Only global data** → skip the phases below; do **Global path** and you're done.
+- **Both** → do both (the common multi-component-system case).
+- **Neither** → nothing to do; the component is already correctly thin.
+
+For a **new** component, the `.ts/.html/.scss/.spec` shell is still scaffolded by the Nx generator (`nx-generate` / the angular-generator instructions); this skill only places the state home on top.
 
 ---
 
@@ -49,7 +89,7 @@ Whatever happens, continue to Phase 1. A stale-but-working clone is always bette
 Ask the user one at a time when answers shape later questions:
 
 1. **Store name** (e.g. `OnboardingContactOrgStore`) and target directory (e.g. `libs/concierge/ui/src/lib/onboarding-shell/data/`).
-2. **`providedIn` scope** — component-scoped (no `providedIn`, manually provided on a component or route), `'root'` for app-wide state, or a custom injection token. Default to component-scoped unless the state is demonstrably global.
+2. **`providedIn` scope** — default **component-scoped**: omit `providedIn`, provide via `providers: [Store]` on the component (or, for a system, its root component). NEVER `providedIn: 'root'` for component/feature state. Reserve `'root'` for genuinely app-global *signal* state — and note that app-/domain-wide *persistent* data is not that; it belongs in the global `@ngrx/store` (recommend the `ngrx-global-store` skill).
 3. **State shape** — list the fields and their types. Distinguish persistent state (computed from a classic-store source) from transient UI state (owned here).
 4. **Features** — the cohesive concerns to split into `with-*` files. If the user doesn't know, propose a split based on state groupings (form fields vs async channel vs submit orchestration).
 5. **Reactive dependencies** — does the store need to observe another store (facade, selector, signalStore)? If yes, its `withProps` will inject the source.
@@ -128,7 +168,7 @@ Always read before scaffolding:
 
 Conventions pulled from these files:
 
-- Store exported as `ConstCase` type-and-value (e.g. `CmaStore`). `providedIn` is omitted when the store is component-scoped; set to `'root'` only when the state is truly global.
+- Store exported as `ConstCase` type-and-value (e.g. `CmaStore`). `providedIn` is omitted for component-scoped stores (provided via `providers: [Store]`); use `providedIn: 'root'` only for genuinely app-global signal state — never for component/feature state.
 - `withProps(() => ({ _service: inject(X), ... }))` for injected dependencies. Private members prefixed with `_` (per `private-store-members.md`).
 - Features are small factory functions exported from `features/with-*.ts`. Compose via `withFeature((store) => withXxx(store))`.
 - `withHooks` last for lifecycle cleanup.
@@ -167,6 +207,18 @@ If refactoring, delete the dead local signals / effects after the store takes ov
 
 ---
 
+## Global path — wire the facade, delegate the slice
+
+When **Routing** sends a concern to the global store:
+
+1. **Slice + facade already exist** → inject the facade (in the component, or for a system in its container/root), read via its exposed signals, dispatch via its methods. Delete the component's duplicated or hand-hydrated copy of that global state. Children of a system `inject()` the facade — don't prop-drill it.
+2. **Slice does not exist** → this is global-slice work. Stop and run the **`ngrx-global-store`** skill to author the slice (actions/reducer/effects/selectors/facade), then return here to wire the facade.
+3. **Never** author actions / reducers / effects / selectors in this skill — that boundary belongs to `ngrx-global-store`.
+
+Clean split: this skill = component side (decision + local SignalStore + facade wiring); `ngrx-global-store` = the global slice itself.
+
+---
+
 ## Common conversions
 
 ### `@Injectable` class with signals → `signalStore`
@@ -190,7 +242,7 @@ Component-store is the signalStore predecessor. When touching one for any reason
 ## What this skill deliberately does NOT do
 
 - **Scaffold without reading docs first.** Always read the relevant guide page(s) before writing code.
-- **Handle classic global stores.** If the feature needs `@ngrx/store` + effects + selectors + entity adapters + websocket subscriptions, stop and recommend the `ngrx-global-store` skill.
-- **Default to `providedIn: 'root'`.** Component-scoped for feature-local state; root only for truly global state.
+- **Author the global slice itself.** Deciding the global path and wiring its facade into the component is in scope; building the slice (actions/reducer/effects/selectors/facade) is the `ngrx-global-store` skill's job — hand off to it (see **Global path**).
+- **Default to `providedIn: 'root'`.** Component/feature state is always component-scoped (`providers: [Store]`); reserve `'root'` for genuinely app-global signal state, never for persistent domain data.
 - **Use `@ngrx/component-store` or `@ngrx/data` for new code.** Both are superseded by signalStore.
 - **Block on a slow / offline `git fetch`.** Phase 0b times out cleanly; a stale-but-working clone is always better than stopping.

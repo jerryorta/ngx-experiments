@@ -1,6 +1,6 @@
 ---
 name: ngrx-global-store
-description: Create or refactor a classic global `@ngrx/store` slice (actions + reducer + effects + selectors + facade) following the Gigasoftware workspace conventions. Hybrid skill — authoritative API guidance comes from a local NgRx clone (kept current via `git pull`); layout and Firestore-integration conventions come from the in-workspace concierge + real-estate store slices. Use when the user wants to add a classic global store slice, wire effects, introduce `@ngrx/entity`, integrate `@ngrx/router-store`, connect a Firestore websocket subscription to state, or refactor an existing slice. Do NOT use for component-scoped signalStore work — the `ngrx-signal-store` skill handles those.
+description: Create or refactor a classic global `@ngrx/store` slice (actions + reducer + effects + selectors + facade) following the Gigasoftware workspace conventions. Hybrid skill — authoritative API guidance comes from a local NgRx clone (kept current via `git pull`); layout and Firestore-integration conventions come from the in-workspace concierge + real-estate store slices. Use when the user wants to add a classic global store slice, wire effects, introduce `@ngrx/entity`, integrate `@ngrx/router-store`, connect a Firestore websocket subscription to state, or refactor an existing slice. Do NOT use for component-scoped signalStore work — the `ngrx-component-state` skill handles those.
 ---
 
 # NgRx Global Store
@@ -58,7 +58,7 @@ Ask one at a time when answers shape later questions:
 8. **Router coupling** — does URL state drive reads (route params → dispatch)?
 9. **Existing code to refactor** — path to the slice being migrated.
 
-If the feature is purely component-local transient state (wizard fields, toggles, one-component OTP channel) — **stop and recommend the `ngrx-signal-store` skill instead**. Classic store is overkill for those.
+If the feature is purely component-local transient state (wizard fields, toggles, one-component OTP channel) — **stop and recommend the `ngrx-component-state` skill instead**. Classic store is overkill for those.
 
 ---
 
@@ -232,14 +232,14 @@ Pattern: effect in the consuming slice (`+onboarding-draft.effects.ts`) listens 
 
 ### Data hydration race (component mounts before snapshot lands)
 
-Don't solve it in the component with imperative hydrate effects. If the slice's data needs to drive form fields, either (a) use a component-scoped signalStore that reads the slice reactively (see `ngrx-signal-store` skill + REX-298), or (b) use `@if` gating on an `isHydrated` selector so the form doesn't render until the snapshot arrives.
+Don't solve it in the component with imperative hydrate effects. If the slice's data needs to drive form fields, either (a) use a component-scoped signalStore that reads the slice reactively (see `ngrx-component-state` skill + REX-298), or (b) use `@if` gating on an `isHydrated` selector so the form doesn't render until the snapshot arrives.
 
 ---
 
 ## What this skill deliberately does NOT do
 
 - **Scaffold without reading docs first.** Always read the relevant guide page(s) before writing code.
-- **Handle component-scoped SignalStore work.** If the feature is a component-local store, stop and recommend the `ngrx-signal-store` skill.
+- **Handle component-scoped SignalStore work.** If the feature is a component-local store, stop and recommend the `ngrx-component-state` skill.
 - **Use `.get()` for Firestore reads.** Workspace invariant — subscriptions only.
 - **Apply optimistic reducer updates for writes.** Workspace invariant (REX-278) — snapshot echo is the source of truth. Pending-merge views belong in facades or component signalStores, not in the reducer.
 - **Introduce `@ngrx/data` or `@ngrx/component-store` for new code.** Both are legacy.

@@ -11,7 +11,7 @@ Verify and AUTO-FIX accessibility selectors for: $ARGUMENTS
    - If `$ARGUMENTS` is an HTML file, analyze that file
    - If `$ARGUMENTS` is a `.ts` component file, find and analyze its associated `.html` template
    - If `$ARGUMENTS` is a directory, find all `*.component.html` files recursively
-2. Read the convention doc: `docs/ai-instructions/accessibility-selectors.instructions.md`
+2. Read the convention doc: `docs/ai-instructions/reference/accessibility-selectors.instructions.md`
 3. For each HTML template, identify:
 
 ### Missing `aria-label` (interactive elements)

@@ -1,5 +1,0 @@
-Renamed:
-  walkthrough with client Broker sideScreen Recording 2026-04-14 at 9.15.23 AM.mov
-→ walkthrough_with_client_Broker_sideScreen_Recording_2026-04-14_at_9.15.23_AM.mov
-
-The file contained a Unicode Narrow No-Break Space (U+202F) before "AM". The skill's hint-matching normalized both the hint and real filename to plain spaces for comparison, found the correct file, then replaced all Unicode space variants with underscores in the new name.

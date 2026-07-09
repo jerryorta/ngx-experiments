@@ -1,5 +1,0 @@
-Renamed file successfully:
-  Before: /tmp/rsp-fixtures/old-eval-0/meeting notes Q4 2025.pdf
-  After:  /tmp/rsp-fixtures/old-eval-0/meeting_notes_Q4_2025.pdf
-
-All spaces in the filename have been replaced with underscores.

@@ -6,13 +6,14 @@ Before starting, load the required MCP tools using the ToolSearch tool:
 
 1. `select:mcp__claude_ai_Atlassian__getAccessibleAtlassianResources`
 2. `select:mcp__claude_ai_Atlassian__getJiraIssue`
-3. `select:mcp__claude_ai_Atlassian__addCommentToJiraIssue`
-4. `select:mcp__claude_ai_Atlassian__editJiraIssue`
-5. `select:mcp__claude_ai_Atlassian__getTransitionsForJiraIssue`
-6. `select:mcp__claude_ai_Atlassian__transitionJiraIssue`
-7. `select:mcp__stitch__get_project`
-8. `select:mcp__stitch__list_screens`
-9. `select:mcp__stitch__get_screen`
+3. `select:mcp__claude_ai_Atlassian__searchJiraIssuesUsingJql`
+4. `select:mcp__claude_ai_Atlassian__addCommentToJiraIssue`
+5. `select:mcp__claude_ai_Atlassian__editJiraIssue`
+6. `select:mcp__claude_ai_Atlassian__getTransitionsForJiraIssue`
+7. `select:mcp__claude_ai_Atlassian__transitionJiraIssue`
+8. `select:mcp__stitch__get_project`
+9. `select:mcp__stitch__list_screens`
+10. `select:mcp__stitch__get_screen`
 
 ## Phase 1: Read the Jira Ticket
 
@@ -48,6 +49,15 @@ Before starting, load the required MCP tools using the ToolSearch tool:
    ```
 
 5. **Save the ticket details** (key, summary, description, current status) for later phases.
+
+6. **Fetch the ticket's sub-tasks.** A decomposed story carries its implementation detail in its sub-tasks, not its own description — so they MUST be pulled in:
+
+   ```
+   mcp__claude_ai_Atlassian__searchJiraIssuesUsingJql(cloudId, jql="parent = <KEY> ORDER BY created ASC", fields=["summary","description","status"], responseContentFormat="markdown")
+   ```
+
+   - **If sub-tasks are returned:** treat **each sub-task's description as a required slice of this story's implementation** (the build checklist — not optional). Add them to the Phase 1 summary as `Sub-tasks: <count>` followed by each `<KEY> — <summary> [<status>]`, and carry every sub-task description into planning (Phase 3).
+   - **If none are returned:** this is a leaf ticket — continue normally (no-op).
 
 ## Phase 2: Use Current Branch
 
@@ -311,7 +321,7 @@ When invoked from `/epic-next` or `/epic-pipeline` (i.e. no human is sitting at 
    - Affected app: `apps/<app>/app/AGENTS.md`
    - UI library for the domain: `libs/<domain>/ui/AGENTS.md`
    - Store library: `libs/<domain>/store/AGENTS.md`
-   - Shared design library: `libs/shared/ui-design-library/AGENTS.md`
+   - Shared design library: `libs/shared/ui-design-library-deprecated/AGENTS.md`
    - Domain-specific design library (if present): `libs/<domain>/design-library/AGENTS.md`
    - Theme library: `libs/<domain>/themes/AGENTS.md`
 
@@ -319,9 +329,9 @@ When invoked from `/epic-next` or `/epic-pipeline` (i.e. no human is sitting at 
 
 2. **Enter plan mode** using the `EnterPlanMode` tool. This will trigger codebase exploration and plan creation per the system's plan mode workflow.
 
-3. **During plan mode**, use the ticket description, comments, acceptance criteria, **design comp summary from Phase 2.5**, and **AGENTS.md context** as requirements. Explore the codebase to understand:
+3. **During plan mode**, use the ticket description, comments, **every sub-task description from Phase 1** (each sub-task is a required slice of this story — the plan must cover all of them), acceptance criteria, **design comp summary from Phase 2.5**, and **AGENTS.md context** as requirements. Explore the codebase to understand:
    - Which files need to be created or modified
-   - Existing `dlc-*` or domain-prefixed design library components that can be reused (check `libs/shared/ui-design-library` and domain design-library)
+   - Existing `dlc-*` or domain-prefixed design library components that can be reused (check `libs/shared/ui-design-library-deprecated` and domain design-library)
    - Existing patterns and conventions to follow (from AGENTS.md files)
    - Dependencies and related code
    - Testing approach
