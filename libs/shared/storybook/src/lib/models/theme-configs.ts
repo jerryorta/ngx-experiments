@@ -23,37 +23,37 @@ export const MW_THEME_CONFIGS: ThemeConfig[] = [
 // ============================================================================
 export const CG_THEME_CONFIGS: ThemeConfig[] = [
   {
-    cssClass: 'cg-professional-light',
+    cssClass: 'dlc-professional-light',
     isDark: false,
     isDefault: false,
     name: 'CG Professional Light',
   },
   {
-    cssClass: 'cg-professional-dark',
+    cssClass: 'dlc-professional-dark',
     isDark: true,
     isDefault: false,
     name: 'CG Professional Dark',
   },
   {
-    cssClass: 'cg-home-light',
+    cssClass: 'dlc-home-light',
     isDark: false,
     isDefault: false,
     name: 'CG Home Light',
   },
   {
-    cssClass: 'cg-home-dark',
+    cssClass: 'dlc-home-dark',
     isDark: true,
     isDefault: false,
     name: 'CG Home Dark',
   },
   {
-    cssClass: 'cg-service-provider-light',
+    cssClass: 'dlc-service-provider-light',
     isDark: false,
     isDefault: false,
     name: 'CG Service Provider Light',
   },
   {
-    cssClass: 'cg-service-provider-dark',
+    cssClass: 'dlc-service-provider-dark',
     isDark: true,
     isDefault: false,
     name: 'CG Service Provider Dark',
