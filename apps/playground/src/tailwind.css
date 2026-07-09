@@ -1,7 +1,0 @@
-/* Tailwind CSS v4 entry — kept as a plain .css file (not .scss) so dart-sass
-   never tries to resolve `@import "tailwindcss"`; the @tailwindcss/postcss
-   plugin expands it. Tailwind v4 auto-detects class usage across the repo
-   (respecting .gitignore), so no `content`/`tailwind.config.js` is required.
-   Add `@theme { ... }` here for design tokens, or `@source "..."` to widen
-   class-detection scope. */
-@import 'tailwindcss';

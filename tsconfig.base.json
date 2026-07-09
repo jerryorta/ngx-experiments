@@ -16,13 +16,7 @@
     "paths": {
       "@nge/rxjs": ["./libs/shared/rxjs/src/index.ts"],
       "@nge/storybook": ["./libs/shared/storybook/src/index.ts"],
-      "@nge/charts": ["./libs/shared/charts/src/index.ts"],
-      "@nge/demo-api": ["./libs/demo/api/src/index.ts"],
-      "@nge/demo-store": ["./libs/demo/store/src/index.ts"],
-      "@nge/demo-ui": ["./libs/demo/ui/src/index.ts"],
-      "@nge/demo-design-library": ["./libs/demo/design-library/src/index.ts"],
-      "@nge/demo-utils": ["./libs/demo/utils/src/index.ts"],
-      "@nge/demo-mocks": ["./libs/demo/mocks/src/index.ts"]
+      "@nge/charts": ["./libs/shared/charts/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

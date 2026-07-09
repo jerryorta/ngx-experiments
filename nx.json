@@ -63,11 +63,6 @@
     },
     {
       "plugin": "@nx/eslint/plugin",
-      "exclude": [
-        "apps/demo/backend/**/*",
-        "apps/demo/desktop/**/*",
-        "apps/demo/mobile/**/*"
-      ],
       "options": {
         "targetName": "lint"
       }
