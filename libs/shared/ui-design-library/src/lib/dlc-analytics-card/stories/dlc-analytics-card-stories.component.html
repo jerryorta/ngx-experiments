@@ -1,0 +1,52 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  trackingNumber="REX-501"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Minimal</h4>
+  <div class="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
+    <dlc-analytics-card label="Listings analysed">
+      <div class="flex h-32 items-center justify-center text-3xl font-semibold">128</div>
+    </dlc-analytics-card>
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">With explainer</h4>
+  <div class="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
+    <dlc-analytics-card
+      label="Median price"
+      explainer="Median list price across the current result set."
+    >
+      <div class="flex h-32 items-center justify-center text-3xl font-semibold">$642k</div>
+    </dlc-analytics-card>
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    With headline + accent
+  </h4>
+  <div class="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+    <dlc-analytics-card
+      label="Market health"
+      headline="Seller's Market"
+      accentColor="#4caf50"
+      explainer="% of properties below their previous list price."
+    >
+      <div class="flex h-32 items-center justify-center text-3xl font-semibold">12.4%</div>
+    </dlc-analytics-card>
+    <dlc-analytics-card
+      label="Market health"
+      headline="Balanced Market"
+      accentColor="#ff9800"
+      explainer="% of properties below their previous list price."
+    >
+      <div class="flex h-32 items-center justify-center text-3xl font-semibold">30.2%</div>
+    </dlc-analytics-card>
+    <dlc-analytics-card
+      label="Market health"
+      headline="Buyer's Market"
+      accentColor="#f44336"
+      explainer="% of properties below their previous list price."
+    >
+      <div class="flex h-32 items-center justify-center text-3xl font-semibold">52.8%</div>
+    </dlc-analytics-card>
+  </div>
+</giga-storybook-review-container>

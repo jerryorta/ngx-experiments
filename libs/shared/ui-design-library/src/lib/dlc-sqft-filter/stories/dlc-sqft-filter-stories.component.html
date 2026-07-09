@@ -1,0 +1,35 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  trackingNumber="REX-484"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Default (Empty)</h4>
+  <div class="mb-8 max-w-md">
+    <dlc-sqft-filter />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Preselected Range (1,500 – 2,500)
+  </h4>
+  <div class="mb-8 max-w-md">
+    <dlc-sqft-filter
+      [min]="1500"
+      [max]="2500"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Interactive (Live Emissions)
+  </h4>
+  <div class="mb-8 max-w-md">
+    <dlc-sqft-filter
+      [min]="interactiveMin()"
+      [max]="interactiveMax()"
+      (rangeChange)="onInteractiveRangeChange($event)"
+    />
+    <p class="mt-3 text-xs text-(--dlc-on-surface-variant)">
+      Emitted rangeChange — min: {{ interactiveMin() ?? "null" }}, max:
+      {{ interactiveMax() ?? "null" }}
+    </p>
+  </div>
+</giga-storybook-review-container>

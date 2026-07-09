@@ -1,0 +1,62 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  trackingNumber="REX-510"
+>
+  <p class="mb-6 text-sm text-(--dlc-on-surface-variant)">
+    Focus a field to open its predictions panel — the leaf is presentational (<span
+      class="font-medium text-(--dlc-on-surface)"
+      >data in, intents out</span
+    >); the Google Places lookup is wired in REX-491.
+  </p>
+
+  <div class="flex flex-col gap-8">
+    <!-- REX-510 — populated: mocked predictions, default placeholder. -->
+    <div class="dlc-address-autocomplete-stories__cell">
+      <span class="dlc-address-autocomplete-stories__label">Populated (mocked predictions)</span>
+      <dlc-address-autocomplete
+        [predictions]="predictions"
+        (queryChange)="onQueryChange($event)"
+        (predictionSelected)="onPredictionSelected($event)"
+        (cleared)="onCleared()"
+      />
+    </div>
+
+    <!-- REX-510 — loading row. -->
+    <div class="dlc-address-autocomplete-stories__cell">
+      <span class="dlc-address-autocomplete-stories__label">Loading</span>
+      <dlc-address-autocomplete
+        [loading]="true"
+        [predictions]="[]"
+        (queryChange)="onQueryChange($event)"
+      />
+    </div>
+
+    <!-- REX-510 — empty results: pre-filled query (≥ 3 chars) with no predictions. -->
+    <div class="dlc-address-autocomplete-stories__cell">
+      <span class="dlc-address-autocomplete-stories__label">Empty results</span>
+      <dlc-address-autocomplete
+        [value]="noMatchValue"
+        [predictions]="[]"
+        (queryChange)="onQueryChange($event)"
+        (cleared)="onCleared()"
+      />
+    </div>
+
+    <!-- REX-510 — pre-filled value: reflected into the input, no queryChange echo. -->
+    <div class="dlc-address-autocomplete-stories__cell">
+      <span class="dlc-address-autocomplete-stories__label">Pre-filled value</span>
+      <dlc-address-autocomplete
+        [value]="prefilledValue"
+        [predictions]="predictions"
+        (queryChange)="onQueryChange($event)"
+        (predictionSelected)="onPredictionSelected($event)"
+        (cleared)="onCleared()"
+      />
+    </div>
+  </div>
+
+  <p class="mt-8 text-sm text-(--dlc-on-surface-variant)">
+    Last intent emitted: <span class="font-medium text-(--dlc-on-surface)">{{ lastIntent() }}</span>
+  </p>
+</giga-storybook-review-container>

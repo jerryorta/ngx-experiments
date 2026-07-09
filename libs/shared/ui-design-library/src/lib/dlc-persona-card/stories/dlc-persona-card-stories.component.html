@@ -1,0 +1,77 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  [uxUrl]="uxUrl"
+  trackingNumber="REX-45 · REX-514"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60"
+    >Marketing personas (REX-45)</h4
+  >
+  <div class="mb-8 flex flex-row flex-wrap gap-4">
+    <dlc-persona-card
+      persona="broker"
+      title="For Brokers & Agents"
+      description="Manage listings, clients, and the full transaction lifecycle in one place."
+      ctaLabel="Learn more →"
+      ctaRoute="/for-brokers"
+    />
+    <dlc-persona-card
+      persona="buyer"
+      title="For Buyers & Sellers"
+      description="Find your perfect home, track offers, and close with confidence."
+      ctaLabel="Learn more →"
+      ctaRoute="/for-buyers"
+    />
+    <dlc-persona-card
+      persona="service-provider"
+      title="For Service Providers"
+      description="Grow your contracting business with job leads and project management tools."
+      ctaLabel="Learn more →"
+      ctaRoute="/for-service-providers"
+    />
+  </div>
+
+  <h4 class="mt-10 mb-4 text-sm font-semibold tracking-wider uppercase opacity-60"
+    >Listing-agent contact (REX-514)</h4
+  >
+  <p class="mb-4 max-w-xl text-sm opacity-75">
+    Contact-mode variant of the same leaf: powers the listing-agent card on the property-search
+    detail panel. Every contact attribute is independently optional — the card renders only the rows
+    it has data for and suppresses the CTA link (the contact-agent dispatch is REX-476's gate, not
+    the card's).
+  </p>
+  <div class="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div>
+      <p class="mb-2 text-xs font-semibold tracking-wider uppercase opacity-60">Fully populated</p>
+      <dlc-persona-card
+        persona="broker"
+        title="Marcus Webb"
+        brokerage="Heritage Realty Group"
+        directPhone="(512) 555-0142"
+        officePhone="(512) 555-2100"
+        email="marcus.webb@heritage-realty.example"
+        license="TX-RE-739201"
+      />
+    </div>
+    <div>
+      <p class="mb-2 text-xs font-semibold tracking-wider uppercase opacity-60"
+        >Sparse (no phone, no license)</p
+      >
+      <dlc-persona-card
+        persona="broker"
+        title="Sandra Liu"
+        brokerage="Lakeside Realty"
+        email="sandra.liu@lakeside.example"
+      />
+    </div>
+    <div>
+      <p class="mb-2 text-xs font-semibold tracking-wider uppercase opacity-60"
+        >Name only (worst-case render)</p
+      >
+      <dlc-persona-card
+        persona="broker"
+        title="Devon Hartley"
+      />
+    </div>
+  </div>
+</giga-storybook-review-container>

@@ -1,0 +1,21 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  [uxUrl]="uxUrl"
+  trackingNumber="REX-92"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Default (empty)</h4>
+  <div class="mb-8">
+    <dlc-search-input />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">With value</h4>
+  <div class="mb-8">
+    <dlc-search-input value="742 Elmwood Ave" />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Custom placeholder</h4>
+  <div class="mb-8">
+    <dlc-search-input placeholder="Search contacts, tasks, documents…" />
+  </div>
+</giga-storybook-review-container>

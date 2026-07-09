@@ -1,0 +1,52 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  [uxUrl]="uxUrl"
+  trackingNumber="REX-167"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Default — with Placeholder</h4>
+  <div class="mb-8 max-w-xs">
+    <dlc-select
+      placeholder="Select action status…"
+      [options]="actionStatusOptions"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">With a Pre-Selected Value</h4>
+  <div class="mb-8 max-w-xs">
+    <dlc-select
+      placeholder="Select action status…"
+      [options]="actionStatusOptions"
+      [(ngModel)]="selectedActionStatus"
+    />
+    @if (selectedActionStatus) {
+      <p class="mt-2 text-xs text-(--dlc-on-surface-variant)">Selected: {{ selectedActionStatus }}</p>
+    }
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Different Options — Role</h4>
+  <div class="mb-8 max-w-xs">
+    <dlc-select
+      placeholder="Select role…"
+      [options]="roleOptions"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Disabled State</h4>
+  <div class="mb-8 max-w-xs">
+    <dlc-select
+      placeholder="Cannot change"
+      [options]="actionStatusOptions"
+      [disabled]="true"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Disabled With Pre-Selected Value</h4>
+  <div class="mb-8 max-w-xs">
+    <dlc-select
+      [options]="actionStatusOptions"
+      [disabled]="true"
+      [(ngModel)]="selectedActionStatus"
+    />
+  </div>
+</giga-storybook-review-container>

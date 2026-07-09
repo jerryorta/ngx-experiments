@@ -1,0 +1,63 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Interactive (controlled by Storybook args)
+  </h4>
+  <div class="mb-8 flex flex-row gap-3">
+    <dlc-button
+      [variant]="variantSig()"
+      [size]="sizeSig()"
+      [disabled]="disabledSig()"
+      [loading]="loadingSig()"
+    >
+      Button
+    </dlc-button>
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Variants</h4>
+  <div class="mb-8 flex flex-row gap-3">
+    <dlc-button variant="primary">Primary</dlc-button>
+    <dlc-button variant="ghost">Ghost</dlc-button>
+    <dlc-button variant="danger">Danger</dlc-button>
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Sizes</h4>
+  <div class="mb-8 flex flex-row items-center gap-3">
+    <dlc-button size="sm">Small</dlc-button>
+    <dlc-button size="md">Medium</dlc-button>
+    <dlc-button size="lg">Large</dlc-button>
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">States</h4>
+  <div class="mb-8 flex flex-row gap-3">
+    <dlc-button [disabled]="true">Disabled</dlc-button>
+    <dlc-button [loading]="true">Loading</dlc-button>
+    <dlc-button
+      variant="ghost"
+      [disabled]="true"
+      >Ghost Disabled</dlc-button
+    >
+    <dlc-button
+      variant="danger"
+      [loading]="true"
+      >Danger Loading</dlc-button
+    >
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    All Variants × Sizes
+  </h4>
+  <div class="grid grid-cols-3 gap-3">
+    @for (v of ["primary", "ghost", "danger"]; track v) {
+      @for (s of ["sm", "md", "lg"]; track s) {
+        <dlc-button
+          [variant]="$any(v)"
+          [size]="$any(s)"
+          >{{ v }} / {{ s }}</dlc-button
+        >
+      }
+    }
+  </div>
+</giga-storybook-review-container>

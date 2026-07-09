@@ -1,0 +1,14 @@
+.dlc-filter-bar-stories {
+  display: block;
+  padding: 1.5rem;
+}
+
+.dlc-fbar-demo {
+  background: var(--dlc-surface, #f7f9fb);
+  border-radius: var(--dlc-radius-md, 8px);
+  padding: 0.5rem;
+}
+
+.dlc-fbar-demo--narrow {
+  max-width: 420px;
+}

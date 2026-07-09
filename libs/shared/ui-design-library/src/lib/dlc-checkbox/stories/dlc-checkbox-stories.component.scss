@@ -1,0 +1,9 @@
+.dlc-checkbox-stories {
+  display: block;
+  padding: 1.5rem;
+
+  &__multiline {
+    --dlc-checkbox-align: flex-start;
+    --dlc-checkbox-box-offset: 2px;
+  }
+}

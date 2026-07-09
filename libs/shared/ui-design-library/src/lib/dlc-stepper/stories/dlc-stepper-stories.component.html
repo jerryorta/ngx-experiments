@@ -1,0 +1,44 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  [uxUrl]="uxUrl"
+  trackingNumber="REX-29"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    3-Step (Horizontal)
+  </h4>
+  <div class="mb-8 w-full">
+    <dlc-stepper
+      [steps]="stepsThreeStage"
+      [orientation]="orientationSig()"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    4-Step (Horizontal)
+  </h4>
+  <div class="mb-8 w-full">
+    <dlc-stepper
+      [steps]="stepsFourStage"
+      orientation="horizontal"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60"> All Upcoming </h4>
+  <div class="mb-8 w-full">
+    <dlc-stepper
+      [steps]="stepsAllUpcoming"
+      orientation="horizontal"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Vertical Orientation
+  </h4>
+  <div class="mb-8">
+    <dlc-stepper
+      [steps]="stepsThreeStage"
+      orientation="vertical"
+    />
+  </div>
+</giga-storybook-review-container>

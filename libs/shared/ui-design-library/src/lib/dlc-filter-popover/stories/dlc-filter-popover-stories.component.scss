@@ -1,0 +1,24 @@
+.dlc-filter-popover-stories {
+  display: block;
+  padding: 1.5rem;
+}
+
+.dlc-fpop-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 180px;
+}
+
+.dlc-fpop-demo__row {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  font-size: 0.8125rem;
+  gap: 0.5rem;
+}
+
+.dlc-fpop-demo__note {
+  color: var(--dlc-on-surface-variant, #5c6370);
+  font-size: 0.8125rem;
+}

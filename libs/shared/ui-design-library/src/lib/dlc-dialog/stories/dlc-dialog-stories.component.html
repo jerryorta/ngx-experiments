@@ -1,0 +1,50 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  [trackingNumber]="trackingNumber"
+>
+  <div class="dlc-dialog-stories__demo">
+    <dlc-button
+      variant="primary"
+      (click)="open()"
+      >Open dialog</dlc-button
+    >
+
+    <dlc-dialog
+      [visible]="_visible"
+      [size]="_size"
+      [ariaLabel]="_ariaLabel"
+      [dismissOnBackdropClick]="_dismissOnBackdropClick"
+      [dismissOnEscape]="_dismissOnEscape"
+      [showCloseButton]="_showCloseButton"
+      (dismissed)="onDismissed()"
+    >
+      <div dlc-dialog-title>
+        <h2
+          class="font-[family-name:var(--dlc-font-family-display)] text-lg font-semibold text-(--dlc-on-surface)"
+        >
+          Confirm action
+        </h2>
+      </div>
+      <div dlc-dialog-content>
+        <p class="text-sm text-(--dlc-on-surface-variant)">
+          Project your own header, body, and footer through the
+          <code>[dlc-dialog-title]</code>, <code>[dlc-dialog-content]</code>, and
+          <code>[dlc-dialog-actions]</code> slots.
+        </p>
+      </div>
+      <div dlc-dialog-actions>
+        <dlc-button
+          variant="ghost"
+          (click)="onDismissed()"
+          >Cancel</dlc-button
+        >
+        <dlc-button
+          variant="primary"
+          (click)="onDismissed()"
+          >Confirm</dlc-button
+        >
+      </div>
+    </dlc-dialog>
+  </div>
+</giga-storybook-review-container>

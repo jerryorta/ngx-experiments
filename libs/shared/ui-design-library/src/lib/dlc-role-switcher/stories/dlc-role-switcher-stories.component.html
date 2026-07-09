@@ -1,0 +1,25 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  [uxUrl]="uxUrl"
+  trackingNumber="REX-29"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Interactive (controlled by Storybook args)
+  </h4>
+  <div class="mb-8">
+    <dlc-role-switcher
+      [activeRole]="activeRoleSig()"
+      (roleChange)="onRoleChange($event)"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Each Persona Active
+  </h4>
+  <div class="mb-8 flex flex-col gap-4">
+    <dlc-role-switcher activeRole="professional" />
+    <dlc-role-switcher activeRole="home" />
+    <dlc-role-switcher activeRole="service-provider" />
+  </div>
+</giga-storybook-review-container>

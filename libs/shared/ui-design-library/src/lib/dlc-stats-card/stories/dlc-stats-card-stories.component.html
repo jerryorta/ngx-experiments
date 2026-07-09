@@ -1,0 +1,33 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  [uxUrl]="uxUrl"
+  trackingNumber="REX-28"
+>
+  <div class="grid max-w-2xl grid-cols-2 gap-4">
+    <dlc-stats-card
+      label="Active Listings"
+      value="42"
+      trend="up"
+      trendLabel="+8 vs last month"
+    />
+    <dlc-stats-card
+      label="Total Sales"
+      value="$3.8M"
+      trend="up"
+      trendLabel="+12% vs last month"
+    />
+    <dlc-stats-card
+      label="Avg Days on Market"
+      value="18"
+      trend="down"
+      trendLabel="-3 days"
+    />
+    <dlc-stats-card
+      label="Close Rate"
+      value="94%"
+      trend="flat"
+      trendLabel="No change"
+    />
+  </div>
+</giga-storybook-review-container>

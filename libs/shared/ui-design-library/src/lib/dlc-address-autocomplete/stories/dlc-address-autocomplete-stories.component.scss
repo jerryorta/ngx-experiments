@@ -1,0 +1,22 @@
+.dlc-address-autocomplete-stories {
+  display: block;
+  padding: 1.5rem;
+
+  // Reserve vertical room so an opened predictions panel (absolute, max-h-64)
+  // renders fully without overlapping the next variant on this review surface.
+  &__cell {
+    position: relative;
+    max-width: 28rem;
+    min-height: 18rem;
+  }
+
+  &__label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--dlc-on-surface-variant);
+  }
+}

@@ -1,0 +1,11 @@
+.dlc-dialog-stories {
+  display: block;
+
+  &__demo {
+    position: relative;
+    height: 500px;
+    background: var(--dlc-surface);
+    overflow: hidden;
+    padding: 1.5rem;
+  }
+}

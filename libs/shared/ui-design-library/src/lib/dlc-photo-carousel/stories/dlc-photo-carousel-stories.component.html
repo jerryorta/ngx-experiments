@@ -1,0 +1,49 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  [uxUrl]="uxUrl"
+  trackingNumber="REX-497"
+>
+  <div class="flex max-w-3xl flex-col gap-8">
+    <!-- REX-497 — multi-photo carousel: prev/next, position label, thumbnail
+         strip, click to open lightbox. -->
+    <section class="flex flex-col gap-2">
+      <h3 class="font-headline text-base font-semibold text-(--dlc-on-surface)"
+        >Multi-photo carousel</h3
+      >
+      <p class="text-xs text-(--dlc-on-surface-variant)"
+        >Hover the hero image for prev/next; click to open the lightbox. Arrow keys + Escape work
+        inside the overlay.</p
+      >
+      <dlc-photo-carousel
+        altText="4821 Elmwood Terrace"
+        [photos]="enrichedPhotoUrls"
+      />
+    </section>
+
+    <!-- REX-497 — single-photo: no carousel controls or thumbnail strip. -->
+    <section class="flex flex-col gap-2">
+      <h3 class="font-headline text-base font-semibold text-(--dlc-on-surface)">Single photo</h3>
+      <p class="text-xs text-(--dlc-on-surface-variant)"
+        >Carousel controls and thumbnail strip hide automatically — the lightbox is still
+        available.</p
+      >
+      <dlc-photo-carousel
+        altText="Downtown condo"
+        [photos]="singlePhotoUrl"
+      />
+    </section>
+
+    <!-- REX-497 — empty state: icon placeholder, no controls. -->
+    <section class="flex flex-col gap-2">
+      <h3 class="font-headline text-base font-semibold text-(--dlc-on-surface)">Empty</h3>
+      <p class="text-xs text-(--dlc-on-surface-variant)"
+        >Renders the same icon placeholder the detail panel showed before REX-497.</p
+      >
+      <dlc-photo-carousel
+        altText="No photos available"
+        [photos]="[]"
+      />
+    </section>
+  </div>
+</giga-storybook-review-container>

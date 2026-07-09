@@ -1,0 +1,51 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  trackingNumber="REX-495"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Default (Off)</h4>
+  <div class="mb-8 max-w-md">
+    <dlc-notes-filter />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Off with notes count
+  </h4>
+  <div class="mb-8 max-w-md">
+    <dlc-notes-filter [count]="5" />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    On (Has notes only)
+  </h4>
+  <div class="mb-8 max-w-md">
+    <dlc-notes-filter
+      [enabled]="true"
+      [count]="3"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Zero noted properties in the current results
+  </h4>
+  <div class="mb-8 max-w-md">
+    <dlc-notes-filter
+      [enabled]="true"
+      [count]="0"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Interactive (Live Emissions)
+  </h4>
+  <div class="mb-8 max-w-md">
+    <dlc-notes-filter
+      [count]="3"
+      [enabled]="interactiveEnabled()"
+      (enabledChange)="onInteractiveEnabledChange($event)"
+    />
+    <p class="mt-3 text-xs text-(--dlc-on-surface-variant)">
+      Emitted enabledChange — {{ interactiveEnabled() }}
+    </p>
+  </div>
+</giga-storybook-review-container>

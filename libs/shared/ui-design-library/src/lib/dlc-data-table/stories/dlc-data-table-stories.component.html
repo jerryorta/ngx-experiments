@@ -1,0 +1,104 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <!-- Section 1: Grouped Table (CRM) -->
+  <section class="mb-8">
+    <h2 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60"
+      >Grouped Table (CRM)</h2
+    >
+    <dlc-data-table
+      [columns]="crmColumns"
+      [groups]="crmGroups"
+    >
+      <ng-template
+        dlcCell="status"
+        let-value="value"
+      >
+        <span
+          class="inline-block rounded px-2 py-0.5 text-xs font-semibold text-white"
+          [style.background-color]="statusColors[value]"
+          >{{ value }}</span
+        >
+      </ng-template>
+    </dlc-data-table>
+  </section>
+
+  <!-- Section 2: Flat Table (CMA Comparables) -->
+  <section class="mb-8">
+    <h2 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60"
+      >Flat Table (CMA Comparables)</h2
+    >
+    <dlc-data-table
+      [columns]="cmaColumns"
+      [rows]="cmaRows"
+    />
+  </section>
+
+  <!-- Section 3: Theme Showcase -->
+  <section class="mb-8">
+    <h2 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Theme Showcase</h2>
+    <div class="grid grid-cols-2 gap-0">
+      <div
+        class="dlc-professional-light"
+        style="padding: 1.5rem; background: var(--dlc-surface)"
+      >
+        <p class="mb-2 text-xs font-semibold opacity-50">Professional · Light</p>
+        <dlc-data-table
+          [columns]="crmColumns"
+          [groups]="crmGroups"
+        />
+      </div>
+      <div
+        class="dlc-professional-dark"
+        style="padding: 1.5rem; background: var(--dlc-surface)"
+      >
+        <p class="mb-2 text-xs font-semibold opacity-50">Professional · Dark</p>
+        <dlc-data-table
+          [columns]="crmColumns"
+          [groups]="crmGroups"
+        />
+      </div>
+      <div
+        class="dlc-home-light"
+        style="padding: 1.5rem; background: var(--dlc-surface)"
+      >
+        <p class="mb-2 text-xs font-semibold opacity-50">Home · Light</p>
+        <dlc-data-table
+          [columns]="crmColumns"
+          [groups]="crmGroups"
+        />
+      </div>
+      <div
+        class="dlc-home-dark"
+        style="padding: 1.5rem; background: var(--dlc-surface)"
+      >
+        <p class="mb-2 text-xs font-semibold opacity-50">Home · Dark</p>
+        <dlc-data-table
+          [columns]="crmColumns"
+          [groups]="crmGroups"
+        />
+      </div>
+      <div
+        class="dlc-service-provider-light"
+        style="padding: 1.5rem; background: var(--dlc-surface)"
+      >
+        <p class="mb-2 text-xs font-semibold opacity-50">Service Provider · Light</p>
+        <dlc-data-table
+          [columns]="crmColumns"
+          [groups]="crmGroups"
+        />
+      </div>
+      <div
+        class="dlc-service-provider-dark"
+        style="padding: 1.5rem; background: var(--dlc-surface)"
+      >
+        <p class="mb-2 text-xs font-semibold opacity-50">Service Provider · Dark</p>
+        <dlc-data-table
+          [columns]="crmColumns"
+          [groups]="crmGroups"
+        />
+      </div>
+    </div>
+  </section>
+</giga-storybook-review-container>

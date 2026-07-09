@@ -1,0 +1,38 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  [uxUrl]="uxUrl"
+  trackingNumber="REX-25"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Interactive (controlled by Storybook args)
+  </h4>
+  <div class="mb-8 w-64">
+    <dlc-progress-bar
+      [value]="valueSig()"
+      [mode]="modeSig()"
+      [label]="labelSig()"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Determinate Values</h4>
+  <div class="mb-8 flex w-64 flex-col gap-3">
+    @for (val of [0, 25, 50, 75, 100]; track val) {
+      <div class="flex items-center gap-3">
+        <span class="w-8 text-right text-xs opacity-60">{{ val }}%</span>
+        <dlc-progress-bar
+          [value]="val"
+          class="flex-1"
+        />
+      </div>
+    }
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Indeterminate</h4>
+  <div class="mb-8 w-64">
+    <dlc-progress-bar
+      mode="indeterminate"
+      label="Loading..."
+    />
+  </div>
+</giga-storybook-review-container>

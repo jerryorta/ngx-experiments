@@ -1,0 +1,30 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  trackingNumber="REX-509"
+>
+  <div class="flex flex-wrap items-start gap-6">
+    <!-- REX-509 — full fixture: photo, price, specs, both address lines. -->
+    <dlc-property-preview-card
+      [property]="withPhotoProperty"
+      (closed)="onClosed(withPhotoProperty.id)"
+      (seeDetails)="onSeeDetails($event)"
+    />
+    <!-- REX-509 — graceful no-photo fallback. -->
+    <dlc-property-preview-card
+      [property]="noPhotoProperty"
+      (closed)="onClosed(noPhotoProperty.id)"
+      (seeDetails)="onSeeDetails($event)"
+    />
+    <!-- REX-509 — sparse listing: no specs row, single address line. -->
+    <dlc-property-preview-card
+      [property]="sparseProperty"
+      (closed)="onClosed(sparseProperty.id)"
+      (seeDetails)="onSeeDetails($event)"
+    />
+  </div>
+
+  <p class="mt-6 text-sm text-(--dlc-on-surface-variant)">
+    Last intent emitted: <span class="font-medium text-(--dlc-on-surface)">{{ lastIntent() }}</span>
+  </p>
+</giga-storybook-review-container>

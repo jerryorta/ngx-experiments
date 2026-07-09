@@ -1,0 +1,51 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  [uxUrl]="uxUrl"
+  trackingNumber="REX-46"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Standard Plans</h4>
+  <div class="mb-8 flex flex-row flex-wrap gap-4">
+    <dlc-pricing-card
+      planName="Solo"
+      [price]="29"
+      billingPeriod="monthly"
+      [features]="['1 agent', '25 active listings', 'CRM access', 'Email support']"
+      ctaLabel="Get started"
+    />
+    <dlc-pricing-card
+      planName="Team"
+      [price]="79"
+      billingPeriod="monthly"
+      [features]="['5 agents', 'Unlimited listings', 'CRM + automation', 'Priority support']"
+      ctaLabel="Get started"
+      [featured]="true"
+    />
+    <dlc-pricing-card
+      planName="Brokerage"
+      price="custom"
+      billingPeriod="monthly"
+      [features]="['Unlimited agents', 'White-label', 'Dedicated CSM', 'SLA guarantee']"
+      ctaLabel="Contact sales"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Annual Billing</h4>
+  <div class="mb-8 flex flex-row flex-wrap gap-4">
+    <dlc-pricing-card
+      planName="Solo"
+      [price]="23"
+      billingPeriod="annual"
+      [features]="['1 agent', '25 active listings', 'CRM access', 'Email support']"
+      ctaLabel="Get started"
+    />
+    <dlc-pricing-card
+      planName="Team"
+      [price]="63"
+      billingPeriod="annual"
+      [features]="['5 agents', 'Unlimited listings', 'CRM + automation', 'Priority support']"
+      ctaLabel="Get started"
+      [featured]="true"
+    />
+  </div>
+</giga-storybook-review-container>

@@ -1,0 +1,76 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  [uxUrl]="uxUrl"
+  trackingNumber="REX-27"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Interactive (controlled by Storybook args)
+  </h4>
+  <div class="mb-8 max-w-sm">
+    <dlc-input
+      [type]="type"
+      [label]="label"
+      [placeholder]="placeholder"
+      [helperText]="helperText"
+      [errorText]="errorText"
+      [disabled]="disabled"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">States</h4>
+  <div class="mb-8 flex max-w-sm flex-col gap-4">
+    <dlc-input
+      label="Default"
+      placeholder="Enter value"
+    />
+    <dlc-input
+      label="With Helper Text"
+      placeholder="Enter email"
+      helperText="We'll never share your email."
+    />
+    <dlc-input
+      label="Error State"
+      placeholder="Enter value"
+      errorText="This field is required"
+    />
+    <dlc-input
+      label="Disabled"
+      placeholder="Disabled input"
+      [disabled]="true"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Input Types</h4>
+  <div class="flex max-w-sm flex-col gap-4">
+    <dlc-input
+      label="Text"
+      type="text"
+      placeholder="Text input"
+    />
+    <dlc-input
+      label="Email"
+      type="email"
+      placeholder="email@example.com"
+    />
+    <dlc-input
+      label="Password"
+      type="password"
+      placeholder="••••••••"
+    />
+    <dlc-input
+      label="Number"
+      type="number"
+      placeholder="0"
+    />
+    <dlc-input
+      label="Date"
+      type="date"
+    />
+    <dlc-input
+      label="URL"
+      type="url"
+      placeholder="https://example.com"
+    />
+  </div>
+</giga-storybook-review-container>

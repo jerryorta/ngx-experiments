@@ -1,0 +1,74 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  trackingNumber="REX-488"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Interactive</h4>
+  <div class="mb-8 flex items-center gap-3">
+    <dlc-checkbox
+      [(ngModel)]="checkedSig"
+      ariaLabel="Interactive checkbox"
+    />
+    <span class="text-sm text-(--dlc-on-surface-variant)">{{
+      checkedSig() ? "Checked" : "Unchecked"
+    }}</span>
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Unchecked</h4>
+  <div class="mb-6">
+    <dlc-checkbox ariaLabel="Unchecked checkbox" />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Checked</h4>
+  <div class="mb-6">
+    <dlc-checkbox
+      [checked]="true"
+      ariaLabel="Checked checkbox"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Disabled</h4>
+  <div class="mb-6 flex items-center gap-6">
+    <dlc-checkbox
+      [disabled]="true"
+      ariaLabel="Disabled unchecked checkbox"
+    />
+    <dlc-checkbox
+      [checked]="true"
+      [disabled]="true"
+      ariaLabel="Disabled checked checkbox"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">With label content</h4>
+  <div class="mb-8 flex w-80 flex-col gap-1">
+    <dlc-checkbox [checked]="true">
+      <span class="text-sm text-(--dlc-on-surface)">Single-line label</span>
+    </dlc-checkbox>
+    <dlc-checkbox class="dlc-checkbox-stories__multiline">
+      <span class="flex min-w-0 flex-col">
+        <span class="text-sm text-(--dlc-on-surface)">Multi-line label</span>
+        <span class="text-xs text-(--dlc-on-surface-variant)"
+          >With a description aligned to the first line via --dlc-checkbox-align +
+          --dlc-checkbox-box-offset</span
+        >
+      </span>
+    </dlc-checkbox>
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60"
+    >Unchecked visibility on surface tones</h4
+  >
+  <div class="mb-8 flex flex-col gap-2">
+    <div class="flex items-center gap-6 rounded-lg bg-(--dlc-surface-container) px-4 py-3">
+      <dlc-checkbox ariaLabel="Unchecked on popover surface" />
+      <span class="text-xs text-(--dlc-on-surface-variant)">--dlc-surface-container (popover)</span>
+    </div>
+    <div class="flex items-center gap-6 rounded-lg bg-(--dlc-surface-container-high) px-4 py-3">
+      <dlc-checkbox ariaLabel="Unchecked on row-hover surface" />
+      <span class="text-xs text-(--dlc-on-surface-variant)"
+        >--dlc-surface-container-high (row hover)</span
+      >
+    </div>
+  </div>
+</giga-storybook-review-container>

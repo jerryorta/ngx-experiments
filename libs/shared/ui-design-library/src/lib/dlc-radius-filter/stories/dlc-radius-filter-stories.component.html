@@ -1,0 +1,48 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  trackingNumber="REX-492"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60"> Idle (No Mode) </h4>
+  <div class="mb-8 max-w-md">
+    <dlc-radius-filter />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Radius Mode (5 mi default)
+  </h4>
+  <div class="mb-8 max-w-md">
+    <dlc-radius-filter mode="radius" />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Radius Mode (controlled, 15 mi)
+  </h4>
+  <div class="mb-8 max-w-md">
+    <dlc-radius-filter
+      mode="radius"
+      [radiusMiles]="15"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60"> Map Bounds Mode </h4>
+  <div class="mb-8 max-w-md">
+    <dlc-radius-filter mode="bounds" />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Interactive (Live Emissions)
+  </h4>
+  <div class="mb-8 max-w-md">
+    <dlc-radius-filter
+      [mode]="interactiveMode()"
+      [radiusMiles]="interactiveMiles()"
+      (modeChange)="onInteractiveModeChange($event)"
+      (radiusMilesChange)="onInteractiveMilesChange($event)"
+    />
+    <p class="mt-3 text-xs text-(--dlc-on-surface-variant)">
+      Emitted mode: {{ interactiveMode() ?? "null" }} — miles:
+      {{ interactiveMiles() ?? "null" }}
+    </p>
+  </div>
+</giga-storybook-review-container>

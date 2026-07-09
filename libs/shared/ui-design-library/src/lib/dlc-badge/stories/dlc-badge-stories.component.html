@@ -1,0 +1,54 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  [uxUrl]="uxUrl"
+  trackingNumber="REX-25"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Interactive (controlled by Storybook args)
+  </h4>
+  <div class="mb-8">
+    <dlc-badge
+      [count]="countSig()"
+      [variant]="variantSig()"
+      [visible]="visibleSig()"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60"
+    >Variants × Count States</h4
+  >
+  <div class="mb-8 flex flex-col gap-4">
+    @for (variant of ["error", "accent", "surface"]; track variant) {
+      <div class="flex flex-row flex-wrap items-center gap-4">
+        <span class="w-16 text-xs opacity-60">{{ variant }}</span>
+        <dlc-badge
+          [variant]="$any(variant)"
+          [count]="null"
+        />
+        <dlc-badge
+          [variant]="$any(variant)"
+          [count]="5"
+        />
+        <dlc-badge
+          [variant]="$any(variant)"
+          [count]="99"
+        />
+        <dlc-badge
+          [variant]="$any(variant)"
+          [count]="100"
+        />
+      </div>
+    }
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Hidden State</h4>
+  <div class="mb-8 flex flex-row flex-wrap items-center gap-4">
+    <dlc-badge
+      variant="error"
+      [count]="5"
+      [visible]="false"
+    />
+    <span class="text-xs opacity-60">(hidden — no badge visible)</span>
+  </div>
+</giga-storybook-review-container>

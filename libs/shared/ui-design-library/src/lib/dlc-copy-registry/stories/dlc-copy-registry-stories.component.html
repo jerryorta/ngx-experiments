@@ -1,0 +1,68 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  trackingNumber="REX-499"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Empty state</h4>
+  <div class="mb-8 max-w-md">
+    <dlc-copy-registry />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Populated (MLS# + addresses)
+  </h4>
+  <div class="mb-8 max-w-md">
+    <dlc-copy-registry [items]="populatedItems" />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Auto-clear toggled on (read-only)
+  </h4>
+  <div class="mb-8 max-w-md">
+    <dlc-copy-registry
+      [items]="populatedItems"
+      [autoClearAfterPaste]="true"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Custom title + empty-state copy
+  </h4>
+  <div class="mb-8 max-w-md">
+    <dlc-copy-registry
+      title="Pasteboard"
+      emptyMessage="No copies yet"
+      emptyHint="Try Cmd+C on a property card"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Interactive — Copy All / Clear All / Auto-clear
+  </h4>
+  <p class="mb-3 text-xs text-(--dlc-on-surface-variant)">
+    The stories component plays the role of the consuming page store: it owns items + the auto-clear
+    flag, mutates them on every emission, and clears the list on copyAll when auto-clear is on.
+  </p>
+  <div class="mb-3 max-w-md">
+    <dlc-copy-registry
+      [items]="interactiveItems()"
+      [autoClearAfterPaste]="interactiveAutoClear()"
+      (autoClearChange)="onInteractiveAutoClearChange($event)"
+      (copyAll)="onInteractiveCopyAll()"
+      (clearAll)="onInteractiveClearAll()"
+      (removeItem)="onInteractiveRemoveItem($event)"
+    />
+  </div>
+  <div class="flex max-w-md items-center gap-2">
+    <button
+      type="button"
+      class="text-xs underline opacity-70 hover:opacity-100"
+      (click)="onResetInteractive()"
+    >
+      Reset interactive list
+    </button>
+    <span class="text-xs text-(--dlc-on-surface-variant)">
+      Items: {{ interactiveCount() }} · Auto-clear: {{ interactiveAutoClear() }}
+    </span>
+  </div>
+</giga-storybook-review-container>

@@ -1,0 +1,66 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  [uxUrl]="uxUrl"
+  trackingNumber="REX-82"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Interactive</h4>
+  <div class="mb-8 flex items-center gap-3">
+    <dlc-toggle
+      [(ngModel)]="checkedSig"
+      ariaLabel="Interactive toggle"
+    />
+    <span class="text-sm text-(--dlc-on-surface-variant)">{{ checkedSig() ? "On" : "Off" }}</span>
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Unchecked</h4>
+  <div class="mb-6">
+    <dlc-toggle ariaLabel="Unchecked toggle" />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Checked</h4>
+  <div class="mb-6">
+    <dlc-toggle
+      [ngModel]="true"
+      ariaLabel="Checked toggle"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Disabled unchecked</h4>
+  <div class="mb-6">
+    <dlc-toggle
+      [ngModel]="false"
+      [disabled]="true"
+      ariaLabel="Disabled unchecked toggle"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Disabled checked</h4>
+  <div class="mb-6">
+    <dlc-toggle
+      [ngModel]="true"
+      [disabled]="true"
+      ariaLabel="Disabled checked toggle"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60"
+    >In context — Contingency toggles</h4
+  >
+  <div class="mb-8 flex flex-col gap-3">
+    @for (
+      label of ["Inspection Contingency", "Appraisal Contingency", "Financing Contingency"];
+      track label
+    ) {
+      <div
+        class="flex items-center justify-between rounded-lg bg-(--dlc-surface-container-low) px-4 py-3"
+      >
+        <span class="text-sm text-(--dlc-on-surface)">{{ label }}</span>
+        <dlc-toggle
+          [ngModel]="true"
+          [ariaLabel]="label"
+        />
+      </div>
+    }
+  </div>
+</giga-storybook-review-container>

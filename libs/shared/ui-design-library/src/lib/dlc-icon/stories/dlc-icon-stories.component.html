@@ -1,0 +1,42 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  trackingNumber="REX-76"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Interactive (controlled by Storybook args)
+  </h4>
+  <div class="mb-8 flex items-center gap-4">
+    <span
+      [dlcIcon]="icon()"
+      class="text-[24px]"
+    ></span>
+    <code class="text-xs opacity-60">{{ icon() }}</code>
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Sizes</h4>
+  <div class="mb-8 flex flex-row flex-wrap items-end gap-6">
+    @for (size of sizes; track size.value) {
+      <div class="flex flex-col items-center gap-2">
+        <span
+          [dlcIcon]="icon()"
+          [style.fontSize]="size.value"
+        ></span>
+        <span class="text-[10px] opacity-60">{{ size.label }}</span>
+      </div>
+    }
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Common Icons</h4>
+  <div class="mb-8 flex flex-row flex-wrap gap-6">
+    @for (name of commonIcons; track name) {
+      <div class="flex flex-col items-center gap-1.5">
+        <span
+          [dlcIcon]="name"
+          class="text-[20px]"
+        ></span>
+        <span class="text-[10px] opacity-60">{{ name }}</span>
+      </div>
+    }
+  </div>
+</giga-storybook-review-container>

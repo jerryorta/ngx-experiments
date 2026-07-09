@@ -1,0 +1,88 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  [uxUrl]="uxUrl"
+  trackingNumber="REX-25"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Interactive (controlled by Storybook args)
+  </h4>
+  <div class="mb-8">
+    <dlc-avatar
+      [imageUrl]="imageUrlSig()"
+      [initials]="initialsSig()"
+      [size]="sizeSig()"
+      [status]="statusSig()"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Sizes — Initials</h4>
+  <div class="mb-8 flex flex-row flex-wrap items-center gap-4">
+    <dlc-avatar
+      size="sm"
+      initials="AB"
+    />
+    <dlc-avatar
+      size="md"
+      initials="AB"
+    />
+    <dlc-avatar
+      size="lg"
+      initials="AB"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Sizes — Image</h4>
+  <div class="mb-8 flex flex-row flex-wrap items-center gap-4">
+    <dlc-avatar
+      size="sm"
+      imageUrl="https://i.pravatar.cc/150?img=1"
+      initials="AB"
+    />
+    <dlc-avatar
+      size="md"
+      imageUrl="https://i.pravatar.cc/150?img=1"
+      initials="AB"
+    />
+    <dlc-avatar
+      size="lg"
+      imageUrl="https://i.pravatar.cc/150?img=1"
+      initials="AB"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Status States</h4>
+  <div class="mb-8 flex flex-row flex-wrap items-center gap-4">
+    <div class="flex flex-col items-center gap-2">
+      <dlc-avatar
+        size="md"
+        initials="ON"
+        status="online"
+      />
+      <span class="text-xs opacity-60">Online</span>
+    </div>
+    <div class="flex flex-col items-center gap-2">
+      <dlc-avatar
+        size="md"
+        initials="BY"
+        status="busy"
+      />
+      <span class="text-xs opacity-60">Busy</span>
+    </div>
+    <div class="flex flex-col items-center gap-2">
+      <dlc-avatar
+        size="md"
+        initials="OF"
+        status="offline"
+      />
+      <span class="text-xs opacity-60">Offline</span>
+    </div>
+    <div class="flex flex-col items-center gap-2">
+      <dlc-avatar
+        size="md"
+        initials="NO"
+      />
+      <span class="text-xs opacity-60">No Status</span>
+    </div>
+  </div>
+</giga-storybook-review-container>

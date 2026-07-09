@@ -1,0 +1,48 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  [uxUrl]="uxUrl"
+  trackingNumber="REX-27"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Interactive (controlled by Storybook args)
+  </h4>
+  <div class="mb-8 max-w-sm">
+    <dlc-textarea
+      [label]="label"
+      [placeholder]="placeholder"
+      [helperText]="helperText"
+      [errorText]="errorText"
+      [rows]="rows"
+      [disabled]="disabled"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">States</h4>
+  <div class="flex max-w-sm flex-col gap-4">
+    <dlc-textarea
+      label="Default"
+      placeholder="Enter description"
+    />
+    <dlc-textarea
+      label="With Helper Text"
+      placeholder="Enter notes"
+      helperText="Max 500 characters."
+    />
+    <dlc-textarea
+      label="Error State"
+      placeholder="Enter value"
+      errorText="This field is required"
+    />
+    <dlc-textarea
+      label="Disabled"
+      placeholder="Disabled textarea"
+      [disabled]="true"
+    />
+    <dlc-textarea
+      label="Custom Rows"
+      placeholder="6 rows"
+      [rows]="6"
+    />
+  </div>
+</giga-storybook-review-container>

@@ -1,0 +1,42 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  trackingNumber="REX-483"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Overflowing (constrained width → scroll affordances appear)
+  </h4>
+  <div class="dlc-fbar-demo dlc-fbar-demo--narrow mb-8">
+    <dlc-filter-bar>
+      <dlc-filter-popover
+        label="Price"
+        valueLabel="$300k–$800k"
+        [active]="true"
+        ><span>body</span></dlc-filter-popover
+      >
+      <dlc-filter-popover label="Type"><span>body</span></dlc-filter-popover>
+      <dlc-filter-popover
+        label="Status"
+        valueLabel="Active"
+        [active]="true"
+        ><span>body</span></dlc-filter-popover
+      >
+      <dlc-filter-popover label="Beds"><span>body</span></dlc-filter-popover>
+      <dlc-filter-popover label="Baths"><span>body</span></dlc-filter-popover>
+      <dlc-filter-popover label="Sqft"><span>body</span></dlc-filter-popover>
+      <dlc-filter-popover label="Lot size"><span>body</span></dlc-filter-popover>
+      <dlc-filter-popover label="Year built"><span>body</span></dlc-filter-popover>
+    </dlc-filter-bar>
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Few items (no overflow → no affordances)
+  </h4>
+  <div class="dlc-fbar-demo mb-8">
+    <dlc-filter-bar>
+      <dlc-filter-popover label="Price"><span>body</span></dlc-filter-popover>
+      <dlc-filter-popover label="Beds"><span>body</span></dlc-filter-popover>
+      <dlc-filter-popover label="Baths"><span>body</span></dlc-filter-popover>
+    </dlc-filter-bar>
+  </div>
+</giga-storybook-review-container>

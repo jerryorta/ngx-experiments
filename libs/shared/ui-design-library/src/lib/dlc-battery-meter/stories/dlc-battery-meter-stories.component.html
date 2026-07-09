@@ -1,0 +1,62 @@
+<giga-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  [uxUrl]="uxUrl"
+  trackingNumber="REX-185"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Interactive (controlled by Storybook args)
+  </h4>
+  <div class="mb-8">
+    <dlc-battery-meter
+      [states]="statesSig()"
+      [trailingLabel]="trailingLabelSig()"
+      [size]="sizeSig()"
+      [showIcon]="showIconSig()"
+      [colorMap]="colorMapSig()"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">State Examples</h4>
+  <div class="mb-8 flex flex-col gap-3">
+    @for (example of stateExamples; track example.label) {
+      <div class="flex items-center gap-4">
+        <span class="w-40 text-xs opacity-60">{{ example.label }}</span>
+        <dlc-battery-meter [states]="example.states" trailingLabel="May 30" size="md" />
+      </div>
+    }
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Size Variants</h4>
+  <div class="mb-8 flex flex-col gap-4">
+    <div class="flex items-center gap-4">
+      <span class="w-8 text-xs opacity-60">sm</span>
+      <dlc-battery-meter [states]="['done', 'done', 'in-progress', 'default', 'default']" trailingLabel="May 30" size="sm" />
+    </div>
+    <div class="flex items-center gap-4">
+      <span class="w-8 text-xs opacity-60">md</span>
+      <dlc-battery-meter [states]="['done', 'done', 'in-progress', 'default', 'default']" trailingLabel="May 30" size="md" />
+    </div>
+    <div class="flex items-center gap-4">
+      <span class="w-8 text-xs opacity-60">lg</span>
+      <dlc-battery-meter [states]="['done', 'done', 'in-progress', 'default', 'default']" trailingLabel="May 30" size="lg" />
+    </div>
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Icon Toggle</h4>
+  <div class="mb-8 flex flex-col gap-3">
+    <div class="flex items-center gap-4">
+      <span class="w-24 text-xs opacity-60">with nub</span>
+      <dlc-battery-meter [states]="['done', 'done', 'in-progress', 'default', 'default']" trailingLabel="May 30" size="md" [showIcon]="true" />
+    </div>
+    <div class="flex items-center gap-4">
+      <span class="w-24 text-xs opacity-60">without nub</span>
+      <dlc-battery-meter [states]="['done', 'done', 'in-progress', 'default', 'default']" trailingLabel="May 30" size="md" [showIcon]="false" />
+    </div>
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Without Closing Date</h4>
+  <div class="mb-8">
+    <dlc-battery-meter [states]="['done', 'done', 'done', 'in-progress', 'default']" size="md" />
+  </div>
+</giga-storybook-review-container>
