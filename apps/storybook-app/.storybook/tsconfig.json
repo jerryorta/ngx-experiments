@@ -8,6 +8,10 @@
   "include": [
     "../../../libs/shared/ui-design-library/src/**/*.stories.ts",
     "../../../libs/shared/ui-design-library/src/**/*.ts",
+    "../../../libs/shared/charts/src/**/*.stories.ts",
+    "../../../libs/shared/charts/src/**/*.ts",
+    "../../../libs/shared/calendar/src/**/*.stories.ts",
+    "../../../libs/shared/calendar/src/**/*.ts",
     "preview.ts"
   ]
 }
