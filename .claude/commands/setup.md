@@ -30,4 +30,7 @@ If `nx` can't find a project (stale daemon after install), run `npx nx reset` fi
 - Dependencies installed (+ any install / peer warnings)
 - Framework clones present (which repos, at what refs)
 - Lint / test status
-- Next steps: `npx nx run storybook-app:storybook` (→ http://localhost:4400) to browse the components; `/update` to bump dependencies later.
+
+## 5. Orient the developer — run `/explain`
+
+Setup is the first thing a fresh cloner runs, so hand them straight off to the tour: invoke the **`/explain`** command — read and follow `.claude/commands/explain.md` — to walk them through the repo's philosophy, how it's organized, and how to spin up their own space with `/new-domain`. (Skip only if the caller explicitly just wanted install-and-stop.)
