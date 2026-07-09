@@ -1,0 +1,15 @@
+.dlc-billing-toggle {
+  display: inline-block;
+
+  &__option {
+    cursor: pointer;
+    border: none;
+    outline: none;
+    background: transparent;
+
+    &:focus-visible {
+      outline: 2px solid var(--dlc-primary);
+      outline-offset: 2px;
+    }
+  }
+}

@@ -1,0 +1,101 @@
+// =============================================================================
+// dlc-filter-bar
+//
+// A single-row horizontal scroller for filter triggers. The track hides its
+// native scrollbar; edge affordances (gradient mask + round chevron button)
+// fade in only when there is more content to scroll to in that direction.
+// Fallback values use the professional-light palette.
+// =============================================================================
+
+.dlc-filter-bar {
+  display: block;
+}
+
+.dlc-filter-bar__viewport {
+  align-items: center;
+  display: flex;
+  position: relative;
+}
+
+// ---------------------------------------------------------------------------
+// Scrollable track — native scrollbar hidden across engines
+// ---------------------------------------------------------------------------
+.dlc-filter-bar__track {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.125rem;
+  scroll-behavior: smooth;
+  scrollbar-width: none; // Firefox
+  -ms-overflow-style: none; // IE / legacy Edge
+  width: 100%;
+
+  &::-webkit-scrollbar {
+    display: none; // Chrome / Safari
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Edge affordance — gradient mask + scroll button, shown only when scrollable
+// ---------------------------------------------------------------------------
+.dlc-filter-bar__edge {
+  align-items: center;
+  bottom: 0;
+  display: flex;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  transition: opacity var(--dlc-transition-duration, 0.15s) ease;
+  width: 56px;
+  z-index: 2;
+
+  &--left {
+    background: linear-gradient(to right, var(--dlc-surface, #f7f9fb) 35%, transparent);
+    justify-content: flex-start;
+    left: 0;
+  }
+
+  &--right {
+    background: linear-gradient(to left, var(--dlc-surface, #f7f9fb) 35%, transparent);
+    justify-content: flex-end;
+    right: 0;
+  }
+
+  &--visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Round chevron scroll button (icon affordance — matches dlc-fab shape)
+// ---------------------------------------------------------------------------
+.dlc-filter-bar__scroll-btn {
+  align-items: center;
+  background: var(--dlc-surface-container-high, #e3e9ef);
+  border: 1px solid var(--dlc-outline-variant, #c4d0da);
+  border-radius: 50%;
+  color: var(--dlc-on-surface, #121518);
+  cursor: pointer;
+  display: flex;
+  height: 32px;
+  justify-content: center;
+  padding: 0;
+  width: 32px;
+
+  &:hover {
+    background: var(--dlc-surface-container-highest, #dbe2e9);
+    border-color: var(--dlc-outline, #91a0ac);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--dlc-secondary, #1a5fa8);
+    outline-offset: 2px;
+  }
+}
+
+.dlc-filter-bar__scroll-icon {
+  font-size: 1.25rem;
+}

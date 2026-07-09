@@ -1,0 +1,11 @@
+@let _displayCount = displayCount();
+
+@if (_displayCount !== null) {
+  <span
+    class="dlc-badge__count flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold"
+  >
+    {{ _displayCount }}
+  </span>
+} @else {
+  <span class="dlc-badge__dot h-2 w-2 rounded-full"></span>
+}

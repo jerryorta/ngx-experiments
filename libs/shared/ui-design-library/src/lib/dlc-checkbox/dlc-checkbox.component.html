@@ -1,0 +1,28 @@
+@let _checkedVal = _checked();
+@let _isDisabledVal = _isDisabled();
+
+<label
+  class="dlc-checkbox__label flex w-full cursor-pointer flex-row gap-3"
+  [class.cursor-not-allowed]="_isDisabledVal"
+  [class.opacity-40]="_isDisabledVal"
+>
+  <input
+    type="checkbox"
+    class="dlc-checkbox__input peer sr-only"
+    [checked]="_checkedVal"
+    [disabled]="_isDisabledVal"
+    [attr.aria-describedby]="ariaDescribedby() || null"
+    [attr.aria-label]="ariaLabel() || null"
+    (change)="onInputChange($event)"
+  />
+  <span
+    class="dlc-checkbox__box flex shrink-0 items-center justify-center"
+    aria-hidden="true"
+  >
+    <span
+      dlcIcon="check"
+      class="dlc-checkbox__check text-sm leading-none"
+    ></span>
+  </span>
+  <ng-content />
+</label>

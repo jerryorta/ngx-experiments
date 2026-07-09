@@ -1,0 +1,46 @@
+@let _min = minDate();
+@let _max = maxDate();
+@let _quickRanges = _quickRangesList();
+
+<div class="flex flex-col gap-4">
+  <div class="flex flex-row gap-3">
+    <dlc-input
+      class="flex-1"
+      type="date"
+      label="From"
+      placeholder="Any"
+      data-testid="sold-date-min-input"
+      [ngModel]="_min"
+      (ngModelChange)="onMinDateChange($event)"
+    />
+    <dlc-input
+      class="flex-1"
+      type="date"
+      label="To"
+      placeholder="Any"
+      data-testid="sold-date-max-input"
+      [ngModel]="_max"
+      (ngModelChange)="onMaxDateChange($event)"
+    />
+  </div>
+
+  <span
+    class="text-xs text-(--dlc-on-surface-variant)"
+    data-testid="sold-date-range-readout"
+  >
+    {{ _formattedRange() }}
+  </span>
+
+  <div class="flex flex-row flex-wrap gap-2">
+    @for (preset of _quickRanges; track preset.label; let presetIndex = $index) {
+      <dlc-button
+        size="sm"
+        [variant]="isActivePreset(preset) ? 'primary' : 'ghost'"
+        [attr.data-testid]="'sold-date-preset-' + presetIndex"
+        (click)="applyPreset(preset)"
+      >
+        {{ preset.label }}
+      </dlc-button>
+    }
+  </div>
+</div>

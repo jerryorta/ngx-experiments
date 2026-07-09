@@ -1,0 +1,26 @@
+@let _count = count();
+
+<div
+  class="dlc-favorites-filter__body flex w-64 flex-col gap-2"
+  role="group"
+  aria-label="Favorites filter"
+>
+  <dlc-checkbox
+    class="dlc-favorites-filter__option"
+    data-testid="favorites-toggle"
+    ariaLabel="Favorites only"
+    [checked]="enabled()"
+    (checkedChange)="enabledChange.emit($event)"
+  >
+    <span class="flex min-w-0 items-center gap-2">
+      <span class="dlc-favorites-filter__label text-sm text-(--dlc-on-surface)">Favorites only</span>
+      @if (_count !== null) {
+        <dlc-badge
+          variant="surface"
+          data-testid="favorites-count"
+          [count]="_count"
+        />
+      }
+    </span>
+  </dlc-checkbox>
+</div>

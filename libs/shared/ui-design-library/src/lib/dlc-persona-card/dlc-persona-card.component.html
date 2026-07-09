@@ -1,0 +1,151 @@
+@let _iconName = iconName();
+@let _title = title();
+@let _description = description();
+@let _ctaRoute = ctaRoute();
+@let _ctaLabel = ctaLabel();
+@let _hasContactInfo = hasContactInfo();
+@let _hasCta = hasCta();
+@let _brokerage = brokerage();
+@let _directPhone = directPhone();
+@let _officePhone = officePhone();
+@let _email = email();
+@let _license = license();
+
+<div
+  class="dlc-persona-card__card group relative flex flex-col gap-4 rounded-(--dlc-radius-lg) border-l-[3px] border-(--dlc-secondary) bg-(--dlc-surface-container-low) p-6 transition-colors duration-300 hover:bg-(--dlc-surface-container-high) md:border-t-2 md:border-l-0"
+>
+  <div class="flex items-start justify-between">
+    <div
+      class="dlc-persona-card__icon dlc-persona-card__icon-bg flex h-12 w-12 items-center justify-center rounded-lg"
+    >
+      <span
+        [dlcIcon]="_iconName"
+        class="text-[28px] text-(--dlc-secondary)"
+        style="font-variation-settings: &quot;FILL&quot; 1"
+      ></span>
+    </div>
+    @if (_hasCta) {
+      <span
+        dlcIcon="north_east"
+        class="text-(--dlc-on-surface-variant) opacity-30 transition-colors duration-300 group-hover:text-(--dlc-secondary) group-hover:opacity-100"
+      ></span>
+    }
+  </div>
+  <div
+    class="dlc-persona-card__title font-[family-name:var(--dlc-font-family-display)] text-xl font-bold text-(--dlc-on-surface)"
+    >{{ _title }}</div
+  >
+  @if (_description) {
+    <div
+      class="dlc-persona-card__description text-sm leading-relaxed text-(--dlc-on-surface-variant)"
+      >{{ _description }}</div
+    >
+  }
+  @if (_hasContactInfo) {
+    <dl
+      class="dlc-persona-card__contact-info flex flex-col gap-1.5 text-sm text-(--dlc-on-surface-variant)"
+      data-testid="dlc-persona-card-contact-info"
+    >
+      @if (_brokerage) {
+        <div
+          class="dlc-persona-card__contact-row flex items-center gap-2"
+          data-testid="dlc-persona-card-brokerage"
+        >
+          <span
+            dlcIcon="business"
+            class="dlc-persona-card__contact-icon text-base text-(--dlc-secondary)"
+            aria-hidden="true"
+          ></span>
+          <dt class="sr-only">Brokerage</dt>
+          <dd class="font-medium text-(--dlc-on-surface)">{{ _brokerage }}</dd>
+        </div>
+      }
+      @if (_directPhone) {
+        <div
+          class="dlc-persona-card__contact-row flex items-center gap-2"
+          data-testid="dlc-persona-card-direct-phone"
+        >
+          <span
+            dlcIcon="phone_iphone"
+            class="dlc-persona-card__contact-icon text-base text-(--dlc-secondary)"
+            aria-hidden="true"
+          ></span>
+          <dt class="sr-only">Direct phone</dt>
+          <dd>
+            <a
+              class="dlc-persona-card__contact-link hover:underline"
+              [attr.href]="'tel:' + _directPhone"
+              >{{ _directPhone }}</a
+            >
+          </dd>
+        </div>
+      }
+      @if (_officePhone) {
+        <div
+          class="dlc-persona-card__contact-row flex items-center gap-2"
+          data-testid="dlc-persona-card-office-phone"
+        >
+          <span
+            dlcIcon="call"
+            class="dlc-persona-card__contact-icon text-base text-(--dlc-secondary)"
+            aria-hidden="true"
+          ></span>
+          <dt class="sr-only">Office phone</dt>
+          <dd>
+            <a
+              class="dlc-persona-card__contact-link hover:underline"
+              [attr.href]="'tel:' + _officePhone"
+              >{{ _officePhone }}</a
+            >
+          </dd>
+        </div>
+      }
+      @if (_email) {
+        <div
+          class="dlc-persona-card__contact-row flex items-center gap-2"
+          data-testid="dlc-persona-card-email"
+        >
+          <span
+            dlcIcon="mail"
+            class="dlc-persona-card__contact-icon text-base text-(--dlc-secondary)"
+            aria-hidden="true"
+          ></span>
+          <dt class="sr-only">Email</dt>
+          <dd>
+            <a
+              class="dlc-persona-card__contact-link hover:underline"
+              [attr.href]="'mailto:' + _email"
+              >{{ _email }}</a
+            >
+          </dd>
+        </div>
+      }
+      @if (_license) {
+        <div
+          class="dlc-persona-card__contact-row flex items-center gap-2"
+          data-testid="dlc-persona-card-license"
+        >
+          <span
+            dlcIcon="badge"
+            class="dlc-persona-card__contact-icon text-base text-(--dlc-secondary)"
+            aria-hidden="true"
+          ></span>
+          <dt class="sr-only">License #</dt>
+          <dd class="text-xs opacity-80">License #{{ _license }}</dd>
+        </div>
+      }
+    </dl>
+  }
+  @if (_hasCta) {
+    <a
+      class="dlc-persona-card__cta mt-auto inline-flex items-center gap-2 text-sm font-semibold text-(--dlc-secondary) hover:underline"
+      [routerLink]="_ctaRoute"
+    >
+      {{ _ctaLabel }}
+      <span
+        dlcIcon="arrow_forward"
+        class="text-base"
+      ></span>
+    </a>
+  }
+</div>

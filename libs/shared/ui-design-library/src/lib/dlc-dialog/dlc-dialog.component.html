@@ -1,0 +1,32 @@
+@if (visible()) {
+  <div
+    class="dlc-dialog__overlay"
+    role="presentation"
+    (click)="onBackdropClick($event)"
+    (keydown.escape)="onEscape()"
+  >
+    <div
+      class="dlc-dialog__panel dlc-dialog__panel--{{ size() }}"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="ariaLabel() || null"
+    >
+      @if (showCloseButton()) {
+        <button
+          type="button"
+          class="dlc-dialog__close absolute top-3 right-3 flex items-center justify-center rounded-full p-2 text-(--dlc-on-surface-variant) transition-colors hover:bg-(--dlc-surface-container)"
+          aria-label="Close dialog"
+          (click)="onCloseClick()"
+        >
+          <span
+            dlcIcon="close"
+            class="text-[20px]"
+          ></span>
+        </button>
+      }
+      <ng-content select="[dlc-dialog-title]" />
+      <ng-content select="[dlc-dialog-content]" />
+      <ng-content select="[dlc-dialog-actions]" />
+    </div>
+  </div>
+}

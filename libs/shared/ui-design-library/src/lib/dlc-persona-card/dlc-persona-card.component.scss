@@ -1,0 +1,26 @@
+.dlc-persona-card {
+  display: block;
+
+  &__icon-bg {
+    background-color: color-mix(in srgb, var(--dlc-secondary-container) 20%, transparent);
+  }
+
+  // Per-persona accent color overrides — sets --dlc-secondary to each persona's canonical accent
+  &--broker {
+    --dlc-secondary: #d4921f;
+    --dlc-secondary-container: #3d2910;
+    --dlc-on-secondary: #fff7e6;
+  }
+
+  &--buyer {
+    --dlc-secondary: #94d4b3;
+    --dlc-secondary-container: #0f533a;
+    --dlc-on-secondary: #e8f4ec;
+  }
+
+  &--service-provider {
+    --dlc-secondary: #14b8ad;
+    --dlc-secondary-container: #0a3530;
+    --dlc-on-secondary: #ccfbf1;
+  }
+}

@@ -1,0 +1,34 @@
+@let _value = value();
+@let _annualDiscountLabel = annualDiscountLabel();
+
+<div class="dlc-billing-toggle__container inline-flex rounded-full bg-(--dlc-surface-container) p-1">
+  <button
+    type="button"
+    class="dlc-billing-toggle__option rounded-(--dlc-radius-sm) px-4 py-1.5 text-sm font-medium transition-all"
+    [class.dlc-billing-toggle__option--active]="_value === 'monthly'"
+    [class.bg-(--dlc-primary)]="_value === 'monthly'"
+    [class.text-(--dlc-on-primary)]="_value === 'monthly'"
+    [class.text-(--dlc-on-surface-variant)]="_value !== 'monthly'"
+    (click)="select('monthly')"
+  >
+    Monthly
+  </button>
+  <button
+    type="button"
+    class="dlc-billing-toggle__option inline-flex items-center gap-2 rounded-(--dlc-radius-sm) px-4 py-1.5 text-sm font-medium transition-all"
+    [class.dlc-billing-toggle__option--active]="_value === 'annual'"
+    [class.bg-(--dlc-primary)]="_value === 'annual'"
+    [class.text-(--dlc-on-primary)]="_value === 'annual'"
+    [class.text-(--dlc-on-surface-variant)]="_value !== 'annual'"
+    (click)="select('annual')"
+  >
+    Annual
+    @if (_value === "annual") {
+      <span
+        class="dlc-billing-toggle__discount rounded-full bg-(--dlc-secondary-container) px-2 text-xs text-(--dlc-secondary)"
+      >
+        {{ _annualDiscountLabel }}
+      </span>
+    }
+  </button>
+</div>

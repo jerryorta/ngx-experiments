@@ -1,0 +1,58 @@
+// dlc-chip — themable text-chip primitive.
+//
+// All visual layout / typography is handled by Tailwind utilities in the host
+// class (see dlc-chip.component.ts). This file is intentionally minimal: it
+// only resolves the intent modifier into the three CSS variables the host
+// reads via Tailwind arbitrary-value classes.
+//
+// Per-intent token values live in `libs/concierge/themes/src/lib/styles/
+// _dlc-chip-tokens.scss` and are included by every theme's mixin, so the chip
+// recolors automatically when the body theme class changes
+// (dlc-professional-light / dlc-home-dark / etc.).
+//
+// To customise a single intent for one theme, override the per-token rule
+// after `@include dlc-chip-tokens.dlc-chip-tokens-{light|dark}();` inside that
+// theme's `.dlc-{persona}-{mode}` block — e.g.:
+//
+//   .dlc-home-light {
+//     @include dlc-chip-tokens.dlc-chip-tokens-light();
+//     --dlc-chip-warning-bg: #fef4d0;
+//   }
+
+.dlc-chip {
+  &--neutral {
+    --dlc-chip-bg: var(--dlc-chip-neutral-bg);
+    --dlc-chip-fg: var(--dlc-chip-neutral-fg);
+    --dlc-chip-ring: var(--dlc-chip-neutral-ring);
+  }
+
+  &--info {
+    --dlc-chip-bg: var(--dlc-chip-info-bg);
+    --dlc-chip-fg: var(--dlc-chip-info-fg);
+    --dlc-chip-ring: var(--dlc-chip-info-ring);
+  }
+
+  &--success {
+    --dlc-chip-bg: var(--dlc-chip-success-bg);
+    --dlc-chip-fg: var(--dlc-chip-success-fg);
+    --dlc-chip-ring: var(--dlc-chip-success-ring);
+  }
+
+  &--warning {
+    --dlc-chip-bg: var(--dlc-chip-warning-bg);
+    --dlc-chip-fg: var(--dlc-chip-warning-fg);
+    --dlc-chip-ring: var(--dlc-chip-warning-ring);
+  }
+
+  &--danger {
+    --dlc-chip-bg: var(--dlc-chip-danger-bg);
+    --dlc-chip-fg: var(--dlc-chip-danger-fg);
+    --dlc-chip-ring: var(--dlc-chip-danger-ring);
+  }
+
+  &--discovery {
+    --dlc-chip-bg: var(--dlc-chip-discovery-bg);
+    --dlc-chip-fg: var(--dlc-chip-discovery-fg);
+    --dlc-chip-ring: var(--dlc-chip-discovery-ring);
+  }
+}

@@ -1,0 +1,82 @@
+@let _isOpen = isOpen();
+@let _isDisabled = isDisabled();
+@let _selectedValue = selectedValue();
+@let _selectedLabel = selectedLabel();
+@let _placeholder = placeholder();
+@let _options = options();
+@let _optionSuffixIcon = optionSuffixIcon();
+
+<button
+  #trigger
+  type="button"
+  class="dlc-select__trigger"
+  [class.dlc-select__trigger--open]="_isOpen"
+  [class.dlc-select__trigger--disabled]="_isDisabled"
+  [class.dlc-select__trigger--has-value]="_selectedValue !== null"
+  [attr.aria-expanded]="_isOpen"
+  [attr.aria-haspopup]="'listbox'"
+  [attr.aria-disabled]="_isDisabled || null"
+  [attr.aria-label]="_selectedLabel ?? _placeholder"
+  (click)="toggleOpen()"
+>
+  <span class="dlc-select__trigger-label">
+    @if (_selectedLabel) {
+      {{ _selectedLabel }}
+    } @else {
+      <span class="dlc-select__placeholder">{{ _placeholder }}</span>
+    }
+  </span>
+  <span
+    class="dlc-select__arrow material-symbols-outlined"
+    aria-hidden="true"
+  >
+    arrow_drop_down
+  </span>
+</button>
+
+<ng-template #panelTpl>
+  <div
+    class="dlc-select__panel"
+    role="listbox"
+    [attr.aria-label]="_placeholder"
+  >
+    @for (opt of _options; track opt.value; let i = $index) {
+      <div
+        class="dlc-select__option"
+        [class.dlc-select__option--selected]="isSelected(opt.value)"
+        [class.dlc-select__option--focused]="isFocused(i)"
+        role="option"
+        tabindex="-1"
+        [attr.aria-selected]="isSelected(opt.value)"
+        (click)="selectOption(opt.value)"
+        (keydown.enter)="selectOption(opt.value)"
+        (keydown.space)="$event.preventDefault(); selectOption(opt.value)"
+      >
+        <span class="dlc-select__option-label">{{ opt.label }}</span>
+        <span class="dlc-select__option-end">
+          @if (isSelected(opt.value)) {
+            <span
+              class="dlc-select__option-check material-symbols-outlined"
+              aria-hidden="true"
+              >check</span
+            >
+          }
+          @if (hasSuffix(opt.value)) {
+            <button
+              type="button"
+              class="dlc-select__option-suffix-btn"
+              [attr.aria-label]="'Edit ' + opt.label"
+              (click)="onSuffixClick($event, opt.value)"
+            >
+              <span
+                class="material-symbols-outlined"
+                aria-hidden="true"
+                >{{ _optionSuffixIcon }}</span
+              >
+            </button>
+          }
+        </span>
+      </div>
+    }
+  </div>
+</ng-template>

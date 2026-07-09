@@ -1,0 +1,57 @@
+@let _label = label();
+@let _valueLabel = valueLabel();
+@let _active = active();
+@let _open = isOpen();
+@let _clearable = clearable();
+
+<!-- Trigger — anchors the overlay; toggles open/closed on click -->
+<button
+  #trigger
+  type="button"
+  class="dlc-filter-popover__trigger"
+  [class.dlc-filter-popover__trigger--active]="_active"
+  [class.dlc-filter-popover__trigger--open]="_open"
+  [attr.aria-expanded]="_open"
+  aria-haspopup="dialog"
+  (click)="toggle()"
+>
+  <span class="dlc-filter-popover__label">{{ _label }}</span>
+  @if (_active && _valueLabel) {
+    <span class="dlc-filter-popover__value">{{ _valueLabel }}</span>
+  }
+  <span
+    dlcIcon="expand_more"
+    class="dlc-filter-popover__chevron"
+    [class.dlc-filter-popover__chevron--open]="_open"
+  ></span>
+</button>
+
+<!-- CDK overlay panel — projected filter body, rendered in the overlay container -->
+<ng-template #panelTpl>
+  <div
+    class="dlc-filter-popover__card"
+    role="dialog"
+    [attr.aria-label]="_label"
+  >
+    <div class="dlc-filter-popover__body">
+      <ng-content />
+    </div>
+
+    @if (_clearable) {
+      <div class="dlc-filter-popover__footer">
+        <button
+          type="button"
+          class="dlc-filter-popover__btn dlc-filter-popover__btn--clear"
+          (click)="onClear()"
+          >Clear</button
+        >
+        <button
+          type="button"
+          class="dlc-filter-popover__btn dlc-filter-popover__btn--done"
+          (click)="close()"
+          >Done</button
+        >
+      </div>
+    }
+  </div>
+</ng-template>

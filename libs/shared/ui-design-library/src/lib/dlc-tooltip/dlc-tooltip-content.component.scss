@@ -1,0 +1,11 @@
+.dlc-tooltip-content {
+  .dlc-tooltip__bubble {
+    background: var(--dlc-surface-container-high);
+    color: var(--dlc-on-surface);
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--dlc-radius-sm);
+    font-size: 0.75rem;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px var(--dlc-shadow-md, rgba(0, 0, 0, 0.2));
+  }
+}

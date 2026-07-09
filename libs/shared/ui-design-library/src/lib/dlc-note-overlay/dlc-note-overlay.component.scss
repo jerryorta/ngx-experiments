@@ -1,0 +1,176 @@
+// =============================================================================
+// dlc-note-overlay
+//
+// Variable architecture (mirrors dlc-select conventions):
+//   - Host variables (.dlc-note-overlay) — for the projected trigger slot
+//   - Panel variables (.dlc-note-overlay__panel) — overlay pane rendered
+//     OUTSIDE the host in a CDK overlay container.
+//
+// Fallback values use the professional-light palette so the component renders
+// correctly when rendered outside a themed ancestor.
+// =============================================================================
+
+// ---------------------------------------------------------------------------
+// Host — inline-flex so it wraps the projected trigger tightly.
+// Must NOT be display:contents — that gives the element no bounding box,
+// which breaks CDK overlay position anchoring (getBoundingClientRect → zeros).
+// ---------------------------------------------------------------------------
+.dlc-note-overlay {
+  display: inline-flex;
+}
+
+// ---------------------------------------------------------------------------
+// CDK overlay backdrop — transparent click-target (no dimming)
+// ---------------------------------------------------------------------------
+.dlc-note-overlay__backdrop {
+  background: transparent;
+}
+
+// ---------------------------------------------------------------------------
+// CDK overlay pane
+// ---------------------------------------------------------------------------
+.dlc-note-overlay__panel {
+  --dlc-nop-bg: var(--dlc-surface-container-high, #e3e9ef);
+  --dlc-nop-border: var(--dlc-outline-variant, #c4d0da);
+  --dlc-nop-shadow: 0 6px 20px color-mix(in srgb, #000 18%, transparent),
+    0 2px 6px color-mix(in srgb, #000 10%, transparent);
+  --dlc-nop-radius: 10px;
+  --dlc-nop-color: var(--dlc-on-surface, #121518);
+  --dlc-nop-color-muted: var(--dlc-on-surface-variant, #5c6370);
+  --dlc-nop-primary: var(--dlc-primary, #1a5fa8);
+  --dlc-nop-primary-fg: var(--dlc-on-primary, #ffffff);
+  --dlc-nop-textarea-bg: var(--dlc-surface-container-lowest, #ffffff);
+  --dlc-nop-textarea-border: var(--dlc-outline, #c4d0da);
+}
+
+// ---------------------------------------------------------------------------
+// Card — the visible panel content
+// ---------------------------------------------------------------------------
+.dlc-note-overlay__card {
+  background: var(--dlc-nop-bg);
+  border: 1px solid var(--dlc-nop-border);
+  border-radius: var(--dlc-nop-radius);
+  box-shadow: var(--dlc-nop-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 280px;
+  padding: 0.625rem;
+  width: 300px;
+}
+
+// ---------------------------------------------------------------------------
+// Optional header input (shown when headerPlaceholder is set)
+// ---------------------------------------------------------------------------
+.dlc-note-overlay__header-input {
+  background: var(--dlc-nop-textarea-bg);
+  border: 1px solid var(--dlc-nop-textarea-border);
+  border-radius: 6px;
+  color: var(--dlc-nop-color);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.5;
+  outline: none;
+  padding: 0.375rem 0.625rem;
+  transition: border-color 0.15s ease;
+  width: 100%;
+
+  &::placeholder {
+    color: var(--dlc-nop-color-muted);
+    font-weight: 400;
+    opacity: 0.75;
+  }
+
+  &:focus {
+    border-color: var(--dlc-nop-primary);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Textarea
+// ---------------------------------------------------------------------------
+.dlc-note-overlay__textarea {
+  background: var(--dlc-nop-textarea-bg);
+  border: 1px solid var(--dlc-nop-textarea-border);
+  border-radius: 6px;
+  color: var(--dlc-nop-color);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  outline: none;
+  padding: 0.5rem 0.625rem;
+  resize: vertical;
+  transition: border-color 0.15s ease;
+  width: 100%;
+
+  &::placeholder {
+    color: var(--dlc-nop-color-muted);
+    opacity: 0.75;
+  }
+
+  &:focus {
+    border-color: var(--dlc-nop-primary);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Footer row
+// ---------------------------------------------------------------------------
+.dlc-note-overlay__footer {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.dlc-note-overlay__hint {
+  color: var(--dlc-nop-color-muted);
+  font-size: 0.6875rem;
+  line-height: 1.2;
+}
+
+.dlc-note-overlay__actions {
+  display: flex;
+  gap: 0.375rem;
+}
+
+// ---------------------------------------------------------------------------
+// Action buttons
+// ---------------------------------------------------------------------------
+.dlc-note-overlay__btn {
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1;
+  padding: 0.375rem 0.75rem;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+
+  &--cancel {
+    background: transparent;
+    border-color: var(--dlc-nop-border);
+    color: var(--dlc-nop-color-muted);
+
+    &:hover {
+      background: color-mix(in srgb, var(--dlc-nop-color) 6%, transparent);
+      border-color: var(--dlc-nop-color-muted);
+      color: var(--dlc-nop-color);
+    }
+  }
+
+  &--save {
+    background: var(--dlc-nop-primary);
+    color: var(--dlc-nop-primary-fg);
+
+    &:hover {
+      opacity: 0.88;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--dlc-nop-primary);
+      outline-offset: 2px;
+    }
+  }
+}

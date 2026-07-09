@@ -1,0 +1,32 @@
+@let _displayStates = displayStates();
+@let _showIcon = showIcon();
+@let _lastSegmentColor = lastSegmentColor();
+@let _trailingLabel = trailingLabel();
+
+<div class="dlc-battery-meter__wrapper">
+  <!-- Battery: one segment per item, coloured by state -->
+  <div
+    class="dlc-battery-meter__battery"
+    aria-hidden="true"
+  >
+    <div class="dlc-battery-meter__body">
+      @for (state of _displayStates; track $index) {
+        <div
+          class="dlc-battery-meter__segment"
+          [style.background-color]="segmentColor(state)"
+        ></div>
+      }
+    </div>
+    @if (_showIcon) {
+      <div
+        class="dlc-battery-meter__nub"
+        [style.background-color]="_lastSegmentColor"
+      ></div>
+    }
+  </div>
+
+  <!-- Closing date label -->
+  @if (_trailingLabel) {
+    <span class="dlc-battery-meter__date">{{ _trailingLabel }}</span>
+  }
+</div>

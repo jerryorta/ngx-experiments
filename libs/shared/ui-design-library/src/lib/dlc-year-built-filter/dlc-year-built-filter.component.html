@@ -1,0 +1,83 @@
+@let _min = min();
+@let _max = max();
+@let _sliderMinValue = sliderMin();
+@let _sliderMaxValue = sliderMax();
+@let _sliderStepValue = sliderStep();
+@let _quickRanges = _quickRangesList();
+
+<div class="flex flex-col gap-4">
+  <div class="flex flex-row gap-3">
+    <dlc-input
+      class="flex-1"
+      type="number"
+      label="Min"
+      placeholder="Any"
+      data-testid="year-built-min-input"
+      [ngModel]="_min"
+      (ngModelChange)="onMinInputChange($event)"
+    />
+    <dlc-input
+      class="flex-1"
+      type="number"
+      label="Max"
+      placeholder="Any"
+      data-testid="year-built-max-input"
+      [ngModel]="_max"
+      (ngModelChange)="onMaxInputChange($event)"
+    />
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <div class="relative h-5">
+      <div
+        class="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-(--dlc-surface-container-high)"
+      ></div>
+      <div
+        class="absolute top-1/2 h-1 -translate-y-1/2 rounded-full bg-(--dlc-primary)"
+        [style.left.%]="_fillLeftPct()"
+        [style.width.%]="_fillWidthPct()"
+      ></div>
+      <input
+        type="range"
+        class="dlc-year-built-filter__range pointer-events-none absolute top-0 left-0 h-full w-full appearance-none bg-transparent"
+        aria-label="Minimum year built"
+        data-testid="year-built-slider-min"
+        [min]="_sliderMinValue"
+        [max]="_sliderMaxValue"
+        [step]="_sliderStepValue"
+        [value]="_minView()"
+        (input)="onSliderMinChange($event)"
+      />
+      <input
+        type="range"
+        class="dlc-year-built-filter__range pointer-events-none absolute top-0 left-0 h-full w-full appearance-none bg-transparent"
+        aria-label="Maximum year built"
+        data-testid="year-built-slider-max"
+        [min]="_sliderMinValue"
+        [max]="_sliderMaxValue"
+        [step]="_sliderStepValue"
+        [value]="_maxView()"
+        (input)="onSliderMaxChange($event)"
+      />
+    </div>
+    <span
+      class="text-xs text-(--dlc-on-surface-variant)"
+      data-testid="year-built-range-readout"
+    >
+      {{ _formattedRange() }}
+    </span>
+  </div>
+
+  <div class="flex flex-row flex-wrap gap-2">
+    @for (preset of _quickRanges; track preset.label; let presetIndex = $index) {
+      <dlc-button
+        size="sm"
+        [variant]="isActivePreset(preset) ? 'primary' : 'ghost'"
+        [attr.data-testid]="'year-built-preset-' + presetIndex"
+        (click)="applyPreset(preset)"
+      >
+        {{ preset.label }}
+      </dlc-button>
+    }
+  </div>
+</div>

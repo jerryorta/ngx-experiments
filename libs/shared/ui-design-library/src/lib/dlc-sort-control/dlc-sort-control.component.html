@@ -1,0 +1,123 @@
+@let _direction = direction();
+@let _field = field();
+@let _open = isOpen();
+@let _options = fieldOptions();
+
+<!-- Trigger — anchors the overlay; toggles open/closed on click -->
+<button
+  #trigger
+  type="button"
+  class="dlc-sort-control__trigger"
+  data-testid="sort-control-trigger"
+  [class.dlc-sort-control__trigger--active]="hasSelection()"
+  [class.dlc-sort-control__trigger--open]="_open"
+  [attr.aria-expanded]="_open"
+  aria-haspopup="dialog"
+  aria-label="Sort properties"
+  (click)="toggle()"
+>
+  <span
+    dlcIcon="swap_vert"
+    class="dlc-sort-control__icon"
+    aria-hidden="true"
+  ></span>
+  <span class="dlc-sort-control__label">Sort: {{ triggerLabel() }}</span>
+  @if (hasSelection()) {
+    <span
+      [dlcIcon]="_direction === 'asc' ? 'arrow_upward' : 'arrow_downward'"
+      class="dlc-sort-control__direction-icon"
+      data-testid="sort-trigger-direction"
+      aria-hidden="true"
+    ></span>
+  }
+  <span
+    dlcIcon="expand_more"
+    class="dlc-sort-control__chevron"
+    [class.dlc-sort-control__chevron--open]="_open"
+  ></span>
+</button>
+
+<!-- CDK overlay panel — sort-field list + direction toggle -->
+<ng-template #panelTpl>
+  <div
+    class="dlc-sort-control__card"
+    role="dialog"
+    aria-label="Sort by"
+  >
+    <span class="dlc-sort-control__title">Sort by</span>
+
+    <div class="dlc-sort-control__fields">
+      @for (option of _options; track option.field) {
+        <button
+          type="button"
+          class="dlc-sort-control__field"
+          [class.dlc-sort-control__field--selected]="_field === option.field"
+          [attr.data-testid]="'sort-field-' + option.field"
+          [attr.aria-pressed]="_field === option.field"
+          (click)="onFieldClick(option.field)"
+        >
+          <span>{{ option.label }}</span>
+          @if (_field === option.field) {
+            <span
+              [dlcIcon]="_direction === 'asc' ? 'arrow_upward' : 'arrow_downward'"
+              class="dlc-sort-control__field-direction"
+              aria-hidden="true"
+            ></span>
+          }
+        </button>
+      }
+    </div>
+
+    @if (hasSelection()) {
+      <div class="dlc-sort-control__directions">
+        <button
+          type="button"
+          class="dlc-sort-control__direction-btn"
+          data-testid="sort-direction-asc"
+          [class.dlc-sort-control__direction-btn--active]="_direction === 'asc'"
+          [attr.aria-pressed]="_direction === 'asc'"
+          (click)="onDirectionClick('asc')"
+        >
+          <span
+            dlcIcon="arrow_upward"
+            class="dlc-sort-control__direction-btn-icon"
+            aria-hidden="true"
+          ></span>
+          Ascending
+        </button>
+        <button
+          type="button"
+          class="dlc-sort-control__direction-btn"
+          data-testid="sort-direction-desc"
+          [class.dlc-sort-control__direction-btn--active]="_direction === 'desc'"
+          [attr.aria-pressed]="_direction === 'desc'"
+          (click)="onDirectionClick('desc')"
+        >
+          <span
+            dlcIcon="arrow_downward"
+            class="dlc-sort-control__direction-btn-icon"
+            aria-hidden="true"
+          ></span>
+          Descending
+        </button>
+      </div>
+    }
+
+    <div class="dlc-sort-control__footer">
+      <button
+        type="button"
+        class="dlc-sort-control__btn dlc-sort-control__btn--clear"
+        data-testid="sort-clear"
+        (click)="onClear()"
+        >Clear</button
+      >
+      <button
+        type="button"
+        class="dlc-sort-control__btn dlc-sort-control__btn--done"
+        data-testid="sort-done"
+        (click)="close()"
+        >Done</button
+      >
+    </div>
+  </div>
+</ng-template>

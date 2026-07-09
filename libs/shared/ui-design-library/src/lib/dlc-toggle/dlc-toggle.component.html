@@ -1,0 +1,20 @@
+@let _checkedVal = _checked();
+@let _isDisabledVal = _isDisabled();
+@let _ariaLabel = ariaLabel();
+
+<button
+  type="button"
+  role="switch"
+  class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+  [class]="_checkedVal ? 'bg-(--dlc-secondary)' : 'bg-(--dlc-outline-variant)'"
+  [class.opacity-40]="_isDisabledVal"
+  [class.cursor-not-allowed]="_isDisabledVal"
+  [attr.aria-checked]="_checkedVal"
+  [attr.aria-label]="_ariaLabel"
+  (click)="toggle()"
+>
+  <span
+    class="pointer-events-none h-5 w-5 rounded-full bg-(--dlc-surface-container-lowest) shadow-sm transition-transform"
+    [class]="_checkedVal ? 'translate-x-[22px]' : 'translate-x-0.5'"
+  ></span>
+</button>

@@ -1,0 +1,76 @@
+.dlc-button {
+  display: block;
+
+  button {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: var(--dlc-font-family-body);
+    font-weight: var(--dlc-font-weight-medium);
+    border-radius: var(--dlc-radius-md);
+    transition:
+      background-color var(--dlc-transition-duration) ease,
+      color var(--dlc-transition-duration) ease,
+      border-color var(--dlc-transition-duration) ease;
+  }
+
+  // — Variant: primary
+  &--primary button {
+    background-color: var(--dlc-secondary);
+    color: var(--dlc-on-secondary);
+
+    &:hover:not([disabled]) {
+      background-color: var(--dlc-secondary-container);
+    }
+  }
+
+  // — Variant: ghost
+  &--ghost button {
+    background-color: transparent;
+    color: var(--dlc-on-surface);
+    border: 1px solid var(--dlc-outline);
+
+    &:hover:not([disabled]) {
+      background-color: var(--dlc-button-ghost-hover-bg, var(--dlc-surface-container));
+    }
+  }
+
+  // — Modifier: light (use on dark/primary-container surfaces)
+  &--light#{&}--ghost button {
+    color: var(--dlc-on-primary);
+    border-color: color-mix(in srgb, var(--dlc-on-primary) 40%, transparent);
+
+    &:hover:not([disabled]) {
+      background-color: color-mix(in srgb, var(--dlc-on-primary) 10%, transparent);
+      border-color: var(--dlc-on-primary);
+    }
+  }
+
+  // — Variant: danger
+  &--danger button {
+    background-color: var(--dlc-error);
+    color: var(--dlc-on-error);
+
+    &:hover:not([disabled]) {
+      background-color: color-mix(in srgb, var(--dlc-error) 80%, transparent);
+    }
+  }
+
+  // — Loading spinner
+  &__spinner {
+    display: inline-block;
+    width: 0.875em;
+    height: 0.875em;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: dlc-spin 0.6s linear infinite;
+  }
+}
+
+@keyframes dlc-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,0 +1,9 @@
+@let _mode = mode();
+@let _value = value();
+
+<div class="dlc-progress-bar__track h-1.5 w-full overflow-hidden rounded-full">
+  <div
+    class="dlc-progress-bar__fill h-full rounded-full"
+    [style.width.%]="_mode === 'determinate' ? _value : null"
+  ></div>
+</div>

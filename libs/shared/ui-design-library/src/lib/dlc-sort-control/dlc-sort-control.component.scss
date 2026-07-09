@@ -1,0 +1,277 @@
+// =============================================================================
+// dlc-sort-control
+//
+// Variable architecture (mirrors dlc-filter-popover):
+//   - Host / trigger styles live on .dlc-sort-control (in-flow)
+//   - Panel variables live on .dlc-sort-control__panel — the CDK pane,
+//     rendered OUTSIDE the host in the overlay container.
+//
+// Fallback values use the professional-light palette so the panel renders
+// correctly even before the active theme class is propagated onto the pane.
+// =============================================================================
+
+// ---------------------------------------------------------------------------
+// Host — inline-flex so it wraps the trigger tightly and keeps a bounding box
+// (display:contents would zero out the CDK anchor rect).
+// ---------------------------------------------------------------------------
+.dlc-sort-control {
+  display: inline-flex;
+}
+
+// ---------------------------------------------------------------------------
+// Trigger button — visually parallel to the dlc-filter-popover triggers it
+// shares the header with.
+// ---------------------------------------------------------------------------
+.dlc-sort-control__trigger {
+  align-items: center;
+  background: var(--dlc-surface-container, #eef2f6);
+  border: 1px solid var(--dlc-outline-variant, #c4d0da);
+  border-radius: var(--dlc-radius-md, 8px);
+  color: var(--dlc-on-surface, #121518);
+  cursor: pointer;
+  display: inline-flex;
+  font-family: var(--dlc-font-family-body);
+  font-size: 0.8125rem;
+  font-weight: var(--dlc-font-weight-medium, 500);
+  gap: 0.375rem;
+  line-height: 1.2;
+  padding: 0.4375rem 0.75rem;
+  transition:
+    background-color var(--dlc-transition-duration, 0.15s) ease,
+    border-color var(--dlc-transition-duration, 0.15s) ease,
+    color var(--dlc-transition-duration, 0.15s) ease;
+  white-space: nowrap;
+
+  &:hover {
+    background: var(--dlc-surface-container-high, #e3e9ef);
+    border-color: var(--dlc-outline, #91a0ac);
+  }
+
+  &--active {
+    background: var(--dlc-secondary-container, #d6e3ff);
+    border-color: var(--dlc-secondary, #1a5fa8);
+    color: var(--dlc-on-secondary-container, #0a1f33);
+  }
+
+  &--open {
+    border-color: var(--dlc-secondary, #1a5fa8);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--dlc-secondary, #1a5fa8);
+    outline-offset: 2px;
+  }
+}
+
+.dlc-sort-control__icon {
+  font-size: 1.125rem;
+}
+
+.dlc-sort-control__direction-icon {
+  font-size: 1rem;
+}
+
+.dlc-sort-control__chevron {
+  font-size: 1.125rem;
+  transition: transform var(--dlc-transition-duration, 0.15s) ease;
+
+  &--open {
+    transform: rotate(180deg);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// CDK overlay backdrop — transparent click target (no dimming)
+// ---------------------------------------------------------------------------
+.dlc-sort-control__backdrop {
+  background: transparent;
+}
+
+// ---------------------------------------------------------------------------
+// CDK overlay pane tokens
+// ---------------------------------------------------------------------------
+.dlc-sort-control__panel {
+  --dlc-sortc-bg: var(--dlc-surface-container-high, #e3e9ef);
+  --dlc-sortc-border: var(--dlc-outline-variant, #c4d0da);
+  --dlc-sortc-shadow:
+    0 6px 20px color-mix(in srgb, #000 18%, transparent), 0 2px 6px color-mix(in srgb, #000 10%, transparent);
+  --dlc-sortc-radius: 10px;
+  --dlc-sortc-color: var(--dlc-on-surface, #121518);
+  --dlc-sortc-color-muted: var(--dlc-on-surface-variant, #5c6370);
+  --dlc-sortc-primary: var(--dlc-primary, #1a5fa8);
+  --dlc-sortc-primary-fg: var(--dlc-on-primary, #ffffff);
+  --dlc-sortc-selected-bg: var(--dlc-secondary-container, #d6e3ff);
+  --dlc-sortc-selected-fg: var(--dlc-on-secondary-container, #0a1f33);
+}
+
+// ---------------------------------------------------------------------------
+// Card — the visible panel content
+// ---------------------------------------------------------------------------
+.dlc-sort-control__card {
+  background: var(--dlc-sortc-bg);
+  border: 1px solid var(--dlc-sortc-border);
+  border-radius: var(--dlc-sortc-radius);
+  box-shadow: var(--dlc-sortc-shadow);
+  color: var(--dlc-sortc-color);
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  min-width: 220px;
+  padding: 0.875rem;
+}
+
+.dlc-sort-control__title {
+  color: var(--dlc-sortc-color-muted);
+  font-size: 0.75rem;
+  font-weight: var(--dlc-font-weight-semibold, 600);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+// ---------------------------------------------------------------------------
+// Field list
+// ---------------------------------------------------------------------------
+.dlc-sort-control__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.dlc-sort-control__field {
+  align-items: center;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--dlc-sortc-color);
+  cursor: pointer;
+  display: flex;
+  font-size: 0.8125rem;
+  font-weight: var(--dlc-font-weight-medium, 500);
+  justify-content: space-between;
+  line-height: 1.2;
+  padding: 0.5rem 0.625rem;
+  text-align: left;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+
+  &:hover {
+    background: color-mix(in srgb, var(--dlc-sortc-color) 8%, transparent);
+  }
+
+  &--selected {
+    background: var(--dlc-sortc-selected-bg);
+    color: var(--dlc-sortc-selected-fg);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--dlc-sortc-primary);
+    outline-offset: -2px;
+  }
+}
+
+.dlc-sort-control__field-direction {
+  font-size: 1rem;
+}
+
+// ---------------------------------------------------------------------------
+// Direction toggle (rendered only while a field is selected)
+// ---------------------------------------------------------------------------
+.dlc-sort-control__directions {
+  border-top: 1px solid var(--dlc-sortc-border);
+  display: flex;
+  gap: 0.5rem;
+  padding-top: 0.625rem;
+}
+
+.dlc-sort-control__direction-btn {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--dlc-sortc-border);
+  border-radius: 6px;
+  color: var(--dlc-sortc-color-muted);
+  cursor: pointer;
+  display: inline-flex;
+  flex: 1;
+  font-size: 0.8125rem;
+  font-weight: var(--dlc-font-weight-medium, 500);
+  gap: 0.25rem;
+  justify-content: center;
+  line-height: 1;
+  padding: 0.4375rem 0.5rem;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+
+  &:hover {
+    border-color: var(--dlc-sortc-color-muted);
+    color: var(--dlc-sortc-color);
+  }
+
+  &--active {
+    background: var(--dlc-sortc-selected-bg);
+    border-color: var(--dlc-sortc-primary);
+    color: var(--dlc-sortc-selected-fg);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--dlc-sortc-primary);
+    outline-offset: 2px;
+  }
+}
+
+.dlc-sort-control__direction-btn-icon {
+  font-size: 1rem;
+}
+
+// ---------------------------------------------------------------------------
+// Footer — Clear / Done
+// ---------------------------------------------------------------------------
+.dlc-sort-control__footer {
+  align-items: center;
+  border-top: 1px solid var(--dlc-sortc-border);
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+  padding-top: 0.625rem;
+}
+
+.dlc-sort-control__btn {
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1;
+  padding: 0.375rem 0.75rem;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+
+  &--clear {
+    background: transparent;
+    border-color: var(--dlc-sortc-border);
+    color: var(--dlc-sortc-color-muted);
+
+    &:hover {
+      border-color: var(--dlc-sortc-color-muted);
+      color: var(--dlc-sortc-color);
+    }
+  }
+
+  &--done {
+    background: var(--dlc-sortc-primary);
+    color: var(--dlc-sortc-primary-fg);
+
+    &:hover {
+      opacity: 0.88;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--dlc-sortc-primary);
+      outline-offset: 2px;
+    }
+  }
+}

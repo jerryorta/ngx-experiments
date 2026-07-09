@@ -1,0 +1,14 @@
+@let _ariaLabel = ariaLabel();
+@let _icon = icon();
+
+<button
+  type="button"
+  class="dlc-fab__button"
+  [attr.aria-label]="_ariaLabel"
+  (click)="fabClick.emit()"
+>
+  <span
+    [dlcIcon]="_icon"
+    class="dlc-fab__icon"
+  ></span>
+</button>

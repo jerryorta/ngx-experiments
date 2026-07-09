@@ -1,0 +1,90 @@
+@let _property = property();
+@let _formattedPrice = formattedPrice();
+@let _formattedSqft = formattedSqft();
+@let _hasSpecs = hasSpecs();
+
+<div
+  class="relative flex flex-col overflow-hidden rounded-[--dlc-radius-md] bg-(--dlc-surface-container-low)"
+>
+  <button
+    type="button"
+    class="dlc-property-preview-card__close absolute top-2 right-2 z-10 flex h-7 w-7 items-center justify-center rounded-[--dlc-radius-sm] bg-(--dlc-surface-container-highest)/80 text-(--dlc-on-surface) hover:bg-(--dlc-surface-container-highest)"
+    aria-label="Close preview"
+    data-testid="property-preview-close"
+    (click)="onClose()"
+  >
+    <span
+      dlcIcon="close"
+      class="text-base leading-none"
+      aria-hidden="true"
+    ></span>
+  </button>
+
+  @if (_property.photoUrl) {
+    <div class="relative aspect-video bg-(--dlc-surface-container-high)">
+      <img
+        class="dlc-property-preview-card__photo h-full w-full object-cover"
+        [src]="_property.photoUrl"
+        [alt]="_property.addressLine1"
+        loading="lazy"
+      />
+    </div>
+  } @else {
+    <div
+      class="dlc-property-preview-card__photo-fallback flex aspect-video items-center justify-center bg-(--dlc-surface-container-high)"
+    >
+      <span
+        dlcIcon="image"
+        class="text-4xl text-(--dlc-on-surface-variant)"
+        aria-hidden="true"
+      ></span>
+    </div>
+  }
+
+  <div class="flex flex-col gap-1 p-3">
+    <span class="dlc-property-preview-card__price text-base font-bold text-(--dlc-secondary)">{{
+      _formattedPrice
+    }}</span>
+
+    @if (_hasSpecs) {
+      <div class="flex flex-wrap gap-3">
+        @if (_property.beds !== null) {
+          <span class="dlc-property-preview-card__beds text-xs text-(--dlc-on-surface-variant)"
+            >{{ _property.beds }} bd</span
+          >
+        }
+        @if (_property.baths !== null) {
+          <span class="dlc-property-preview-card__baths text-xs text-(--dlc-on-surface-variant)"
+            >{{ _property.baths }} ba</span
+          >
+        }
+        @if (_formattedSqft !== null) {
+          <span class="dlc-property-preview-card__sqft text-xs text-(--dlc-on-surface-variant)">{{
+            _formattedSqft
+          }}</span>
+        }
+      </div>
+    }
+
+    <span class="dlc-property-preview-card__address text-sm font-medium text-(--dlc-on-surface)">{{
+      _property.addressLine1
+    }}</span>
+    @if (_property.addressLine2) {
+      <span
+        class="dlc-property-preview-card__address-secondary text-xs text-(--dlc-on-surface-variant)"
+        >{{ _property.addressLine2 }}</span
+      >
+    }
+
+    <div class="mt-2">
+      <dlc-button
+        size="sm"
+        variant="primary"
+        data-testid="property-preview-see-details"
+        (click)="onSeeDetails()"
+      >
+        See details
+      </dlc-button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,44 @@
+.dlc-checkbox {
+  display: block;
+
+  // Checked / unchecked states shift fill tokens only — no borders, per the
+  // concierge tonal-elevation convention. The native checkbox stays sr-only;
+  // the visual box is the sibling `__box` span driven by `:checked`.
+  //
+  // Unchecked fill = --dlc-checkbox-unchecked-bg, defined per theme to clear
+  // 3:1 against both the popover surface and the row-hover tone. The
+  // --dlc-outline fallback collides with the hover tone in the dark themes,
+  // and the cg token set has no surface-container-highest — both ways the
+  // box goes invisible without the dedicated token.
+  &__label {
+    align-items: var(--dlc-checkbox-align, center);
+  }
+
+  &__box {
+    width: var(--dlc-checkbox-size, 18px);
+    height: var(--dlc-checkbox-size, 18px);
+    margin-top: var(--dlc-checkbox-box-offset, 0);
+    background-color: var(--dlc-checkbox-unchecked-bg, var(--dlc-outline, #7d858c));
+    border-radius: var(--dlc-checkbox-radius, var(--dlc-radius-xs, 4px));
+    transition: background-color 120ms ease;
+  }
+
+  &__check {
+    color: var(--dlc-checkbox-check-color, var(--dlc-on-primary, #ffffff));
+    opacity: 0;
+    transition: opacity 120ms ease;
+  }
+
+  &__input:checked ~ &__box {
+    background-color: var(--dlc-checkbox-checked-bg, var(--dlc-primary, #1a5fa8));
+
+    .dlc-checkbox__check {
+      opacity: 1;
+    }
+  }
+
+  &__input:focus-visible ~ &__box {
+    outline: 2px solid var(--dlc-checkbox-checked-bg, var(--dlc-primary, #1a5fa8));
+    outline-offset: 2px;
+  }
+}

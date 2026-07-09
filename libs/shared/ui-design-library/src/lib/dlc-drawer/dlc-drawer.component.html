@@ -1,0 +1,39 @@
+@let _isVisible = isVisible();
+@let _isOpen = isOpen();
+@let _width = width();
+@let _ariaLabel = ariaLabel();
+@let _isDragging = isDragging();
+
+@if (_isVisible) {
+  <!-- Backdrop -->
+  <div
+    class="dlc-drawer__backdrop fixed inset-0"
+    [class.dlc-drawer__backdrop--open]="_isOpen"
+    aria-hidden="true"
+    (click)="close()"
+  ></div>
+
+  <!-- Panel -->
+  <div
+    class="dlc-drawer__panel fixed top-0 right-0 flex h-full flex-col bg-(--dlc-surface) shadow-2xl"
+    [class.dlc-drawer__panel--open]="_isOpen"
+    [style.width.px]="_width"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="_ariaLabel || null"
+  >
+    <!-- Drag-to-resize handle — anchored to the left edge of the panel -->
+    <div
+      class="dlc-drawer__resize-handle"
+      role="separator"
+      aria-label="Resize drawer"
+      [class.dlc-drawer__resize-handle--dragging]="_isDragging"
+      (mousedown)="onDragStart($event)"
+    ></div>
+
+    <!-- Content — shifted right by handle width so nothing overlaps -->
+    <div class="dlc-drawer__content flex min-h-0 flex-1 flex-col">
+      <ng-content />
+    </div>
+  </div>
+}

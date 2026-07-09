@@ -1,7 +1,56 @@
-// Shared UI Design Library — go-forward home for reusable `dlc-` presentational
-// primitives, consumed across the ngx-experiments workspace. Ported from
-// Gigasoftware's `@gigasoftware/ui-design-library`, keeping the `dlc-` prefix.
-//
-// Add each new component/directive/pipe here, following the authoring rules in
-// AGENTS.md + COMPONENT-ARCHITECTURE-BEST-PRACTICES.md.
+// Shared UI Design Library — dlc- presentational primitives (ported cg→dlc from concierge-design-library).
 export * from './lib/dlc-deleted-badge/dlc-deleted-badge.component';
+export * from './lib/dlc-address-autocomplete/dlc-address-autocomplete.component';
+export * from './lib/dlc-address-autocomplete/dlc-address-autocomplete.model';
+export * from './lib/dlc-analytics-card/dlc-analytics-card.component';
+export * from './lib/dlc-avatar/dlc-avatar.component';
+export * from './lib/dlc-badge/dlc-badge.component';
+export * from './lib/dlc-battery-meter/dlc-battery-meter.component';
+export * from './lib/dlc-billing-toggle/dlc-billing-toggle.component';
+export * from './lib/dlc-button/dlc-button.component';
+export * from './lib/dlc-checkbox/dlc-checkbox.component';
+export * from './lib/dlc-chip/dlc-chip.component';
+export * from './lib/dlc-copy-registry/dlc-copy-registry.component';
+export * from './lib/dlc-copy-registry/dlc-copy-registry.model';
+export * from './lib/dlc-data-table/dlc-cell.directive';
+export * from './lib/dlc-data-table/dlc-data-table.component';
+export * from './lib/dlc-data-table/dlc-row-expansion.directive';
+export * from './lib/dlc-dialog/dlc-dialog.component';
+export * from './lib/dlc-drawer/dlc-drawer.component';
+export * from './lib/dlc-fab/dlc-fab.component';
+export * from './lib/dlc-favorites-filter/dlc-favorites-filter.component';
+export * from './lib/dlc-feature-showcase/dlc-feature-showcase.component';
+export * from './lib/dlc-filter-bar/dlc-filter-bar.component';
+export * from './lib/dlc-filter-popover/dlc-filter-popover.component';
+export * from './lib/dlc-icon/dlc-icon.directive';
+export * from './lib/dlc-input/dlc-input.component';
+export * from './lib/dlc-invite-member-modal/dlc-invite-member-modal.component';
+export * from './lib/dlc-lot-size-filter/dlc-lot-size-filter.component';
+export * from './lib/dlc-note-overlay/dlc-note-overlay.component';
+export * from './lib/dlc-notes-filter/dlc-notes-filter.component';
+export * from './lib/dlc-persona-card/dlc-persona-card.component';
+export * from './lib/dlc-photo-carousel/dlc-photo-carousel.component';
+export * from './lib/dlc-pricing-card/dlc-pricing-card.component';
+export * from './lib/dlc-progress-bar/dlc-progress-bar.component';
+export * from './lib/dlc-property-preview-card/dlc-property-preview-card.component';
+export * from './lib/dlc-property-preview-card/dlc-property-preview-card.model';
+export * from './lib/dlc-property-type-filter/dlc-property-type-filter.component';
+export * from './lib/dlc-radius-filter/dlc-radius-filter.component';
+export * from './lib/dlc-ratings-filter/dlc-ratings-filter.component';
+export * from './lib/dlc-role-switcher/dlc-role-switcher.component';
+export * from './lib/dlc-search-input/dlc-search-input.component';
+export * from './lib/dlc-select/dlc-select.component';
+export * from './lib/dlc-sign-in/dlc-sign-in.component';
+export * from './lib/dlc-sold-date-filter/dlc-sold-date-filter.component';
+export * from './lib/dlc-sort-control/dlc-sort-control.component';
+export * from './lib/dlc-sqft-filter/dlc-sqft-filter.component';
+export * from './lib/dlc-star-rating/dlc-star-rating.component';
+export * from './lib/dlc-stats-card/dlc-stats-card.component';
+export * from './lib/dlc-status-filter/dlc-status-filter.component';
+export * from './lib/dlc-stepper/dlc-stepper.component';
+export * from './lib/dlc-suggestion-banner/dlc-suggestion-banner.component';
+export * from './lib/dlc-template-picker-modal/dlc-template-picker-modal.component';
+export * from './lib/dlc-textarea/dlc-textarea.component';
+export * from './lib/dlc-toggle/dlc-toggle.component';
+export * from './lib/dlc-tooltip/dlc-tooltip.directive';
+export * from './lib/dlc-year-built-filter/dlc-year-built-filter.component';

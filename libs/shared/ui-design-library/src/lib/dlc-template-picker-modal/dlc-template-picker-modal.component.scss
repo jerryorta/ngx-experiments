@@ -1,0 +1,54 @@
+.dlc-template-picker-modal {
+  &__template-icon-wrap {
+    align-items: center;
+    background: var(--dlc-surface-container-low);
+    border-radius: 0.5rem;
+    color: var(--dlc-on-surface-variant);
+    display: flex;
+    flex-shrink: 0;
+    height: 2.5rem;
+    justify-content: center;
+    transition:
+      background 0.15s,
+      color 0.15s;
+    width: 2.5rem;
+  }
+
+  &__template-card {
+    background: var(--dlc-surface-container-low);
+    border-radius: 0.75rem;
+    cursor: pointer;
+    padding: 1rem;
+    text-align: left;
+    transition: background 0.15s;
+    width: 100%;
+
+    &:hover:not(.dlc-template-picker-modal__template-card--selected) {
+      background: var(--dlc-surface-container);
+    }
+
+    &--selected {
+      background: var(--dlc-surface-container);
+      outline: 2px solid var(--dlc-secondary);
+      outline-offset: -2px;
+
+      .dlc-template-picker-modal__template-icon-wrap {
+        background: var(--dlc-secondary-container);
+        color: var(--dlc-on-secondary-container);
+      }
+
+      .dlc-template-picker-modal__check-icon {
+        color: var(--dlc-secondary);
+        opacity: 1;
+      }
+    }
+  }
+
+  &__check-icon {
+    color: var(--dlc-outline-variant);
+    opacity: 0.4;
+    transition:
+      color 0.15s,
+      opacity 0.15s;
+  }
+}

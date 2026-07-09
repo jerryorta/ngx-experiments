@@ -1,0 +1,22 @@
+.dlc-notes-filter {
+  display: block;
+
+  // Single-row toggle — hover shifts the surface token only, no borders, per
+  // the concierge tonal-elevation convention. The checkbox visuals live in the
+  // shared dlc-checkbox; the row padding sits on the inner label so the whole
+  // row stays one click target (mirrors dlc-favorites-filter__option).
+  &__option {
+    --dlc-checkbox-align: center;
+
+    border-radius: var(--dlc-radius-sm, 6px);
+    transition: background-color 120ms ease;
+
+    &:hover {
+      background-color: var(--dlc-surface-container-high);
+    }
+
+    .dlc-checkbox__label {
+      padding: 0.375rem 0.5rem;
+    }
+  }
+}

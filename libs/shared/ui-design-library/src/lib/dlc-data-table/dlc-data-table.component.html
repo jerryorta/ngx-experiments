@@ -1,0 +1,120 @@
+@let _columns = columns();
+@let _effectiveGroups = effectiveGroups();
+@let _expandedRowId = expandedRowId();
+@let _rowExpansion = rowExpansion();
+
+<div class="overflow-x-auto">
+  <table class="dlc-data-table__table">
+    <thead>
+      <tr
+        cdkDropList
+        cdkDropListOrientation="horizontal"
+        (cdkDropListDropped)="dropHeader($event)"
+      >
+        @for (col of _columns; track col.key) {
+          <th
+            class="dlc-data-table__header-cell"
+            [class.dlc-data-table__header-cell--sticky]="col.sticky"
+            [class.dlc-data-table__header-cell--draggable]="!col.sticky"
+            [style.width]="col.width ?? 'auto'"
+            cdkDrag
+            [cdkDragDisabled]="col.sticky ?? false"
+          >
+            <div
+              *cdkDragPreview
+              class="dlc-data-table__drag-preview"
+              >{{ col.label }}</div
+            >
+            {{ col.label }}
+          </th>
+        }
+      </tr>
+    </thead>
+    @for (group of _effectiveGroups; track getGroupKey(group)) {
+      <tbody>
+        @if (group.label) {
+          <tr
+            class="dlc-data-table__group-header-row"
+            [class.cursor-pointer]="group.collapsible"
+            [style.--dlc-group-accent-color]="group.accentColor ?? null"
+            (click)="group.collapsible && toggleGroup(getGroupKey(group))"
+          >
+            <td
+              class="dlc-data-table__group-header"
+              [attr.colspan]="_columns.length || 1"
+            >
+              <div class="dlc-data-table__group-header-inner flex items-center gap-2">
+                @if (group.accentColor) {
+                  <span
+                    class="dlc-data-table__group-header-accent"
+                    [style.background-color]="group.accentColor"
+                  ></span>
+                }
+                @if (group.collapsible) {
+                  <button
+                    type="button"
+                    class="dlc-data-table__collapse-btn"
+                    [class.dlc-data-table__collapse-btn--collapsed]="
+                      isGroupCollapsed(getGroupKey(group))
+                    "
+                    [attr.aria-expanded]="!isGroupCollapsed(getGroupKey(group))"
+                    aria-label="Toggle group: {{ group.label }}"
+                    (click)="$event.stopPropagation(); toggleGroup(getGroupKey(group))"
+                  >
+                    <span
+                      dlcIcon="expand_more"
+                      class="text-base leading-none"
+                    ></span>
+                  </button>
+                }
+                <span class="text-sm font-semibold">{{ group.label }}</span>
+              </div>
+            </td>
+          </tr>
+        }
+        @if (!group.collapsible || !isGroupCollapsed(getGroupKey(group))) {
+          @for (row of group.rows; track $index) {
+            <tr class="dlc-data-table__row">
+              @for (col of _columns; track col.key) {
+                <td
+                  class="dlc-data-table__cell"
+                  [class.dlc-data-table__cell--sticky]="col.sticky"
+                  [style.width]="col.width ?? 'auto'"
+                >
+                  @if (getCellTemplate(col.key); as tmpl) {
+                    <ng-container
+                      [ngTemplateOutlet]="tmpl"
+                      [ngTemplateOutletContext]="{
+                        $implicit: row,
+                        column: col.key,
+                        value: getCellValue(row, col.key),
+                      }"
+                    />
+                  } @else {
+                    {{ getCellValue(row, col.key) }}
+                  }
+                </td>
+              }
+            </tr>
+            @let _rowKey = getExpandedRowKey(row);
+            @if (_rowKey && _rowKey === _expandedRowId) {
+              @if (_rowExpansion) {
+                <tr class="dlc-data-table__expansion-row">
+                  <td
+                    class="dlc-data-table__expansion-cell"
+                    [attr.colspan]="_columns.length"
+                  >
+                    <ng-container
+                      [ngTemplateOutlet]="_rowExpansion.template"
+                      [ngTemplateOutletContext]="{ $implicit: row }"
+                    />
+                  </td>
+                </tr>
+              }
+            }
+          }
+        }
+      </tbody>
+    }
+  </table>
+</div>

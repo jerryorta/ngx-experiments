@@ -1,0 +1,185 @@
+.dlc-copy-registry {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  width: 100%;
+  color: var(--dlc-on-surface);
+  background: var(--dlc-surface-container);
+  border-radius: var(--dlc-radius-md, 8px);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  &__heading {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  &__title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--dlc-on-surface);
+  }
+
+  // Tonal pill — no border, no shadow per the concierge elevation lock.
+  &__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    height: 1.25rem;
+    padding: 0 0.375rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--dlc-on-surface-variant);
+    background: var(--dlc-surface-container-high);
+    border-radius: var(--dlc-radius-sm, 6px);
+  }
+
+  &__auto-clear {
+    --dlc-checkbox-align: center;
+
+    display: inline-flex;
+    align-items: center;
+  }
+
+  &__toolbar {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  // dlc-button stretches to 100% by default; constrain inside the toolbar so
+  // the two actions sit comfortably side-by-side.
+  &__action {
+    display: inline-flex;
+    flex: 1;
+  }
+
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.5rem;
+    padding: 2rem 1rem;
+    color: var(--dlc-on-surface-variant);
+  }
+
+  &__empty-icon {
+    font-size: 2rem;
+    opacity: 0.4;
+  }
+
+  &__empty-message {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--dlc-on-surface);
+  }
+
+  &__empty-hint {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--dlc-on-surface-variant);
+  }
+
+  &__items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 24rem;
+    overflow-y: auto;
+  }
+
+  &__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.625rem 0.75rem;
+    background: var(--dlc-surface-container-high);
+    border-radius: var(--dlc-radius-sm, 6px);
+    transition: background-color 120ms ease;
+
+    &:hover {
+      background: var(--dlc-surface-container-highest, var(--dlc-surface-container-high));
+    }
+  }
+
+  &__item-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  &__item-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--dlc-on-surface-variant);
+  }
+
+  &__item-source {
+    font-size: 0.6875rem;
+    color: var(--dlc-on-surface-variant);
+    opacity: 0.7;
+  }
+
+  &__item-text {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--dlc-on-surface);
+    word-break: break-word;
+  }
+
+  &__item-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  // Icon-only affordance — square hit target, tonal hover, no border.
+  &__item-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    margin: 0;
+    color: var(--dlc-on-surface-variant);
+    background: transparent;
+    border: 0;
+    border-radius: var(--dlc-radius-sm, 6px);
+    cursor: pointer;
+    transition:
+      background-color 120ms ease,
+      color 120ms ease;
+
+    &:hover {
+      color: var(--dlc-on-surface);
+      background: var(--dlc-surface-container);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--dlc-primary);
+      outline-offset: 2px;
+    }
+
+    .material-symbols-outlined {
+      font-size: 1.125rem;
+    }
+  }
+}

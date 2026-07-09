@@ -1,0 +1,47 @@
+.dlc-radius-filter {
+  display: block;
+
+  // Native single-thumb slider plumbing — track is hidden so the Tailwind
+  // styled fill bar shows through; the thumb pseudo-elements re-enable
+  // pointer events so the slider stays draggable.
+  &__range {
+    &::-webkit-slider-runnable-track {
+      background: transparent;
+    }
+
+    &::-webkit-slider-thumb {
+      appearance: none;
+      background-color: var(--dlc-primary);
+      border: 2px solid var(--dlc-surface);
+      border-radius: 9999px;
+      cursor: pointer;
+      height: 16px;
+      pointer-events: auto;
+      width: 16px;
+    }
+
+    &::-moz-range-track {
+      background: transparent;
+    }
+
+    &::-moz-range-thumb {
+      background-color: var(--dlc-primary);
+      border: 2px solid var(--dlc-surface);
+      border-radius: 9999px;
+      cursor: pointer;
+      height: 16px;
+      pointer-events: auto;
+      width: 16px;
+    }
+
+    &:focus-visible::-webkit-slider-thumb {
+      outline: 2px solid var(--dlc-primary);
+      outline-offset: 2px;
+    }
+
+    &:focus-visible::-moz-range-thumb {
+      outline: 2px solid var(--dlc-primary);
+      outline-offset: 2px;
+    }
+  }
+}

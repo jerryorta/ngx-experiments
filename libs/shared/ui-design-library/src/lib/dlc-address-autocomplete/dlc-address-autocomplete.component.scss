@@ -1,0 +1,28 @@
+.dlc-address-autocomplete {
+  display: block;
+  position: relative;
+
+  // Floating suggestions overlay — carries an elevation drop shadow mirroring the
+  // filter popovers' `--dlc-fpop-shadow`. Overlays float above page content, so
+  // they take a shadow; the "tonal elevation only" lock governs in-flow surfaces,
+  // not floating panels (dlc-filter-popover sets the precedent).
+  &__panel {
+    box-shadow:
+      0 6px 20px color-mix(in srgb, #000 18%, transparent),
+      0 2px 6px color-mix(in srgb, #000 10%, transparent);
+  }
+
+  // Highlighted row — pointer hover OR keyboard-active. Fills with the dark
+  // `--dlc-primary-container` tone and flips BOTH text lines to its paired
+  // on-color so they stay legible (the default `--dlc-on-surface` text is dark and
+  // would all but vanish on the dark fill).
+  &__option:hover,
+  &__option--active {
+    background: var(--dlc-primary-container);
+
+    .dlc-address-autocomplete__option-main,
+    .dlc-address-autocomplete__option-secondary {
+      color: var(--dlc-on-primary-container);
+    }
+  }
+}

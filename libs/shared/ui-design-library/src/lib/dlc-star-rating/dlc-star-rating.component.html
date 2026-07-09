@@ -1,0 +1,35 @@
+@let _rating = rating();
+@let _readonly = readonly();
+@let _isSm = size() === "sm";
+
+<div
+  class="flex items-center gap-0.5"
+  role="group"
+  aria-label="Star rating"
+  (mouseleave)="onMouseLeave()"
+>
+  @for (index of starIndexes; track index) {
+    <button
+      type="button"
+      [attr.aria-label]="'Rate ' + index + ' out of 5 stars'"
+      [attr.aria-pressed]="(_rating ?? 0) >= index"
+      [disabled]="_readonly || null"
+      [class]="
+        'flex cursor-pointer items-center justify-center rounded-sm p-0 transition-transform hover:scale-110 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--dlc-primary) disabled:cursor-default ' +
+        (_isSm ? 'h-4 w-4' : 'h-6 w-6')
+      "
+      (click)="$event.stopPropagation(); onStarClick($any(index))"
+      (mouseenter)="onMouseEnter(index)"
+    >
+      <span
+        [dlcIcon]="isFilled(index) ? 'star' : 'star_border'"
+        [class]="
+          'leading-none ' +
+          (_isSm ? 'text-[14px] ' : 'text-[18px] ') +
+          (isFilled(index) ? 'text-(--dlc-secondary)' : 'text-(--dlc-on-surface-variant)')
+        "
+        aria-hidden="true"
+      ></span>
+    </button>
+  }
+</div>

@@ -1,0 +1,41 @@
+.dlc-role-switcher {
+  display: inline-block;
+  position: relative;
+
+  &__trigger {
+    border-radius: var(--dlc-radius-sm);
+    border-color: var(--dlc-outline);
+    background-color: var(--dlc-surface-container);
+    color: var(--dlc-on-surface);
+
+    &:hover {
+      background-color: var(--dlc-surface-container-high);
+    }
+  }
+
+  &__panel {
+    border-radius: var(--dlc-radius-md);
+    border-color: var(--dlc-outline);
+    background-color: var(--dlc-surface-container);
+    box-shadow: 0 4px 16px var(--dlc-shadow-md, rgba(0, 0, 0, 0.2));
+  }
+
+  &__option {
+    background: transparent;
+    border: none;
+    color: var(--dlc-on-surface);
+
+    &:hover {
+      background-color: var(--dlc-surface-container-high);
+    }
+
+    &--active {
+      background-color: var(--dlc-primary-container);
+      color: var(--dlc-on-primary);
+
+      &:hover {
+        background-color: var(--dlc-primary-container);
+      }
+    }
+  }
+}

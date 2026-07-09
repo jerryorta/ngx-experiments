@@ -1,0 +1,59 @@
+.dlc-drawer {
+  // ─── Customization tokens ───────────────────────────────────────────────────
+  --dlc-drawer-z-index: 50;
+  --dlc-drawer-backdrop-bg: rgb(0 0 0 / 40%);
+  --dlc-drawer-handle-width: 6px;
+  --dlc-drawer-handle-rest-color: color-mix(in srgb, var(--dlc-outline-variant) 60%, transparent);
+  --dlc-drawer-handle-hover-color: var(--dlc-primary);
+  --dlc-drawer-handle-active-color: var(--dlc-primary);
+  --dlc-drawer-transition-duration: 300ms;
+  --dlc-drawer-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
+  // ────────────────────────────────────────────────────────────────────────────
+
+  &__backdrop {
+    background: var(--dlc-drawer-backdrop-bg);
+    opacity: 0;
+    transition: opacity var(--dlc-drawer-transition-duration) ease;
+    z-index: var(--dlc-drawer-z-index);
+
+    &--open {
+      opacity: 1;
+    }
+  }
+
+  &__panel {
+    transform: translateX(100%);
+    transition: transform var(--dlc-drawer-transition-duration) var(--dlc-drawer-transition-easing);
+    z-index: calc(var(--dlc-drawer-z-index) + 1);
+
+    &--open {
+      transform: translateX(0);
+    }
+  }
+
+  &__resize-handle {
+    background-color: var(--dlc-drawer-handle-rest-color);
+    bottom: 0;
+    cursor: ew-resize;
+    flex-shrink: 0;
+    left: 0;
+    position: absolute;
+    top: 0;
+    transition: background-color 0.15s ease;
+    width: var(--dlc-drawer-handle-width);
+    z-index: 10;
+
+    &:hover {
+      background-color: var(--dlc-drawer-handle-hover-color);
+    }
+
+    &--dragging {
+      background-color: var(--dlc-drawer-handle-active-color);
+    }
+  }
+
+  &__content {
+    // Offset so content clears the resize handle
+    margin-left: var(--dlc-drawer-handle-width);
+  }
+}

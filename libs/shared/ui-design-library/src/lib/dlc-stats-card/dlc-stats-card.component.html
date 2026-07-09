@@ -1,0 +1,82 @@
+@let _routerLink = routerLink();
+@let _label = label();
+@let _value = value();
+@let _trend = trend();
+@let _trendLabel = trendLabel();
+
+@if (_routerLink) {
+  <a
+    [routerLink]="_routerLink"
+    class="flex h-full flex-col gap-1 rounded-[--dlc-radius-md] bg-(--dlc-surface-container-lowest) p-4 focus-visible:ring-2 focus-visible:ring-(--dlc-primary) focus-visible:ring-offset-2 focus-visible:outline-none"
+  >
+    <span
+      class="dlc-stats-card__label text-xs font-medium tracking-wider text-(--dlc-on-surface-variant) uppercase"
+      >{{ _label }}</span
+    >
+    <span class="dlc-stats-card__value text-2xl font-bold text-(--dlc-on-surface)">{{ _value }}</span>
+
+    @if (_trend !== "flat" || _trendLabel) {
+      <div class="dlc-stats-card__trend flex items-center gap-1">
+        @if (_trend === "up") {
+          <span
+            dlcIcon="arrow_upward"
+            class="text-base text-(--dlc-success)"
+            aria-hidden="true"
+          ></span>
+        } @else if (_trend === "down") {
+          <span
+            dlcIcon="arrow_downward"
+            class="text-base text-(--dlc-error)"
+            aria-hidden="true"
+          ></span>
+        } @else {
+          <span
+            dlcIcon="remove"
+            class="text-base text-(--dlc-on-surface-variant)"
+            aria-hidden="true"
+          ></span>
+        }
+        @if (_trendLabel) {
+          <span class="text-xs text-(--dlc-on-surface-variant)">{{ _trendLabel }}</span>
+        }
+      </div>
+    }
+  </a>
+} @else {
+  <div
+    class="flex h-full flex-col gap-1 rounded-[--dlc-radius-md] bg-(--dlc-surface-container-lowest) p-4"
+  >
+    <span
+      class="dlc-stats-card__label text-xs font-medium tracking-wider text-(--dlc-on-surface-variant) uppercase"
+      >{{ _label }}</span
+    >
+    <span class="dlc-stats-card__value text-2xl font-bold text-(--dlc-on-surface)">{{ _value }}</span>
+
+    @if (_trend !== "flat" || _trendLabel) {
+      <div class="dlc-stats-card__trend flex items-center gap-1">
+        @if (_trend === "up") {
+          <span
+            dlcIcon="arrow_upward"
+            class="text-base text-(--dlc-success)"
+            aria-hidden="true"
+          ></span>
+        } @else if (_trend === "down") {
+          <span
+            dlcIcon="arrow_downward"
+            class="text-base text-(--dlc-error)"
+            aria-hidden="true"
+          ></span>
+        } @else {
+          <span
+            dlcIcon="remove"
+            class="text-base text-(--dlc-on-surface-variant)"
+            aria-hidden="true"
+          ></span>
+        }
+        @if (_trendLabel) {
+          <span class="text-xs text-(--dlc-on-surface-variant)">{{ _trendLabel }}</span>
+        }
+      </div>
+    }
+  </div>
+}

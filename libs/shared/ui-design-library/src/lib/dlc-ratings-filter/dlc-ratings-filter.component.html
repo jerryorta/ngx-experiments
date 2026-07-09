@@ -1,0 +1,79 @@
+@let _count = _selectedCount();
+
+<div
+  class="dlc-ratings-filter__body flex w-72 flex-col gap-3"
+  role="group"
+  aria-label="Filter by property ratings"
+>
+  <!-- Bulk actions -->
+  <div class="flex flex-row flex-wrap gap-2">
+    <dlc-button
+      size="sm"
+      variant="ghost"
+      data-testid="ratings-select-all"
+      (click)="selectAll()"
+    >
+      Select All
+    </dlc-button>
+    <dlc-button
+      size="sm"
+      variant="ghost"
+      data-testid="ratings-clear-all"
+      [disabled]="_count === 0"
+      (click)="clearAll()"
+    >
+      Clear All
+    </dlc-button>
+  </div>
+
+  <!-- Star-rating multi-select rows (5★ → 1★) -->
+  <div class="flex flex-col gap-1">
+    @for (rating of _rows; track rating) {
+      @let _checked = isSelected(rating);
+      @let _bucketCount = countFor(rating);
+      <dlc-checkbox
+        class="dlc-ratings-filter__option"
+        [class.dlc-ratings-filter__option--selected]="_checked"
+        [attr.data-testid]="'ratings-option-' + rating"
+        [checked]="_checked"
+        [ariaLabel]="rating + ' star' + (rating === 1 ? '' : 's')"
+        (checkedChange)="toggle(rating)"
+      >
+        <span class="flex min-w-0 flex-1 items-center justify-between gap-3">
+          <span
+            class="dlc-ratings-filter__stars flex items-center gap-0.5"
+            aria-hidden="true"
+          >
+            @for (_filled of filledStars(rating); track _filled) {
+              <span
+                dlcIcon="star"
+                class="text-base leading-none text-(--dlc-secondary)"
+              ></span>
+            }
+            @for (_empty of emptyStars(rating); track _empty) {
+              <span
+                dlcIcon="star_border"
+                class="text-base leading-none text-(--dlc-on-surface-variant)"
+              ></span>
+            }
+          </span>
+          <dlc-badge
+            variant="surface"
+            [attr.data-testid]="'ratings-count-' + rating"
+            [count]="_bucketCount"
+          />
+        </span>
+      </dlc-checkbox>
+    }
+  </div>
+
+  <!-- Selection summary -->
+  @if (_count > 0) {
+    <span
+      class="text-xs text-(--dlc-on-surface-variant)"
+      data-testid="ratings-count"
+    >
+      {{ _count }} {{ _count === 1 ? "rating" : "ratings" }} selected
+    </span>
+  }
+</div>

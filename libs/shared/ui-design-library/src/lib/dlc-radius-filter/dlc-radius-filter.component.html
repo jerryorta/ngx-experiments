@@ -1,0 +1,98 @@
+@let _mode = mode();
+
+<div class="flex w-64 flex-col gap-4">
+  <!-- Mode toggle — clicking the active pill turns the filter off (REX-492) -->
+  <div
+    class="dlc-radius-filter__mode-toggle inline-flex self-start rounded-(--dlc-radius-md) bg-(--dlc-surface-container) p-1"
+    data-testid="radius-mode-toggle"
+  >
+    <button
+      type="button"
+      class="dlc-radius-filter__mode-option rounded-(--dlc-radius-sm) px-4 py-1.5 text-sm font-medium transition-all"
+      data-testid="radius-mode-radius"
+      [class.bg-(--dlc-primary)]="_mode === 'radius'"
+      [class.text-(--dlc-on-primary)]="_mode === 'radius'"
+      [class.text-(--dlc-on-surface-variant)]="_mode !== 'radius'"
+      [attr.aria-pressed]="_mode === 'radius'"
+      (click)="onModeClick('radius')"
+    >
+      Radius
+    </button>
+    <button
+      type="button"
+      class="dlc-radius-filter__mode-option rounded-(--dlc-radius-sm) px-4 py-1.5 text-sm font-medium transition-all"
+      data-testid="radius-mode-bounds"
+      [class.bg-(--dlc-primary)]="_mode === 'bounds'"
+      [class.text-(--dlc-on-primary)]="_mode === 'bounds'"
+      [class.text-(--dlc-on-surface-variant)]="_mode !== 'bounds'"
+      [attr.aria-pressed]="_mode === 'bounds'"
+      (click)="onModeClick('bounds')"
+    >
+      Map Bounds
+    </button>
+  </div>
+
+  @switch (_mode) {
+    @case ("radius") {
+      <div
+        class="flex flex-col gap-3"
+        data-testid="radius-mode-panel"
+      >
+        <dlc-input
+          type="number"
+          label="Miles"
+          placeholder="Miles"
+          data-testid="radius-miles-input"
+          [ngModel]="_milesInputValue()"
+          (ngModelChange)="onInputChange($event)"
+        />
+
+        <div class="flex flex-col gap-2">
+          <div class="relative h-5">
+            <div
+              class="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-(--dlc-surface-container-high)"
+            ></div>
+            <div
+              class="absolute top-1/2 h-1 -translate-y-1/2 rounded-full bg-(--dlc-primary)"
+              [style.left.%]="0"
+              [style.width.%]="_fillWidthPct()"
+            ></div>
+            <input
+              type="range"
+              class="dlc-radius-filter__range pointer-events-none absolute top-0 left-0 h-full w-full appearance-none bg-transparent"
+              aria-label="Search radius (miles)"
+              data-testid="radius-miles-slider"
+              [min]="_sliderMin"
+              [max]="_sliderMax"
+              [step]="_sliderStep"
+              [value]="_milesView()"
+              (input)="onSliderChange($event)"
+            />
+          </div>
+          <span
+            class="text-xs text-(--dlc-on-surface-variant)"
+            data-testid="radius-miles-readout"
+          >
+            Search within {{ _formattedMiles() }}
+          </span>
+        </div>
+      </div>
+    }
+    @case ("bounds") {
+      <p
+        class="text-xs text-(--dlc-on-surface-variant)"
+        data-testid="radius-bounds-hint"
+      >
+        Search updates to match the map view. Pan or zoom the map to change the searched area.
+      </p>
+    }
+    @default {
+      <p
+        class="text-xs text-(--dlc-on-surface-variant)"
+        data-testid="radius-idle-hint"
+      >
+        Pick a mode to scope the search by area.
+      </p>
+    }
+  }
+</div>

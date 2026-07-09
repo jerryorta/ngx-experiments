@@ -1,0 +1,137 @@
+@let _loading = loading();
+@let _errorMessage = errorMessage();
+@let _googleEnabled = googleEnabled();
+@let _heading = heading();
+@let _subheading = subheading();
+@let _primaryLabel = primaryLabel();
+@let _togglePrompt = togglePrompt();
+@let _toggleAction = toggleAction();
+@let _isSignUp = isSignUp();
+@let _emailError = emailError();
+@let _passwordError = passwordError();
+@let _confirmPasswordError = confirmPasswordError();
+
+<div class="flex w-full justify-center">
+  <div
+    class="flex w-full max-w-md flex-col rounded-[--dlc-radius-lg] bg-(--dlc-surface-container) p-8"
+  >
+    <h1
+      class="dlc-sign-in__heading mb-6 text-xl font-semibold text-(--dlc-on-surface)"
+      data-testid="dlc-sign-in-heading"
+    >
+      {{ _heading }}
+    </h1>
+
+    @if (_googleEnabled) {
+      <button
+        type="button"
+        data-testid="dlc-sign-in-google"
+        class="flex w-full items-center justify-center gap-3 rounded-[--dlc-radius-md] bg-(--dlc-surface) px-4 py-2.5 text-sm font-medium text-(--dlc-on-surface) transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
+        [disabled]="_loading"
+        (click)="onGoogleClick()"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 48 48"
+          class="h-5 w-5"
+          aria-hidden="true"
+        >
+          <path
+            fill="#4285F4"
+            d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+          />
+          <path
+            fill="#34A853"
+            d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+          />
+          <path
+            fill="#FBBC05"
+            d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+          />
+          <path
+            fill="#EA4335"
+            d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+          />
+        </svg>
+        <span>Continue with Google</span>
+      </button>
+
+      <div class="my-4 flex items-center gap-3 text-xs text-(--dlc-on-surface-variant)">
+        <span class="h-px flex-1 bg-(--dlc-outline)"></span>
+        <span>or continue with email</span>
+        <span class="h-px flex-1 bg-(--dlc-outline)"></span>
+      </div>
+    }
+
+    <form
+      class="flex flex-col gap-6"
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      novalidate
+    >
+      <p class="text-sm text-(--dlc-on-surface-variant)">{{ _subheading }}</p>
+
+      <div class="flex flex-col gap-4">
+        <dlc-input
+          label="Email"
+          placeholder="you@example.com"
+          type="email"
+          formControlName="email"
+          [errorText]="_emailError"
+        />
+        <dlc-input
+          label="Password"
+          placeholder="••••••••"
+          type="password"
+          formControlName="password"
+          [errorText]="_passwordError"
+          [allowVisibilityToggle]="true"
+        />
+        @if (_isSignUp) {
+          <dlc-input
+            label="Confirm password"
+            placeholder="••••••••"
+            type="password"
+            formControlName="confirmPassword"
+            [errorText]="_confirmPasswordError"
+            [allowVisibilityToggle]="true"
+            data-testid="dlc-sign-in-confirm-password"
+          />
+        }
+      </div>
+
+      <dlc-button
+        variant="primary"
+        size="md"
+        [loading]="_loading"
+        [disabled]="_loading"
+        data-testid="dlc-sign-in-submit"
+      >
+        {{ _primaryLabel }}
+      </dlc-button>
+
+      @if (_errorMessage) {
+        <p
+          class="dlc-sign-in__error text-sm text-(--dlc-error)"
+          data-testid="dlc-sign-in-error"
+        >
+          {{ _errorMessage }}
+        </p>
+      }
+    </form>
+
+    <div class="dlc-sign-in__alt mt-6 flex flex-col items-center gap-3 text-sm">
+      <span class="text-(--dlc-on-surface-variant)">{{ _togglePrompt }}</span>
+      <div class="w-full max-w-[16rem]">
+        <dlc-button
+          variant="ghost"
+          size="md"
+          data-testid="dlc-sign-in-toggle"
+          (click)="toggleMode()"
+        >
+          {{ _toggleAction }}
+        </dlc-button>
+      </div>
+    </div>
+  </div>
+</div>

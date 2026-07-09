@@ -1,0 +1,49 @@
+@let _title = title();
+@let _description = description();
+
+<div class="flex items-start gap-3 rounded-lg bg-(--dlc-primary-container) px-4 py-3">
+  <!-- Icon -->
+  <span
+    dlcIcon="auto_awesome"
+    class="mt-0.5 shrink-0 text-[20px] text-(--dlc-on-primary)"
+  ></span>
+
+  <!-- Content -->
+  <div class="min-w-0 flex-1">
+    <p class="text-sm font-medium text-(--dlc-on-primary)">{{ _title }}</p>
+    <p class="mt-0.5 text-xs text-(--dlc-on-primary) opacity-80">{{ _description }}</p>
+    <div class="mt-2 flex items-center gap-2">
+      <dlc-button
+        variant="primary"
+        size="sm"
+        data-testid="accept"
+        (click)="accept.emit()"
+        >Apply</dlc-button
+      >
+      <dlc-button
+        variant="ghost"
+        size="sm"
+        [light]="true"
+        data-testid="choose-alternative"
+        (click)="chooseAlternative.emit()"
+        >Choose different</dlc-button
+      >
+    </div>
+  </div>
+
+  <!-- Dismiss -->
+  <div class="shrink-0">
+    <button
+      type="button"
+      class="flex cursor-pointer items-center justify-center text-(--dlc-on-primary) opacity-70 hover:opacity-100"
+      aria-label="Dismiss suggestion"
+      data-testid="dismiss"
+      (click)="dismiss.emit()"
+    >
+      <span
+        dlcIcon="close"
+        class="text-[18px]"
+      ></span>
+    </button>
+  </div>
+</div>

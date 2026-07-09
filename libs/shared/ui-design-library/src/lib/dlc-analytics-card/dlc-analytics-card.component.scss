@@ -1,0 +1,10 @@
+.dlc-analytics-card {
+  display: block;
+
+  // Chart projections render full-width inside the body slot — keep the
+  // GigaChart canvas sized by its container, never the other way round.
+  &__body {
+    display: block;
+    width: 100%;
+  }
+}

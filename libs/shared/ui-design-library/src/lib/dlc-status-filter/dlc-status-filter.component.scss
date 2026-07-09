@@ -1,0 +1,28 @@
+.dlc-status-filter {
+  display: block;
+
+  // Row hover/selected states shift surface tokens only — no borders, per the
+  // concierge tonal-elevation convention. The checkbox visuals live in the
+  // shared dlc-checkbox; the box aligns to the first label line via its layout
+  // tokens, and the row padding sits on the inner label so the whole row stays
+  // one click target.
+  &__option {
+    --dlc-checkbox-align: flex-start;
+    --dlc-checkbox-box-offset: 2px;
+
+    border-radius: var(--dlc-radius-sm, 6px);
+    transition: background-color 120ms ease;
+
+    &:hover {
+      background-color: var(--dlc-surface-container-high);
+    }
+
+    &--selected {
+      background-color: var(--dlc-surface-container-high);
+    }
+
+    .dlc-checkbox__label {
+      padding: 0.375rem 0.5rem;
+    }
+  }
+}

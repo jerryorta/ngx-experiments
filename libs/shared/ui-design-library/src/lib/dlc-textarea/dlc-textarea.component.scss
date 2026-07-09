@@ -1,0 +1,21 @@
+.dlc-textarea {
+  display: block;
+
+  &__field {
+    border: 1px solid var(--dlc-outline);
+
+    &:focus {
+      border-color: var(--dlc-secondary);
+      box-shadow: 0 0 0 1px var(--dlc-secondary);
+    }
+
+    &--error {
+      border-color: var(--dlc-error);
+
+      &:focus {
+        border-color: var(--dlc-error);
+        box-shadow: 0 0 0 1px var(--dlc-error);
+      }
+    }
+  }
+}

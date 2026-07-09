@@ -1,0 +1,97 @@
+.dlc-battery-meter {
+  display: inline-flex;
+  align-items: center;
+
+  &__wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  // Inner flex row: body + nub sit directly adjacent with no gap
+  &__battery {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  // Battery outer body — overflow: hidden lets border-radius clip segments cleanly
+  &__body {
+    border-radius: var(--dlc-radius-sm) 0 0 var(--dlc-radius-sm);
+    display: inline-flex;
+    align-items: stretch;
+    overflow: hidden;
+  }
+
+  &__segment {
+    background-color: var(--dlc-surface-container);
+    transition: background-color var(--dlc-transition-duration, 0.2s) ease;
+    flex-shrink: 0;
+  }
+
+  // Positive terminal nub — colour set dynamically to match the last segment
+  &__nub {
+    border-radius: 0 2px 2px 0;
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  &__date {
+    color: var(--dlc-on-surface-variant);
+    font-family: var(--dlc-font-family-body);
+    white-space: nowrap;
+    font-weight: var(--dlc-font-weight-medium);
+  }
+
+  // --- Size variants ---
+
+  &--sm {
+    .dlc-battery-meter__segment {
+      width: 8px;
+      height: 12px;
+    }
+
+    .dlc-battery-meter__nub {
+      width: 2px;
+      height: 6px;
+    }
+
+    .dlc-battery-meter__date {
+      font-size: 10px;
+      line-height: 1.2;
+    }
+  }
+
+  &--md {
+    .dlc-battery-meter__segment {
+      width: 10px;
+      height: 16px;
+    }
+
+    .dlc-battery-meter__nub {
+      width: 3px;
+      height: 8px;
+    }
+
+    .dlc-battery-meter__date {
+      font-size: 12px;
+      line-height: 1.4;
+    }
+  }
+
+  &--lg {
+    .dlc-battery-meter__segment {
+      width: 14px;
+      height: 22px;
+    }
+
+    .dlc-battery-meter__nub {
+      width: 3px;
+      height: 11px;
+    }
+
+    .dlc-battery-meter__date {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+  }
+}

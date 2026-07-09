@@ -1,0 +1,175 @@
+@let _photos = photos();
+@let _currentUrl = currentUrl();
+@let _currentAltText = currentAltText();
+@let _hasMultiplePhotos = hasMultiplePhotos();
+@let _positionLabel = positionLabel();
+@let _currentIndex = currentIndex();
+@let _lightboxOpen = lightboxOpen();
+
+<div class="group relative aspect-video w-full overflow-hidden bg-(--dlc-surface-container-high)">
+  @if (_currentUrl) {
+    <button
+      type="button"
+      class="block h-full w-full cursor-zoom-in border-0 bg-transparent p-0 focus-visible:ring-2 focus-visible:ring-(--dlc-primary) focus-visible:outline-none"
+      [attr.aria-label]="'Open ' + _currentAltText + ' in full view'"
+      (click)="openLightbox()"
+    >
+      <img
+        class="dlc-photo-carousel__photo h-full w-full object-cover"
+        [src]="_currentUrl"
+        [alt]="_currentAltText"
+        loading="lazy"
+      />
+    </button>
+  } @else {
+    <div class="flex h-full w-full items-center justify-center">
+      <span
+        dlcIcon="image"
+        class="text-5xl text-(--dlc-on-surface-variant)"
+        aria-hidden="true"
+      ></span>
+    </div>
+  }
+
+  @if (_hasMultiplePhotos) {
+    <button
+      type="button"
+      class="dlc-photo-carousel__prev absolute top-1/2 left-2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-(--dlc-surface-container-highest)/85 text-(--dlc-on-surface) opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+      aria-label="Previous photo"
+      data-testid="photo-carousel-prev"
+      (click)="prev()"
+    >
+      <span
+        dlcIcon="chevron_left"
+        class="text-2xl"
+        aria-hidden="true"
+      ></span>
+    </button>
+    <button
+      type="button"
+      class="dlc-photo-carousel__next absolute top-1/2 right-2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-(--dlc-surface-container-highest)/85 text-(--dlc-on-surface) opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+      aria-label="Next photo"
+      data-testid="photo-carousel-next"
+      (click)="next()"
+    >
+      <span
+        dlcIcon="chevron_right"
+        class="text-2xl"
+        aria-hidden="true"
+      ></span>
+    </button>
+
+    @if (_positionLabel) {
+      <span
+        class="dlc-photo-carousel__position absolute right-2 bottom-2 rounded-[--dlc-radius-sm] bg-(--dlc-surface-container-highest)/85 px-2 py-0.5 text-[11px] font-medium text-(--dlc-on-surface-variant)"
+        data-testid="photo-carousel-position"
+      >
+        {{ _positionLabel }}
+      </span>
+    }
+  }
+</div>
+
+@if (_hasMultiplePhotos) {
+  <div
+    class="dlc-photo-carousel__thumbnails flex gap-2 overflow-x-auto px-2 py-2"
+    role="list"
+    aria-label="Photo thumbnails"
+  >
+    @for (url of _photos; track $index) {
+      <button
+        type="button"
+        class="dlc-photo-carousel__thumbnail relative h-14 w-20 flex-shrink-0 overflow-hidden rounded-[--dlc-radius-sm] border-2 transition-opacity focus-visible:ring-2 focus-visible:ring-(--dlc-primary) focus-visible:outline-none"
+        [class.dlc-photo-carousel__thumbnail--active]="$index === _currentIndex"
+        [style.border-color]="$index === _currentIndex ? 'var(--dlc-primary)' : 'transparent'"
+        [style.opacity]="$index === _currentIndex ? '1' : '0.7'"
+        [attr.aria-label]="'Show photo ' + ($index + 1) + ' of ' + _photos.length"
+        [attr.aria-current]="$index === _currentIndex"
+        role="listitem"
+        data-testid="photo-carousel-thumbnail"
+        (click)="goTo($index)"
+      >
+        <img
+          [src]="url"
+          alt=""
+          class="h-full w-full object-cover"
+          loading="lazy"
+        />
+      </button>
+    }
+  </div>
+}
+
+@if (_lightboxOpen && _currentUrl) {
+  <div
+    class="dlc-photo-carousel__lightbox fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Photo viewer"
+    tabindex="0"
+    (keydown)="onLightboxKeydown($event)"
+    (click)="onLightboxBackdropClick($event)"
+  >
+    <button
+      type="button"
+      class="absolute top-4 right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+      aria-label="Close photo viewer"
+      data-testid="photo-carousel-lightbox-close"
+      (click)="closeLightbox()"
+    >
+      <span
+        dlcIcon="close"
+        class="text-[24px]"
+        aria-hidden="true"
+      ></span>
+    </button>
+
+    @if (_hasMultiplePhotos) {
+      <button
+        type="button"
+        class="absolute top-1/2 left-4 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+        aria-label="Previous photo"
+        data-testid="photo-carousel-lightbox-prev"
+        (click)="prev(); $event.stopPropagation()"
+      >
+        <span
+          dlcIcon="chevron_left"
+          class="text-[28px]"
+          aria-hidden="true"
+        ></span>
+      </button>
+      <button
+        type="button"
+        class="absolute top-1/2 right-4 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+        aria-label="Next photo"
+        data-testid="photo-carousel-lightbox-next"
+        (click)="next(); $event.stopPropagation()"
+      >
+        <span
+          dlcIcon="chevron_right"
+          class="text-[28px]"
+          aria-hidden="true"
+        ></span>
+      </button>
+    }
+
+    <div
+      class="flex max-h-[90vh] max-w-[95vw] flex-col items-center"
+      role="presentation"
+      (click)="$event.stopPropagation()"
+      (keydown)="$event.stopPropagation()"
+    >
+      <img
+        [src]="_currentUrl"
+        [alt]="_currentAltText"
+        class="max-h-[85vh] max-w-full rounded-lg object-contain"
+      />
+      @if (_positionLabel) {
+        <span
+          class="mt-3 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm"
+          >{{ _positionLabel }}</span
+        >
+      }
+    </div>
+  </div>
+}

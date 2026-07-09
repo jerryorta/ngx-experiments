@@ -1,0 +1,42 @@
+@let _orientation = orientation();
+@let _steps = steps();
+
+<div
+  class="dlc-stepper__container"
+  [class.dlc-stepper__container--horizontal]="_orientation === 'horizontal'"
+  [class.dlc-stepper__container--vertical]="_orientation === 'vertical'"
+>
+  @for (step of _steps; track step.label; let i = $index; let last = $last) {
+    <div class="dlc-stepper__step">
+      <div class="dlc-stepper__step-inner">
+        <div
+          class="dlc-stepper__circle flex h-8 w-8 items-center justify-center rounded-full border-2 text-sm font-bold"
+          [class.dlc-stepper__circle--completed]="step.state === 'completed'"
+          [class.dlc-stepper__circle--active]="step.state === 'active'"
+          [class.dlc-stepper__circle--upcoming]="step.state === 'upcoming'"
+        >
+          @if (step.state === "completed") {
+            <span
+              dlcIcon="check"
+              class="text-base"
+            ></span>
+          } @else {
+            {{ i + 1 }}
+          }
+        </div>
+        <div
+          class="dlc-stepper__label mt-1 text-center text-xs"
+          [class.dlc-stepper__label--active]="step.state === 'active'"
+        >
+          {{ step.label }}
+        </div>
+      </div>
+      @if (!last) {
+        <div
+          class="dlc-stepper__connector h-0.5 flex-1"
+          [class.dlc-stepper__connector--completed]="step.state === 'completed'"
+        ></div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,104 @@
+@let _placeholder = placeholder();
+@let _textValue = _text();
+@let _isLoading = loading();
+@let _preds = predictions();
+@let _isPanelVisible = _panelVisible();
+@let _active = _activeIndex();
+
+<div class="flex items-center gap-2 rounded-[--dlc-radius-md] bg-(--dlc-surface-container) px-3 py-2">
+  <span
+    dlcIcon="search"
+    class="dlc-address-autocomplete__search-icon shrink-0 text-xl leading-none text-(--dlc-on-surface-variant)"
+  ></span>
+  <input
+    #inputEl
+    class="dlc-address-autocomplete__field min-w-0 flex-1 border-none bg-transparent text-sm text-(--dlc-on-surface) outline-none placeholder:text-(--dlc-on-surface-variant)"
+    type="text"
+    role="combobox"
+    aria-autocomplete="list"
+    aria-haspopup="listbox"
+    autocomplete="off"
+    [attr.aria-label]="_placeholder"
+    [attr.aria-expanded]="_isPanelVisible"
+    [attr.aria-controls]="_listboxId"
+    [attr.aria-activedescendant]="_activeOptionId()"
+    [placeholder]="_placeholder"
+    [value]="_textValue"
+    (input)="onInput($event)"
+    (focus)="onFocus()"
+    (keydown)="onKeydown($event)"
+  />
+  @if (_textValue) {
+    <button
+      type="button"
+      class="dlc-address-autocomplete__clear flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-[--dlc-radius-sm] text-(--dlc-on-surface-variant) hover:bg-(--dlc-surface-variant) hover:text-(--dlc-on-surface)"
+      aria-label="Clear address search"
+      data-testid="address-autocomplete-clear"
+      (click)="onClear()"
+    >
+      <span
+        dlcIcon="close"
+        class="text-base leading-none"
+      ></span>
+    </button>
+  }
+</div>
+
+@if (_isPanelVisible) {
+  <!-- Floating overlay: raised surface token + elevation shadow (see SCSS, mirrors --dlc-fpop-shadow). No border per the 1px-border lock. -->
+  <!-- mousedown is swallowed so an option click never blurs the input mid-selection. -->
+  <ul
+    class="dlc-address-autocomplete__panel absolute top-full right-0 left-0 z-10 mt-1 max-h-64 overflow-y-auto rounded-[--dlc-radius-md] bg-(--dlc-surface-container-high) py-1"
+    role="listbox"
+    aria-label="Address suggestions"
+    data-testid="address-autocomplete-listbox"
+    [id]="_listboxId"
+    (mousedown)="$event.preventDefault()"
+  >
+    @if (_isLoading) {
+      <li
+        class="dlc-address-autocomplete__loading flex items-center gap-2 px-3 py-2 text-sm text-(--dlc-on-surface-variant)"
+        role="presentation"
+      >
+        <span
+          dlcIcon="progress_activity"
+          class="animate-spin text-base leading-none"
+        ></span>
+        Searching…
+      </li>
+    } @else if (_preds.length === 0) {
+      <li
+        class="dlc-address-autocomplete__empty px-3 py-2 text-sm text-(--dlc-on-surface-variant)"
+        role="presentation"
+      >
+        No matching addresses
+      </li>
+    } @else {
+      @for (prediction of _preds; track prediction.id; let i = $index) {
+        <!-- aria-activedescendant combobox: focus stays on the input; the option
+             is never tab-reached. tabindex="-1" + keydown handlers mirror dlc-select
+             and satisfy the a11y lint rules without breaking the focus model. -->
+        <li
+          class="dlc-address-autocomplete__option flex cursor-pointer flex-col gap-0.5 px-3 py-2"
+          [class.dlc-address-autocomplete__option--active]="i === _active"
+          role="option"
+          tabindex="-1"
+          [id]="_id + '-option-' + i"
+          [attr.aria-selected]="i === _active"
+          (click)="selectPrediction(prediction)"
+          (keydown.enter)="selectPrediction(prediction)"
+          (keydown.space)="$event.preventDefault(); selectPrediction(prediction)"
+        >
+          <span
+            class="dlc-address-autocomplete__option-main text-sm font-medium text-(--dlc-on-surface)"
+            >{{ prediction.mainText }}</span
+          >
+          <span
+            class="dlc-address-autocomplete__option-secondary text-xs text-(--dlc-on-surface-variant)"
+            >{{ prediction.secondaryText }}</span
+          >
+        </li>
+      }
+    }
+  </ul>
+}

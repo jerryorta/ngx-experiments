@@ -1,0 +1,38 @@
+@let _activeRole = activeRole();
+
+<button
+  class="dlc-role-switcher__trigger flex cursor-pointer flex-row items-center gap-2 border px-3 py-2 text-sm"
+  (click)="_open = !_open"
+  type="button"
+>
+  <span
+    [dlcIcon]="getActiveOption().icon"
+    class="text-base"
+  ></span>
+  <span>{{ getActiveOption().label }}</span>
+  <span
+    [dlcIcon]="_open ? 'expand_less' : 'expand_more'"
+    class="text-base"
+  ></span>
+</button>
+
+@if (_open) {
+  <div
+    class="dlc-role-switcher__panel absolute top-full left-0 z-50 mt-1 min-w-48 overflow-hidden border"
+  >
+    @for (option of roles; track option.role) {
+      <button
+        class="dlc-role-switcher__option flex w-full cursor-pointer flex-row items-center gap-2 px-4 py-3 text-left text-sm"
+        [class.dlc-role-switcher__option--active]="option.role === _activeRole"
+        (click)="selectRole(option.role)"
+        type="button"
+      >
+        <span
+          [dlcIcon]="option.icon"
+          class="text-base"
+        ></span>
+        <span>{{ option.label }}</span>
+      </button>
+    }
+  </div>
+}

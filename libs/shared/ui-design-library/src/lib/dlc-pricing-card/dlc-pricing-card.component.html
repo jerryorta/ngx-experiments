@@ -1,0 +1,84 @@
+@let _featured = featured();
+@let _planName = planName();
+@let _price = price();
+@let _billingPeriod = billingPeriod();
+@let _features = features();
+@let _ctaLabel = ctaLabel();
+
+<div
+  class="dlc-pricing-card__card flex h-full min-w-60 flex-col rounded-[--dlc-radius-md] border p-6"
+  [class.border-(--dlc-secondary)]="_featured"
+  [class.border-(--dlc-outline-variant)]="!_featured"
+>
+  <!-- Plan name + badge -->
+  <div class="flex items-center justify-between gap-2">
+    <span class="text-lg font-bold text-(--dlc-on-surface)">{{ _planName }}</span>
+    @if (_featured) {
+      <span
+        class="dlc-pricing-card__badge rounded-full bg-(--dlc-secondary-container) px-2 py-0.5 text-xs text-(--dlc-secondary)"
+      >
+        Most Popular
+      </span>
+    }
+  </div>
+
+  <!-- Price row -->
+  <div class="dlc-pricing-card__price mt-4">
+    @if (_price === "free") {
+      <span class="text-4xl font-bold text-(--dlc-on-surface)">Free</span>
+    } @else if (_price === "custom") {
+      <span class="text-4xl font-bold text-(--dlc-on-surface)">Custom</span>
+    } @else {
+      <span class="text-4xl font-bold text-(--dlc-on-surface)">${{ _price }}</span>
+      <span class="text-sm text-(--dlc-on-surface-variant)">
+        @if (_billingPeriod === "annual") {
+          /yr
+        } @else {
+          /mo
+        }
+      </span>
+    }
+  </div>
+
+  <!-- Billing period label -->
+  @if (_price !== "free" && _price !== "custom") {
+    <span class="mt-1 text-xs text-(--dlc-on-surface-variant)">
+      @if (_billingPeriod === "annual") {
+        billed annually
+      } @else {
+        billed monthly
+      }
+    </span>
+  }
+
+  <!-- Feature list -->
+  <ul class="dlc-pricing-card__features mt-4 flex flex-col gap-2">
+    @for (feature of _features; track feature) {
+      <li class="flex items-center gap-2 text-sm text-(--dlc-on-surface-variant)">
+        <span class="text-(--dlc-secondary)">✓</span>
+        {{ feature }}
+      </li>
+    }
+  </ul>
+
+  <!-- CTA button -->
+  <div class="dlc-pricing-card__cta mt-auto pt-6">
+    @if (_featured) {
+      <button
+        class="w-full rounded-[--dlc-radius-sm] bg-(--dlc-secondary) py-2 text-sm font-medium text-(--dlc-on-secondary) transition-opacity hover:opacity-90"
+        (click)="onCtaClick()"
+        type="button"
+      >
+        {{ _ctaLabel }}
+      </button>
+    } @else {
+      <button
+        class="w-full rounded-[--dlc-radius-sm] border border-(--dlc-outline) py-2 text-sm font-medium text-(--dlc-on-surface) transition-opacity hover:opacity-80"
+        (click)="onCtaClick()"
+        type="button"
+      >
+        {{ _ctaLabel }}
+      </button>
+    }
+  </div>
+</div>

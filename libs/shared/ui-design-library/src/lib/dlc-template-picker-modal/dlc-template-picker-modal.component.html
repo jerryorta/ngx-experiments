@@ -1,0 +1,91 @@
+@let _visible = visible();
+@let _templates = templates();
+@let _selectedId = selectedId();
+
+<dlc-dialog
+  [visible]="_visible"
+  size="md"
+  ariaLabel="Apply Template"
+  (dismissed)="dismissed.emit()"
+>
+  <!-- Header -->
+  <div dlc-dialog-title>
+    <h2
+      class="font-[family-name:var(--dlc-font-family-display)] text-lg font-semibold text-(--dlc-on-surface)"
+    >
+      Apply Template
+    </h2>
+    <p class="text-sm text-(--dlc-on-surface-variant)"
+      >Select a workflow template to bootstrap this transaction</p
+    >
+  </div>
+
+  <!-- Body: template cards -->
+  <div dlc-dialog-content>
+    @if (_templates.length === 0) {
+      <div class="flex flex-col items-center gap-3 py-12 text-center">
+        <span
+          dlcIcon="playlist_add"
+          class="text-[40px] text-(--dlc-on-surface-variant)"
+        ></span>
+        <p class="text-sm text-(--dlc-on-surface-variant)"
+          >No templates available for this transaction type.</p
+        >
+      </div>
+    } @else {
+      <div class="flex flex-col gap-3">
+        @for (template of _templates; track template.id) {
+          <button
+            type="button"
+            class="dlc-template-picker-modal__template-card"
+            [class.dlc-template-picker-modal__template-card--selected]="_selectedId === template.id"
+            (click)="selectedId.set(template.id)"
+          >
+            <div class="flex items-start gap-4">
+              <div class="dlc-template-picker-modal__template-icon-wrap">
+                <span
+                  [dlcIcon]="template.icon"
+                  class="text-[24px]"
+                ></span>
+              </div>
+              <div class="flex-1 text-left">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-semibold text-(--dlc-on-surface)">{{
+                    template.label
+                  }}</span>
+                  <span
+                    class="rounded-full bg-(--dlc-surface-container) px-2 py-0.5 text-[11px] font-medium text-(--dlc-on-surface-variant)"
+                  >
+                    {{ template.taskCount }} tasks
+                  </span>
+                </div>
+                <p class="mt-0.5 text-xs text-(--dlc-on-surface-variant)">{{
+                  template.description
+                }}</p>
+              </div>
+              <span
+                dlcIcon="check_circle"
+                class="dlc-template-picker-modal__check-icon shrink-0 text-[20px]"
+              ></span>
+            </div>
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Footer -->
+  <div dlc-dialog-actions>
+    <dlc-button
+      variant="ghost"
+      (click)="dismissed.emit()"
+      >Cancel</dlc-button
+    >
+    <dlc-button
+      variant="primary"
+      [disabled]="_selectedId === null"
+      (click)="onApply()"
+      >Apply Template</dlc-button
+    >
+  </div>
+</dlc-dialog>

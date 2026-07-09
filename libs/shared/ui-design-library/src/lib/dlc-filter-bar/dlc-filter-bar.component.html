@@ -1,0 +1,51 @@
+@let _showLeft = showLeft();
+@let _showRight = showRight();
+
+<div class="dlc-filter-bar__viewport">
+  <!-- Left scroll affordance -->
+  <div
+    class="dlc-filter-bar__edge dlc-filter-bar__edge--left"
+    [class.dlc-filter-bar__edge--visible]="_showLeft"
+  >
+    <button
+      type="button"
+      class="dlc-filter-bar__scroll-btn"
+      aria-label="Scroll filters left"
+      tabindex="-1"
+      (click)="scrollByStep(-1)"
+    >
+      <span
+        dlcIcon="chevron_left"
+        class="dlc-filter-bar__scroll-icon"
+      ></span>
+    </button>
+  </div>
+
+  <!-- Scrollable track -->
+  <div
+    #scroll
+    class="dlc-filter-bar__track"
+    (scroll)="onScroll()"
+  >
+    <ng-content />
+  </div>
+
+  <!-- Right scroll affordance -->
+  <div
+    class="dlc-filter-bar__edge dlc-filter-bar__edge--right"
+    [class.dlc-filter-bar__edge--visible]="_showRight"
+  >
+    <button
+      type="button"
+      class="dlc-filter-bar__scroll-btn"
+      aria-label="Scroll filters right"
+      tabindex="-1"
+      (click)="scrollByStep(1)"
+    >
+      <span
+        dlcIcon="chevron_right"
+        class="dlc-filter-bar__scroll-icon"
+      ></span>
+    </button>
+  </div>
+</div>

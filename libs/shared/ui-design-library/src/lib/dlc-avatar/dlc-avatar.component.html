@@ -1,0 +1,25 @@
+@let _imageUrl = imageUrl();
+@let _initials = initials();
+@let _status = status();
+
+<div
+  class="dlc-avatar__circle relative flex items-center justify-center overflow-hidden rounded-full"
+>
+  @if (_imageUrl) {
+    <img
+      class="h-full w-full object-cover"
+      [src]="_imageUrl"
+      [alt]="_initials"
+    />
+  } @else {
+    <span class="leading-none font-medium">{{ _initials }}</span>
+  }
+  @if (_status !== null) {
+    <span
+      class="dlc-avatar__status absolute right-0 bottom-0 rounded-full"
+      [class.dlc-avatar__status--online]="_status === 'online'"
+      [class.dlc-avatar__status--busy]="_status === 'busy'"
+      [class.dlc-avatar__status--offline]="_status === 'offline'"
+    ></span>
+  }
+</div>

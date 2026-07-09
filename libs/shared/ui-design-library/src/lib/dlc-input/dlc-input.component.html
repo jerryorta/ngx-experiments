@@ -1,0 +1,97 @@
+@let _label = label();
+@let _errorText = errorText();
+@let _helperText = helperText();
+@let _disabled = disabled();
+@let _disabledByFormFlag = _disabledByForm();
+@let _effectiveTypeValue = _effectiveType();
+@let _placeholder = placeholder();
+@let _showToggle = _showVisibilityToggle();
+@let _isVisible = _visible();
+
+<div class="flex flex-col gap-1">
+  @if (_label) {
+    <label
+      class="dlc-input__label text-xs font-medium text-(--dlc-on-surface-variant)"
+      [attr.for]="_inputId"
+    >
+      {{ _label }}
+    </label>
+  }
+  <div class="dlc-input__control relative">
+    <input
+      [id]="_inputId"
+      class="dlc-input__field w-full rounded-[--dlc-radius-sm] border bg-(--dlc-surface-container) px-3 py-2 text-sm text-(--dlc-on-surface) outline-none"
+      [class.dlc-input__field--error]="!!_errorText"
+      [class.opacity-50]="_disabled || _disabledByFormFlag"
+      [class.cursor-not-allowed]="_disabled || _disabledByFormFlag"
+      [class.pr-10]="_showToggle"
+      [type]="_effectiveTypeValue"
+      [placeholder]="_placeholder"
+      [disabled]="_disabled || _disabledByFormFlag"
+      [value]="_value"
+      (input)="onInput($event)"
+      (blur)="onBlur()"
+    />
+    @if (_showToggle) {
+      <button
+        type="button"
+        class="dlc-input__visibility-toggle absolute inset-y-0 right-0 flex w-10 items-center justify-center text-(--dlc-on-surface-variant) transition-colors hover:text-(--dlc-on-surface) focus:outline-none focus-visible:text-(--dlc-on-surface)"
+        data-testid="dlc-input-visibility-toggle"
+        [attr.aria-label]="_isVisible ? 'Hide password' : 'Show password'"
+        [attr.aria-pressed]="_isVisible"
+        (click)="toggleVisibility()"
+      >
+        @if (_isVisible) {
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            class="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path
+              d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"
+            />
+            <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+            <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+            <line
+              x1="1"
+              y1="1"
+              x2="23"
+              y2="23"
+            />
+          </svg>
+        } @else {
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            class="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+            <circle
+              cx="12"
+              cy="12"
+              r="3"
+            />
+          </svg>
+        }
+      </button>
+    }
+  </div>
+  @if (_helperText) {
+    <span class="dlc-input__helper text-xs text-(--dlc-on-surface-variant)">{{ _helperText }}</span>
+  }
+  @if (_errorText) {
+    <span class="dlc-input__error text-xs text-(--dlc-error)">{{ _errorText }}</span>
+  }
+</div>

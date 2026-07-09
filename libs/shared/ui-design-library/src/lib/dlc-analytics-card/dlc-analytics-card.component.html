@@ -1,0 +1,31 @@
+@let _accent = accentColor();
+@let _headline = headline();
+@let _explainer = explainer();
+
+<div class="flex flex-col gap-3 rounded-lg bg-(--dlc-surface-container) p-4">
+  <div class="flex items-start justify-between gap-3">
+    <span class="text-xs font-semibold tracking-wide text-(--dlc-on-surface-variant) uppercase">
+      {{ label() }}
+    </span>
+    @if (_headline) {
+      <span class="flex items-center gap-2 text-sm font-medium text-(--dlc-on-surface)">
+        @if (_accent) {
+          <span
+            class="inline-block h-2 w-2 rounded-full"
+            [style.background-color]="_accent"
+            aria-hidden="true"
+          ></span>
+        }
+        {{ _headline }}
+      </span>
+    }
+  </div>
+
+  <div class="dlc-analytics-card__body min-h-[120px]">
+    <ng-content />
+  </div>
+
+  @if (_explainer) {
+    <p class="text-xs leading-snug text-(--dlc-on-surface-variant)">{{ _explainer }}</p>
+  }
+</div>

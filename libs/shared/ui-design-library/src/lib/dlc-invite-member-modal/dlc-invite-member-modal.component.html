@@ -1,0 +1,182 @@
+@let _visible = visible();
+@let _inFlight = inFlight();
+@let _errorMessage = errorMessage();
+@let _titleVal = title();
+@let _subtitleVal = subtitle();
+@let _roleOptionsVal = roleOptions();
+@let _kindVal = _kind();
+@let _emailVal = _email();
+@let _phoneVal = _phone();
+@let _messageVal = _message();
+@let _roleVal = _role();
+@let _canSubmitVal = _canSubmit();
+
+@if (_visible) {
+  <div
+    class="dlc-invite-member-modal__overlay"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="_titleVal"
+    data-testid="invite-member-modal"
+    (click)="onBackdropClick($event)"
+    (keydown.escape)="dismissed.emit()"
+  >
+    <div class="dlc-invite-member-modal__container">
+      <!-- Header — REX-527: title/subtitle inputs let circle-scope hosts
+           swap the copy to "Invite to circle" / "Send a circle invitation". -->
+      <div class="dlc-invite-member-modal__header flex items-center justify-between">
+        <div>
+          <h2
+            class="font-[family-name:var(--dlc-font-family-display)] text-lg font-semibold text-(--dlc-on-surface)"
+            data-testid="invite-modal-title"
+          >
+            {{ _titleVal }}
+          </h2>
+          <p
+            class="text-sm text-(--dlc-on-surface-variant)"
+            data-testid="invite-modal-subtitle"
+            >{{ _subtitleVal }}</p
+          >
+        </div>
+        <button
+          type="button"
+          class="flex items-center justify-center rounded-full p-2 text-(--dlc-on-surface-variant) transition-colors hover:bg-(--dlc-surface-container)"
+          aria-label="Close invite member modal"
+          data-testid="invite-modal-close-btn"
+          (click)="dismissed.emit()"
+        >
+          <span
+            dlcIcon="close"
+            class="text-[20px]"
+          ></span>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="dlc-invite-member-modal__body flex flex-col gap-5 p-5">
+        <!-- Recipient kind selector -->
+        <div class="flex flex-col gap-2">
+          <span
+            class="text-xs font-medium text-(--dlc-on-surface-variant)"
+            id="invite-kind-label"
+            >Recipient channel</span
+          >
+          <div
+            class="flex flex-row gap-2"
+            role="radiogroup"
+            aria-labelledby="invite-kind-label"
+          >
+            <button
+              type="button"
+              role="radio"
+              class="dlc-invite-member-modal__kind-chip cursor-pointer rounded-full border px-4 py-1.5 text-sm transition"
+              [class.dlc-invite-member-modal__kind-chip--selected]="_kindVal === 'email'"
+              [attr.aria-checked]="_kindVal === 'email'"
+              aria-label="Invite by email"
+              data-testid="invite-kind-email"
+              (click)="onKindChange('email')"
+            >
+              Email
+            </button>
+            <button
+              type="button"
+              role="radio"
+              class="dlc-invite-member-modal__kind-chip cursor-pointer rounded-full border px-4 py-1.5 text-sm transition"
+              [class.dlc-invite-member-modal__kind-chip--selected]="_kindVal === 'phone'"
+              [attr.aria-checked]="_kindVal === 'phone'"
+              aria-label="Invite by phone"
+              data-testid="invite-kind-phone"
+              (click)="onKindChange('phone')"
+            >
+              Phone
+            </button>
+          </div>
+        </div>
+
+        <!-- Conditional address input -->
+        @if (_kindVal === "email") {
+          <dlc-input
+            label="Email address"
+            placeholder="member@example.com"
+            type="email"
+            aria-label="Email address"
+            data-testid="invite-email-input"
+            [ngModel]="_emailVal"
+            (ngModelChange)="onEmailChange($event)"
+          />
+        } @else {
+          <dlc-input
+            label="Phone number"
+            placeholder="(555) 123-4567"
+            type="tel"
+            aria-label="Phone number"
+            data-testid="invite-phone-input"
+            [ngModel]="_phoneVal"
+            (ngModelChange)="onPhoneChange($event)"
+          />
+        }
+
+        <!-- Role picker -->
+        <div class="flex flex-col gap-1">
+          <span
+            class="text-xs font-medium text-(--dlc-on-surface-variant)"
+            id="invite-role-label"
+            >Role</span
+          >
+          <dlc-select
+            aria-labelledby="invite-role-label"
+            data-testid="invite-role-select"
+            [options]="_roleOptionsVal"
+            placeholder="Select role"
+            [ngModel]="_roleVal"
+            (selectedValueChange)="onRoleChange($event)"
+          />
+        </div>
+
+        <!-- Optional message -->
+        <dlc-textarea
+          label="Personal message (optional)"
+          placeholder="Add a note for the recipient…"
+          [rows]="3"
+          aria-label="Personal message"
+          data-testid="invite-message-input"
+          [ngModel]="_messageVal"
+          (ngModelChange)="onMessageChange($event)"
+        />
+
+        <!-- Error display -->
+        @if (_errorMessage) {
+          <p
+            class="text-xs font-medium text-(--dlc-error)"
+            role="alert"
+            aria-live="polite"
+            data-testid="invite-error"
+            >{{ _errorMessage }}</p
+          >
+        }
+      </div>
+
+      <!-- Footer -->
+      <div class="dlc-invite-member-modal__footer">
+        <dlc-button
+          variant="ghost"
+          aria-label="Cancel invitation"
+          data-testid="invite-cancel-btn"
+          (click)="dismissed.emit()"
+        >
+          Cancel
+        </dlc-button>
+        <dlc-button
+          variant="primary"
+          aria-label="Send invitation"
+          data-testid="invite-submit-btn"
+          [disabled]="!_canSubmitVal"
+          [loading]="_inFlight"
+          (click)="onSubmit()"
+        >
+          Send invitation
+        </dlc-button>
+      </div>
+    </div>
+  </div>
+}

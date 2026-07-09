@@ -1,0 +1,33 @@
+.dlc-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &--hidden {
+    display: none;
+  }
+
+  &--error {
+    .dlc-badge__count,
+    .dlc-badge__dot {
+      background-color: var(--dlc-error);
+      color: var(--dlc-on-error, var(--dlc-on-surface));
+    }
+  }
+
+  &--accent {
+    .dlc-badge__count,
+    .dlc-badge__dot {
+      background-color: var(--dlc-secondary);
+      color: var(--dlc-on-secondary);
+    }
+  }
+
+  &--surface {
+    .dlc-badge__count,
+    .dlc-badge__dot {
+      background-color: var(--dlc-surface-container-high);
+      color: var(--dlc-on-surface);
+    }
+  }
+}

@@ -1,0 +1,78 @@
+@let _options = options();
+@let _count = _selectedCount();
+
+<div class="flex w-72 flex-col gap-3">
+  <!-- Shortcut presets + bulk actions -->
+  <div class="flex flex-row flex-wrap gap-2">
+    <dlc-button
+      size="sm"
+      variant="ghost"
+      data-testid="property-type-select-all"
+      (click)="selectAll()"
+    >
+      Select All
+    </dlc-button>
+    <dlc-button
+      size="sm"
+      variant="ghost"
+      data-testid="property-type-clear-all"
+      [disabled]="_count === 0"
+      (click)="clearAll()"
+    >
+      Clear All
+    </dlc-button>
+    <dlc-button
+      size="sm"
+      data-testid="property-type-for-sale"
+      [variant]="_isForSaleActive() ? 'primary' : 'ghost'"
+      (click)="selectForSale()"
+    >
+      For Sale
+    </dlc-button>
+    <dlc-button
+      size="sm"
+      data-testid="property-type-for-rent"
+      [variant]="_isForRentActive() ? 'primary' : 'ghost'"
+      (click)="selectForRent()"
+    >
+      For Rent
+    </dlc-button>
+  </div>
+
+  <!-- Multi-select checklist -->
+  <div
+    class="flex flex-col"
+    role="group"
+    aria-label="Property types"
+  >
+    @for (option of _options; track option.value) {
+      @let _checked = isSelected(option.value);
+      <dlc-checkbox
+        class="dlc-property-type-filter__option"
+        [class.dlc-property-type-filter__option--selected]="_checked"
+        [attr.data-testid]="'property-type-option-' + option.value"
+        [checked]="_checked"
+        [ariaLabel]="option.label"
+        (checkedChange)="toggle(option.value)"
+      >
+        <span
+          [dlcIcon]="option.icon"
+          class="text-lg leading-none text-(--dlc-on-surface-variant)"
+        ></span>
+        <span class="dlc-property-type-filter__label text-sm text-(--dlc-on-surface)">{{
+          option.label
+        }}</span>
+      </dlc-checkbox>
+    }
+  </div>
+
+  <!-- Selection summary -->
+  @if (_count > 0) {
+    <span
+      class="text-xs text-(--dlc-on-surface-variant)"
+      data-testid="property-type-count"
+    >
+      {{ _count }} {{ _count === 1 ? "type" : "types" }} selected
+    </span>
+  }
+</div>

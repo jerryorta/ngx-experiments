@@ -1,0 +1,24 @@
+@let _value = value();
+@let _placeholder = placeholder();
+
+<span
+  dlcIcon="search"
+  class="dlc-search-input__search-icon"
+></span>
+<input
+  class="dlc-search-input__field"
+  type="search"
+  [value]="_value"
+  [placeholder]="_placeholder"
+  (input)="onInput($event)"
+  aria-label="Search"
+  autocomplete="off"
+/>
+<button
+  type="button"
+  class="dlc-search-input__mic-btn"
+  (click)="onMicClick()"
+  aria-label="Voice search"
+>
+  <span dlcIcon="mic"></span>
+</button>

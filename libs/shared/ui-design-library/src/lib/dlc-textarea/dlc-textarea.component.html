@@ -1,0 +1,39 @@
+@let _label = label();
+@let _errorText = errorText();
+@let _helperText = helperText();
+@let _disabled = disabled();
+@let _disabledByFormFlag = _disabledByForm();
+@let _rows = rows();
+@let _placeholder = placeholder();
+
+<div class="flex flex-col gap-1">
+  @if (_label) {
+    <label
+      class="dlc-textarea__label text-xs font-medium text-(--dlc-on-surface-variant)"
+      [attr.for]="_textareaId"
+    >
+      {{ _label }}
+    </label>
+  }
+  <textarea
+    [id]="_textareaId"
+    class="dlc-textarea__field w-full resize-y rounded-[--dlc-radius-sm] border bg-(--dlc-surface-container) px-3 py-2 text-sm text-(--dlc-on-surface) outline-none"
+    [class.dlc-textarea__field--error]="!!_errorText"
+    [class.opacity-50]="_disabled || _disabledByFormFlag"
+    [class.cursor-not-allowed]="_disabled || _disabledByFormFlag"
+    [rows]="_rows"
+    [placeholder]="_placeholder"
+    [disabled]="_disabled || _disabledByFormFlag"
+    [value]="_value"
+    (input)="onInput($event)"
+    (blur)="onBlur()"
+  ></textarea>
+  @if (_helperText) {
+    <span class="dlc-textarea__helper text-xs text-(--dlc-on-surface-variant)">{{
+      _helperText
+    }}</span>
+  }
+  @if (_errorText) {
+    <span class="dlc-textarea__error text-xs text-(--dlc-error)">{{ _errorText }}</span>
+  }
+</div>

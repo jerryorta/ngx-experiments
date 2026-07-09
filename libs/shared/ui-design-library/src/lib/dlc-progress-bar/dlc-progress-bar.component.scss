@@ -1,0 +1,34 @@
+.dlc-progress-bar {
+  display: block;
+  width: 100%;
+
+  .dlc-progress-bar__track {
+    background-color: var(--dlc-surface-container-high);
+  }
+
+  .dlc-progress-bar__fill {
+    background-color: var(--dlc-secondary);
+    transition: width var(--dlc-transition-duration, 0.2s) ease;
+  }
+
+  &--indeterminate {
+    .dlc-progress-bar__fill {
+      width: 40%;
+      animation: dlc-progress-slide 1.5s ease-in-out infinite;
+    }
+  }
+}
+
+@keyframes dlc-progress-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  50% {
+    transform: translateX(150%);
+  }
+
+  100% {
+    transform: translateX(-100%);
+  }
+}

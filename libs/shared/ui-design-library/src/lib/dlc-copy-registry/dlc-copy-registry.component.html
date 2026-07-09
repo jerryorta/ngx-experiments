@@ -1,0 +1,113 @@
+@let _items = items();
+@let _isEmpty = isEmpty();
+@let _count = itemCount();
+
+<header class="dlc-copy-registry__header">
+  <div class="dlc-copy-registry__heading">
+    <span class="dlc-copy-registry__title">{{ title() }}</span>
+    @if (!_isEmpty) {
+      <span
+        class="dlc-copy-registry__count"
+        data-testid="copy-registry-count"
+        aria-hidden="true"
+        >{{ _count }}</span
+      >
+    }
+  </div>
+
+  <dlc-checkbox
+    class="dlc-copy-registry__auto-clear"
+    data-testid="copy-registry-auto-clear"
+    ariaLabel="Auto-clear after copying"
+    [checked]="autoClearAfterPaste()"
+    (checkedChange)="autoClearChange.emit($event)"
+  >
+    <span class="text-sm text-(--dlc-on-surface-variant)">Auto-clear</span>
+  </dlc-checkbox>
+</header>
+
+<div
+  class="dlc-copy-registry__toolbar"
+  role="group"
+  aria-label="Registry actions"
+>
+  <dlc-button
+    class="dlc-copy-registry__action"
+    data-testid="copy-registry-copy-all"
+    variant="ghost"
+    size="sm"
+    [disabled]="_isEmpty"
+    (click)="onCopyAll()"
+  >
+    <span dlcIcon="content_paste"></span>
+    Copy All
+  </dlc-button>
+  <dlc-button
+    class="dlc-copy-registry__action"
+    data-testid="copy-registry-clear-all"
+    variant="ghost"
+    size="sm"
+    [disabled]="_isEmpty"
+    (click)="onClearAll()"
+  >
+    <span dlcIcon="delete_sweep"></span>
+    Clear All
+  </dlc-button>
+</div>
+
+@if (_isEmpty) {
+  <div
+    class="dlc-copy-registry__empty"
+    data-testid="copy-registry-empty"
+  >
+    <span
+      dlcIcon="content_copy"
+      class="dlc-copy-registry__empty-icon"
+    ></span>
+    <p class="dlc-copy-registry__empty-message">{{ emptyMessage() }}</p>
+    <p class="dlc-copy-registry__empty-hint">{{ emptyHint() }}</p>
+  </div>
+} @else {
+  <ul
+    class="dlc-copy-registry__items"
+    role="list"
+    data-testid="copy-registry-items"
+  >
+    @for (item of _items; track item.id) {
+      <li
+        class="dlc-copy-registry__item"
+        data-testid="copy-registry-item"
+      >
+        <div class="dlc-copy-registry__item-body">
+          @if (item.label) {
+            <span class="dlc-copy-registry__item-label">{{ item.label }}</span>
+          }
+          @if (item.source) {
+            <span class="dlc-copy-registry__item-source">{{ item.source }}</span>
+          }
+          <p class="dlc-copy-registry__item-text">{{ item.text }}</p>
+        </div>
+        <div class="dlc-copy-registry__item-actions">
+          <button
+            type="button"
+            class="dlc-copy-registry__item-action"
+            data-testid="copy-registry-item-copy"
+            [attr.aria-label]="'Copy ' + (item.label || 'item')"
+            (click)="onCopyItem(item)"
+          >
+            <span dlcIcon="content_copy"></span>
+          </button>
+          <button
+            type="button"
+            class="dlc-copy-registry__item-action"
+            data-testid="copy-registry-item-remove"
+            [attr.aria-label]="'Remove ' + (item.label || 'item')"
+            (click)="onRemoveItem(item.id)"
+          >
+            <span dlcIcon="close"></span>
+          </button>
+        </div>
+      </li>
+    }
+  </ul>
+}

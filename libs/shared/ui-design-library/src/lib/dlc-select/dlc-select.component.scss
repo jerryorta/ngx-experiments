@@ -1,0 +1,203 @@
+// =============================================================================
+// dlc-select
+//
+// Variable architecture:
+//   - Trigger variables are defined on .dlc-select (the host) so they are
+//     accessible to the trigger button inside the component.
+//   - Panel variables are defined on .dlc-select-overlay (the CDK overlay pane
+//     panelClass) because the panel is rendered OUTSIDE the host in a CDK
+//     overlay container. Fallback values use the professional-light palette so
+//     the component looks correct when a non-Concierge theme is active.
+// =============================================================================
+
+// ---------------------------------------------------------------------------
+// Host — trigger variables
+// ---------------------------------------------------------------------------
+.dlc-select {
+  --dlc-select-trigger-bg: var(--dlc-surface-container-lowest, #ffffff);
+  --dlc-select-trigger-border: var(--dlc-outline, #c4d0da);
+  --dlc-select-trigger-color: var(--dlc-on-surface, #121518);
+  --dlc-select-trigger-radius: 8px;
+  --dlc-select-trigger-min-width: 160px;
+
+  display: block;
+  position: relative;
+
+  &__trigger {
+    align-items: center;
+    background-color: var(--dlc-select-trigger-bg);
+    border: 1px solid var(--dlc-select-trigger-border);
+    border-radius: var(--dlc-select-trigger-radius);
+    color: var(--dlc-select-trigger-color);
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 0.875rem;
+    gap: 0.375rem;
+    line-height: 1.25;
+    min-width: var(--dlc-select-trigger-min-width);
+    outline: none;
+    padding: 0.5rem 0.625rem 0.5rem 0.75rem;
+    transition:
+      border-color 0.15s ease,
+      background-color 0.15s ease;
+    user-select: none;
+    width: 100%;
+
+    &:focus-visible,
+    &:hover:not(.dlc-select__trigger--disabled) {
+      border-color: var(--dlc-primary, #1a5fa8);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--dlc-primary, #1a5fa8);
+      outline-offset: 1px;
+    }
+
+    &--open {
+      border-color: var(--dlc-primary, #1a5fa8);
+    }
+
+    &--disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }
+
+  &__trigger-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__placeholder {
+    color: var(--dlc-on-surface-variant, #5c6370);
+    opacity: 0.7;
+  }
+
+  &__arrow {
+    color: var(--dlc-on-surface-variant, #5c6370);
+    flex-shrink: 0;
+    font-size: 1.25rem;
+    line-height: 1;
+    transition: transform 0.15s ease;
+
+    .dlc-select__trigger--open & {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// CDK overlay pane — panel variables
+// Applied as panelClass on the overlay. The active Concierge theme class is
+// also added to the pane so --dlc-* tokens resolve from the correct palette.
+// ---------------------------------------------------------------------------
+.dlc-select-overlay {
+  --dlc-select-panel-bg: var(--dlc-surface-container-high, #e3e9ef);
+  --dlc-select-panel-border: var(--dlc-outline, #c4d0da);
+  --dlc-select-panel-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
+  --dlc-select-option-color: var(--dlc-on-surface, #121518);
+  --dlc-select-option-hover-bg: color-mix(in srgb, var(--dlc-on-surface, #121518) 8%, transparent);
+  // Light themes: --dlc-primary is a dark accent — good contrast on light panels.
+  --dlc-select-option-selected-color: var(--dlc-primary, #1a5fa8);
+  --dlc-select-option-focused-bg: color-mix(in srgb, var(--dlc-primary, #1a5fa8) 12%, transparent);
+}
+
+// Dark themes: --dlc-primary is near-black (e.g. #0f2b3c, #2c4a39) — invisible
+// on dark panel backgrounds. Use --dlc-on-primary (the light complement) instead.
+.dlc-professional-dark,
+.dlc-home-dark,
+.dlc-service-provider-dark {
+  &.dlc-select-overlay {
+    --dlc-select-option-selected-color: var(--dlc-on-primary);
+    --dlc-select-option-focused-bg: color-mix(in srgb, var(--dlc-on-primary) 15%, transparent);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Panel + options — rendered inside the CDK overlay pane
+// ---------------------------------------------------------------------------
+.dlc-select__panel {
+  background-color: var(--dlc-select-panel-bg);
+  border: 1px solid var(--dlc-select-panel-border);
+  border-radius: 8px;
+  box-shadow: var(--dlc-select-panel-shadow);
+  max-height: 280px;
+  min-width: 100%;
+  overflow-y: auto;
+}
+
+.dlc-select__option {
+  align-items: center;
+  color: var(--dlc-select-option-color);
+  cursor: pointer;
+  display: flex;
+  font-size: 0.875rem;
+  padding: 0.5rem 0.875rem;
+  transition: background-color 0.1s ease;
+  width: 100%;
+
+  &:hover {
+    background-color: var(--dlc-select-option-hover-bg);
+  }
+
+  &--focused {
+    background-color: var(--dlc-select-option-focused-bg);
+  }
+
+  &--selected {
+    color: var(--dlc-select-option-selected-color);
+    font-weight: 600;
+  }
+}
+
+.dlc-select__option-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dlc-select__option-end {
+  align-items: center;
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.125rem;
+  margin-left: 0.5rem;
+}
+
+.dlc-select__option-check {
+  color: var(--dlc-select-option-selected-color);
+  flex-shrink: 0;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.dlc-select__option-suffix-btn {
+  align-items: center;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  flex-shrink: 0;
+  height: 1.5rem;
+  justify-content: center;
+  opacity: 0.55;
+  padding: 0;
+  width: 1.5rem;
+
+  &:hover {
+    background: color-mix(in srgb, var(--dlc-on-surface, #121518) 10%, transparent);
+    opacity: 1;
+  }
+
+  .material-symbols-outlined {
+    font-size: 1rem;
+    line-height: 1;
+  }
+}

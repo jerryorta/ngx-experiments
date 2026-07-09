@@ -1,0 +1,67 @@
+@let _headerPlaceholder = headerPlaceholder();
+@let _headerDraft = headerDraft();
+@let _showTextarea = showTextarea();
+@let _placeholder = placeholder();
+@let _draftText = draftText();
+@let _cancelLabel = cancelLabel();
+@let _saveLabel = saveLabel();
+
+<!-- Trigger slot — projected content opens the overlay on click (bubbles to host) -->
+<ng-content />
+
+<!-- CDK overlay panel template — rendered outside the host in the overlay container -->
+<ng-template #panelTpl>
+  <div
+    class="dlc-note-overlay__card"
+    role="group"
+    aria-label="Note editor"
+  >
+    @if (_headerPlaceholder) {
+      <input
+        type="text"
+        class="dlc-note-overlay__header-input"
+        [placeholder]="_headerPlaceholder"
+        [value]="_headerDraft"
+        (input)="headerDraft.set($any($event.target).value)"
+        (keydown)="onKeydown($event)"
+        aria-label="Note header"
+      />
+    }
+    @if (_showTextarea) {
+      <textarea
+        #noteTextarea
+        class="dlc-note-overlay__textarea"
+        rows="3"
+        [placeholder]="_placeholder"
+        [value]="_draftText"
+        (input)="draftText.set($any($event.target).value)"
+        (keydown)="onKeydown($event)"
+        (focus)="noteTextarea.select()"
+        aria-label="Note text"
+      ></textarea>
+    }
+    <div class="dlc-note-overlay__footer">
+      <span class="dlc-note-overlay__hint">
+        {{
+          _showTextarea
+            ? "Shift+Enter for newline · Esc to cancel"
+            : "Enter to save · Esc to cancel"
+        }}
+      </span>
+      <div class="dlc-note-overlay__actions">
+        <button
+          type="button"
+          class="dlc-note-overlay__btn dlc-note-overlay__btn--cancel"
+          (click)="onCancel()"
+          >{{ _cancelLabel }}</button
+        >
+        <button
+          type="button"
+          class="dlc-note-overlay__btn dlc-note-overlay__btn--save"
+          (click)="onSave()"
+          >{{ _saveLabel }}</button
+        >
+      </div>
+    </div>
+  </div>
+</ng-template>

@@ -1,0 +1,16 @@
+@let _buttonClasses = buttonClasses();
+@let _disabled = disabled();
+@let _loading = loading();
+
+<button
+  [class]="_buttonClasses"
+  [attr.disabled]="_disabled || _loading ? '' : null"
+>
+  @if (_loading) {
+    <span
+      class="dlc-button__spinner"
+      aria-hidden="true"
+    ></span>
+  }
+  <ng-content />
+</button>

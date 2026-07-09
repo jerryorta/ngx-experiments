@@ -1,0 +1,84 @@
+@let _grouped = _groups();
+@let _count = _selectedCount();
+
+<div class="flex w-80 flex-col gap-3">
+  <!-- Shortcut presets + bulk actions -->
+  <div class="flex flex-row flex-wrap gap-2">
+    <dlc-button
+      size="sm"
+      variant="ghost"
+      data-testid="status-select-all"
+      (click)="selectAll()"
+    >
+      Select All
+    </dlc-button>
+    <dlc-button
+      size="sm"
+      variant="ghost"
+      data-testid="status-clear-all"
+      [disabled]="_count === 0"
+      (click)="clearAll()"
+    >
+      Clear All
+    </dlc-button>
+    <dlc-button
+      size="sm"
+      data-testid="status-active-only"
+      [variant]="_isActiveOnlyActive() ? 'primary' : 'ghost'"
+      (click)="selectActiveOnly()"
+    >
+      Active Only
+    </dlc-button>
+  </div>
+
+  <!-- Category-grouped multi-select checklist -->
+  <div
+    class="flex flex-col gap-2"
+    role="group"
+    aria-label="Listing statuses"
+  >
+    @for (group of _grouped; track group.category) {
+      <div class="flex flex-col">
+        <span
+          class="px-2 pb-1 text-xs font-semibold tracking-wide text-(--dlc-on-surface-variant) uppercase"
+          [attr.data-testid]="'status-group-' + group.category"
+        >
+          {{ group.category }}
+        </span>
+        @for (option of group.options; track option.value) {
+          @let _checked = isSelected(option.value);
+          <dlc-checkbox
+            class="dlc-status-filter__option"
+            [class.dlc-status-filter__option--selected]="_checked"
+            [attr.data-testid]="'status-option-' + option.value"
+            [checked]="_checked"
+            [ariaLabel]="option.label"
+            [ariaDescribedby]="'status-option-desc-' + option.value"
+            (checkedChange)="toggle(option.value)"
+          >
+            <span class="flex min-w-0 flex-col">
+              <span class="dlc-status-filter__label text-sm text-(--dlc-on-surface)">{{
+                option.label
+              }}</span>
+              <span
+                class="dlc-status-filter__description text-xs text-(--dlc-on-surface-variant)"
+                [attr.id]="'status-option-desc-' + option.value"
+                >{{ option.description }}</span
+              >
+            </span>
+          </dlc-checkbox>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Selection summary -->
+  @if (_count > 0) {
+    <span
+      class="text-xs text-(--dlc-on-surface-variant)"
+      data-testid="status-count"
+    >
+      {{ _count }} {{ _count === 1 ? "status" : "statuses" }} selected
+    </span>
+  }
+</div>

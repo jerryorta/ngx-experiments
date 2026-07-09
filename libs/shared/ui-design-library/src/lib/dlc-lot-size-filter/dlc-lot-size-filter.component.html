@@ -1,0 +1,95 @@
+@let _unit = unit();
+
+<div class="flex flex-col gap-4">
+  <div
+    class="dlc-lot-size-filter__unit-toggle inline-flex self-start rounded-(--dlc-radius-md) bg-(--dlc-surface-container) p-1"
+    data-testid="lot-size-unit-toggle"
+  >
+    <button
+      type="button"
+      class="dlc-lot-size-filter__unit-option rounded-(--dlc-radius-sm) px-4 py-1.5 text-sm font-medium transition-all"
+      data-testid="lot-size-unit-sqft"
+      [class.bg-(--dlc-primary)]="_unit === 'sqft'"
+      [class.text-(--dlc-on-primary)]="_unit === 'sqft'"
+      [class.text-(--dlc-on-surface-variant)]="_unit !== 'sqft'"
+      [attr.aria-pressed]="_unit === 'sqft'"
+      (click)="selectUnit('sqft')"
+    >
+      Sq Ft
+    </button>
+    <button
+      type="button"
+      class="dlc-lot-size-filter__unit-option rounded-(--dlc-radius-sm) px-4 py-1.5 text-sm font-medium transition-all"
+      data-testid="lot-size-unit-acres"
+      [class.bg-(--dlc-primary)]="_unit === 'acres'"
+      [class.text-(--dlc-on-primary)]="_unit === 'acres'"
+      [class.text-(--dlc-on-surface-variant)]="_unit !== 'acres'"
+      [attr.aria-pressed]="_unit === 'acres'"
+      (click)="selectUnit('acres')"
+    >
+      Acres
+    </button>
+  </div>
+
+  <div class="flex flex-row gap-3">
+    <dlc-input
+      class="flex-1"
+      type="number"
+      label="Min"
+      placeholder="Any"
+      data-testid="lot-size-min-input"
+      [ngModel]="_minInputValue()"
+      (ngModelChange)="onMinInputChange($event)"
+    />
+    <dlc-input
+      class="flex-1"
+      type="number"
+      label="Max"
+      placeholder="Any"
+      data-testid="lot-size-max-input"
+      [ngModel]="_maxInputValue()"
+      (ngModelChange)="onMaxInputChange($event)"
+    />
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <div class="relative h-5">
+      <div
+        class="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-(--dlc-surface-container-high)"
+      ></div>
+      <div
+        class="absolute top-1/2 h-1 -translate-y-1/2 rounded-full bg-(--dlc-primary)"
+        [style.left.%]="_fillLeftPct()"
+        [style.width.%]="_fillWidthPct()"
+      ></div>
+      <input
+        type="range"
+        class="dlc-lot-size-filter__range pointer-events-none absolute top-0 left-0 h-full w-full appearance-none bg-transparent"
+        min="0"
+        aria-label="Minimum lot size"
+        data-testid="lot-size-slider-min"
+        [max]="_sliderMax()"
+        [step]="_sliderStep()"
+        [value]="_minView()"
+        (input)="onSliderMinChange($event)"
+      />
+      <input
+        type="range"
+        class="dlc-lot-size-filter__range pointer-events-none absolute top-0 left-0 h-full w-full appearance-none bg-transparent"
+        min="0"
+        aria-label="Maximum lot size"
+        data-testid="lot-size-slider-max"
+        [max]="_sliderMax()"
+        [step]="_sliderStep()"
+        [value]="_maxView()"
+        (input)="onSliderMaxChange($event)"
+      />
+    </div>
+    <span
+      class="text-xs text-(--dlc-on-surface-variant)"
+      data-testid="lot-size-range-readout"
+    >
+      {{ _formattedRange() }}
+    </span>
+  </div>
+</div>

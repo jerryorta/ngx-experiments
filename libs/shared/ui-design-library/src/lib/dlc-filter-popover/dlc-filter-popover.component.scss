@@ -1,0 +1,176 @@
+// =============================================================================
+// dlc-filter-popover
+//
+// Variable architecture (mirrors dlc-note-overlay):
+//   - Host / trigger styles live on .dlc-filter-popover (in-flow)
+//   - Panel variables live on .dlc-filter-popover__panel — the CDK pane,
+//     rendered OUTSIDE the host in the overlay container.
+//
+// Fallback values use the professional-light palette so the panel renders
+// correctly even before the active theme class is propagated onto the pane.
+// =============================================================================
+
+// ---------------------------------------------------------------------------
+// Host — inline-flex so it wraps the trigger tightly and keeps a bounding box
+// (display:contents would zero out the CDK anchor rect).
+// ---------------------------------------------------------------------------
+.dlc-filter-popover {
+  display: inline-flex;
+}
+
+// ---------------------------------------------------------------------------
+// Trigger button
+// ---------------------------------------------------------------------------
+.dlc-filter-popover__trigger {
+  align-items: center;
+  background: var(--dlc-surface-container, #eef2f6);
+  border: 1px solid var(--dlc-outline-variant, #c4d0da);
+  border-radius: var(--dlc-radius-md, 8px);
+  color: var(--dlc-on-surface, #121518);
+  cursor: pointer;
+  display: inline-flex;
+  font-family: var(--dlc-font-family-body);
+  font-size: 0.8125rem;
+  font-weight: var(--dlc-font-weight-medium, 500);
+  gap: 0.375rem;
+  line-height: 1.2;
+  padding: 0.4375rem 0.75rem;
+  transition:
+    background-color var(--dlc-transition-duration, 0.15s) ease,
+    border-color var(--dlc-transition-duration, 0.15s) ease,
+    color var(--dlc-transition-duration, 0.15s) ease;
+  white-space: nowrap;
+
+  &:hover {
+    background: var(--dlc-surface-container-high, #e3e9ef);
+    border-color: var(--dlc-outline, #91a0ac);
+  }
+
+  &--active {
+    background: var(--dlc-secondary-container, #d6e3ff);
+    border-color: var(--dlc-secondary, #1a5fa8);
+    color: var(--dlc-on-secondary-container, #0a1f33);
+  }
+
+  &--open {
+    border-color: var(--dlc-secondary, #1a5fa8);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--dlc-secondary, #1a5fa8);
+    outline-offset: 2px;
+  }
+}
+
+.dlc-filter-popover__label {
+  font-weight: var(--dlc-font-weight-medium, 500);
+}
+
+.dlc-filter-popover__value {
+  color: var(--dlc-on-secondary-container, #0a1f33);
+  font-weight: var(--dlc-font-weight-semibold, 600);
+}
+
+.dlc-filter-popover__chevron {
+  font-size: 1.125rem;
+  transition: transform var(--dlc-transition-duration, 0.15s) ease;
+
+  &--open {
+    transform: rotate(180deg);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// CDK overlay backdrop — transparent click target (no dimming)
+// ---------------------------------------------------------------------------
+.dlc-filter-popover__backdrop {
+  background: transparent;
+}
+
+// ---------------------------------------------------------------------------
+// CDK overlay pane tokens
+// ---------------------------------------------------------------------------
+.dlc-filter-popover__panel {
+  --dlc-fpop-bg: var(--dlc-surface-container-high, #e3e9ef);
+  --dlc-fpop-border: var(--dlc-outline-variant, #c4d0da);
+  --dlc-fpop-shadow:
+    0 6px 20px color-mix(in srgb, #000 18%, transparent), 0 2px 6px color-mix(in srgb, #000 10%, transparent);
+  --dlc-fpop-radius: 10px;
+  --dlc-fpop-color: var(--dlc-on-surface, #121518);
+  --dlc-fpop-color-muted: var(--dlc-on-surface-variant, #5c6370);
+  --dlc-fpop-primary: var(--dlc-primary, #1a5fa8);
+  --dlc-fpop-primary-fg: var(--dlc-on-primary, #ffffff);
+}
+
+// ---------------------------------------------------------------------------
+// Card — the visible panel content
+// ---------------------------------------------------------------------------
+.dlc-filter-popover__card {
+  background: var(--dlc-fpop-bg);
+  border: 1px solid var(--dlc-fpop-border);
+  border-radius: var(--dlc-fpop-radius);
+  box-shadow: var(--dlc-fpop-shadow);
+  color: var(--dlc-fpop-color);
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  min-width: 220px;
+  padding: 0.875rem;
+}
+
+.dlc-filter-popover__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+// ---------------------------------------------------------------------------
+// Footer — Clear / Done (only when [clearable])
+// ---------------------------------------------------------------------------
+.dlc-filter-popover__footer {
+  align-items: center;
+  border-top: 1px solid var(--dlc-fpop-border);
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+  padding-top: 0.625rem;
+}
+
+.dlc-filter-popover__btn {
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1;
+  padding: 0.375rem 0.75rem;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+
+  &--clear {
+    background: transparent;
+    border-color: var(--dlc-fpop-border);
+    color: var(--dlc-fpop-color-muted);
+
+    &:hover {
+      border-color: var(--dlc-fpop-color-muted);
+      color: var(--dlc-fpop-color);
+    }
+  }
+
+  &--done {
+    background: var(--dlc-fpop-primary);
+    color: var(--dlc-fpop-primary-fg);
+
+    &:hover {
+      opacity: 0.88;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--dlc-fpop-primary);
+      outline-offset: 2px;
+    }
+  }
+}
