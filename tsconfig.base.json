@@ -20,7 +20,9 @@
       "@nge/ui-design-library": [
         "./libs/shared/ui-design-library/src/index.ts"
       ],
-      "@nge/themes": ["./libs/shared/themes/src/index.ts"]
+      "@nge/themes": ["./libs/shared/themes/src/index.ts"],
+      "@nge/date": ["./libs/shared/date/src/index.ts"],
+      "@nge/calendar": ["./libs/shared/calendar/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
