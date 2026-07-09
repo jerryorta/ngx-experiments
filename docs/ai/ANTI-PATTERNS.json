@@ -1,0 +1,136 @@
+{
+  "$schema": "Anti-patterns detectable by regex or AST. Severity: blocker = must fix before merge, warn = should fix.",
+  "patterns": [
+    {
+      "id": "legacy-ngIf",
+      "description": "Legacy *ngIf directive — use @if control flow",
+      "regex": "\\*ngIf",
+      "fileGlob": "*.html",
+      "severity": "blocker",
+      "fix": "Replace with @if (condition) { ... }"
+    },
+    {
+      "id": "legacy-ngFor",
+      "description": "Legacy *ngFor directive — use @for control flow",
+      "regex": "\\*ngFor",
+      "fileGlob": "*.html",
+      "severity": "blocker",
+      "fix": "Replace with @for (item of items; track item.id) { ... }"
+    },
+    {
+      "id": "legacy-ngSwitch",
+      "description": "Legacy *ngSwitch directive — use @switch control flow",
+      "regex": "\\*ngSwitch",
+      "fileGlob": "*.html",
+      "severity": "blocker",
+      "fix": "Replace with @switch (value) { @case (x) { ... } }"
+    },
+    {
+      "id": "constructor-injection",
+      "description": "Constructor dependency injection — use inject()",
+      "regex": "constructor\\s*\\([^)]*(?:private|public|protected|readonly)\\s+\\w+\\s*:",
+      "fileGlob": "*.ts",
+      "severity": "blocker",
+      "fix": "Use inject() function: private service = inject(ServiceName)"
+    },
+    {
+      "id": "input-decorator",
+      "description": "@Input() decorator — use signal input()",
+      "regex": "@Input\\(",
+      "fileGlob": "*.ts",
+      "severity": "blocker",
+      "fix": "Use signal: myInput = input<Type>(defaultValue) or input.required<Type>()"
+    },
+    {
+      "id": "output-decorator",
+      "description": "@Output() decorator — use signal output()",
+      "regex": "@Output\\(",
+      "fileGlob": "*.ts",
+      "severity": "blocker",
+      "fix": "Use signal: myOutput = output<Type>()"
+    },
+    {
+      "id": "inline-template",
+      "description": "Inline template in @Component — use templateUrl",
+      "regex": "template\\s*:\\s*`",
+      "fileGlob": "*.component.ts",
+      "severity": "blocker",
+      "fix": "Move template to separate .html file and use templateUrl"
+    },
+    {
+      "id": "inline-styles",
+      "description": "Inline styles in @Component — use styleUrl",
+      "regex": "styles\\s*:\\s*\\[",
+      "fileGlob": "*.component.ts",
+      "severity": "blocker",
+      "fix": "Move styles to separate .scss file and use styleUrl"
+    },
+    {
+      "id": "uidl-host-selector",
+      "description": ":host in UI Design Library SCSS — use component class wrapper",
+      "regex": ":host\\s*\\{",
+      "fileGlob": "libs/shared/ui-design-library-deprecated/**/*.scss",
+      "severity": "blocker",
+      "fix": "Replace :host with .dlc-component-name { } wrapper class"
+    },
+    {
+      "id": "uidl-missing-host-class",
+      "description": "UI Design Library component missing host class",
+      "regex": "@Component\\(\\{[^}]*selector:\\s*'dlc-[^']*'[^}]*\\}\\)",
+      "fileGlob": "libs/shared/ui-design-library-deprecated/**/*.ts",
+      "severity": "warn",
+      "note": "Verify host: { class: 'dlc-...' } is present matching selector"
+    },
+    {
+      "id": "any-type",
+      "description": "Usage of 'any' type — use specific types",
+      "regex": ":\\s*any\\b",
+      "fileGlob": "*.ts",
+      "severity": "warn",
+      "fix": "Replace with a specific type or generic"
+    },
+    {
+      "id": "jasmine-import",
+      "description": "Jasmine test framework — use Jest",
+      "regex": "from\\s*['\"]jasmine['\"]",
+      "fileGlob": "*.spec.ts",
+      "severity": "blocker",
+      "fix": "Use Jest APIs instead of Jasmine"
+    },
+    {
+      "id": "service-lifecycle-hook",
+      "description": "Lifecycle hook implemented on an @Injectable service — hooks only fire when the providing injector is destroyed (for providedIn:'root' that's app shutdown, effectively never)",
+      "regex": "@Injectable[\\s\\S]{0,200}implements\\s+(?:[^{]+,\\s*)?(OnDestroy|OnInit|OnChanges|DoCheck|AfterContentInit|AfterContentChecked|AfterViewInit|AfterViewChecked)",
+      "fileGlob": "*.ts",
+      "severity": "warn",
+      "fix": "Drop the lifecycle hook. For subscription cleanup inject DestroyRef and pipe through takeUntilDestroyed(destroyRef)."
+    },
+    {
+      "id": "angular-material-import",
+      "description": "Angular Material import — Material is legacy (evolving-cognition / real-estate apps only), NOT for new development",
+      "regex": "from\\s*['\"]@angular/material",
+      "fileGlob": "*.ts",
+      "severity": "warn",
+      "note": "Legacy evolving-cognition / real-estate apps are exempt (existing Material code is fine — do not tear it down). For NEW components, do not import @angular/material. See docs/ai/CONSTRAINTS.md § Angular Material.",
+      "fix": "Build without Angular Material: ViewEncapsulation.None + host class + Tailwind + own-namespace --<prefix>-* CSS-var tokens with literal fallbacks (ref libs/shared/calendar)."
+    },
+    {
+      "id": "mat-sys-token",
+      "description": "Angular Material --mat-sys-* design token in new styles — use own-namespace --<prefix>-* tokens with literal fallbacks",
+      "regex": "--mat-sys-",
+      "fileGlob": "*.scss",
+      "severity": "warn",
+      "note": "Also applies to the Tailwind arbitrary-value syntax in templates, e.g. text-(--mat-sys-primary). Legacy evolving-cognition / real-estate apps and their theme libs are exempt. New components must not depend on Material's --mat-sys-* tokens. See docs/ai/CONSTRAINTS.md § Angular Material.",
+      "fix": "Replace with var(--<prefix>-token, <literal>) — an own-namespace token with a literal fallback (ref libs/shared/calendar theme/_giga-calendar-tokens.scss)."
+    },
+    {
+      "id": "mat-component-selector",
+      "description": "Angular Material component (<mat-*>) in a new template — Material is legacy, NOT for new development",
+      "regex": "<mat-",
+      "fileGlob": "*.html",
+      "severity": "warn",
+      "note": "Legacy evolving-cognition / real-estate templates are exempt. For NEW components, do not use <mat-*> Angular Material components. See docs/ai/CONSTRAINTS.md § Angular Material.",
+      "fix": "Use design-library components + Tailwind, and @angular/cdk primitives (overlay, a11y, drag-drop) instead of Angular Material."
+    }
+  ]
+}
