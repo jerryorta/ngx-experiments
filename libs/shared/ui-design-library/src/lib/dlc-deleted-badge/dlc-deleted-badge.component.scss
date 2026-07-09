@@ -1,0 +1,11 @@
+// Tailwind utilities handle layout in the template. Per the design-library
+// convention, define overridable tokens FIRST — inside the host class, named
+// `--<component-selector>-<property>` with literal fallbacks. Tokens live with
+// their component (NO shared/central token file), and there is NO Angular
+// Material and NO `--mat-sys-*`.
+.dlc-deleted-badge {
+  --dlc-deleted-badge-bg-color: var(--dlc-color-error-container, #f9dedc);
+  --dlc-deleted-badge-text-color: var(--dlc-color-on-error-container, #410e0b);
+
+  display: inline-block;
+}

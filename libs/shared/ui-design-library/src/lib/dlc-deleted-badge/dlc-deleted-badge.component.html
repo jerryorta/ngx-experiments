@@ -1,0 +1,22 @@
+@let days = daysRemaining();
+
+<div
+  class="inline-flex items-center gap-1 rounded-md bg-[var(--dlc-deleted-badge-bg-color,#f9dedc)] px-2 py-1 text-sm text-[var(--dlc-deleted-badge-text-color,#410e0b)]"
+>
+  <svg
+    class="h-4 w-4"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    aria-hidden="true"
+  >
+    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+  </svg>
+  <span class="font-medium">
+    Deleted
+    @if (days !== null && days > 0) {
+      <span class="ml-1 opacity-80">({{ days }} day{{ days > 1 ? "s" : "" }} left)</span>
+    } @else if (days === 0) {
+      <span class="ml-1 opacity-80">(expires today)</span>
+    }
+  </span>
+</div>
