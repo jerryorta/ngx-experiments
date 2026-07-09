@@ -1,101 +1,112 @@
-# NgxExperiments
+# ngx-experiments
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+> A standalone **Nx + Angular** reference workspace — a clean-room design system and experiments playground for **modern Angular** (standalone, signals, zero Angular Material), built under the `@nge` namespace.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+![Angular](https://img.shields.io/badge/Angular-21-DD0031?logo=angular&logoColor=white)
+![Nx](https://img.shields.io/badge/Nx-22-143055?logo=nx&logoColor=white)
+![NgRx](https://img.shields.io/badge/NgRx-21-BA2BD2?logo=reactivex&logoColor=white)
+![Storybook](https://img.shields.io/badge/Storybook-10-FF4785?logo=storybook&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06B6D4?logo=tailwindcss&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+## What it is
 
-## Run tasks
+`ngx-experiments` is a self-contained Nx monorepo for building and showcasing modern Angular to a high standard — and a sandbox for porting shared libraries and trying ideas without the weight of a product. Everything lives under its own **`@nge`** import scope.
 
-To run the dev server for your app, use:
+Its conventions — coding standards, generators, and a curated set of AI / Claude skills and docs — are **mirrored from a larger production monorepo** with every product/domain specific stripped out, so what you build matches battle-tested patterns while staying framework-pure.
 
-```sh
-npx nx serve playground
+**Principles**
+
+- **Standalone + signals everywhere** — `input()` / `output()`, component-scoped `@ngrx/signals` stores, new control flow (`@if` / `@for`), OnPush, `ViewEncapsulation.None`.
+- **No Angular Material** — components self-theme through their own `--<prefix>-*` CSS-variable tokens (with literal fallbacks), never `--mat-sys-*`.
+- **Nx domain-library-set** — each domain is a consistent set of libs (`models` / `store` / `ui` / `design-library` / `utils` / `mocks` / `themes`), each with its own short prefix.
+
+## What's inside
+
+| Library | Import | Description |
+| --- | --- | --- |
+| **ui-design-library** | `@nge/ui-design-library` | **50 `dlc-` presentational components** — button, input, select, chip, dialog, drawer, data-table, tooltip, stepper, cards, filters… |
+| **themes** | `@nge/themes` | **3 personas** (Professional / Home / Service Provider) × light & dark, as `--dlc-*` CSS-variable tokens |
+| **calendar** | `@nge/calendar` | Calendar, date-picker, time-picker, and views |
+| **charts** | `@nge/charts` | d3-based chart primitives |
+| **date** · **rxjs** · **storybook** | `@nge/*` | Temporal utilities, RxJS helpers, Storybook support |
+
+- **`apps/storybook-app`** — a Storybook host that serves every component + chart + calendar story, with a **persona theme switcher** in the toolbar.
+- **1,100+ passing Jest tests**, lint-clean across the workspace.
+
+## Quick start
+
+```bash
+git clone git@github.com:jerryorta-dev/ngx-experiments.git
+cd ngx-experiments
 ```
 
-To create a production bundle:
+**With [Claude Code](https://claude.com/claude-code):** run **`/setup`** — it installs dependencies, clones the framework source references, verifies the build, and hands off to `/explain` for a guided tour.
 
-```sh
-npx nx build playground
+**Manually:**
+
+```bash
+npm ci --legacy-peer-deps          # --legacy-peer-deps is the workspace default (see .npmrc)
+./scripts/clone-open-source.sh     # optional: shallow framework SOURCE clones into ../open-source
 ```
 
-To see all available targets to run for a project, run:
+Then run Storybook:
 
-```sh
-npx nx show project playground
+```bash
+npx nx run storybook-app:storybook   # → http://localhost:4400
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+## Working in the repo
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+Verify — there are no `npm run lint/test/build` scripts; use Nx:
 
-## Add new projects
-
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
-
-Use the plugin's generator to create new projects.
-
-To generate a new application, use:
-
-```sh
-npx nx g @nx/angular:app demo
+```bash
+npx nx run-many --target=lint,test --all
+npx nx run storybook-app:build-storybook
 ```
 
-To generate a new library, use:
+Claude Code commands (`.claude/commands/`):
 
-```sh
-npx nx g @nx/angular:lib mylib
-```
+| Command | What it does |
+| --- | --- |
+| `/setup` | First run — install deps + clone framework refs + verify, then hand off to `/explain` |
+| `/explain` | Tour the repo's philosophy, organization, and how to make your own space |
+| `/new-domain` | Scaffold your own domain-library-set — your sandbox |
+| `/update` | Update npm dependencies (Nx-migrate flow, `--legacy-peer-deps`) |
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
+## Architecture
 
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- **Nx monorepo**, npm, the `@angular/build` (esbuild) builder, Tailwind v4 (CSS-first).
+- **`libs/shared/*`** — the reusable building blocks (table above). Promote domain code up here once it's genuinely reusable.
+- **`apps/storybook-app`** — the Storybook host.
+- **`docs/`** — curated Angular / Nx / NgRx / testing conventions.
+- **Prefixes** — the shared design library uses **`dlc-`** (a design-library prefix, deliberately separate from the `@nge` org namespace); other shared libs use `nge-`; each new domain picks its own.
+- **`../open-source/`** (a sibling directory) — shallow, version-pinned clones of Angular, Material + CDK, NgRx, and RxJS **source**, for reference beyond `node_modules`' built types. Set up via `scripts/clone-open-source.sh`.
 
-## Set up CI!
+## Tech stack
 
-### Step 1
+| | Version |
+| --- | --- |
+| Nx | 22.7.5 |
+| Angular | 21.2 (zone-based, standalone) |
+| NgRx (store + signals) | 21.1 |
+| Storybook (Angular) | 10.4 |
+| Tailwind CSS | 4 (CSS-first) |
+| TypeScript | 5.9 |
+| Testing | Jest 30 |
+| Lint | ESLint 9 (flat config) |
 
-To connect to Nx Cloud, run the following command:
+## Built for AI-assisted development
 
-```sh
-npx nx connect
-```
+This workspace is set up to be worked on with **Claude Code**: framework-level skills in `.claude/skills/`, the `/setup` · `/explain` · `/new-domain` · `/update` commands in `.claude/commands/`, and the `../open-source/` framework source clones give the assistant accurate, version-matched references. A fresh clone is one command (`/setup`) from being set up *and* oriented.
 
-Connecting to Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
+> **Optional — agent teams.** Much of this repo was built using Claude Code's experimental **agent teams** mode (a persistent lead agent coordinating a team of subagents). To work the same way, enable it once in your **global** `~/.claude/settings.json` — it's a personal, user-level opt-in, so the repo deliberately doesn't force it on cloners:
+>
+> ```jsonc
+> // ~/.claude/settings.json  (NOT the repo's .claude/settings.json)
+> { "env": { "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1" } }
+> ```
 
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+---
 
-### Step 2
-
-Use the following command to configure a CI workflow for your workspace:
-
-```sh
-npx nx g ci-workflow
-```
-
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+_A personal reference / experiments workspace — not a published package._

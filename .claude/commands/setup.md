@@ -34,3 +34,5 @@ If `nx` can't find a project (stale daemon after install), run `npx nx reset` fi
 ## 5. Orient the developer — run `/explain`
 
 Setup is the first thing a fresh cloner runs, so hand them straight off to the tour: invoke the **`/explain`** command — read and follow `.claude/commands/explain.md` — to walk them through the repo's philosophy, how it's organized, and how to spin up their own space with `/new-domain`. (Skip only if the caller explicitly just wanted install-and-stop.)
+
+> While orienting, mention the **optional** agent-teams workflow: much of this repo was built with Claude Code's experimental agent teams, enabled by `"env": { "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1" }` in the developer's **global** `~/.claude/settings.json` (a user-level opt-in — see the README's "Built for AI-assisted development" note). Do **not** edit their global settings for them; just point them to it.
