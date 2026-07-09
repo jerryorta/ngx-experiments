@@ -1,0 +1,108 @@
+// =============================================================================
+// Concierge — Professional Dark Theme
+// Applied via: .dlc-professional-dark
+// Persona: Broker/Agent — deep navy-black + glowing gold, Manrope/DM Sans
+// =============================================================================
+
+@use "../dlc-chip-tokens";
+
+@mixin dlc-professional-dark-theme() {
+  .dlc-professional-dark {
+    @include dlc-chip-tokens.dlc-chip-tokens-dark();
+    // --- Primary ---
+    --dlc-primary: #0f2b3c;
+    --dlc-primary-container: #0a1e2b;
+    --dlc-on-primary: #e8f4fc;
+    --dlc-on-primary-container: #e8f4fc;
+
+    // --- Accent ---
+    --dlc-secondary: #d4921f;
+    --dlc-secondary-container: #3d2910;
+    --dlc-on-secondary: #fff7e6;
+
+    // --- Surface ---
+    --dlc-surface: #07131b;
+    --dlc-surface-container-lowest: var(--dlc-surface);
+    --dlc-surface-container-low: #0a1e2b;
+    --dlc-surface-container: #0f2b3c;
+    --dlc-surface-container-high: #17415a;
+    --dlc-surface-variant: var(--dlc-surface-container-high);
+
+    // --- Text ---
+    --dlc-on-surface: #e8f4fc;
+    --dlc-on-surface-variant: #8bafc5;
+
+    // --- Borders ---
+    // --dlc-outline is mixed toward --dlc-on-surface so control boundaries (radio rings,
+    // input borders) clear WCAG 3:1 non-text contrast against the dark surfaces; the
+    // darker --dlc-outline-variant remains for subtle dividers/card edges.
+    --dlc-outline: #5f7a8a;
+    --dlc-outline-variant: #17415a;
+
+    // Unchecked dlc-checkbox fill — outline mixed toward on-surface so the box
+    // clears 3:1 against BOTH --dlc-surface-container (popover bg) and
+    // --dlc-surface-container-high (row-hover bg); raw --dlc-outline collides
+    // with the hover tone in the dark themes.
+    --dlc-checkbox-unchecked-bg: #728b9a;
+
+    // --- Semantic states ---
+    --dlc-error: #f2b8b5;
+    --dlc-on-error: #601410;
+    --dlc-success: #a8d5b5;
+    --dlc-on-success: #10402a;
+    --dlc-warning: #fbcc6e;
+    --dlc-on-warning: #3e2200;
+
+    --dlc-overlay: rgba(0, 0, 0, 0.32);
+
+    // --- Typography ---
+    --dlc-font-family-display: "Manrope", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --dlc-font-family-body: "DM Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --dlc-font-weight-regular: 400;
+    --dlc-font-weight-medium: 500;
+    --dlc-font-weight-bold: 600;
+
+    // --- Shape ---
+    --dlc-radius-sm: 2px;
+    --dlc-radius-md: 4px;
+    --dlc-radius-lg: 8px;
+
+    // --- Nav Sidebar (dark navy surface — sidebar is always dark, same as light) ---
+    --dlc-nav-sidebar-bg: linear-gradient(180deg, #001624 0%, #0f2b3c 100%);
+    --dlc-nav-sidebar-text: #cbd5e1;
+    --dlc-nav-sidebar-active-bg: rgba(196, 132, 29, 0.12);
+    --dlc-nav-sidebar-hover-bg: rgba(255, 255, 255, 0.07);
+    --dlc-nav-sidebar-divider: rgba(203, 213, 225, 0.18);
+
+    // --- Motion ---
+    --dlc-transition-duration: 160ms;
+
+    // --- Chart token bridge ---
+    // Maps --chart-* contract tokens (libs/shared/charts) to CG theme values.
+    // Tokens without a direct CG equivalent use the closest semantic match.
+    --chart-surface: var(--dlc-surface);
+    --chart-surface-variant: var(--dlc-surface-container-high);
+    --chart-surface-container: var(--dlc-surface-container);
+    --chart-surface-container-low: var(--dlc-surface-container-low);
+    --chart-surface-container-highest: var(--dlc-surface-container-high);
+    --chart-inverse-surface: var(--dlc-on-surface);
+    --chart-inverse-on-surface: var(--dlc-surface);
+    --chart-on-surface: var(--dlc-on-surface);
+    --chart-on-surface-variant: var(--dlc-on-surface-variant);
+    --chart-outline: var(--dlc-outline);
+    --chart-outline-variant: var(--dlc-outline-variant);
+    --chart-primary: var(--dlc-primary);
+    --chart-primary-container: var(--dlc-primary-container);
+    --chart-on-primary: var(--dlc-on-primary);
+    --chart-secondary: var(--dlc-secondary);
+    --chart-secondary-container: var(--dlc-secondary-container);
+    --chart-tertiary: var(--dlc-warning);
+    --chart-error: var(--dlc-error);
+
+    // --- Storybook review token bridge ---
+    // Maps --sb-review-* contract tokens (libs/shared/storybook) to CG professional dark values.
+    --sb-review-text: rgba(232, 244, 252, 0.5); // --dlc-on-surface (#e8f4fc) at 50%
+    --sb-review-border: var(--dlc-on-surface-variant); // #8bafc5 — blue-gray separator
+    --sb-review-status-border: var(--dlc-on-surface-variant); // #8bafc5
+  }
+}

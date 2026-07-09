@@ -1,0 +1,101 @@
+// =============================================================================
+// Concierge — Service Provider Dark Theme
+// Applied via: .dlc-service-provider-dark
+// Persona: Service Provider — charcoal steel + vivid teal (#14B8AD), Epilogue/IBM Plex Sans
+// =============================================================================
+
+@use "../dlc-chip-tokens";
+
+@mixin dlc-service-provider-dark-theme() {
+  .dlc-service-provider-dark {
+    @include dlc-chip-tokens.dlc-chip-tokens-dark();
+    // --- Primary ---
+    --dlc-primary: #1e3247;
+    --dlc-primary-container: #152636;
+    --dlc-on-primary: #e0eaf4;
+    --dlc-on-primary-container: #e0eaf4;
+
+    // --- Accent ---
+    --dlc-secondary: #14b8ad;
+    --dlc-secondary-container: #0a3530;
+    --dlc-on-secondary: #ccfbf1;
+
+    // --- Surface ---
+    --dlc-surface: #121921;
+    --dlc-surface-container-lowest: var(--dlc-surface);
+    --dlc-surface-container-low: #111f2e;
+    --dlc-surface-container: #1a2d3f;
+    --dlc-surface-container-high: #243b55;
+    --dlc-surface-variant: var(--dlc-surface-container-high);
+
+    // --- Text ---
+    --dlc-on-surface: #e0eaf4;
+    --dlc-on-surface-variant: #7a9bb8;
+
+    // --- Borders ---
+    // --dlc-outline is mixed toward --dlc-on-surface so control boundaries (radio rings,
+    // input borders) clear WCAG 3:1 non-text contrast against the dark surfaces; the
+    // darker --dlc-outline-variant remains for subtle dividers/card edges.
+    --dlc-outline: #6a7b8d;
+    --dlc-outline-variant: #1a2d3f;
+
+    // Unchecked dlc-checkbox fill — outline mixed toward on-surface so the box
+    // clears 3:1 against BOTH --dlc-surface-container (popover bg) and
+    // --dlc-surface-container-high (row-hover bg); raw --dlc-outline collides
+    // with the hover tone in the dark themes.
+    --dlc-checkbox-unchecked-bg: #758596;
+
+    // --- Semantic states ---
+    --dlc-error: #f2b8b5;
+    --dlc-on-error: #601410;
+    --dlc-success: #a8d5b5;
+    --dlc-on-success: #10402a;
+    --dlc-warning: #fbcc6e;
+    --dlc-on-warning: #3e2200;
+
+    --dlc-overlay: rgba(0, 0, 0, 0.32);
+
+    // --- Typography ---
+    --dlc-font-family-display: "Epilogue", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --dlc-font-family-body: "IBM Plex Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --dlc-font-weight-regular: 400;
+    --dlc-font-weight-medium: 500;
+    --dlc-font-weight-bold: 600;
+
+    // --- Shape ---
+    --dlc-radius-sm: 2px;
+    --dlc-radius-md: 4px;
+    --dlc-radius-lg: 8px;
+
+    // --- Motion ---
+    --dlc-transition-duration: 160ms;
+
+    // --- Chart token bridge ---
+    // Maps --chart-* contract tokens (libs/shared/charts) to CG theme values.
+    // Tokens without a direct CG equivalent use the closest semantic match.
+    --chart-surface: var(--dlc-surface);
+    --chart-surface-variant: var(--dlc-surface-container-high);
+    --chart-surface-container: var(--dlc-surface-container);
+    --chart-surface-container-low: var(--dlc-surface-container-low);
+    --chart-surface-container-highest: var(--dlc-surface-container-high);
+    --chart-inverse-surface: var(--dlc-on-surface);
+    --chart-inverse-on-surface: var(--dlc-surface);
+    --chart-on-surface: var(--dlc-on-surface);
+    --chart-on-surface-variant: var(--dlc-on-surface-variant);
+    --chart-outline: var(--dlc-outline);
+    --chart-outline-variant: var(--dlc-outline-variant);
+    --chart-primary: var(--dlc-primary);
+    --chart-primary-container: var(--dlc-primary-container);
+    --chart-on-primary: var(--dlc-on-primary);
+    --chart-secondary: var(--dlc-secondary);
+    --chart-secondary-container: var(--dlc-secondary-container);
+    --chart-tertiary: var(--dlc-warning);
+    --chart-error: var(--dlc-error);
+
+    // --- Storybook review token bridge ---
+    // Maps --sb-review-* contract tokens (libs/shared/storybook) to CG service provider dark values.
+    --sb-review-text: rgba(224, 234, 244, 0.5); // --dlc-on-surface (#e0eaf4) at 50%
+    --sb-review-border: var(--dlc-on-surface-variant); // #7a9bb8 — steel blue separator
+    --sb-review-status-border: var(--dlc-on-surface-variant); // #7a9bb8
+  }
+}

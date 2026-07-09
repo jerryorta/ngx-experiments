@@ -1,0 +1,91 @@
+// =============================================================================
+// Concierge — Chip Tokens
+// Component:  <dlc-chip>  (libs/concierge/design-library/src/lib/dlc-chip)
+// =============================================================================
+// Each intent exposes a 3-token triplet — background, foreground, ring — that
+// the <dlc-chip> component resolves via CSS-variable indirection. The bare
+// pairings below are WCAG-AA compliant (≥ 4.5:1 normal-text contrast) against
+// each theme's surface.
+//
+// Themes pick light- or dark-mode variants by `@include`'ing one of the two
+// mixins below inside their `.dlc-{persona}-{mode}` rule. To customise a
+// single intent for a specific persona (e.g. a warmer "warning" amber on
+// Home Light), override only the per-token rule AFTER the `@include`:
+//
+//   .dlc-home-light {
+//     @include dlc-chip-tokens.dlc-chip-tokens-light();
+//     --dlc-chip-warning-bg: #fef4d0;
+//   }
+// =============================================================================
+
+@mixin dlc-chip-tokens-light() {
+  // --- Neutral — reuses the theme's surface tokens so neutral chips
+  // match every other low-emphasis surface in the running theme (e.g.
+  // synonym tags, audit metadata, "muted" UI). No persona-specific
+  // overrides needed because --dlc-surface-container-high and friends
+  // are already declared per persona.
+  --dlc-chip-neutral-bg: var(--dlc-surface-container-high);
+  --dlc-chip-neutral-fg: var(--dlc-on-surface);
+  --dlc-chip-neutral-ring: var(--dlc-outline-variant);
+
+  // --- Info (sky) ---
+  --dlc-chip-info-bg: #bae6fd;
+  --dlc-chip-info-fg: #0c4a6e;
+  --dlc-chip-info-ring: #0ea5e9;
+
+  // --- Success (emerald) ---
+  --dlc-chip-success-bg: #a7f3d0;
+  --dlc-chip-success-fg: #064e3b;
+  --dlc-chip-success-ring: #10b981;
+
+  // --- Warning (amber) ---
+  --dlc-chip-warning-bg: #fde68a;
+  --dlc-chip-warning-fg: #78350f;
+  --dlc-chip-warning-ring: #f59e0b;
+
+  // --- Danger (rose) ---
+  --dlc-chip-danger-bg: #fecdd3;
+  --dlc-chip-danger-fg: #881337;
+  --dlc-chip-danger-ring: #f43f5e;
+
+  // --- Discovery (violet) ---
+  --dlc-chip-discovery-bg: #ddd6fe;
+  --dlc-chip-discovery-fg: #4c1d95;
+  --dlc-chip-discovery-ring: #8b5cf6;
+}
+
+@mixin dlc-chip-tokens-dark() {
+  // Dark-mode pairings drop the bg to a 25% tint of the 500-shade, lift the
+  // text to the 50-shade for legibility, and soften the ring to 60% alpha.
+
+  // --- Neutral — reuses the theme's surface tokens so neutral chips
+  // match every other low-emphasis surface in the running dark theme.
+  --dlc-chip-neutral-bg: var(--dlc-surface-container-high);
+  --dlc-chip-neutral-fg: var(--dlc-on-surface);
+  --dlc-chip-neutral-ring: var(--dlc-outline-variant);
+
+  // --- Info (sky) ---
+  --dlc-chip-info-bg: rgb(14 165 233 / 25%);
+  --dlc-chip-info-fg: #f0f9ff;
+  --dlc-chip-info-ring: rgb(56 189 248 / 60%);
+
+  // --- Success (emerald) ---
+  --dlc-chip-success-bg: rgb(16 185 129 / 25%);
+  --dlc-chip-success-fg: #ecfdf5;
+  --dlc-chip-success-ring: rgb(52 211 153 / 60%);
+
+  // --- Warning (amber) ---
+  --dlc-chip-warning-bg: rgb(245 158 11 / 25%);
+  --dlc-chip-warning-fg: #fffbeb;
+  --dlc-chip-warning-ring: rgb(251 191 36 / 60%);
+
+  // --- Danger (rose) ---
+  --dlc-chip-danger-bg: rgb(244 63 94 / 25%);
+  --dlc-chip-danger-fg: #fff1f2;
+  --dlc-chip-danger-ring: rgb(251 113 133 / 60%);
+
+  // --- Discovery (violet) ---
+  --dlc-chip-discovery-bg: rgb(139 92 246 / 25%);
+  --dlc-chip-discovery-fg: #f5f3ff;
+  --dlc-chip-discovery-ring: rgb(167 139 250 / 60%);
+}

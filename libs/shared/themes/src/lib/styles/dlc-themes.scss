@@ -1,0 +1,33 @@
+// =============================================================================
+// Concierge — Theme Entry Point
+// =============================================================================
+// Import order: theme vars → base
+// =============================================================================
+
+@use "professional/dlc-professional-dark";
+@use "professional/dlc-professional-light";
+@use "home/dlc-home-dark";
+@use "home/dlc-home-light";
+@use "service-provider/dlc-service-provider-dark";
+@use "service-provider/dlc-service-provider-light";
+@use "dlc-base";
+
+@mixin dlc-theme-mixin() {
+  @include dlc-professional-dark.dlc-professional-dark-theme();
+  @include dlc-professional-light.dlc-professional-light-theme();
+  @include dlc-home-dark.dlc-home-dark-theme();
+  @include dlc-home-light.dlc-home-light-theme();
+  @include dlc-service-provider-dark.dlc-service-provider-dark-theme();
+  @include dlc-service-provider-light.dlc-service-provider-light-theme();
+  @include dlc-base.dlc-base();
+
+  .dlc-professional-dark,
+  .dlc-professional-light,
+  .dlc-home-dark,
+  .dlc-home-light,
+  .dlc-service-provider-dark,
+  .dlc-service-provider-light {
+    @include dlc-base.dlc-theme-surface();
+    // Bridge the shared <giga-calendar> tokens to this persona's --dlc-* values.
+  }
+}

@@ -1,0 +1,101 @@
+// =============================================================================
+// Concierge — Home Dark Theme
+// Applied via: .dlc-home-dark
+// Persona: Client — warm espresso + terracotta ember, Literata/Nunito Sans
+// =============================================================================
+
+@use "../dlc-chip-tokens";
+
+@mixin dlc-home-dark-theme() {
+  .dlc-home-dark {
+    @include dlc-chip-tokens.dlc-chip-tokens-dark();
+    // --- Primary ---
+    --dlc-primary: #2c4a39;
+    --dlc-primary-container: #1e3327;
+    --dlc-on-primary: #d4ede2;
+    --dlc-on-primary-container: #d4ede2;
+
+    // --- Accent ---
+    --dlc-secondary: #d4805a;
+    --dlc-secondary-container: #4a2515;
+    --dlc-on-secondary: #fdeee6;
+
+    // --- Surface ---
+    --dlc-surface: #161311;
+    --dlc-surface-container-lowest: var(--dlc-surface);
+    --dlc-surface-container-low: #241810;
+    --dlc-surface-container: #2e2017;
+    --dlc-surface-container-high: #3d2c1e;
+    --dlc-surface-variant: var(--dlc-surface-container-high);
+
+    // --- Text ---
+    --dlc-on-surface: #ede0d4;
+    --dlc-on-surface-variant: #9e8672;
+
+    // --- Borders ---
+    // --dlc-outline is mixed toward --dlc-on-surface so control boundaries (radio rings,
+    // input borders) clear WCAG 3:1 non-text contrast against the dark surfaces; the
+    // darker --dlc-outline-variant remains for subtle dividers/card edges.
+    --dlc-outline: #826d5e;
+    --dlc-outline-variant: #3d2c1e;
+
+    // Unchecked dlc-checkbox fill — outline mixed toward on-surface so the box
+    // clears 3:1 against BOTH --dlc-surface-container (popover bg) and
+    // --dlc-surface-container-high (row-hover bg); raw --dlc-outline collides
+    // with the hover tone in the dark themes.
+    --dlc-checkbox-unchecked-bg: #897566;
+
+    // --- Semantic states ---
+    --dlc-error: #f2b8b5;
+    --dlc-on-error: #601410;
+    --dlc-success: #a8d5b5;
+    --dlc-on-success: #10402a;
+    --dlc-warning: #fbcc6e;
+    --dlc-on-warning: #3e2200;
+
+    --dlc-overlay: rgba(0, 0, 0, 0.32);
+
+    // --- Typography ---
+    --dlc-font-family-display: "Literata", Georgia, "Times New Roman", serif;
+    --dlc-font-family-body: "Nunito Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --dlc-font-weight-regular: 400;
+    --dlc-font-weight-medium: 500;
+    --dlc-font-weight-bold: 600;
+
+    // --- Shape ---
+    --dlc-radius-sm: 4px;
+    --dlc-radius-md: 8px;
+    --dlc-radius-lg: 16px;
+
+    // --- Motion ---
+    --dlc-transition-duration: 160ms;
+
+    // --- Chart token bridge ---
+    // Maps --chart-* contract tokens (libs/shared/charts) to CG theme values.
+    // Tokens without a direct CG equivalent use the closest semantic match.
+    --chart-surface: var(--dlc-surface);
+    --chart-surface-variant: var(--dlc-surface-container-high);
+    --chart-surface-container: var(--dlc-surface-container);
+    --chart-surface-container-low: var(--dlc-surface-container-low);
+    --chart-surface-container-highest: var(--dlc-surface-container-high);
+    --chart-inverse-surface: var(--dlc-on-surface);
+    --chart-inverse-on-surface: var(--dlc-surface);
+    --chart-on-surface: var(--dlc-on-surface);
+    --chart-on-surface-variant: var(--dlc-on-surface-variant);
+    --chart-outline: var(--dlc-outline);
+    --chart-outline-variant: var(--dlc-outline-variant);
+    --chart-primary: var(--dlc-primary);
+    --chart-primary-container: var(--dlc-primary-container);
+    --chart-on-primary: var(--dlc-on-primary);
+    --chart-secondary: var(--dlc-secondary);
+    --chart-secondary-container: var(--dlc-secondary-container);
+    --chart-tertiary: var(--dlc-warning);
+    --chart-error: var(--dlc-error);
+
+    // --- Storybook review token bridge ---
+    // Maps --sb-review-* contract tokens (libs/shared/storybook) to CG home dark values.
+    --sb-review-text: rgba(237, 224, 212, 0.5); // --dlc-on-surface (#ede0d4) at 50%
+    --sb-review-border: var(--dlc-on-surface-variant); // #9e8672 — warm brown separator
+    --sb-review-status-border: var(--dlc-on-surface-variant); // #9e8672
+  }
+}

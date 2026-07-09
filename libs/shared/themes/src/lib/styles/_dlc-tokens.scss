@@ -1,0 +1,66 @@
+// =============================================================================
+// Concierge CSS Variable Token Contract
+// =============================================================================
+// This file documents all --dlc-* CSS custom properties used across the app.
+// Actual values are defined in persona theme files:
+//   professional/_dlc-professional-dark.scss / professional/_dlc-professional-light.scss
+//   home/_dlc-home-dark.scss / home/_dlc-home-light.scss
+//   service-provider/_dlc-service-provider-dark.scss / service-provider/_dlc-service-provider-light.scss
+// =============================================================================
+
+// --- Color: Primary ---
+// --dlc-primary              Main brand color (navy, sage, steel per persona)
+// --dlc-primary-container    Subtle tinted surface for primary content
+// --dlc-on-primary           Text/icon color on primary-colored surfaces
+
+// --- Color: Accent ---
+// --dlc-secondary               Sharp CTA / highlight color (gold, terracotta, teal per persona)
+// --dlc-secondary-container     Subtle tinted surface for accent content
+// --dlc-on-secondary            Text/icon color on accent-colored surfaces
+
+// --- Color: Surface ---
+// --dlc-surface                    Page background
+// --dlc-surface-container-lowest   Alias for surface (lightest, modal interiors)
+// --dlc-surface-container-low      Even subtler elevation
+// --dlc-surface-container          Slightly elevated surface (cards, panels)
+// --dlc-surface-container-high     Higher elevation (modals, dropdowns)
+// --dlc-surface-variant      Hover/selected tint for surface elements (alias of --dlc-surface-container-high)
+// --dlc-on-surface           Primary text color
+// --dlc-on-surface-variant   Secondary/muted text and icons
+
+// --- Color: Borders ---
+// --dlc-outline              Stronger border (inputs, focused states)
+// --dlc-outline-variant      Subtle border (dividers, inactive elements)
+
+// --- Color: Nav Sidebar ---
+// --dlc-nav-sidebar-bg         Sidebar panel background (dark for professional/SP, warm linen for home)
+// --dlc-nav-sidebar-text       Inactive nav item text/icon color
+// --dlc-nav-sidebar-active-bg  Background tint for the active nav item
+// --dlc-nav-sidebar-hover-bg   Background tint on nav item hover
+// --dlc-nav-sidebar-divider    Separator color (header border-bottom, footer border-top, divider elements)
+
+// --- Color: Overlay ---
+// --dlc-overlay               Scrim/backdrop overlay (rgba black at 32% opacity)
+
+// --- Color: Semantic States ---
+// --dlc-error                Error/danger state fill
+// --dlc-on-error             Text/icon on error surface
+// --dlc-success              Success/completed state fill
+// --dlc-on-success           Text/icon on success surface
+// --dlc-warning              Warning state fill
+// --dlc-on-warning           Text/icon on warning surface
+
+// --- Typography ---
+// --dlc-font-family-display  Headline/display font (Manrope / Literata / Epilogue per persona)
+// --dlc-font-family-body     Body text font (DM Sans / Nunito Sans / IBM Plex Sans per persona)
+// --dlc-font-weight-regular  400
+// --dlc-font-weight-medium   500
+// --dlc-font-weight-bold     600
+
+// --- Shape ---
+// --dlc-radius-sm            Small radius — tight elements
+// --dlc-radius-md            Medium radius — buttons, inputs
+// --dlc-radius-lg            Large radius — panels, cards
+
+// --- Motion ---
+// --dlc-transition-duration  Base transition speed

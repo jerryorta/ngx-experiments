@@ -1,0 +1,110 @@
+// =============================================================================
+// Concierge — Service Provider Light Theme
+// Applied via: .dlc-service-provider-light
+// Persona: Service Provider — steel slate (#243B55) + teal (#0D9488), Epilogue/IBM Plex Sans, 4px radius
+// =============================================================================
+
+@use "../dlc-chip-tokens";
+
+@mixin dlc-service-provider-light-theme() {
+  .dlc-service-provider-light {
+    @include dlc-chip-tokens.dlc-chip-tokens-light();
+    // --- Primary ---
+    --dlc-primary: #243b55;
+    --dlc-primary-container: #3d5a78;
+    --dlc-on-primary: #ffffff;
+    --dlc-on-primary-container: #ffffff;
+
+    // --- Accent ---
+    --dlc-secondary: #0d9488;
+    --dlc-secondary-container: #ccfbf1;
+    --dlc-on-secondary: #ffffff;
+
+    // --- Surface ---
+    --dlc-surface: #ffffff;
+    --dlc-surface-container-lowest: var(--dlc-surface);
+    --dlc-surface-container-low: #f5f7fa;
+    --dlc-surface-container: #ebf0f5;
+    --dlc-surface-container-high: #dde5ed;
+    --dlc-surface-variant: var(--dlc-surface-container-high);
+
+    // --- Text ---
+    --dlc-on-surface: #1c2b39;
+    --dlc-on-surface-variant: #4a6278;
+
+    // --- Borders ---
+    --dlc-outline: #b8c8d8;
+    --dlc-outline-variant: #d8e4ec;
+
+    // Unchecked dlc-checkbox fill — outline mixed toward on-surface so the box
+    // clears 3:1 against BOTH --dlc-surface-container (popover bg) and
+    // --dlc-surface-container-high (row-hover bg); raw --dlc-outline collides
+    // with the hover tone in the dark themes.
+    --dlc-checkbox-unchecked-bg: #758494;
+
+    // --- Collaborative accent (fixed — same across all personas/modes) ---
+    --dlc-tertiary-fixed: #e2dfff;
+    --dlc-on-tertiary-fixed: #0f0069;
+
+    // --- Semantic states ---
+    --dlc-error: #b3261e;
+    --dlc-on-error: #ffffff;
+    --dlc-success: #0f9d58;
+    --dlc-on-success: #ffffff;
+    --dlc-warning: #f9a825;
+    --dlc-on-warning: #1e1300;
+
+    --dlc-overlay: rgba(0, 0, 0, 0.32);
+
+    // --- Typography ---
+    --dlc-font-family-display: "Epilogue", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --dlc-font-family-body: "IBM Plex Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --dlc-font-weight-regular: 400;
+    --dlc-font-weight-medium: 500;
+    --dlc-font-weight-bold: 600;
+
+    // --- Nav Sidebar (dark steel surface) ---
+    // Sidebar bg = steel slate; text = 70% white; active = teal glass tint
+    --dlc-nav-sidebar-bg: #243b55;
+    --dlc-nav-sidebar-text: rgba(228, 236, 244, 0.7);
+    --dlc-nav-sidebar-active-bg: rgba(13, 148, 136, 0.12);
+    --dlc-nav-sidebar-hover-bg: rgba(255, 255, 255, 0.07);
+    --dlc-nav-sidebar-divider: rgba(228, 236, 244, 0.18);
+
+    // --- Shape ---
+    --dlc-radius-sm: 2px;
+    --dlc-radius-md: 4px;
+    --dlc-radius-lg: 8px;
+
+    // --- Motion ---
+    --dlc-transition-duration: 160ms;
+
+    // --- Chart token bridge ---
+    // Maps --chart-* contract tokens (libs/shared/charts) to CG theme values.
+    // Tokens without a direct CG equivalent use the closest semantic match.
+    --chart-surface: var(--dlc-surface);
+    --chart-surface-variant: var(--dlc-surface-container-high);
+    --chart-surface-container: var(--dlc-surface-container);
+    --chart-surface-container-low: var(--dlc-surface-container-low);
+    --chart-surface-container-highest: var(--dlc-surface-container-high);
+    --chart-inverse-surface: var(--dlc-on-surface);
+    --chart-inverse-on-surface: var(--dlc-surface);
+    --chart-on-surface: var(--dlc-on-surface);
+    --chart-on-surface-variant: var(--dlc-on-surface-variant);
+    --chart-outline: var(--dlc-outline);
+    --chart-outline-variant: var(--dlc-outline-variant);
+    --chart-primary: var(--dlc-primary);
+    --chart-primary-container: var(--dlc-primary-container);
+    --chart-on-primary: var(--dlc-on-primary);
+    --chart-secondary: var(--dlc-secondary);
+    --chart-secondary-container: var(--dlc-secondary-container);
+    --chart-tertiary: var(--dlc-warning);
+    --chart-error: var(--dlc-error);
+
+    // --- Storybook review token bridge ---
+    // Maps --sb-review-* contract tokens (libs/shared/storybook) to CG service provider light values.
+    --sb-review-text: rgba(28, 43, 57, 0.5); // --dlc-on-surface (#1c2b39) at 50%
+    --sb-review-border: var(--dlc-outline); // #b8c8d8 — steel blue-gray separator
+    --sb-review-status-border: var(--dlc-outline); // #b8c8d8
+  }
+}

@@ -1,0 +1,89 @@
+// =============================================================================
+// Concierge — Base / Reset
+// =============================================================================
+
+// CDK overlay reset — required for any Concierge component that uses Angular CDK Overlay
+// (dlc-tooltip, dlc-select, etc.). Included once here so all app/Storybook builds get it.
+@import "@angular/cdk/overlay-prebuilt.css";
+
+@mixin dlc-theme-surface() {
+  font-family: var(--dlc-font-family-body);
+  font-weight: var(--dlc-font-weight-regular);
+  background: var(--dlc-surface);
+  color: var(--dlc-on-surface);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@mixin dlc-base() {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+  }
+
+  button {
+    cursor: pointer;
+
+    &:disabled {
+      cursor: default;
+    }
+  }
+
+  // Layout class used by AppComponent host (mirrors dlc-global-mobile-page)
+  .dlc-global-mobile-page {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    flex: 1 1 auto;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+  // Material Symbols icon defaults
+  // Wrapped in @layer base so Tailwind utilities (text-*, text-[size]) can override.
+  @layer base {
+    .material-symbols-outlined {
+      font-variation-settings:
+        "FILL" 0,
+        "wght" 400,
+        "GRAD" 0,
+        "opsz" 24;
+      color: inherit;
+      user-select: none;
+      font-size: 24px;
+      line-height: 1;
+      vertical-align: middle;
+    }
+  }
+
+  // Scrollbar — thin and unobtrusive
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--dlc-outline);
+    border-radius: var(--dlc-radius-sm);
+
+    &:hover {
+      background: var(--dlc-on-surface-variant);
+    }
+  }
+}
