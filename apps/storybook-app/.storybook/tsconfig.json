@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.app.json",
+  "compilerOptions": {
+    "emitDecoratorMetadata": true
+  },
+  "files": [],
+  "exclude": ["../**/*.spec.ts", "../../../libs/**/*.spec.ts"],
+  "include": [
+    "../../../libs/shared/ui-design-library/src/**/*.stories.ts",
+    "../../../libs/shared/ui-design-library/src/**/*.ts",
+    "preview.ts"
+  ]
+}
