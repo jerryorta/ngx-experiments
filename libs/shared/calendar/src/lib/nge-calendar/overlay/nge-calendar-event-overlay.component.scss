@@ -1,0 +1,50 @@
+// Event-click overlay FRAME (ARCH-147).
+//
+// ViewEncapsulation.None — scope everything under the host class, never `:host`.
+// Every value is a `var(--nge-calendar-*, <literal>)` chain so the frame renders
+// un-themed AND picks up the host's inline `--nge-calendar-*` props that the
+// shell copies onto the CDK overlay pane.
+.nge-calendar-event-overlay {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  min-width: 14rem;
+  max-width: 22rem;
+  padding: var(--nge-calendar-spacing-lg, 1rem);
+  background: var(--nge-calendar-surface, #ffffff);
+  color: var(--nge-calendar-on-surface, #1a1a1a);
+  border: var(--nge-calendar-border-width, 1px) solid var(--nge-calendar-outline-variant, #d4d4d4);
+  border-radius: var(--nge-calendar-radius-md, 8px);
+  box-shadow: var(--nge-calendar-overlay-shadow, 0 2px 6px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1));
+  font-family: var(--nge-calendar-font-family, system-ui, sans-serif);
+  font-size: var(--nge-calendar-font-size-base, 0.875rem);
+  line-height: var(--nge-calendar-line-height, 1.5);
+
+  &__close {
+    position: absolute;
+    top: var(--nge-calendar-spacing-xs, 0.25rem);
+    right: var(--nge-calendar-spacing-xs, 0.25rem);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    border: 0;
+    border-radius: var(--nge-calendar-radius-sm, 4px);
+    background: transparent;
+    color: var(--nge-calendar-on-surface-variant, #5c5c5c);
+    font-size: var(--nge-calendar-font-size-lg, 1.125rem);
+    line-height: 1;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--nge-calendar-hover, #e8e8e8);
+    }
+  }
+
+  &__body {
+    // Keep body clear of the absolutely-positioned close button.
+    padding-right: var(--nge-calendar-spacing-lg, 1rem);
+  }
+}

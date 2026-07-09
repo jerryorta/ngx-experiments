@@ -1,0 +1,55 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="calendar-overview-stories__page">
+    <header class="calendar-overview-stories__header">
+      <h2 class="calendar-overview-stories__title">NgeCalendar</h2>
+      <p class="calendar-overview-stories__intro">
+        Reusable, themeable, theme-agnostic calendar library
+        (<code>&#64;gigasoftware/calendar</code>). This is the Storybook harness (ARCH-72) — the
+        canvas every view + interaction story is authored on. The
+        <code>&lt;nge-calendar&gt;</code> shell and views land in later ARCH-60 stories; the panel
+        below is a placeholder that demonstrates the theming bridge.
+      </p>
+    </header>
+
+    <section class="calendar-overview-stories__section">
+      <h3 class="calendar-overview-stories__section-title">Theme tokens</h3>
+      <p class="calendar-overview-stories__hint">
+        Each swatch reads a <code>--nge-calendar-*</code> token with a literal fallback, so it
+        renders with no host theme and updates live when you switch the theme in the toolbar.
+      </p>
+      <div class="calendar-overview-stories__swatches">
+        @for (swatch of tokenSwatches; track swatch.token) {
+          <figure class="calendar-overview-stories__swatch-item">
+            <div
+              class="calendar-overview-stories__swatch"
+              [style.background]="swatch.value"
+            ></div>
+            <figcaption class="calendar-overview-stories__swatch-caption">
+              <span class="calendar-overview-stories__swatch-label">{{ swatch.label }}</span>
+              <code class="calendar-overview-stories__swatch-token">{{ swatch.token }}</code>
+            </figcaption>
+          </figure>
+        }
+      </div>
+    </section>
+
+    <section class="calendar-overview-stories__section">
+      <h3 class="calendar-overview-stories__section-title">Views (coming soon)</h3>
+      <p class="calendar-overview-stories__hint">
+        Each view authors its own usage / theming / interaction stories under
+        <code>nge-calendar/stories/&lt;view&gt;/</code> on top of this harness.
+      </p>
+      <ul class="calendar-overview-stories__views">
+        @for (view of upcomingViews; track view.name) {
+          <li class="calendar-overview-stories__view-chip">
+            <span class="calendar-overview-stories__view-name">{{ view.name }}</span>
+            <span class="calendar-overview-stories__view-story">{{ view.story }}</span>
+          </li>
+        }
+      </ul>
+    </section>
+  </div>
+</nge-storybook-review-container>

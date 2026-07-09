@@ -1,0 +1,13 @@
+<button
+  type="button"
+  class="nge-calendar-event-overlay__close"
+  aria-label="Close"
+  data-testid="nge-calendar-event-overlay-close"
+  (click)="closed.emit()"
+>
+  ×
+</button>
+
+<div class="nge-calendar-event-overlay__body">
+  <ng-content />
+</div>

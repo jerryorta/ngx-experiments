@@ -1,0 +1,59 @@
+// Mobile month-agenda layout harness styles (ARCH-148).
+//
+// ViewEncapsulation.None — scope everything under the host class, never `:host`.
+// Tokens are chained `var(--nge-calendar-*, <literal>)` so the harness renders
+// un-themed AND updates live under a consumer's `--nge-calendar-*` override.
+.nge-month-agenda-stories {
+  display: block;
+
+  &__page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: var(--nge-calendar-surface, #ffffff);
+    color: var(--nge-calendar-on-surface, #1a1a1a);
+    border: 1px solid var(--nge-calendar-outline, #d4d4d4);
+    border-radius: 12px;
+  }
+
+  &__title {
+    margin: 0 0 0.25rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  &__intro {
+    margin: 0;
+    max-width: 60ch;
+    color: var(--nge-calendar-on-surface-variant, #5c5c5c);
+    line-height: 1.5;
+
+    code {
+      padding: 0.1rem 0.3rem;
+      border-radius: var(--nge-calendar-radius-sm, 4px);
+      background: var(--nge-calendar-surface-container, #f1f5f9);
+      font-size: 0.85em;
+    }
+  }
+
+  // ── mobile-ish, height-constrained frame ───────────────────────────────────
+  // A narrow, fixed-height shell wrapping `<nge-calendar>` so the agenda body
+  // overflows and scrolls internally (the ManyEvents story relies on this).
+  &__frame {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 420px;
+    height: 560px;
+    overflow: hidden;
+    border: 1px solid var(--nge-calendar-outline-variant, #d4d4d4);
+    border-radius: 16px;
+
+    nge-calendar {
+      display: flex;
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+  }
+}

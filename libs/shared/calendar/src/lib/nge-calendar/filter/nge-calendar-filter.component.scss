@@ -1,0 +1,146 @@
+// Cross-view filter funnel + popover (ARCH-149).
+//
+// ViewEncapsulation.None — scope everything under the host / panel classes, never
+// `:host`. The trigger lives in-flow; the card is portalled OUTSIDE the host into
+// the CDK overlay container, so the popover wrapper copies the host's inline
+// `--nge-calendar-*` props onto the pane. Every value is a
+// `var(--nge-calendar-*, <literal>)` chain so it renders un-themed AND upgrades
+// under a consumer override.
+
+// ── trigger (in-flow) ────────────────────────────────────────────────────────
+.nge-calendar-filter {
+  display: inline-flex;
+
+  &__trigger {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    min-height: 2rem;
+    padding: var(--nge-calendar-spacing-xs, 0.25rem) var(--nge-calendar-spacing-sm, 0.5rem);
+    color: var(--nge-calendar-on-surface, #1a1a1a);
+    background: var(--nge-calendar-surface-container, #f1f1f1);
+    border: var(--nge-calendar-border-width, 1px) solid var(--nge-calendar-outline-variant, #d4d4d4);
+    border-radius: var(--nge-calendar-radius-sm, 4px);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--nge-calendar-hover, #e8e8e8);
+    }
+
+    &--active {
+      color: var(--nge-calendar-on-accent, #ffffff);
+      background: var(--nge-calendar-accent, #2563eb);
+      border-color: var(--nge-calendar-accent, #2563eb);
+
+      &:hover {
+        background: var(--nge-calendar-accent, #2563eb);
+      }
+    }
+
+    &--open {
+      border-color: var(--nge-calendar-accent, #2563eb);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--nge-calendar-accent, #2563eb);
+      outline-offset: 2px;
+    }
+  }
+
+  &__icon {
+    display: block;
+    width: 1rem;
+    height: 1rem;
+  }
+
+  &__badge {
+    position: absolute;
+    top: -0.25rem;
+    right: -0.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1rem;
+    height: 1rem;
+    padding: 0 0.25rem;
+    box-sizing: border-box;
+    font-size: 0.625rem;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--nge-calendar-on-accent, #ffffff);
+    background: var(--nge-calendar-error, #b3261e);
+    border-radius: 999px;
+  }
+}
+
+// ── popover card (body-mounted CDK pane) ─────────────────────────────────────
+.nge-calendar-filter__card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--nge-calendar-spacing-md, 0.75rem);
+  min-width: 15rem;
+  max-width: 20rem;
+  padding: var(--nge-calendar-spacing-lg, 1rem);
+  color: var(--nge-calendar-on-surface, #1a1a1a);
+  background: var(--nge-calendar-surface, #ffffff);
+  border: var(--nge-calendar-border-width, 1px) solid var(--nge-calendar-outline-variant, #d4d4d4);
+  border-radius: var(--nge-calendar-radius-md, 8px);
+  box-shadow: var(--nge-calendar-overlay-shadow, 0 2px 6px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1));
+  font-family: var(--nge-calendar-font-family, system-ui, sans-serif);
+  font-size: var(--nge-calendar-font-size-base, 0.875rem);
+  line-height: var(--nge-calendar-line-height, 1.5);
+}
+
+.nge-calendar-filter__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--nge-calendar-spacing-sm, 0.5rem);
+}
+
+.nge-calendar-filter__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--nge-calendar-spacing-sm, 0.5rem);
+  padding-top: var(--nge-calendar-spacing-sm, 0.5rem);
+  border-top: var(--nge-calendar-border-width, 1px) solid var(--nge-calendar-outline-variant, #d4d4d4);
+}
+
+.nge-calendar-filter__btn {
+  padding: var(--nge-calendar-spacing-xs, 0.25rem) var(--nge-calendar-spacing-md, 0.75rem);
+  font: inherit;
+  font-size: var(--nge-calendar-font-size-sm, 0.75rem);
+  font-weight: 500;
+  line-height: 1;
+  border: var(--nge-calendar-border-width, 1px) solid transparent;
+  border-radius: var(--nge-calendar-radius-sm, 4px);
+  cursor: pointer;
+
+  &--clear {
+    color: var(--nge-calendar-on-surface-variant, #5c5c5c);
+    background: transparent;
+    border-color: var(--nge-calendar-outline-variant, #d4d4d4);
+
+    &:hover {
+      color: var(--nge-calendar-on-surface, #1a1a1a);
+      border-color: var(--nge-calendar-on-surface-variant, #5c5c5c);
+    }
+  }
+
+  &--done {
+    color: var(--nge-calendar-on-accent, #ffffff);
+    background: var(--nge-calendar-accent, #2563eb);
+
+    &:hover {
+      opacity: 0.88;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--nge-calendar-accent, #2563eb);
+    outline-offset: 2px;
+  }
+}

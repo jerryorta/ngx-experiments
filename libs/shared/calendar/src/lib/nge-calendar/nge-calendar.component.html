@@ -1,0 +1,125 @@
+@let view = store.view();
+
+<header class="nge-calendar__header">
+  <div class="nge-calendar__nav">
+    <button
+      type="button"
+      class="nge-calendar__nav-btn"
+      aria-label="Previous"
+      data-testid="nge-calendar-prev"
+      (click)="store.previous()"
+    >
+      ‹
+    </button>
+    <button
+      type="button"
+      class="nge-calendar__nav-btn nge-calendar__nav-btn--today"
+      aria-label="Today"
+      data-testid="nge-calendar-today"
+      (click)="store.goToToday()"
+    >
+      Today
+    </button>
+    <button
+      type="button"
+      class="nge-calendar__nav-btn"
+      aria-label="Next"
+      data-testid="nge-calendar-next"
+      (click)="store.next()"
+    >
+      ›
+    </button>
+  </div>
+
+  @let label = headerLabel();
+  <h2
+    class="nge-calendar__title"
+    data-testid="nge-calendar-title"
+    >{{ label }}</h2
+  >
+
+  <div class="nge-calendar__actions">
+    <div
+      class="nge-calendar__views"
+      role="group"
+      aria-label="Select calendar view"
+    >
+      @for (v of views; track v) {
+        <button
+          type="button"
+          class="nge-calendar__view-btn"
+          [class.nge-calendar__view-btn--active]="view === v"
+          [attr.aria-pressed]="view === v"
+          [attr.aria-label]="'View ' + v"
+          [attr.data-testid]="'nge-calendar-view-' + v"
+          (click)="store.setView(v)"
+        >
+          {{ v }}
+        </button>
+      }
+    </div>
+
+    <!-- Cross-view filter funnel (ARCH-149). Lives in the shared header so the
+         trigger shows on EVERY view — month / week / day / year AND the mobile
+         agenda branch. It inject()s the ambient store; a host
+         `#ngeCalendarFilter` template flows down as `hostPanel`. -->
+    <nge-calendar-filter
+      class="nge-calendar__filter"
+      [hostPanel]="eventFilter()"
+    />
+  </div>
+</header>
+
+<div
+  class="nge-calendar__viewport"
+  data-testid="nge-calendar-viewport"
+>
+  @switch (view) {
+    @case ("month") {
+      <!-- The compact mobile agenda layout (ARCH-148) swaps in when the consumer
+           opts in via `config.monthLayout === 'agenda'`; both inject the same
+           ambient store, so no input()/output() is prop-drilled. -->
+      @if (store.monthLayout() === "agenda") {
+        <nge-month-agenda-view data-testid="nge-month-agenda-view" />
+      } @else {
+        <nge-month-view data-testid="nge-month-view" />
+      }
+    }
+    @case ("week") {
+      <!-- Week + day share ONE shared time-grid primitive (ARCH-67 / S7); it
+           inject()s the same ambient store and reads the active timeGridViewModel. -->
+      <nge-time-grid data-testid="nge-time-grid" />
+    }
+    @case ("day") {
+      <nge-time-grid data-testid="nge-time-grid" />
+    }
+    @case ("year") {
+      <!-- Twelve mini-month grids (ARCH-68 / S8); injects the same ambient store
+           and reads yearViewModel, drilling into month view on a day / month click. -->
+      <nge-year-view data-testid="nge-year-view" />
+    }
+  }
+</div>
+
+<!-- Event-click overlay popup (ARCH-147). The shell portals this template into a
+     CDK overlay anchored to the clicked event element. The frame is content-
+     agnostic; a host `#ngeCalendarEventOverlay` template wins over the default
+     body, rendered with the typed `overlayContext()` `$implicit` context. -->
+<ng-template #ngeCalendarOverlayTemplate>
+  @if (overlayContext(); as ctx) {
+    <nge-calendar-event-overlay
+      cdkTrapFocus
+      [cdkTrapFocusAutoCapture]="true"
+      (closed)="store.clearSelection()"
+    >
+      @if (eventOverlay(); as tpl) {
+        <ng-container *ngTemplateOutlet="tpl; context: ctx" />
+      } @else {
+        <nge-calendar-default-event-overlay
+          [event]="ctx.event"
+          [locale]="store.config()?.locale"
+        />
+      }
+    </nge-calendar-event-overlay>
+  }
+</ng-template>

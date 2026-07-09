@@ -1,0 +1,56 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-calendar-overlay-stories__page">
+    <header class="nge-calendar-overlay-stories__header">
+      <h2 class="nge-calendar-overlay-stories__title">Event-click overlay (ARCH-147)</h2>
+      <p class="nge-calendar-overlay-stories__intro">
+        Click an event to open an anchored overlay popup. Dismiss it with the × button, the Escape
+        key, or a click outside.
+      </p>
+    </header>
+
+    @switch (variant()) {
+      @case ("custom") {
+        <!-- A host-supplied template wins over the default body. It reads the typed
+             `event.data` payload (ARCH-146), so build-storybook (strictTemplates)
+             FAILS if the generic `T` does not flow from `[config]` into the overlay
+             context — the inference guard. -->
+        <nge-calendar [config]="config">
+          <ng-template
+            #ngeCalendarEventOverlay
+            let-event
+            let-close="close"
+          >
+            <div class="nge-calendar-overlay-stories__custom">
+              <strong class="nge-calendar-overlay-stories__custom-title">{{ event.title }}</strong>
+              <p class="nge-calendar-overlay-stories__custom-line">
+                Organizer: {{ event.data?.organizer }}
+              </p>
+              <p class="nge-calendar-overlay-stories__custom-line">
+                Location: {{ event.data?.location }}
+              </p>
+              <button
+                type="button"
+                class="nge-calendar-overlay-stories__custom-close"
+                (click)="close()"
+              >
+                Dismiss
+              </button>
+            </div>
+          </ng-template>
+        </nge-calendar>
+      }
+      @case ("themed") {
+        <!-- Default body under a `--nge-calendar-*` theme override; the overlay
+             pane inherits the host's inline theme props. -->
+        <nge-calendar [config]="themedConfig" />
+      }
+      @default {
+        <!-- No host template → built-in default overlay body. -->
+        <nge-calendar [config]="config" />
+      }
+    }
+  </div>
+</nge-storybook-review-container>

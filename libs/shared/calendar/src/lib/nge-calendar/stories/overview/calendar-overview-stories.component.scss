@@ -1,0 +1,110 @@
+// Overview / smoke-story styles for the shared calendar harness (ARCH-72).
+//
+// The canonical, complete `--nge-calendar-*` token set ships in S5 (ARCH-65).
+// Here we consume only the handful the placeholder needs, each chained
+// `var(--nge-calendar-*, <literal>)` so the harness renders un-themed AND
+// updates live when a consumer overrides a `--nge-calendar-*` token.
+//
+// ViewEncapsulation.None — scope everything under the host class, never `:host`.
+.calendar-overview-stories {
+  display: block;
+
+  &__page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: var(--nge-calendar-surface, #ffffff);
+    color: var(--nge-calendar-on-surface, #1a1a1a);
+    border: 1px solid var(--nge-calendar-outline, #d4d4d4);
+    border-radius: 12px;
+  }
+
+  &__title {
+    margin: 0 0 0.25rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  &__intro,
+  &__hint {
+    margin: 0;
+    max-width: 60ch;
+    color: var(--nge-calendar-on-surface-variant, #5c5c5c);
+    line-height: 1.5;
+  }
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  &__section-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  &__swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1rem;
+  }
+
+  &__swatch-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0;
+  }
+
+  &__swatch {
+    height: 64px;
+    border-radius: 8px;
+    border: 1px solid var(--nge-calendar-outline, #d4d4d4);
+  }
+
+  &__swatch-caption {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  &__swatch-label {
+    font-weight: 500;
+  }
+
+  &__swatch-token {
+    font-size: 0.75rem;
+    color: var(--nge-calendar-on-surface-variant, #5c5c5c);
+  }
+
+  &__views {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__view-chip {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    padding: 0.5rem 0.875rem;
+    border-radius: 8px;
+    border: 1px solid var(--nge-calendar-outline, #d4d4d4);
+    background: var(--nge-calendar-surface-container, #f1f1f1);
+  }
+
+  &__view-name {
+    font-weight: 600;
+  }
+
+  &__view-story {
+    font-size: 0.75rem;
+    color: var(--nge-calendar-on-surface-variant, #5c5c5c);
+  }
+}

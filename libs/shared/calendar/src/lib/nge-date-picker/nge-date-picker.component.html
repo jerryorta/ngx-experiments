@@ -1,0 +1,183 @@
+<!-- Themed trigger (ARCH-166). A button/field showing the formatted selected value
+     (or the placeholder when empty) with a leading inline-SVG calendar glyph — an
+     inline SVG, not a Material font icon, since the lib is Material-free. Clicking it
+     opens the anchored CDK-Overlay panel below. -->
+<button
+  #trigger
+  type="button"
+  class="nge-date-picker__trigger"
+  [class.nge-date-picker__trigger--placeholder]="selectedDate() === null"
+  data-testid="nge-date-picker-trigger"
+  [disabled]="isDisabled()"
+  aria-haspopup="dialog"
+  [attr.aria-expanded]="isOpen()"
+  [attr.aria-label]="displayLabel()"
+  (click)="toggle()"
+>
+  <svg
+    class="nge-date-picker__icon"
+    viewBox="0 0 24 24"
+    width="18"
+    height="18"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      fill="currentColor"
+      d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1V3a1 1 0 0 1 1-1Zm12 7H5v10h14V9Zm0-3H5v1h14V6Z"
+    />
+  </svg>
+  <span class="nge-date-picker__value">{{ displayLabel() }}</span>
+</button>
+
+<!-- Overlay panel (ARCH-166). The shell portals this template into a CDK overlay
+     anchored to the trigger. `cdkTrapFocus` + auto-capture trap focus inside the open
+     dialog; Escape / outside-click close it and return focus to the trigger. The day
+     grid follows the WAI-ARIA grid pattern with a single roving tabindex. -->
+<ng-template #panelTemplate>
+  <div
+    class="nge-date-picker__panel"
+    cdkTrapFocus
+    [cdkTrapFocusAutoCapture]="true"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Choose date"
+    data-testid="nge-date-picker-panel"
+  >
+    <div class="nge-date-picker__panel-header">
+      @if (panelView() === "days") {
+        <button
+          type="button"
+          class="nge-date-picker__nav-btn"
+          aria-label="Previous month"
+          data-testid="nge-date-picker-prev"
+          (click)="prevMonth()"
+        >
+          ‹
+        </button>
+      }
+
+      <!-- The title doubles as the year-view toggle: tap it to swap the day grid for a
+           scrollable year grid (large tap targets for mobile), and back. -->
+      <button
+        type="button"
+        class="nge-date-picker__title"
+        [attr.aria-expanded]="panelView() === 'years'"
+        data-testid="nge-date-picker-title"
+        (click)="toggleYearView()"
+      >
+        <span
+          class="nge-date-picker__month-label"
+          aria-live="polite"
+          data-testid="nge-date-picker-month-label"
+          >{{ monthLabel() }}</span
+        >
+        <span
+          class="nge-date-picker__title-caret"
+          aria-hidden="true"
+          >{{ panelView() === "years" ? "▴" : "▾" }}</span
+        >
+      </button>
+
+      @if (panelView() === "days") {
+        <button
+          type="button"
+          class="nge-date-picker__nav-btn"
+          aria-label="Next month"
+          data-testid="nge-date-picker-next"
+          (click)="nextMonth()"
+        >
+          ›
+        </button>
+      }
+    </div>
+
+    @if (panelView() === "days") {
+      <div
+        class="nge-date-picker__grid"
+        role="grid"
+        [attr.aria-label]="monthLabel()"
+      >
+        <div
+          class="nge-date-picker__weekdays"
+          role="row"
+        >
+          @for (label of weekdayLabels(); track $index) {
+            <div
+              class="nge-date-picker__weekday"
+              role="columnheader"
+            >
+              {{ label }}
+            </div>
+          }
+        </div>
+
+        @for (week of weeks(); track $index) {
+          <div
+            class="nge-date-picker__week"
+            role="row"
+          >
+            @for (day of week; track day.getTime()) {
+              <button
+                type="button"
+                class="nge-date-picker__day"
+                [class.nge-date-picker__day--today]="isToday(day)"
+                [class.nge-date-picker__day--selected]="isSelected(day)"
+                [class.nge-date-picker__day--out-of-month]="isOutsideMonth(day)"
+                [class.nge-date-picker__day--disabled]="isDisabledDay(day)"
+                role="gridcell"
+                data-testid="nge-date-picker-day"
+                [attr.data-date]="cellKey(day)"
+                [attr.aria-label]="cellLabel(day)"
+                [attr.aria-selected]="isSelected(day)"
+                [attr.aria-current]="isToday(day) ? 'date' : null"
+                [attr.aria-disabled]="isDisabledDay(day) ? 'true' : null"
+                [attr.tabindex]="cellTabIndex(day)"
+                (click)="selectDay(day)"
+                (keydown)="onGridKeydown($event)"
+              >
+                <span class="nge-date-picker__day-number">{{ day.getDate() }}</span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    } @else {
+      <!-- Year view (ARCH-166). A vertically scrollable grid of large, tappable year
+           cells (mobile-friendly), bounded by [min]/[max] or a generous default. The
+           selected/current year is highlighted and scrolled into view on open. -->
+      <div
+        class="nge-date-picker__years"
+        role="grid"
+        aria-label="Select year"
+        data-testid="nge-date-picker-years"
+      >
+        @for (row of yearRows(); track $index) {
+          <div
+            class="nge-date-picker__year-row"
+            role="row"
+          >
+            @for (year of row; track year) {
+              <button
+                type="button"
+                class="nge-date-picker__year"
+                [class.nge-date-picker__year--selected]="isSelectedYear(year)"
+                [class.nge-date-picker__year--current]="isCurrentYear(year)"
+                role="gridcell"
+                data-testid="nge-date-picker-year"
+                [attr.data-year]="year"
+                [attr.aria-selected]="isSelectedYear(year)"
+                [attr.aria-current]="isCurrentYear(year) ? 'date' : null"
+                [attr.tabindex]="yearTabIndex(year)"
+                (click)="selectYear(year)"
+                (keydown)="onYearKeydown($event)"
+              >
+                {{ year }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</ng-template>

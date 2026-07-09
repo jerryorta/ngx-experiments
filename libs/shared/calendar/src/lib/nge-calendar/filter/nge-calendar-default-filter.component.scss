@@ -1,0 +1,120 @@
+// DEFAULT cross-view filter body (ARCH-149).
+//
+// ViewEncapsulation.None — scope everything under the host class, never `:host`.
+// Every value is a `var(--nge-calendar-*, <literal>)` chain so it renders
+// un-themed AND updates live under a consumer's `--nge-calendar-*` override
+// (the popover wrapper copies the host's inline theme props onto the CDK pane).
+.nge-calendar-default-filter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--nge-calendar-spacing-md, 0.75rem);
+  min-width: 14rem;
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--nge-calendar-spacing-xs, 0.25rem);
+  }
+
+  &__label {
+    font-size: var(--nge-calendar-font-size-sm, 0.75rem);
+    font-weight: 600;
+    color: var(--nge-calendar-on-surface-variant, #5c5c5c);
+  }
+
+  &__search {
+    box-sizing: border-box;
+    width: 100%;
+    padding: var(--nge-calendar-spacing-xs, 0.25rem) var(--nge-calendar-spacing-sm, 0.5rem);
+    font: inherit;
+    font-size: var(--nge-calendar-font-size-base, 0.875rem);
+    color: var(--nge-calendar-on-surface, #1a1a1a);
+    background: var(--nge-calendar-surface, #ffffff);
+    border: var(--nge-calendar-border-width, 1px) solid var(--nge-calendar-outline-variant, #d4d4d4);
+    border-radius: var(--nge-calendar-radius-sm, 4px);
+
+    &:focus-visible {
+      outline: 2px solid var(--nge-calendar-accent, #2563eb);
+      outline-offset: 1px;
+    }
+  }
+
+  // ── colour swatches ────────────────────────────────────────────────────────
+  &__swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nge-calendar-spacing-xs, 0.25rem);
+  }
+
+  &__swatch {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: var(--nge-calendar-radius-sm, 4px);
+    cursor: pointer;
+
+    &--selected {
+      border-color: var(--nge-calendar-on-surface, #1a1a1a);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--nge-calendar-accent, #2563eb);
+      outline-offset: 2px;
+    }
+  }
+
+  &__swatch-check {
+    color: var(--nge-calendar-on-accent, #ffffff);
+    font-size: var(--nge-calendar-font-size-sm, 0.75rem);
+    line-height: 1;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.6);
+  }
+
+  // ── timing segmented control ───────────────────────────────────────────────
+  &__segments {
+    display: inline-flex;
+    align-items: stretch;
+    border: var(--nge-calendar-border-width, 1px) solid var(--nge-calendar-outline-variant, #d4d4d4);
+    border-radius: var(--nge-calendar-radius-sm, 4px);
+    overflow: hidden;
+  }
+
+  &__segment {
+    flex: 1 1 auto;
+    padding: var(--nge-calendar-spacing-xs, 0.25rem) var(--nge-calendar-spacing-sm, 0.5rem);
+    font: inherit;
+    font-size: var(--nge-calendar-font-size-sm, 0.75rem);
+    line-height: 1;
+    color: var(--nge-calendar-on-surface, #1a1a1a);
+    background: var(--nge-calendar-surface-container, #f1f1f1);
+    border: 0;
+    border-right: var(--nge-calendar-border-width, 1px) solid var(--nge-calendar-outline-variant, #d4d4d4);
+    cursor: pointer;
+
+    &:last-child {
+      border-right: 0;
+    }
+
+    &:hover {
+      background: var(--nge-calendar-hover, #e8e8e8);
+    }
+
+    &--active {
+      color: var(--nge-calendar-on-accent, #ffffff);
+      background: var(--nge-calendar-accent, #2563eb);
+
+      &:hover {
+        background: var(--nge-calendar-accent, #2563eb);
+      }
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--nge-calendar-accent, #2563eb);
+      outline-offset: -2px;
+    }
+  }
+}

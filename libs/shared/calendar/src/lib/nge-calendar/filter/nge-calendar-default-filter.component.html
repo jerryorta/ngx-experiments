@@ -1,0 +1,83 @@
+@let f = filter();
+@let colors = availableColors();
+
+<div
+  class="nge-calendar-default-filter"
+  data-testid="nge-calendar-default-filter"
+>
+  <!-- ── title search ───────────────────────────────────────────────────────── -->
+  <label class="nge-calendar-default-filter__field">
+    <span class="nge-calendar-default-filter__label">Search</span>
+    <input
+      type="search"
+      class="nge-calendar-default-filter__search"
+      data-testid="nge-calendar-filter-query"
+      placeholder="Filter by title…"
+      aria-label="Filter events by title"
+      [value]="f.query"
+      (input)="onQueryInput($any($event.target).value)"
+    />
+  </label>
+
+  <!-- ── colour facet ───────────────────────────────────────────────────────── -->
+  @if (colors.length > 0) {
+    <div
+      class="nge-calendar-default-filter__field"
+      role="group"
+      aria-label="Filter events by colour"
+    >
+      <span class="nge-calendar-default-filter__label">Colour</span>
+      <div class="nge-calendar-default-filter__swatches">
+        @for (color of colors; track color) {
+          @let selected = isColorSelected(color);
+          <button
+            type="button"
+            class="nge-calendar-default-filter__swatch"
+            [class.nge-calendar-default-filter__swatch--selected]="selected"
+            [attr.aria-pressed]="selected"
+            [attr.aria-label]="'Colour ' + color"
+            [attr.data-testid]="'nge-calendar-filter-color-' + color"
+            [style.background]="color"
+            (click)="onColorToggle(color)"
+          >
+            @if (selected) {
+              <span
+                class="nge-calendar-default-filter__swatch-check"
+                aria-hidden="true"
+                >✓</span
+              >
+            }
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- ── timing segmented group ─────────────────────────────────────────────── -->
+  <!-- `role="group"` + `aria-pressed` toggle buttons (matching the colour facet
+       above and the header view-switcher) — natively Tab/Enter/Space operable,
+       so no roving-tabindex / arrow-key obligation a `radiogroup` would impose. -->
+  <div
+    class="nge-calendar-default-filter__field"
+    role="group"
+    aria-label="Filter events by timing"
+  >
+    <span class="nge-calendar-default-filter__label">Timing</span>
+    <div class="nge-calendar-default-filter__segments">
+      @for (option of timingOptions; track option.value) {
+        @let active = f.timing === option.value;
+        <button
+          type="button"
+          class="nge-calendar-default-filter__segment"
+          [class.nge-calendar-default-filter__segment--active]="active"
+          [attr.aria-pressed]="active"
+          [attr.aria-label]="option.label"
+          [attr.data-testid]="'nge-calendar-filter-timing-' + option.value"
+          (click)="onTimingChange(option.value)"
+        >
+          {{ option.label }}
+        </button>
+      }
+    </div>
+  </div>
+</div>

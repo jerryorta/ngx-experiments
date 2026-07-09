@@ -1,0 +1,38 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-month-agenda-stories__page">
+    <header class="nge-month-agenda-stories__header">
+      <h2 class="nge-month-agenda-stories__title">Mobile month-agenda layout (ARCH-148)</h2>
+      <p class="nge-month-agenda-stories__intro">
+        With <code>monthLayout: 'agenda'</code> the shell renders the month view as a compact
+        day-grouped agenda list instead of the 6×7 grid. The frame below is constrained to a
+        mobile-ish width and height so the agenda's internal scroll is demonstrable.
+      </p>
+    </header>
+
+    <!-- Mobile-ish, height-constrained frame so the agenda body scrolls internally. -->
+    <div class="nge-month-agenda-stories__frame">
+      @switch (variant()) {
+        @case ("themed") {
+          <!-- Same month under a `--nge-calendar-*` host override; the agenda
+               layout themes through the calendar's own CSS-variable namespace. -->
+          <nge-calendar [config]="themedConfig" />
+        }
+        @case ("manyEvents") {
+          <!-- Densely populated month → the agenda body overflows and scrolls. -->
+          <nge-calendar [config]="manyEventsConfig" />
+        }
+        @case ("empty") {
+          <!-- Zero events → the agenda empty state. -->
+          <nge-calendar [config]="emptyConfig" />
+        }
+        @default {
+          <!-- A normal month with events across several days. -->
+          <nge-calendar [config]="config" />
+        }
+      }
+    </div>
+  </div>
+</nge-storybook-review-container>

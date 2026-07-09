@@ -1,0 +1,129 @@
+@let vm = store.monthViewModel();
+
+@if (vm) {
+  <!-- Compact, date-only month grid (flex: none) — the scaffold reuses the same
+       monthViewModel as the desktop grid, but each cell renders ONLY the day
+       number + an event-presence dot (no chips / bars / drop-lists). -->
+  <div
+    class="nge-month-agenda-view__grid"
+    data-testid="nge-month-agenda-grid"
+    role="grid"
+    aria-label="Month"
+  >
+    <div
+      class="nge-month-agenda-view__weekdays"
+      role="row"
+    >
+      @for (label of vm.weekdayLabels; track $index) {
+        <div
+          class="nge-month-agenda-view__weekday"
+          role="columnheader"
+        >
+          {{ label }}
+        </div>
+      }
+    </div>
+
+    @for (week of vm.weeks; track $index) {
+      <div
+        class="nge-month-agenda-view__week"
+        role="row"
+      >
+        @for (day of week.days; track day.date; let colIndex = $index) {
+          <div
+            class="nge-month-agenda-view__day"
+            [class.nge-month-agenda-view__day--today]="isToday(day.date)"
+            [class.nge-month-agenda-view__day--selected]="isSelected(day.date)"
+            [class.nge-month-agenda-view__day--out-of-month]="day.isOutOfMonth"
+            [class.nge-month-agenda-view__day--weekend]="day.isWeekend"
+            role="gridcell"
+            data-testid="nge-month-agenda-day"
+            [attr.data-date]="day.date.toISOString()"
+            [attr.aria-label]="day.date.toDateString()"
+            [attr.aria-selected]="isSelected(day.date)"
+            [attr.tabindex]="cellTabIndex(day)"
+            (click)="activateDay(day.date)"
+            (keydown)="onGridKeydown($event)"
+          >
+            <span class="nge-month-agenda-view__day-number">{{ day.dayOfMonth }}</span>
+            @if (hasEvents(week, day, colIndex)) {
+              <span
+                class="nge-month-agenda-view__dot"
+                data-testid="nge-month-agenda-dot"
+                aria-hidden="true"
+              ></span>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Scrollable, day-grouped agenda body (flex: 1; the ONLY scrolling region).
+       `cdkScrollable` registers it with CDK's ScrollDispatcher. Each group lists
+       the events that START on that day (pre-sorted in the core). -->
+  <div
+    #agendaBody
+    cdkScrollable
+    class="nge-month-agenda-view__agenda"
+    data-testid="nge-month-agenda-body"
+    role="region"
+    aria-label="Agenda"
+  >
+    @for (group of store.monthAgenda()?.days ?? []; track trackGroup(group)) {
+      <section
+        class="nge-month-agenda-view__group"
+        data-testid="nge-month-agenda-group"
+        [attr.data-date]="group.date.toISOString()"
+      >
+        <h3
+          class="nge-month-agenda-view__group-heading"
+          data-testid="nge-month-agenda-group-heading"
+        >
+          {{ groupLabel(group.date) }}
+        </h3>
+        <div
+          class="nge-month-agenda-view__events"
+          role="list"
+        >
+          @for (event of group.events; track event.id) {
+            <!-- The listitem wrapper keeps proper list semantics (a role="list"
+                 needs role="listitem" children) WITHOUT overriding the card's
+                 implicit button role. -->
+            <div
+              class="nge-month-agenda-view__event-item"
+              role="listitem"
+            >
+              <button
+                type="button"
+                class="nge-month-agenda-view__event"
+                data-testid="nge-month-agenda-event"
+                [attr.data-event-id]="event.id"
+                [attr.aria-label]="event.title"
+                (click)="store.selectEvent(event.id)"
+              >
+                <span
+                  class="nge-month-agenda-view__event-dot"
+                  [style.background-color]="eventColor(event)"
+                ></span>
+                <span class="nge-month-agenda-view__event-body">
+                  <span class="nge-month-agenda-view__event-title">{{ event.title }}</span>
+                  <span class="nge-month-agenda-view__event-time">{{
+                    eventTimeLabel(event)
+                  }}</span>
+                </span>
+              </button>
+            </div>
+          }
+        </div>
+      </section>
+    } @empty {
+      <p
+        class="nge-month-agenda-view__empty"
+        data-testid="nge-month-agenda-empty"
+      >
+        No events this month
+      </p>
+    }
+  </div>
+}

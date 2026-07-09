@@ -1,0 +1,408 @@
+// `<nge-month-view>` styling (ARCH-66 / S6).
+//
+// ViewEncapsulation.None — every rule is scoped under the `.nge-month-view`
+// host class, NEVER `:host`. All colours / typography / spacing / radii / z-index
+// come from the `--nge-calendar-*` token helper (shared with the shell), so the
+// view is self-sufficient un-themed and upgrades under a consumer override. NO
+// Angular Material / `--mat-sys-*` anything.
+//
+// Layout is a 7-column CSS Grid (weekday header + six week rows). Per-day numbers and
+// chips are grid cells; multi-day bars are absolutely overlaid on each week so they
+// span columns without inserting a row. All positioning inputs (columns, spans, lanes)
+// come from the pre-computed `store.monthViewModel()` — this file does no layout maths.
+@use "../../theme/nge-calendar-tokens" as tok;
+
+// Vertical gap between stacked items (chips, popover rows).
+$bar-lane-gap: 0.125rem;
+// Minimum height of a week row. The grid still *grows* to fill a taller container
+// (weeks are `flex: 1 1 0`), but this floor stops rows collapsing to content height
+// when no explicit height is supplied (e.g. Storybook), which would clip events.
+$week-min-height: 7.5rem;
+
+.nge-month-view {
+  // Spanning-bar geometry, shared between the SCSS (bar height) and the component's
+  // inline positioning (lane step) so barTop() and the day-cell reserve stay in sync.
+  --nge-month-bar-h: 1.25rem;
+  --nge-month-bar-step: 1.375rem;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  font-family: tok.nge-calendar-token("font-family");
+  font-size: tok.nge-calendar-token("font-size-base");
+  color: tok.nge-calendar-token("on-surface");
+
+  &__grid {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+    border: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("outline-variant");
+    border-radius: tok.nge-calendar-token("radius-md");
+    overflow: hidden;
+  }
+
+  &__weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: tok.nge-calendar-token("surface-container");
+    border-bottom: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("outline-variant");
+  }
+
+  &__weekday {
+    padding: tok.nge-calendar-token("spacing-xs") tok.nge-calendar-token("spacing-sm");
+    text-align: center;
+    font-size: tok.nge-calendar-token("font-size-sm");
+    font-weight: 600;
+    color: tok.nge-calendar-token("on-surface-variant");
+  }
+
+  &__week {
+    display: flex;
+    // Grow to fill a taller container, but NEVER shrink below content (shrink 0) —
+    // a busy week (bar lanes + overflowing chips) grows / scrolls instead of clipping
+    // its "+N more". `min-height` floors otherwise-sparse rows.
+    flex: 1 0 auto;
+    flex-direction: column;
+    min-height: $week-min-height;
+    position: relative;
+
+    &:not(:last-child) {
+      border-bottom: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("outline-variant");
+    }
+  }
+
+  // Day-number header row — one cell per column, pinned ABOVE the bars band so the
+  // number always sits at the very top of the week and the spanning bars fall beneath.
+  &__numbers {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+  }
+
+  &__number-cell {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: tok.nge-calendar-token("spacing-xs");
+    background: tok.nge-calendar-token("surface");
+
+    &:not(:last-child) {
+      border-right: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("outline-variant");
+    }
+
+    &--weekend {
+      background: tok.nge-calendar-token("surface-container");
+    }
+
+    &--out-of-month .nge-month-view__day-number {
+      color: tok.nge-calendar-token("on-surface-variant");
+      opacity: 0.6;
+    }
+
+    // Today: filled pill on the number.
+    &--today .nge-month-view__day-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.5rem;
+      height: 1.5rem;
+      padding: 0 tok.nge-calendar-token("spacing-xs");
+      color: tok.nge-calendar-token("on-surface");
+      background: tok.nge-calendar-token("today");
+      border-radius: tok.nge-calendar-token("radius-sm");
+    }
+
+    // Anchor: subtle accent RING on the number (quiet; combines with the today pill).
+    &--anchor .nge-month-view__day-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.5rem;
+      height: 1.5rem;
+      padding: 0 tok.nge-calendar-token("spacing-xs");
+      border: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("accent");
+      border-radius: tok.nge-calendar-token("radius-sm");
+    }
+  }
+
+  // Spanning bars: absolutely overlaid on the days grid (NOT a grid row), positioned
+  // by the component's inline `left` / `width` (% of the week) + `top` (lane), so they
+  // cross day columns while the cell backgrounds beneath stay continuous.
+  &__bar {
+    position: absolute;
+    z-index: 1;
+    box-sizing: border-box;
+    min-width: 0;
+    height: var(--nge-month-bar-h);
+    padding: 0 tok.nge-calendar-token("spacing-xs");
+    font: inherit;
+    font-size: tok.nge-calendar-token("font-size-sm");
+    line-height: var(--nge-month-bar-h);
+    text-align: left;
+    color: tok.nge-calendar-token("event-fg");
+    background: tok.nge-calendar-token("event-bg");
+    border: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("event-bg");
+    // Flush (square) edges by default; rounded only on the real start / end.
+    border-radius: 0;
+    cursor: pointer;
+
+    &--start {
+      border-top-left-radius: tok.nge-calendar-token("radius-sm");
+      border-bottom-left-radius: tok.nge-calendar-token("radius-sm");
+    }
+
+    &--end {
+      border-top-right-radius: tok.nge-calendar-token("radius-sm");
+      border-bottom-right-radius: tok.nge-calendar-token("radius-sm");
+    }
+
+    &:focus-visible {
+      outline: 2px solid tok.nge-calendar-token("accent");
+      outline-offset: 1px;
+    }
+  }
+
+  &__bar-label {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &__days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    flex: 1 1 auto;
+    min-height: 0;
+    // Positioning context for the absolutely-overlaid spanning bars.
+    position: relative;
+  }
+
+  &__day {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    padding: tok.nge-calendar-token("spacing-xs");
+    // Reserve room at the top for this week's spanning-bar lanes so chips sit below
+    // them (`--nge-month-bar-reserve` is set per week from `weekBarLanes()`).
+    padding-top: calc(
+      tok.nge-calendar-token("spacing-xs") + var(--nge-month-bar-reserve, 0) * var(--nge-month-bar-step)
+    );
+    background: tok.nge-calendar-token("surface");
+    position: relative;
+
+    &:not(:last-child) {
+      border-right: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("outline-variant");
+    }
+
+    &--weekend {
+      background: tok.nge-calendar-token("surface-container");
+    }
+
+    // Roving-focus ring (ARCH-70 / S10). The cell is the managed-focus target —
+    // exactly one is `tabindex=0`; arrow keys move focus between cells. Inset so it
+    // reads inside the cell border without overlapping neighbours.
+    &:focus-visible {
+      outline: 2px solid tok.nge-calendar-token("accent");
+      outline-offset: -2px;
+    }
+  }
+
+  &__day-number {
+    font-size: tok.nge-calendar-token("font-size-sm");
+    font-weight: 600;
+  }
+
+  &__chips {
+    display: flex;
+    flex-direction: column;
+    gap: $bar-lane-gap;
+    min-width: 0;
+  }
+
+  // Single-day events render as a colour DOT + label on a transparent row — clearly
+  // distinct from the filled, full-width spanning bars (`&__bar`).
+  &__chip {
+    display: flex;
+    align-items: center;
+    gap: tok.nge-calendar-token("spacing-xs");
+    min-width: 0;
+    padding: 0 tok.nge-calendar-token("spacing-xs");
+    font: inherit;
+    font-size: tok.nge-calendar-token("font-size-sm");
+    text-align: left;
+    color: tok.nge-calendar-token("on-surface");
+    background: transparent;
+    border: none;
+    border-radius: tok.nge-calendar-token("radius-sm");
+    cursor: pointer;
+
+    &:hover {
+      background: tok.nge-calendar-token("hover");
+    }
+
+    &:focus-visible {
+      outline: 2px solid tok.nge-calendar-token("accent");
+      outline-offset: 1px;
+    }
+
+    // Draggable chips (editable calendar + the event opts in) get a grab cursor;
+    // it flips to grabbing while a pointer drag is in flight.
+    &--draggable {
+      cursor: grab;
+
+      &:active {
+        cursor: grabbing;
+      }
+    }
+  }
+
+  // CDK drag artefacts, scoped to the month view. The preview is the chip lifted
+  // under the pointer; the placeholder is the gap left in the source cell. We keep
+  // both minimal and on-token rather than relying on Material defaults.
+  .cdk-drag-preview {
+    z-index: tok.nge-calendar-token("z-drag");
+    box-sizing: border-box;
+    padding: 0 tok.nge-calendar-token("spacing-xs");
+    color: tok.nge-calendar-token("on-surface");
+    background: tok.nge-calendar-token("surface");
+    border-radius: tok.nge-calendar-token("radius-sm");
+    box-shadow: 0 2px 8px rgb(0 0 0 / 20%);
+  }
+
+  .cdk-drag-placeholder {
+    opacity: 0.4;
+  }
+
+  // Smooth the settle animation when a chip is released onto a cell.
+  .cdk-drag-animating {
+    transition: transform 150ms ease;
+  }
+
+  // The event's colour lives on the dot (inline per-event `background-color`, or the
+  // `event-bg` token fallback) — not the whole chip.
+  &__chip-dot {
+    flex: none;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: tok.nge-calendar-token("event-bg");
+  }
+
+  &__chip-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &__more {
+    align-self: flex-start;
+    padding: 0 tok.nge-calendar-token("spacing-xs");
+    font: inherit;
+    font-size: tok.nge-calendar-token("font-size-sm");
+    color: tok.nge-calendar-token("on-surface-variant");
+    background: transparent;
+    border: none;
+    border-radius: tok.nge-calendar-token("radius-sm");
+    cursor: pointer;
+
+    &:hover {
+      background: tok.nge-calendar-token("hover");
+    }
+
+    &:focus-visible {
+      outline: 2px solid tok.nge-calendar-token("accent");
+      outline-offset: 1px;
+    }
+  }
+
+  // Overflow popover: absolutely-positioned panel anchored within the cell.
+  &__popover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: tok.nge-calendar-token("z-popover");
+    min-width: 12rem;
+    max-width: 16rem;
+    padding: tok.nge-calendar-token("spacing-sm");
+    color: tok.nge-calendar-token("on-surface");
+    background: tok.nge-calendar-token("surface");
+    border: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("outline");
+    border-radius: tok.nge-calendar-token("radius-md");
+    box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
+  }
+
+  &__popover-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: tok.nge-calendar-token("spacing-sm");
+    margin-bottom: tok.nge-calendar-token("spacing-xs");
+  }
+
+  &__popover-title {
+    font-weight: 600;
+  }
+
+  &__popover-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    font: inherit;
+    line-height: 1;
+    color: tok.nge-calendar-token("on-surface-variant");
+    background: transparent;
+    border: none;
+    border-radius: tok.nge-calendar-token("radius-sm");
+    cursor: pointer;
+
+    &:hover {
+      background: tok.nge-calendar-token("hover");
+    }
+
+    &:focus-visible {
+      outline: 2px solid tok.nge-calendar-token("accent");
+      outline-offset: 1px;
+    }
+  }
+
+  &__popover-list {
+    display: flex;
+    flex-direction: column;
+    gap: $bar-lane-gap;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__popover-event {
+    display: flex;
+    align-items: center;
+    gap: tok.nge-calendar-token("spacing-xs");
+    width: 100%;
+    min-width: 0;
+    padding: tok.nge-calendar-token("spacing-xs") tok.nge-calendar-token("spacing-sm");
+    font: inherit;
+    font-size: tok.nge-calendar-token("font-size-sm");
+    text-align: left;
+    color: tok.nge-calendar-token("on-surface");
+    background: transparent;
+    border: none;
+    border-radius: tok.nge-calendar-token("radius-sm");
+    cursor: pointer;
+
+    &:hover {
+      background: tok.nge-calendar-token("hover");
+    }
+
+    &:focus-visible {
+      outline: 2px solid tok.nge-calendar-token("accent");
+      outline-offset: 1px;
+    }
+  }
+}

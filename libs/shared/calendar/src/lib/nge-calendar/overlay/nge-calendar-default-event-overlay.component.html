@@ -1,0 +1,26 @@
+@let ev = event();
+
+<div
+  class="nge-calendar-default-event-overlay"
+  data-testid="nge-calendar-default-event-overlay"
+>
+  <div class="nge-calendar-default-event-overlay__heading">
+    <span
+      class="nge-calendar-default-event-overlay__swatch"
+      data-testid="nge-calendar-default-event-overlay-swatch"
+      [style.background]="ev.color || 'var(--nge-calendar-event-bg, #2563eb)'"
+    ></span>
+    <span
+      class="nge-calendar-default-event-overlay__title"
+      data-testid="nge-calendar-default-event-overlay-title"
+      >{{ ev.title }}</span
+    >
+  </div>
+
+  <div
+    class="nge-calendar-default-event-overlay__time"
+    data-testid="nge-calendar-default-event-overlay-time"
+  >
+    {{ timeLabel() }}
+  </div>
+</div>

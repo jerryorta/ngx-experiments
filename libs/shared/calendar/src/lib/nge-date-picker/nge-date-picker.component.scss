@@ -1,0 +1,267 @@
+// `<nge-date-picker>` styling (ARCH-166).
+//
+// ViewEncapsulation.None — every rule is scoped under a `.nge-date-picker*` class,
+// NEVER `:host`. All colours / typography / spacing / radii come from the shared
+// `--nge-calendar-*` token helper (the same one the calendar shell + views use), so
+// the picker is self-sufficient un-themed and upgrades under a consumer override.
+// NO Angular Material / `--mat-sys-*` anything; NO hardcoded colours.
+//
+// The trigger renders in-flow under `.nge-date-picker`; the panel is portalled into
+// the CDK overlay (OUTSIDE the host), so its rules are scoped under the top-level
+// `.nge-date-picker__panel` block rather than nested under `.nge-date-picker`.
+@use "../theme/nge-calendar-tokens" as tok;
+
+.nge-date-picker {
+  display: inline-block;
+  font-family: tok.nge-calendar-token("font-family");
+  font-size: tok.nge-calendar-token("font-size-base");
+  line-height: tok.nge-calendar-token("line-height");
+  color: tok.nge-calendar-token("on-surface");
+
+  &__trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: tok.nge-calendar-token("spacing-sm");
+    min-width: 12rem;
+    padding: tok.nge-calendar-token("spacing-sm") tok.nge-calendar-token("spacing-md");
+    font: inherit;
+    text-align: left;
+    color: tok.nge-calendar-token("on-surface");
+    background: tok.nge-calendar-token("surface");
+    border: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("outline");
+    border-radius: tok.nge-calendar-token("radius-md");
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background: tok.nge-calendar-token("hover");
+    }
+
+    &:focus-visible {
+      outline: 2px solid tok.nge-calendar-token("accent");
+      outline-offset: 1px;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    // Muted value text while showing the placeholder.
+    &--placeholder .nge-date-picker__value {
+      color: tok.nge-calendar-token("on-surface-variant");
+    }
+  }
+
+  &__icon {
+    flex: none;
+    color: tok.nge-calendar-token("on-surface-variant");
+  }
+
+  &__value {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+// ─── Overlay panel (portalled — top-level block) ─────────────────────────────────
+.nge-date-picker__panel {
+  box-sizing: border-box;
+  // Responsive width so the panel never overflows a phone viewport.
+  width: min(20rem, calc(100vw - 1.5rem));
+  padding: tok.nge-calendar-token("spacing-sm");
+  font-family: tok.nge-calendar-token("font-family");
+  font-size: tok.nge-calendar-token("font-size-base");
+  color: tok.nge-calendar-token("on-surface");
+  background: tok.nge-calendar-token("surface");
+  border: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("outline-variant");
+  border-radius: tok.nge-calendar-token("radius-md");
+  box-shadow: tok.nge-calendar-token("overlay-shadow");
+}
+
+.nge-date-picker__panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: tok.nge-calendar-token("spacing-sm");
+  margin-bottom: tok.nge-calendar-token("spacing-sm");
+}
+
+.nge-date-picker__nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  font: inherit;
+  font-size: tok.nge-calendar-token("font-size-lg");
+  line-height: 1;
+  color: tok.nge-calendar-token("on-surface");
+  background: transparent;
+  border: none;
+  border-radius: tok.nge-calendar-token("radius-sm");
+  cursor: pointer;
+
+  &:hover {
+    background: tok.nge-calendar-token("hover");
+  }
+
+  &:focus-visible {
+    outline: 2px solid tok.nge-calendar-token("accent");
+    outline-offset: 1px;
+  }
+}
+
+// The title button (month label + caret) doubles as the year-view toggle.
+.nge-date-picker__title {
+  display: inline-flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  gap: tok.nge-calendar-token("spacing-xs");
+  min-height: 2.25rem;
+  padding: 0 tok.nge-calendar-token("spacing-sm");
+  font: inherit;
+  color: tok.nge-calendar-token("on-surface");
+  background: transparent;
+  border: none;
+  border-radius: tok.nge-calendar-token("radius-sm");
+  cursor: pointer;
+
+  &:hover {
+    background: tok.nge-calendar-token("hover");
+  }
+
+  &:focus-visible {
+    outline: 2px solid tok.nge-calendar-token("accent");
+    outline-offset: 1px;
+  }
+}
+
+.nge-date-picker__month-label {
+  font-size: tok.nge-calendar-token("font-size-base");
+  font-weight: 600;
+}
+
+.nge-date-picker__title-caret {
+  font-size: tok.nge-calendar-token("font-size-sm");
+  color: tok.nge-calendar-token("on-surface-variant");
+}
+
+.nge-date-picker__weekdays,
+.nge-date-picker__week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.nge-date-picker__weekday {
+  padding: tok.nge-calendar-token("spacing-xs") 0;
+  text-align: center;
+  font-size: tok.nge-calendar-token("font-size-sm");
+  font-weight: 600;
+  color: tok.nge-calendar-token("on-surface-variant");
+}
+
+.nge-date-picker__day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  min-width: 0;
+  padding: 0;
+  font: inherit;
+  font-size: tok.nge-calendar-token("font-size-sm");
+  color: tok.nge-calendar-token("on-surface");
+  background: transparent;
+  border: none;
+  border-radius: tok.nge-calendar-token("radius-sm");
+  cursor: pointer;
+
+  &:hover:not(.nge-date-picker__day--disabled):not(.nge-date-picker__day--selected) {
+    background: tok.nge-calendar-token("hover");
+  }
+
+  &:focus-visible {
+    outline: 2px solid tok.nge-calendar-token("accent");
+    outline-offset: -2px;
+  }
+
+  // Today (when not selected): a quiet accent ring on the cell.
+  &--today:not(.nge-date-picker__day--selected) {
+    box-shadow: inset 0 0 0 tok.nge-calendar-token("border-width") tok.nge-calendar-token("accent");
+  }
+
+  // Selected: filled accent cell.
+  &--selected {
+    color: tok.nge-calendar-token("on-accent");
+    background: tok.nge-calendar-token("accent");
+  }
+
+  // Leading / trailing days from the adjacent month read quieter.
+  &--out-of-month {
+    color: tok.nge-calendar-token("on-surface-variant");
+    opacity: 0.55;
+  }
+
+  // Out-of-range (min/max) days are announced disabled (aria-disabled) and not
+  // selectable, but stay focusable so roving keyboard nav is not broken.
+  &--disabled {
+    color: tok.nge-calendar-token("on-surface-variant");
+    cursor: not-allowed;
+    opacity: 0.35;
+  }
+}
+
+// ─── Year view (scrollable, mobile-friendly) ─────────────────────────────────────
+.nge-date-picker__years {
+  display: flex;
+  flex-direction: column;
+  // Cap the height so years scroll instead of growing the panel off-screen.
+  max-height: 15rem;
+  overflow-y: auto;
+  // Momentum scrolling on touch.
+  -webkit-overflow-scrolling: touch;
+}
+
+.nge-date-picker__year-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.nge-date-picker__year {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  // Large touch target for mobile (~44px tall).
+  min-height: 2.75rem;
+  padding: tok.nge-calendar-token("spacing-xs");
+  font: inherit;
+  font-size: tok.nge-calendar-token("font-size-base");
+  color: tok.nge-calendar-token("on-surface");
+  background: transparent;
+  border: none;
+  border-radius: tok.nge-calendar-token("radius-sm");
+  cursor: pointer;
+
+  &:hover:not(.nge-date-picker__year--selected) {
+    background: tok.nge-calendar-token("hover");
+  }
+
+  &:focus-visible {
+    outline: 2px solid tok.nge-calendar-token("accent");
+    outline-offset: -2px;
+  }
+
+  // Current year (when not the shown year): a quiet accent ring.
+  &--current:not(.nge-date-picker__year--selected) {
+    box-shadow: inset 0 0 0 tok.nge-calendar-token("border-width") tok.nge-calendar-token("accent");
+  }
+
+  // The shown year: filled accent cell.
+  &--selected {
+    color: tok.nge-calendar-token("on-accent");
+    background: tok.nge-calendar-token("accent");
+  }
+}

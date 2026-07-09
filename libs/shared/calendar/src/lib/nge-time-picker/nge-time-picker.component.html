@@ -1,0 +1,319 @@
+<!-- Themed trigger. A button/field showing the formatted selected value (or the placeholder when
+     empty) with a leading inline-SVG clock glyph — an inline SVG, not a Material font icon, since the
+     lib is Material-free. Clicking it opens the anchored CDK-Overlay panel below. -->
+<button
+  #trigger
+  type="button"
+  class="nge-time-picker__trigger"
+  [class.nge-time-picker__trigger--placeholder]="selectedTime() === null"
+  data-testid="nge-time-picker-trigger"
+  [disabled]="isDisabled()"
+  aria-haspopup="dialog"
+  [attr.aria-expanded]="isOpen()"
+  [attr.aria-label]="displayLabel()"
+  (click)="toggle()"
+>
+  <svg
+    class="nge-time-picker__icon"
+    viewBox="0 0 24 24"
+    width="18"
+    height="18"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      fill="currentColor"
+      d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Zm.75-13h-1.5v5.31l4.04 2.42.76-1.26-3.3-1.97V7Z"
+    />
+  </svg>
+  <span class="nge-time-picker__value">{{ displayLabel() }}</span>
+</button>
+
+<!-- Overlay panel. The shell portals this template into a CDK overlay anchored to the trigger.
+     `cdkTrapFocus` + auto-capture trap focus inside the open dialog; Escape / outside-click / Cancel
+     close it (discarding the draft) and return focus to the trigger. The value commits only on Done. -->
+<ng-template #panelTemplate>
+  <div
+    class="nge-time-picker__panel"
+    cdkTrapFocus
+    [cdkTrapFocusAutoCapture]="true"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Choose time"
+    data-testid="nge-time-picker-panel"
+  >
+    <!-- Header: live formatted preview of the in-progress draft + the runtime surface toggle. -->
+    <div class="nge-time-picker__header">
+      <div
+        class="nge-time-picker__preview"
+        aria-live="polite"
+        data-testid="nge-time-picker-preview"
+      >
+        {{ draftLabel() }}
+      </div>
+
+      <!-- Surface toggle (12-hour only — 24h stays on columns). Lets the user (or AT) flip between
+           the dial and the scrollable list; both edit the same draft, so the in-progress time
+           carries across the switch. -->
+      @if (canUseClock()) {
+        <button
+          type="button"
+          class="nge-time-picker__surface-toggle"
+          data-testid="nge-time-picker-surface-toggle"
+          [attr.aria-pressed]="activeSurface() === 'clock'"
+          [attr.aria-label]="activeSurface() === 'clock' ? 'Switch to list' : 'Switch to clock'"
+          (click)="toggleSurface()"
+        >
+          @if (activeSurface() === "clock") {
+            <svg
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                fill="currentColor"
+                d="M4 6h2v2H4V6Zm0 5h2v2H4v-2Zm0 5h2v2H4v-2Zm4-10h12v2H8V6Zm0 5h12v2H8v-2Zm0 5h12v2H8v-2Z"
+              />
+            </svg>
+          } @else {
+            <svg
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                fill="currentColor"
+                d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Zm.75-13h-1.5v5.31l4.04 2.42.76-1.26-3.3-1.97V7Z"
+              />
+            </svg>
+          }
+        </button>
+      }
+    </div>
+
+    <!-- Selection surface chosen by `activeSurface()` (seeded from `selectionMode`, flipped by the
+         toggle). Both surfaces edit the same `draftHour` / `draftMinute`; the shell (footer / overlay
+         / value) is surface-agnostic. A future variant adds another `@case` here. -->
+    @switch (activeSurface()) {
+      @case ("clock") {
+        <!-- Analog clock: H : M step tabs + AM/PM, then the SVG dial. Two-step (hour → auto-advance
+             → minute); tap a number or drag the hand; the dial is a role="slider" for keyboard. -->
+        <div class="nge-time-picker__clock">
+          <div class="nge-time-picker__clock-tabs">
+            <button
+              type="button"
+              class="nge-time-picker__clock-tab"
+              [class.nge-time-picker__clock-tab--active]="clockStep() === 'hour'"
+              data-testid="nge-time-picker-clock-hour-tab"
+              (click)="setClockStep('hour')"
+            >
+              {{ hourLabel(draftHour()) }}
+            </button>
+            <span
+              class="nge-time-picker__clock-sep"
+              aria-hidden="true"
+              >:</span
+            >
+            <button
+              type="button"
+              class="nge-time-picker__clock-tab"
+              [class.nge-time-picker__clock-tab--active]="clockStep() === 'minute'"
+              data-testid="nge-time-picker-clock-minute-tab"
+              (click)="setClockStep('minute')"
+            >
+              {{ minuteLabel(draftMinute()) }}
+            </button>
+
+            <div
+              class="nge-time-picker__clock-meridiem"
+              role="group"
+              aria-label="AM or PM"
+            >
+              @for (period of meridiems; track period) {
+                <button
+                  type="button"
+                  class="nge-time-picker__clock-ampm"
+                  [class.nge-time-picker__clock-ampm--active]="isSelectedMeridiem(period)"
+                  data-testid="nge-time-picker-meridiem"
+                  [attr.data-meridiem]="period"
+                  [attr.aria-pressed]="isSelectedMeridiem(period)"
+                  [disabled]="isMeridiemDisabled(period)"
+                  (click)="setMeridiem(period)"
+                >
+                  {{ meridiemLabel(period) }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <svg
+            class="nge-time-picker__dial"
+            [attr.viewBox]="dialViewBox"
+            role="slider"
+            tabindex="0"
+            data-testid="nge-time-picker-dial"
+            [attr.aria-label]="clockStep() === 'hour' ? 'Hour' : 'Minute'"
+            [attr.aria-valuenow]="dialValueNow()"
+            [attr.aria-valuemin]="dialValueMin()"
+            [attr.aria-valuemax]="dialValueMax()"
+            [attr.aria-valuetext]="draftLabel()"
+            (pointerdown)="onDialPointerDown($event)"
+            (pointermove)="onDialPointerMove($event)"
+            (pointerup)="onDialPointerUp($event)"
+            (keydown)="onDialKeydown($event)"
+          >
+            <circle
+              class="nge-time-picker__dial-face"
+              [attr.cx]="dialCenter"
+              [attr.cy]="dialCenter"
+              [attr.r]="dialFaceRadius"
+            />
+            <line
+              class="nge-time-picker__dial-hand"
+              [attr.x1]="dialCenter"
+              [attr.y1]="dialCenter"
+              [attr.x2]="handTip().x"
+              [attr.y2]="handTip().y"
+            />
+            <circle
+              class="nge-time-picker__dial-puck"
+              [attr.cx]="handTip().x"
+              [attr.cy]="handTip().y"
+              [attr.r]="puckRadius"
+            />
+            <circle
+              class="nge-time-picker__dial-center"
+              [attr.cx]="dialCenter"
+              [attr.cy]="dialCenter"
+              r="3"
+            />
+            @for (n of dialNumbers(); track n.value) {
+              <text
+                class="nge-time-picker__dial-number"
+                [class.nge-time-picker__dial-number--selected]="n.selected"
+                [class.nge-time-picker__dial-number--disabled]="n.disabled"
+                [attr.x]="n.x"
+                [attr.y]="n.y"
+                text-anchor="middle"
+                dominant-baseline="central"
+              >
+                {{ n.label }}
+              </text>
+            }
+          </svg>
+        </div>
+      }
+      @default {
+        <div class="nge-time-picker__columns">
+          <!-- Hours -->
+          <div
+            class="nge-time-picker__column"
+            role="listbox"
+            aria-label="Hour"
+            data-testid="nge-time-picker-hours"
+          >
+            @for (hour of hours(); track hour) {
+              <button
+                type="button"
+                class="nge-time-picker__option"
+                [class.nge-time-picker__option--selected]="isSelectedHour(hour)"
+                [class.nge-time-picker__option--disabled]="isHourDisabled(hour)"
+                role="option"
+                data-testid="nge-time-picker-hour"
+                [attr.data-hour]="hour"
+                [attr.aria-selected]="isSelectedHour(hour)"
+                [attr.aria-disabled]="isHourDisabled(hour) ? 'true' : null"
+                [attr.tabindex]="hourTabIndex(hour)"
+                (click)="selectHour(hour)"
+                (keydown)="onColumnKeydown($event, 'hour')"
+              >
+                {{ hourLabel(hour) }}
+              </button>
+            }
+          </div>
+
+          <!-- Minutes -->
+          <div
+            class="nge-time-picker__column"
+            role="listbox"
+            aria-label="Minute"
+            data-testid="nge-time-picker-minutes"
+          >
+            @for (minute of minutes(); track minute) {
+              <button
+                type="button"
+                class="nge-time-picker__option"
+                [class.nge-time-picker__option--selected]="isSelectedMinute(minute)"
+                [class.nge-time-picker__option--disabled]="isMinuteDisabled(minute)"
+                role="option"
+                data-testid="nge-time-picker-minute"
+                [attr.data-minute]="minute"
+                [attr.aria-selected]="isSelectedMinute(minute)"
+                [attr.aria-disabled]="isMinuteDisabled(minute) ? 'true' : null"
+                [attr.tabindex]="minuteTabIndex(minute)"
+                (click)="selectMinute(minute)"
+                (keydown)="onColumnKeydown($event, 'minute')"
+              >
+                {{ minuteLabel(minute) }}
+              </button>
+            }
+          </div>
+
+          <!-- Meridiem (12-hour clock only) -->
+          @if (showMeridiem()) {
+            <div
+              class="nge-time-picker__column nge-time-picker__column--meridiem"
+              role="listbox"
+              aria-label="AM or PM"
+              data-testid="nge-time-picker-meridiems"
+            >
+              @for (period of meridiems; track period) {
+                <button
+                  type="button"
+                  class="nge-time-picker__option"
+                  [class.nge-time-picker__option--selected]="isSelectedMeridiem(period)"
+                  [class.nge-time-picker__option--disabled]="isMeridiemDisabled(period)"
+                  role="option"
+                  data-testid="nge-time-picker-meridiem"
+                  [attr.data-meridiem]="period"
+                  [attr.aria-selected]="isSelectedMeridiem(period)"
+                  [attr.aria-disabled]="isMeridiemDisabled(period) ? 'true' : null"
+                  [attr.tabindex]="meridiemTabIndex(period)"
+                  (click)="setMeridiem(period)"
+                  (keydown)="onColumnKeydown($event, 'meridiem')"
+                >
+                  {{ meridiemLabel(period) }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
+    }
+
+    <!-- Footer: Cancel discards the draft; Done commits it (disabled while out of `[min]`/`[max]`). -->
+    <div class="nge-time-picker__footer">
+      <button
+        type="button"
+        class="nge-time-picker__btn nge-time-picker__btn--ghost"
+        data-testid="nge-time-picker-cancel"
+        (click)="cancel()"
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="nge-time-picker__btn nge-time-picker__btn--primary"
+        data-testid="nge-time-picker-done"
+        [disabled]="!isDraftInRange()"
+        (click)="confirm()"
+      >
+        Done
+      </button>
+    </div>
+  </div>
+</ng-template>

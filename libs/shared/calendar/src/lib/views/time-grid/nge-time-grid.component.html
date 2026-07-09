@@ -1,0 +1,193 @@
+@let vm = store.timeGridViewModel();
+@let now = store.nowIndicator();
+
+@if (vm) {
+  <div
+    class="nge-time-grid__grid"
+    data-testid="nge-time-grid"
+    role="grid"
+    [attr.aria-label]="vm.columns.length > 1 ? 'Week' : 'Day'"
+  >
+    <!-- ONE scroll container holds the headers, all-day strip and time canvas, so the
+         scrollbar narrows all three equally and the columns stay aligned. The header +
+         all-day rows are pinned via the sticky __topbar. `cdkScrollable` registers it
+         with CDK's ScrollDispatcher so dragging a timed block (standalone cdkDrag, no
+         cdkDropList) auto-scrolls the canvas near the top/bottom edge (S9 / ARCH-69). -->
+    <div
+      #body
+      cdkScrollable
+      class="nge-time-grid__scroll"
+      data-testid="nge-time-grid-body"
+    >
+      <div class="nge-time-grid__topbar">
+        <!-- Column day headers (weekday + day-of-month; today pill / anchor ring). -->
+        <div
+          class="nge-time-grid__headers"
+          role="row"
+          [style.grid-template-columns]="gridTemplateColumns(vm.columns.length)"
+        >
+          <div class="nge-time-grid__corner"></div>
+          @for (column of vm.columns; track column.date.getTime()) {
+            <div
+              class="nge-time-grid__col-header"
+              [class.nge-time-grid__col-header--today]="isToday(column.date)"
+              [class.nge-time-grid__col-header--anchor]="column.isAnchor"
+              role="columnheader"
+              [attr.aria-label]="column.date.toDateString()"
+            >
+              <span class="nge-time-grid__col-weekday">{{ column.date | date: "EEE" }}</span>
+              <span class="nge-time-grid__col-day">{{ column.date | date: "d" }}</span>
+            </div>
+          }
+        </div>
+
+        <!-- All-day strip: gutter label + spanning bars overlaid on the columns track. -->
+        <div
+          class="nge-time-grid__allday"
+          role="row"
+          data-testid="nge-time-grid-allday"
+          [style.--nge-tg-allday-rows]="allDayLaneCount(vm.allDayBars)"
+        >
+          <div class="nge-time-grid__allday-label">all-day</div>
+          <div class="nge-time-grid__allday-track">
+            @for (bar of vm.allDayBars; track bar.event.id) {
+              <button
+                type="button"
+                class="nge-time-grid__allday-bar"
+                [class.nge-time-grid__allday-bar--start]="bar.isStart"
+                [class.nge-time-grid__allday-bar--end]="bar.isEnd"
+                [style.left.%]="(bar.startCol / vm.columns.length) * 100"
+                [style.width.%]="(bar.span / vm.columns.length) * 100"
+                [style.top]="allDayBarTop(bar)"
+                [style.background-color]="eventColor(bar.event)"
+                [style.border-color]="eventColor(bar.event)"
+                data-testid="nge-time-grid-allday-bar"
+                [attr.data-event-id]="bar.event.id"
+                [attr.aria-label]="bar.event.title"
+                (click)="store.selectEvent(bar.event.id)"
+              >
+                <span class="nge-time-grid__allday-bar-label">{{ bar.event.title }}</span>
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Scrolling time canvas: hour gutter + per-column hour lines / events / now-line. -->
+      <div
+        #canvas
+        class="nge-time-grid__canvas"
+        [style.--nge-tg-rows]="vm.totalMinutes / 60"
+        [style.grid-template-columns]="gridTemplateColumns(vm.columns.length)"
+      >
+        <!-- Time gutter: one label per hour line. -->
+        <div class="nge-time-grid__gutter">
+          @for (label of vm.hourLabels; track label.minute) {
+            <span
+              class="nge-time-grid__hour-label"
+              [style.top.%]="(label.minute / vm.totalMinutes) * 100"
+            >
+              {{ label.label }}
+            </span>
+          }
+        </div>
+
+        @for (column of vm.columns; track column.date.getTime()) {
+          <!-- The column is the managed-focus (roving-tabindex) element: exactly one
+               is tabindex=0 (the focused day, else the anchor). Keydown + click are
+               bound HERE (the focusable element), not the scroll container, so the
+               focused element is both focusable and key-activatable (a11y-clean).
+               `focusedDate` carries the day AND the minute-of-day; arrows move time
+               (U/D) / day (L/R), Enter/Space activate the focused slot. -->
+          <div
+            class="nge-time-grid__col"
+            [class.nge-time-grid__col--today]="isToday(column.date)"
+            role="gridcell"
+            data-testid="nge-time-grid-column"
+            [attr.data-date]="column.date.toISOString()"
+            [attr.aria-label]="column.date.toDateString()"
+            [attr.tabindex]="colTabIndex(column)"
+            (click)="onColumnClick($event, column)"
+            (keydown)="onGridKeydown($event)"
+          >
+            <!-- Hour gridlines. -->
+            @for (label of vm.hourLabels; track label.minute) {
+              <div
+                class="nge-time-grid__hour-line"
+                [style.top.%]="(label.minute / vm.totalMinutes) * 100"
+              ></div>
+            }
+
+            <!-- Focused-slot band (keyboard / click focus indicator): paints one slot
+                 tall at `focusedDate`'s minute-of-day, only in the focused column and
+                 only when that time is inside the window. The column's own
+                 `:focus-visible` outline is the analog of the month cell's focus ring;
+                 this band additionally pinpoints the focused TIME within the day. -->
+            @if (isFocusBandVisible(column)) {
+              <div
+                class="nge-time-grid__focus-slot"
+                data-testid="nge-time-grid-focus-slot"
+                aria-hidden="true"
+                [style.top.%]="focusBandTopPct()"
+                [style.height.%]="focusBandHeightPct()"
+              ></div>
+            }
+
+            <!-- Timed event blocks — lane left/width pre-computed in the core. Each is
+                 a standalone `cdkDrag` (free positioning, NOT a drop list): on drop we
+                 convert the pixel distance to a day + minute delta and drive the store,
+                 then `reset()` the transform so the block snaps back (the consumer
+                 re-feeds config to make the move stick). The bottom-edge resize handle
+                 is pointer-based (a nested cdkDrag would be fragile) — see the store. -->
+            @for (slot of column.timed; track slot.event.id) {
+              <button
+                type="button"
+                class="nge-time-grid__event"
+                [class.nge-time-grid__event--draggable]="canDrag(slot.event)"
+                [style.top.%]="(slot.startMinute / vm.totalMinutes) * 100"
+                [style.height.%]="(slot.durationMinutes / vm.totalMinutes) * 100"
+                [style.left.%]="slot.leftPct"
+                [style.width.%]="slot.widthPct"
+                [style.background-color]="eventColor(slot.event)"
+                [style.border-color]="eventColor(slot.event)"
+                data-testid="nge-time-grid-event"
+                [attr.data-event-id]="slot.event.id"
+                [attr.aria-label]="slot.event.title"
+                cdkDrag
+                [cdkDragDisabled]="!canDrag(slot.event)"
+                (cdkDragStarted)="onEventDragStart(slot.event)"
+                (cdkDragEnded)="onEventDragEnd($event)"
+                (click)="store.selectEvent(slot.event.id)"
+              >
+                <span class="nge-time-grid__event-title">{{ slot.event.title }}</span>
+
+                <!-- Bottom-edge resize handle (editable + has an end). pointerdown stops
+                     the block's cdkDrag and drives the store's resize gesture. -->
+                @if (canResize(slot.event)) {
+                  <span
+                    class="nge-time-grid__event-resize"
+                    data-testid="nge-time-grid-resize"
+                    aria-hidden="true"
+                    (pointerdown)="onResizeHandleDown($event, slot.event)"
+                  ></span>
+                }
+              </button>
+            }
+
+            <!-- Current-time indicator, only in the column matching today. -->
+            @if (now && isNowColumn(column.date)) {
+              <div
+                class="nge-time-grid__now"
+                data-testid="nge-time-grid-now"
+                [style.top.%]="now.topPct"
+                aria-hidden="true"
+              >
+                <span class="nge-time-grid__now-dot"></span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

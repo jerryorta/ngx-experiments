@@ -1,0 +1,32 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-calendar-generic-stories__page">
+    <header class="nge-calendar-generic-stories__header">
+      <h2 class="nge-calendar-generic-stories__title">Typed event payload (ARCH-146)</h2>
+      <p class="nge-calendar-generic-stories__intro">
+        The config binds <code>NgeCalendarConfig&lt;AppointmentMeta&gt;</code>, so the phantom
+        <code>T</code> flows from <code>[config]</code> to the <code>(eventClick)</code> /
+        <code>(eventDrop)</code> / <code>(eventResize)</code> handlers, where
+        <code>$event.event.data</code> is typed <code>AppointmentMeta</code>. Click an event to read
+        its domain payload back below.
+      </p>
+    </header>
+
+    <nge-calendar
+      [config]="config"
+      (eventClick)="onClick($event)"
+      (eventDrop)="onDrop($event)"
+      (eventResize)="onResize($event)"
+    />
+
+    @if (lastPayload(); as payload) {
+      <p class="nge-calendar-generic-stories__payload">
+        Last event payload — owner <code>{{ payload.ownerId }}</code
+        >, attendees <code>{{ payload.attendees }}</code
+        >.
+      </p>
+    }
+  </div>
+</nge-storybook-review-container>

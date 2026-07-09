@@ -1,0 +1,374 @@
+// `<nge-time-picker>` styling.
+//
+// ViewEncapsulation.None — every rule is scoped under a `.nge-time-picker*` class, NEVER `:host`.
+// All colours / typography / spacing / radii come from the shared `--nge-calendar-*` token helper
+// (the same one the calendar shell + views + date picker use), so the picker is self-sufficient
+// un-themed and upgrades under a consumer override. NO Angular Material / `--mat-sys-*`; NO hardcoded
+// colours.
+//
+// The trigger renders in-flow under `.nge-time-picker`; the panel is portalled into the CDK overlay
+// (OUTSIDE the host), so its rules are scoped under the top-level `.nge-time-picker__panel` block
+// rather than nested under `.nge-time-picker`.
+@use "../theme/nge-calendar-tokens" as tok;
+
+.nge-time-picker {
+  display: inline-block;
+  font-family: tok.nge-calendar-token("font-family");
+  font-size: tok.nge-calendar-token("font-size-base");
+  line-height: tok.nge-calendar-token("line-height");
+  color: tok.nge-calendar-token("on-surface");
+
+  &__trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: tok.nge-calendar-token("spacing-sm");
+    min-width: 9rem;
+    padding: tok.nge-calendar-token("spacing-sm") tok.nge-calendar-token("spacing-md");
+    font: inherit;
+    text-align: left;
+    color: tok.nge-calendar-token("on-surface");
+    background: tok.nge-calendar-token("surface");
+    border: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("outline");
+    border-radius: tok.nge-calendar-token("radius-md");
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background: tok.nge-calendar-token("hover");
+    }
+
+    &:focus-visible {
+      outline: 2px solid tok.nge-calendar-token("accent");
+      outline-offset: 1px;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    // Muted value text while showing the placeholder.
+    &--placeholder .nge-time-picker__value {
+      color: tok.nge-calendar-token("on-surface-variant");
+    }
+  }
+
+  &__icon {
+    flex: none;
+    color: tok.nge-calendar-token("on-surface-variant");
+  }
+
+  &__value {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+// ─── Overlay panel (portalled — top-level block) ─────────────────────────────────
+.nge-time-picker__panel {
+  box-sizing: border-box;
+  // Responsive width so the panel never overflows a phone viewport.
+  width: min(18rem, calc(100vw - 1.5rem));
+  padding: tok.nge-calendar-token("spacing-sm");
+  font-family: tok.nge-calendar-token("font-family");
+  font-size: tok.nge-calendar-token("font-size-base");
+  color: tok.nge-calendar-token("on-surface");
+  background: tok.nge-calendar-token("surface");
+  border: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("outline-variant");
+  border-radius: tok.nge-calendar-token("radius-md");
+  box-shadow: tok.nge-calendar-token("overlay-shadow");
+}
+
+.nge-time-picker__header {
+  position: relative;
+}
+
+.nge-time-picker__preview {
+  padding: tok.nge-calendar-token("spacing-xs") 0 tok.nge-calendar-token("spacing-sm");
+  text-align: center;
+  font-size: tok.nge-calendar-token("font-size-lg");
+  font-weight: 600;
+  color: tok.nge-calendar-token("on-surface");
+}
+
+// Runtime dial ⇄ columns toggle (top-right of the header).
+.nge-time-picker__surface-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  color: tok.nge-calendar-token("on-surface-variant");
+  background: transparent;
+  border: none;
+  border-radius: tok.nge-calendar-token("radius-sm");
+  cursor: pointer;
+
+  &:hover {
+    background: tok.nge-calendar-token("hover");
+  }
+
+  &:focus-visible {
+    outline: 2px solid tok.nge-calendar-token("accent");
+    outline-offset: 1px;
+  }
+}
+
+.nge-time-picker__columns {
+  display: flex;
+  gap: tok.nge-calendar-token("spacing-xs");
+}
+
+.nge-time-picker__column {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  // Cap the height so options scroll instead of growing the panel off-screen.
+  max-height: 13rem;
+  overflow-y: auto;
+  // Momentum scrolling on touch.
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+
+  // The AM/PM column has only two short options — let it hug its content.
+  &--meridiem {
+    flex: 0 0 auto;
+  }
+}
+
+.nge-time-picker__option {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  // Large touch target for mobile (~44px tall).
+  min-height: 2.75rem;
+  padding: 0 tok.nge-calendar-token("spacing-sm");
+  font: inherit;
+  font-size: tok.nge-calendar-token("font-size-base");
+  color: tok.nge-calendar-token("on-surface");
+  background: transparent;
+  border: none;
+  border-radius: tok.nge-calendar-token("radius-sm");
+  cursor: pointer;
+
+  &:hover:not(.nge-time-picker__option--disabled):not(.nge-time-picker__option--selected) {
+    background: tok.nge-calendar-token("hover");
+  }
+
+  &:focus-visible {
+    outline: 2px solid tok.nge-calendar-token("accent");
+    outline-offset: -2px;
+  }
+
+  // Selected: filled accent option.
+  &--selected {
+    color: tok.nge-calendar-token("on-accent");
+    background: tok.nge-calendar-token("accent");
+  }
+
+  // Out-of-range (min/max) options are announced disabled (aria-disabled) and not selectable, but
+  // stay focusable so roving keyboard nav is not broken.
+  &--disabled {
+    color: tok.nge-calendar-token("on-surface-variant");
+    cursor: not-allowed;
+    opacity: 0.35;
+  }
+}
+
+// ─── Analog clock surface ────────────────────────────────────────────────────────
+.nge-time-picker__clock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: tok.nge-calendar-token("spacing-sm");
+}
+
+.nge-time-picker__clock-tabs {
+  display: flex;
+  align-items: center;
+  gap: tok.nge-calendar-token("spacing-xs");
+}
+
+.nge-time-picker__clock-tab {
+  min-width: 2.5rem;
+  padding: tok.nge-calendar-token("spacing-xs") tok.nge-calendar-token("spacing-sm");
+  font: inherit;
+  font-size: tok.nge-calendar-token("font-size-lg");
+  font-weight: 600;
+  color: tok.nge-calendar-token("on-surface-variant");
+  background: transparent;
+  border: none;
+  border-radius: tok.nge-calendar-token("radius-sm");
+  cursor: pointer;
+
+  &:hover {
+    background: tok.nge-calendar-token("hover");
+  }
+
+  &:focus-visible {
+    outline: 2px solid tok.nge-calendar-token("accent");
+    outline-offset: 1px;
+  }
+
+  &--active {
+    color: tok.nge-calendar-token("accent");
+  }
+}
+
+.nge-time-picker__clock-sep {
+  font-size: tok.nge-calendar-token("font-size-lg");
+  font-weight: 600;
+  color: tok.nge-calendar-token("on-surface-variant");
+}
+
+.nge-time-picker__clock-meridiem {
+  display: inline-flex;
+  margin-left: tok.nge-calendar-token("spacing-sm");
+  overflow: hidden;
+  border: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("outline-variant");
+  border-radius: tok.nge-calendar-token("radius-sm");
+}
+
+.nge-time-picker__clock-ampm {
+  padding: tok.nge-calendar-token("spacing-xs") tok.nge-calendar-token("spacing-sm");
+  font: inherit;
+  font-size: tok.nge-calendar-token("font-size-sm");
+  color: tok.nge-calendar-token("on-surface");
+  background: transparent;
+  border: none;
+  cursor: pointer;
+
+  &:hover:not(:disabled):not(.nge-time-picker__clock-ampm--active) {
+    background: tok.nge-calendar-token("hover");
+  }
+
+  &:focus-visible {
+    outline: 2px solid tok.nge-calendar-token("accent");
+    outline-offset: -2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.35;
+  }
+
+  &--active {
+    color: tok.nge-calendar-token("on-accent");
+    background: tok.nge-calendar-token("accent");
+  }
+}
+
+.nge-time-picker__dial {
+  // Square; capped so the panel stays phone-friendly.
+  width: min(16rem, 100%);
+  height: auto;
+  // Selection is driven by pointer drag — suppress scroll/zoom + text selection.
+  touch-action: none;
+  user-select: none;
+
+  // The dial is focused programmatically after a tap/selection, which would otherwise show the
+  // user-agent's default focus square. Suppress it on plain :focus (the puck already indicates the
+  // value); keyboard users still get a branded ring via :focus-visible.
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid tok.nge-calendar-token("accent");
+    outline-offset: 2px;
+  }
+}
+
+.nge-time-picker__dial-face {
+  fill: tok.nge-calendar-token("surface-container");
+}
+
+.nge-time-picker__dial-hand {
+  stroke: tok.nge-calendar-token("accent");
+  stroke-width: 2;
+  transition: all 0.15s ease;
+}
+
+.nge-time-picker__dial-puck {
+  fill: tok.nge-calendar-token("accent");
+  transition: all 0.15s ease;
+}
+
+.nge-time-picker__dial-center {
+  fill: tok.nge-calendar-token("accent");
+}
+
+.nge-time-picker__dial-number {
+  // Sized in viewBox units so the labels scale with the dial.
+  font-size: 14px;
+  fill: tok.nge-calendar-token("on-surface");
+  user-select: none;
+
+  &--selected {
+    font-weight: 600;
+    fill: tok.nge-calendar-token("on-accent");
+  }
+
+  &--disabled {
+    fill: tok.nge-calendar-token("on-surface-variant");
+    opacity: 0.35;
+  }
+}
+
+// Respect reduced-motion: no hand sweep.
+@media (prefers-reduced-motion: reduce) {
+  .nge-time-picker__dial-hand,
+  .nge-time-picker__dial-puck {
+    transition: none;
+  }
+}
+
+// ─── Footer (Cancel / Done) ──────────────────────────────────────────────────────
+.nge-time-picker__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: tok.nge-calendar-token("spacing-sm");
+  margin-top: tok.nge-calendar-token("spacing-sm");
+}
+
+.nge-time-picker__btn {
+  min-height: 2.25rem;
+  padding: 0 tok.nge-calendar-token("spacing-md");
+  font: inherit;
+  border: tok.nge-calendar-token("border-width") solid transparent;
+  border-radius: tok.nge-calendar-token("radius-sm");
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid tok.nge-calendar-token("accent");
+    outline-offset: 1px;
+  }
+
+  // Cancel: quiet outlined button.
+  &--ghost {
+    color: tok.nge-calendar-token("on-surface");
+    background: transparent;
+    border-color: tok.nge-calendar-token("outline-variant");
+
+    &:hover {
+      background: tok.nge-calendar-token("hover");
+    }
+  }
+
+  // Done: filled accent button; dims when the draft is out of range.
+  &--primary {
+    color: tok.nge-calendar-token("on-accent");
+    background: tok.nge-calendar-token("accent");
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }
+}

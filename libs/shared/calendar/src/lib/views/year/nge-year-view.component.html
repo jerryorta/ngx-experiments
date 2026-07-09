@@ -1,0 +1,83 @@
+@let vm = store.yearViewModel();
+
+@if (vm) {
+  <div
+    class="nge-year-view__grid"
+    data-testid="nge-year-view"
+    role="grid"
+    [attr.aria-label]="vm.year + ''"
+  >
+    @for (month of vm.months; track month.monthIndex) {
+      <section
+        class="nge-year-view__month"
+        role="rowgroup"
+      >
+        <button
+          type="button"
+          class="nge-year-view__month-header"
+          data-testid="nge-year-month"
+          [attr.data-month-index]="month.monthIndex"
+          [attr.aria-label]="month.label + ' ' + vm.year"
+          [attr.tabindex]="monthTabIndex(month.monthIndex)"
+          (click)="onMonthClick(month)"
+          (keydown)="onYearKeydown($event)"
+        >
+          {{ month.label }}
+        </button>
+
+        <div
+          class="nge-year-view__weekdays"
+          role="row"
+        >
+          @for (wd of month.weekdayLabels; track $index) {
+            <div
+              class="nge-year-view__weekday"
+              role="columnheader"
+            >
+              {{ wd }}
+            </div>
+          }
+        </div>
+
+        <div class="nge-year-view__weeks">
+          @for (week of month.weeks; track $index) {
+            <div
+              class="nge-year-view__week"
+              role="row"
+            >
+              @for (day of week; track day.date.getTime()) {
+                <button
+                  type="button"
+                  class="nge-year-view__day"
+                  [class.nge-year-view__day--out-of-month]="day.isOutOfMonth"
+                  [class.nge-year-view__day--today]="isToday(day.date)"
+                  [class.nge-year-view__day--anchor]="day.isAnchor"
+                  [attr.data-density]="day.densityLevel"
+                  role="gridcell"
+                  data-testid="nge-year-day"
+                  [attr.data-date]="day.date.toISOString()"
+                  [attr.data-event-count]="day.eventCount"
+                  [attr.aria-label]="
+                    day.date.toDateString() +
+                    (day.eventCount > 0 ? ', ' + day.eventCount + ' events' : ', no events')
+                  "
+                  (click)="onDayClick(day)"
+                >
+                  <span class="nge-year-view__day-number">{{ day.dayOfMonth }}</span>
+                  @if (day.eventCount > 0) {
+                    <span
+                      class="nge-year-view__density"
+                      [attr.data-density]="day.densityLevel"
+                      data-testid="nge-year-density"
+                      aria-hidden="true"
+                    ></span>
+                  }
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </section>
+    }
+  </div>
+}

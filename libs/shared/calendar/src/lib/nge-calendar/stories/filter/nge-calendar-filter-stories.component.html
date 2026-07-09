@@ -1,0 +1,83 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-calendar-filter-stories__page">
+    <header class="nge-calendar-filter-stories__header">
+      <h2 class="nge-calendar-filter-stories__title">Cross-view filter funnel (ARCH-149)</h2>
+      <p class="nge-calendar-filter-stories__intro">
+        Open the funnel in the header (top-right) to narrow the events shown across EVERY view.
+        Search by title, toggle colours, or pick all-day / timed; Done applies, Clear resets.
+      </p>
+    </header>
+
+    @switch (variant()) {
+      @case ("host") {
+        <!-- A host `#ngeCalendarFilter` template wins over the default body. Its
+             predicate reads the typed `event.data` payload (ARCH-146), so
+             build-storybook (strictTemplates) FAILS if the generic `T` does not
+             flow from `[config]` into the filter context — the inference guard. -->
+        <nge-calendar [config]="config()">
+          <ng-template
+            #ngeCalendarFilter
+            let-filter
+            let-apply="apply"
+            let-setFilter="setFilter"
+            let-close="close"
+          >
+            <div class="nge-calendar-filter-stories__host">
+              <p class="nge-calendar-filter-stories__host-line">
+                Quick filters ({{ filter.timing }})
+              </p>
+              <button
+                type="button"
+                class="nge-calendar-filter-stories__host-btn"
+                (click)="apply(highPriorityPredicate)"
+              >
+                High-priority only
+              </button>
+              <button
+                type="button"
+                class="nge-calendar-filter-stories__host-btn"
+                (click)="setFilter({ timing: 'allDay' }); close()"
+              >
+                All-day events
+              </button>
+              <button
+                type="button"
+                class="nge-calendar-filter-stories__host-btn nge-calendar-filter-stories__host-btn--clear"
+                (click)="apply(null)"
+              >
+                Reset
+              </button>
+            </div>
+          </ng-template>
+        </nge-calendar>
+      }
+      @case ("config") {
+        <!-- An EXTERNAL `config.eventFilter` predicate, toggled outside the funnel.
+             It takes precedence over the funnel's default facets. -->
+        <div class="nge-calendar-filter-stories__controls">
+          <button
+            type="button"
+            class="nge-calendar-filter-stories__toggle"
+            [class.nge-calendar-filter-stories__toggle--on]="onlyAllDay()"
+            (click)="toggleAllDay()"
+          >
+            config.eventFilter: all-day only ({{ onlyAllDay() ? "on" : "off" }})
+          </button>
+        </div>
+        <nge-calendar [config]="config()" />
+      }
+      @case ("themed") {
+        <!-- Default funnel under a `--nge-calendar-*` theme override; the popover
+             pane inherits the host's inline theme props. -->
+        <nge-calendar [config]="themedConfig()" />
+      }
+      @default {
+        <!-- No host template, no config predicate → the built-in default funnel. -->
+        <nge-calendar [config]="config()" />
+      }
+    }
+  </div>
+</nge-storybook-review-container>

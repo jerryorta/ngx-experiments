@@ -1,0 +1,173 @@
+@let vm = store.monthViewModel();
+
+@if (vm) {
+  <div
+    class="nge-month-view__grid"
+    data-testid="nge-month-view"
+    role="grid"
+    aria-label="Month"
+  >
+    <div
+      class="nge-month-view__weekdays"
+      role="row"
+    >
+      @for (label of vm.weekdayLabels; track $index) {
+        <div
+          class="nge-month-view__weekday"
+          role="columnheader"
+        >
+          {{ label }}
+        </div>
+      }
+    </div>
+
+    @for (week of vm.weeks; track $index) {
+      <div
+        class="nge-month-view__week"
+        role="row"
+      >
+        <!-- Day numbers pinned to the top of the week, one per column. -->
+        <div class="nge-month-view__numbers">
+          @for (day of week.days; track day.date) {
+            <div
+              class="nge-month-view__number-cell"
+              [class.nge-month-view__number-cell--today]="isToday(day.date)"
+              [class.nge-month-view__number-cell--anchor]="day.isAnchor"
+              [class.nge-month-view__number-cell--out-of-month]="day.isOutOfMonth"
+              [class.nge-month-view__number-cell--weekend]="day.isWeekend"
+            >
+              <span class="nge-month-view__day-number">{{ day.dayOfMonth }}</span>
+            </div>
+          }
+        </div>
+
+        <!-- Day content. Spanning bars are absolutely overlaid on a reserved band at
+             the top of this grid, so they cross day columns WITHOUT inserting a row
+             that would break the cell grid (the cell backgrounds stay continuous).
+             The grid is a `cdkDropListGroup` so a chip can be dragged between any of
+             its day cells (each cell is its own `cdkDropList`). -->
+        <div
+          class="nge-month-view__days"
+          cdkDropListGroup
+          [style.--nge-month-bar-reserve]="weekBarLanes(week)"
+        >
+          @for (day of week.days; track day.date) {
+            <div
+              class="nge-month-view__day"
+              [class.nge-month-view__day--today]="isToday(day.date)"
+              [class.nge-month-view__day--out-of-month]="day.isOutOfMonth"
+              [class.nge-month-view__day--weekend]="day.isWeekend"
+              role="gridcell"
+              data-testid="nge-month-day"
+              [attr.data-date]="day.date.toISOString()"
+              [attr.aria-label]="day.date.toDateString()"
+              [attr.tabindex]="cellTabIndex(day)"
+              cdkDropList
+              [cdkDropListData]="day.date"
+              (cdkDropListDropped)="onChipDropped($event, day)"
+              (click)="onCellClick($event, day)"
+              (keydown)="onGridKeydown($event)"
+            >
+              <div class="nge-month-view__chips">
+                @for (chip of day.visible; track chip.id) {
+                  <button
+                    type="button"
+                    class="nge-month-view__chip"
+                    [class.nge-month-view__chip--draggable]="canDrag(chip)"
+                    data-testid="nge-month-chip"
+                    [attr.data-event-id]="chip.id"
+                    [attr.aria-label]="chip.title"
+                    cdkDrag
+                    [cdkDragData]="chip"
+                    [cdkDragDisabled]="!canDrag(chip)"
+                    (click)="store.selectEvent(chip.id)"
+                  >
+                    <span
+                      class="nge-month-view__chip-dot"
+                      [style.background-color]="chipColor(chip)"
+                    ></span>
+                    <span class="nge-month-view__chip-label">{{ chip.title }}</span>
+                  </button>
+                }
+
+                @if (day.hiddenCount > 0) {
+                  <button
+                    type="button"
+                    class="nge-month-view__more"
+                    data-testid="nge-month-more"
+                    [attr.aria-label]="day.hiddenCount + ' more events'"
+                    (click)="store.openPopover(day.date)"
+                  >
+                    +{{ day.hiddenCount }} more
+                  </button>
+                }
+              </div>
+
+              @if (isPopoverCell(day.date)) {
+                <div
+                  class="nge-month-view__popover"
+                  role="dialog"
+                  data-testid="nge-month-popover"
+                  [attr.aria-label]="day.date.toDateString() + ' events'"
+                >
+                  <div class="nge-month-view__popover-header">
+                    <span class="nge-month-view__popover-title">{{ day.dayOfMonth }}</span>
+                    <button
+                      type="button"
+                      class="nge-month-view__popover-close"
+                      data-testid="nge-month-popover-close"
+                      aria-label="Close"
+                      (click)="store.closePopover()"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <ul class="nge-month-view__popover-list">
+                    @for (event of store.popoverEvents(); track event.id) {
+                      <li>
+                        <button
+                          type="button"
+                          class="nge-month-view__popover-event"
+                          data-testid="nge-month-popover-event"
+                          [attr.data-event-id]="event.id"
+                          [attr.aria-label]="event.title"
+                          (click)="store.selectEvent(event.id)"
+                        >
+                          <span
+                            class="nge-month-view__chip-dot"
+                            [style.background-color]="chipColor(event)"
+                          ></span>
+                          <span class="nge-month-view__chip-label">{{ event.title }}</span>
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                </div>
+              }
+            </div>
+          }
+
+          @for (bar of week.bars; track bar.event.id) {
+            <button
+              type="button"
+              class="nge-month-view__bar"
+              [class.nge-month-view__bar--start]="bar.isStart"
+              [class.nge-month-view__bar--end]="bar.isEnd"
+              [style.left]="barLeft(bar)"
+              [style.width]="barWidth(bar)"
+              [style.top]="barTop(bar)"
+              [style.background-color]="chipColor(bar.event)"
+              [style.border-color]="chipColor(bar.event)"
+              [attr.data-testid]="'nge-month-bar'"
+              [attr.data-event-id]="bar.event.id"
+              [attr.aria-label]="bar.event.title"
+              (click)="store.selectEvent(bar.event.id)"
+            >
+              <span class="nge-month-view__bar-label">{{ bar.event.title }}</span>
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </div>
+}

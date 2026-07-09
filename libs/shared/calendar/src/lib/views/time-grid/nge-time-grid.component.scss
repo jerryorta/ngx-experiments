@@ -1,0 +1,361 @@
+// `<nge-time-grid>` styling (ARCH-67 / S7) — the shared week + day time grid.
+//
+// ViewEncapsulation.None — every rule is scoped under the `.nge-time-grid` host
+// class, NEVER `:host`. All colours / typography / spacing / radii / z-index come
+// from the `--nge-calendar-*` token helper (shared with the shell + month view),
+// so the view is self-sufficient un-themed and upgrades under a consumer override.
+// NO Angular Material / `--mat-sys-*` anything.
+//
+// Layout: ONE vertical scroll container (`__scroll`) holds the day-headers, the
+// all-day strip AND the time `__canvas`, so a scrollbar narrows all three equally
+// and the columns stay aligned (headers outside the scroller would shift against
+// the scrolled body). The headers + all-day strip are pinned via a sticky
+// `__topbar`. The canvas is a CSS Grid of `gutter + N` columns whose height is
+// `hour-height × hours`, so every absolutely-positioned event / hour-line /
+// now-line resolves its `top%` against the full day window. All positioning
+// inputs come from `store.timeGridViewModel()` — this file does no layout maths.
+@use "../../theme/nge-calendar-tokens" as tok;
+
+.nge-time-grid {
+  // Geometry contract (shared between SCSS and the template's inline `top%`):
+  --nge-tg-gutter: 3.5rem; // time-axis (gutter) width
+  --nge-tg-hour-h: 3rem; // rendered height of one hour row
+  --nge-tg-allday-bar-h: 1.25rem; // all-day bar height
+  --nge-tg-allday-step: 1.375rem; // all-day bar lane step (height + gap)
+  --nge-tg-resize-h: 6px; // bottom-edge resize handle hit-height
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  font-family: tok.nge-calendar-token("font-family");
+  font-size: tok.nge-calendar-token("font-size-base");
+  color: tok.nge-calendar-token("on-surface");
+
+  &__grid {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    border: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("outline-variant");
+    border-radius: tok.nge-calendar-token("radius-md");
+    overflow: hidden;
+  }
+
+  // ── the single scroll container ────────────────────────────────────────────
+  // Headers, all-day strip AND the time canvas all live here, so they share one
+  // width context and the columns stay aligned. The native scrollbar is hidden:
+  // it reserved space that left a gap before the right border (the headers /
+  // hour-lines stopped short). Vertical scroll still works via wheel / trackpad /
+  // keyboard, and the grid auto-scrolls to "now" on load.
+  &__scroll {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: none; // Firefox
+    background: tok.nge-calendar-token("surface");
+
+    &::-webkit-scrollbar {
+      display: none; // WebKit / Blink
+    }
+  }
+
+  // Sticky header band: day headers + all-day strip pinned at the top while the
+  // canvas scrolls beneath. Above the now-line (z 20) so it scrolls under cleanly.
+  &__topbar {
+    position: sticky;
+    top: 0;
+    z-index: 25;
+    background: tok.nge-calendar-token("surface");
+  }
+
+  // ── all-day strip ──────────────────────────────────────────────────────────
+  // A single track (1fr after the gutter) the same width as the N columns, with
+  // bars absolutely overlaid by % so they span days like the month view's bars.
+  &__allday {
+    display: grid;
+    grid-template-columns: var(--nge-tg-gutter) 1fr;
+    background: tok.nge-calendar-token("surface");
+    border-bottom: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("outline-variant");
+  }
+
+  &__allday-label {
+    display: flex;
+    align-items: center;
+    padding: tok.nge-calendar-token("spacing-xs");
+    font-size: tok.nge-calendar-token("font-size-sm");
+    color: tok.nge-calendar-token("on-surface-variant");
+    border-right: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("outline-variant");
+  }
+
+  &__allday-track {
+    position: relative;
+    min-height: calc(var(--nge-tg-allday-step) * var(--nge-tg-allday-rows, 1));
+    padding: tok.nge-calendar-token("spacing-xs") 0;
+  }
+
+  &__allday-bar {
+    position: absolute;
+    z-index: 1;
+    box-sizing: border-box;
+    min-width: 0;
+    height: var(--nge-tg-allday-bar-h);
+    padding: 0 tok.nge-calendar-token("spacing-xs");
+    font: inherit;
+    font-size: tok.nge-calendar-token("font-size-sm");
+    line-height: var(--nge-tg-allday-bar-h);
+    text-align: left;
+    color: tok.nge-calendar-token("event-fg");
+    background: tok.nge-calendar-token("event-bg");
+    border: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("event-bg");
+    // Flush (square) edges by default; rounded only on the real start / end.
+    border-radius: 0;
+    cursor: pointer;
+
+    &--start {
+      border-top-left-radius: tok.nge-calendar-token("radius-sm");
+      border-bottom-left-radius: tok.nge-calendar-token("radius-sm");
+    }
+
+    &--end {
+      border-top-right-radius: tok.nge-calendar-token("radius-sm");
+      border-bottom-right-radius: tok.nge-calendar-token("radius-sm");
+    }
+
+    &:focus-visible {
+      outline: 2px solid tok.nge-calendar-token("accent");
+      outline-offset: 1px;
+    }
+  }
+
+  &__allday-bar-label {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  // ── column day headers ───────────────────────────────────────────────────
+  // grid-template-columns is bound inline (literal `repeat(N, …)`) — `repeat(var())`
+  // is invalid CSS, so the column count comes from the component.
+  &__headers {
+    display: grid;
+    background: tok.nge-calendar-token("surface-container");
+    border-bottom: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("outline-variant");
+  }
+
+  &__corner {
+    border-right: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("outline-variant");
+  }
+
+  &__col-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.125rem;
+    padding: tok.nge-calendar-token("spacing-xs");
+    text-align: center;
+
+    &:not(:last-child) {
+      border-right: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("outline-variant");
+    }
+
+    // Today: filled pill on the day number.
+    &--today .nge-time-grid__col-day {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.5rem;
+      height: 1.5rem;
+      color: tok.nge-calendar-token("on-surface");
+      background: tok.nge-calendar-token("today");
+      border-radius: tok.nge-calendar-token("radius-sm");
+    }
+
+    // Anchor: subtle accent ring (quiet; combines with the today pill).
+    &--anchor .nge-time-grid__col-day {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.5rem;
+      height: 1.5rem;
+      border: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("accent");
+      border-radius: tok.nge-calendar-token("radius-sm");
+    }
+  }
+
+  &__col-weekday {
+    font-size: tok.nge-calendar-token("font-size-sm");
+    font-weight: 600;
+    text-transform: uppercase;
+    color: tok.nge-calendar-token("on-surface-variant");
+  }
+
+  &__col-day {
+    font-size: tok.nge-calendar-token("font-size-base");
+    font-weight: 600;
+  }
+
+  // ── scrolling time canvas ──────────────────────────────────────────────────
+  // grid-template-columns is bound inline (see __headers).
+  &__canvas {
+    display: grid;
+    // Full day-window height (hours × hour-height) → the scroll container scrolls.
+    height: calc(var(--nge-tg-hour-h) * var(--nge-tg-rows, 24));
+  }
+
+  &__gutter {
+    position: relative;
+    border-right: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("outline-variant");
+  }
+
+  // Hour labels sit centred on their gridline (translateY -50%).
+  &__hour-label {
+    position: absolute;
+    right: tok.nge-calendar-token("spacing-xs");
+    transform: translateY(-50%);
+    font-size: tok.nge-calendar-token("font-size-sm");
+    color: tok.nge-calendar-token("on-surface-variant");
+    white-space: nowrap;
+  }
+
+  &__col {
+    position: relative;
+    min-width: 0;
+
+    &:not(:last-child) {
+      border-right: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("outline-variant");
+    }
+
+    // Roving-focus ring (ARCH-70 / S10). The column is the managed-focus target —
+    // exactly one is `tabindex=0`; arrow keys move focus between columns (L/R) or the
+    // focused time within a column (U/D). Inset so it reads inside the column border.
+    &:focus-visible {
+      outline: 2px solid tok.nge-calendar-token("accent");
+      outline-offset: -2px;
+    }
+  }
+
+  // Focused-slot band (ARCH-70 / S10): one slot tall at `focusedDate`'s minute-of-day,
+  // painted only in the focused column. The analog of the month cell's focus ring,
+  // pinpointing the focused TIME — a subtle accent-tinted fill with an accent left
+  // edge. Sits above the hour-lines (z 1) but below event blocks (z 2) and the
+  // now-line, so it never occludes an event the user is about to act on.
+  &__focus-slot {
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    box-sizing: border-box;
+    background: tok.nge-calendar-token("selected");
+    border-left: 2px solid tok.nge-calendar-token("accent");
+    pointer-events: none;
+  }
+
+  &__hour-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-top: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("outline-variant");
+    pointer-events: none;
+  }
+
+  // Timed event block: absolutely positioned by minute offset (top/height) and
+  // overlap lane (left/width). A thin surface-coloured hairline separates lanes.
+  // NOTE: `overflow` stays visible so the bottom-edge resize handle (which sits
+  // flush at the block's bottom) is not clipped; the title clamps its own overflow.
+  &__event {
+    position: absolute;
+    z-index: 2;
+    box-sizing: border-box;
+    min-height: 1rem;
+    padding: 0.125rem tok.nge-calendar-token("spacing-xs");
+    font: inherit;
+    font-size: tok.nge-calendar-token("font-size-sm");
+    text-align: left;
+    color: tok.nge-calendar-token("event-fg");
+    background: tok.nge-calendar-token("event-bg");
+    border: tok.nge-calendar-token("border-width") solid tok.nge-calendar-token("surface");
+    border-radius: tok.nge-calendar-token("radius-sm");
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 2px solid tok.nge-calendar-token("accent");
+      outline-offset: 1px;
+    }
+
+    // Draggable blocks (editable calendar + the event opts in) get a grab cursor;
+    // it flips to grabbing while a pointer drag is in flight.
+    &--draggable {
+      cursor: grab;
+
+      &:active {
+        cursor: grabbing;
+      }
+    }
+  }
+
+  &__event-title {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  // Bottom-edge resize handle: a thin full-width strip flush to the block's bottom.
+  // Pointer-driven (see the component) — `ns-resize` cursor; rendered only when the
+  // event is editable AND has an end. Sits above the block body so its own cursor
+  // and pointer events win over the block's grab/drag.
+  &__event-resize {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 3;
+    height: var(--nge-tg-resize-h);
+    cursor: ns-resize;
+    touch-action: none;
+  }
+
+  // CDK drag artefacts, scoped to the time grid. The preview is the block lifted
+  // under the pointer during a free-drag move. We keep it minimal and on-token
+  // rather than relying on Material defaults.
+  .cdk-drag-preview {
+    z-index: tok.nge-calendar-token("z-drag");
+    box-sizing: border-box;
+    padding: 0.125rem tok.nge-calendar-token("spacing-xs");
+    color: tok.nge-calendar-token("event-fg");
+    background: tok.nge-calendar-token("event-bg");
+    border-radius: tok.nge-calendar-token("radius-sm");
+    box-shadow: 0 2px 8px rgb(0 0 0 / 20%);
+  }
+
+  // Smooth the settle animation when a block is released (then `reset()` snaps it
+  // back to its config-derived position).
+  .cdk-drag-animating {
+    transition: transform 150ms ease;
+  }
+
+  // ── now-line ───────────────────────────────────────────────────────────────
+  &__now {
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: tok.nge-calendar-token("z-now-line");
+    border-top: 2px solid tok.nge-calendar-token("now-indicator");
+    pointer-events: none;
+  }
+
+  &__now-dot {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 0.5rem;
+    height: 0.5rem;
+    transform: translate(-50%, -50%);
+    background: tok.nge-calendar-token("now-indicator");
+    border-radius: 50%;
+  }
+}
