@@ -104,7 +104,9 @@ describe('OverviewStore', () => {
       store.setTrendRange('3m');
       const data = store.netWorthChartConfig().layers[0].data as NgeLineDataPoint[];
       expect(data).toHaveLength(2);
-      expect(data[data.length - 1].y).toBe(130000);
+      // y is dollars (valueCents / 100) — the line preset has no Y-tick formatter,
+      // so the store scales the data instead (130000 cents → 1300).
+      expect(data[data.length - 1].y).toBe(1300);
     });
 
     it('slices to the last 6 months when trendRange is 6m (cutoff 2026-01-01)', () => {

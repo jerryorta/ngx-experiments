@@ -173,9 +173,12 @@ export const OverviewStore = signalStore(
       /** Net-worth trend line, sliced to `trendRange`. */
       netWorthChartConfig: computed<NgeChartConfig>(() =>
         createLineChartConfig({
+          // The line preset (unlike the bar presets) has no Y-tick formatter, so
+          // scale cents → dollars in the data to keep the axis readable; the
+          // tooltip rounds back to cents for exact `formatMoney` output.
           data: netWorthPoints().map<NgeLineDataPoint>(point => ({
             x: parseIsoDateLocal(point.date),
-            y: point.valueCents,
+            y: point.valueCents / 100,
           })),
           showArea: true,
           showXAxis: true,
@@ -184,10 +187,10 @@ export const OverviewStore = signalStore(
             enabled: true,
             formatContent: point => ({
               label: point.x instanceof Date ? point.x.toLocaleDateString() : String(point.x),
-              value: formatMoney(point.y),
+              value: formatMoney(Math.round(point.y * 100)),
             }),
           },
-          yAxisTickFormat: formatAxisDollars,
+          yAxisLabel: 'Net worth',
         })
       ),
 

@@ -56,7 +56,9 @@
         }
       </div>
       @if (facade.netWorthSeries().length) {
-        <nge-chart [config]="store.netWorthChartConfig()" />
+        <div class="h-64 w-full">
+          <nge-chart [config]="store.netWorthChartConfig()" />
+        </div>
       } @else {
         <ldg-empty-state
           icon="show_chart"
@@ -68,7 +70,9 @@
 
     <dlc-analytics-card label="Spending by Category">
       @if (facade.spendingByCategory().length) {
-        <ldg-donut-chart [segments]="store.spendingSegments()" [showLegend]="true" />
+        <div class="h-64 w-full">
+          <ldg-donut-chart [segments]="store.spendingSegments()" [showLegend]="true" />
+        </div>
       } @else {
         <ldg-empty-state
           icon="donut_large"
@@ -80,7 +84,9 @@
 
     <dlc-analytics-card label="Budget vs. Actual" explainer="This month's spending against each category's limit.">
       @if (store.hasBudgetData()) {
-        <nge-chart [config]="store.budgetChartConfig()" />
+        <div class="h-64 w-full">
+          <nge-chart [config]="store.budgetChartConfig()" />
+        </div>
       } @else {
         <ldg-empty-state
           icon="track_changes"
@@ -92,7 +98,9 @@
 
     <dlc-analytics-card label="Cashflow" explainer="Inflow vs. outflow by month.">
       @if (facade.cashflow().length) {
-        <nge-chart [config]="store.cashflowChartConfig()" />
+        <div class="h-64 w-full">
+          <nge-chart [config]="store.cashflowChartConfig()" />
+        </div>
       } @else {
         <ldg-empty-state
           icon="swap_vert"
