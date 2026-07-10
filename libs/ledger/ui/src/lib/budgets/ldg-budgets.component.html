@@ -1,0 +1,102 @@
+<ldg-header-bar
+  title="Budgets"
+  subtitle="July 2026"
+/>
+
+<ldg-page-content>
+  <div class="ldg-budgets__content flex flex-col gap-8">
+    <section class="ldg-budgets__section flex flex-col gap-4">
+      <h2 class="ldg-budgets__section-title text-sm font-semibold tracking-wider uppercase opacity-60">
+        Category budgets
+      </h2>
+
+      @if (facade.status() === 'loading') {
+        <p class="ldg-budgets__loading text-sm text-(--ldg-muted)">Loading budgets…</p>
+      } @else if (!store.budgetRows().length) {
+        <ldg-empty-state
+          icon="account_balance_wallet"
+          heading="No budgets set for July"
+          message="Budgets you create will show up here as cards, alongside how much you've spent."
+        />
+      } @else {
+        <div class="ldg-budgets__grid grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          @for (row of store.budgetRows(); track row.category.id) {
+            <div class="ldg-budgets__card relative">
+              <ldg-budget-card
+                [category]="row.category"
+                [limitCents]="row.limitCents"
+                [spentCents]="row.spentCents"
+              />
+              <ldg-icon-button
+                class="absolute top-3 right-3"
+                icon="edit"
+                [ariaLabel]="'Edit ' + row.category.name + ' budget'"
+                (pressed)="store.startEdit(row)"
+              />
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="ldg-budgets__section flex flex-col gap-4">
+      <h2 class="ldg-budgets__section-title text-sm font-semibold tracking-wider uppercase opacity-60">
+        Bills &amp; due dates
+      </h2>
+
+      <nge-calendar
+        [config]="store.calendarConfig()"
+        (eventClick)="onBillEventClick($event)"
+      />
+
+      @if (store.selectedBill(); as bill) {
+        <div
+          class="ldg-budgets__bill-detail flex items-center justify-between gap-3 rounded-lg border border-(--ldg-border) bg-(--ldg-card) p-3 text-sm text-(--ldg-on-surface)"
+        >
+          <div class="flex min-w-0 flex-col">
+            <span class="truncate font-semibold">{{ bill.name }}</span>
+            <span class="text-xs text-(--ldg-muted)">Due {{ bill.dueDate }} · {{ bill.recurrence }}</span>
+          </div>
+          <span class="font-semibold">{{ store.selectedBillAmount() }}</span>
+          <ldg-icon-button
+            icon="close"
+            ariaLabel="Dismiss bill detail"
+            (pressed)="store.clearBill()"
+          />
+        </div>
+      }
+    </section>
+  </div>
+</ldg-page-content>
+
+@if (store.editingCategory(); as category) {
+  <dlc-dialog
+    [visible]="true"
+    [ariaLabel]="'Edit ' + category.name + ' budget'"
+    size="sm"
+    (dismissed)="store.cancelEdit()"
+  >
+    <div dlc-dialog-title>
+      <h2 class="ldg-budgets__dialog-title text-lg font-semibold">{{ category.name }} budget</h2>
+    </div>
+    <div dlc-dialog-content>
+      <ldg-amount-input
+        label="Monthly limit"
+        [ngModel]="store.draftLimitCents()"
+        (ngModelChange)="store.updateDraft($event)"
+      />
+    </div>
+    <div dlc-dialog-actions>
+      <dlc-button
+        variant="ghost"
+        (click)="store.cancelEdit()"
+        >Cancel</dlc-button
+      >
+      <dlc-button
+        variant="primary"
+        (click)="store.saveEdit()"
+        >Save</dlc-button
+      >
+    </div>
+  </dlc-dialog>
+}
