@@ -15,24 +15,14 @@
 
 Its conventions — coding standards, generators, and a curated set of AI / Claude skills and docs — are **mirrored from a larger production monorepo** with every product/domain specific stripped out, so what you build matches battle-tested patterns while staying framework-pure.
 
-**Principles**
+## Concepts
 
-- **Standalone + signals everywhere** — `input()` / `output()`, component-scoped `@ngrx/signals` stores, new control flow (`@if` / `@for`), OnPush, `ViewEncapsulation.None`.
-- **No Angular Material** — components self-theme through their own `--<prefix>-*` CSS-variable tokens (with literal fallbacks), never `--mat-sys-*`.
-- **Nx domain-library-set** — each domain is a consistent set of libs (`models` / `store` / `ui` / `design-library` / `utils` / `mocks` / `themes`), each with its own short prefix.
+Each shared library is a self-contained answer to one architecture question — small enough to read end-to-end:
 
-## What's inside
-
-| Library | Import | Description |
-| --- | --- | --- |
-| **ui-design-library** | `@nge/ui-design-library` | **50 `dlc-` presentational components** — button, input, select, chip, dialog, drawer, data-table, tooltip, stepper, cards, filters… |
-| **themes** | `@nge/themes` | **3 personas** (Professional / Home / Service Provider) × light & dark, as `--dlc-*` CSS-variable tokens |
-| **calendar** | `@nge/calendar` | Calendar, date-picker, time-picker, and views |
-| **charts** | `@nge/charts` | d3-based chart primitives |
-| **date** · **rxjs** · **storybook** | `@nge/*` | Temporal utilities, RxJS helpers, Storybook support |
-
-- **`apps/storybook-app`** — a Storybook host that serves every component + chart + calendar story, with a **persona theme switcher** in the toolbar.
-- **1,100+ passing Jest tests**, lint-clean across the workspace.
+- **What would a custom component (design) library look like?** — `@nge/ui-design-library` (`dlc-*`): standalone, OnPush components with signal `input()` / `output()`, themed entirely through CSS-variable tokens. A complete design system with **zero Angular Material**.
+- **What would an _extensible_ charts library look like?** — `@nge/charts`: one `<nge-chart [config]>` driven by composable **layers** (bar, line, bullet, donut…). Each chart type is just a pure D3 render fn + config + `--chart-*` theme slice + preset — so a domain can incubate its own chart and promote it upstream by _moving files_, not rewriting.
+- **What would a comprehensive component system look like?** — `@nge/calendar`: day / week / month / year views with drag, resize, and filtering, all driven by one component-scoped `@ngrx/signals` store composed from small `with-*` features.
+- **What would custom app domains look like?** — `/new-domain` scaffolds a full library-set (`models · store · ui · design-library · utils · mocks · themes`) plus an app built on the libraries above. The **Ledger** personal-finance dashboard (`apps/ledger`) is the worked example.
 
 ## Quick start
 
