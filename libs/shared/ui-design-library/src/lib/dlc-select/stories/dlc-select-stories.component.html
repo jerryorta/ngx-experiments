@@ -32,6 +32,18 @@
     />
   </div>
 
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Scrolling Options — Long List</h4>
+  <div class="mb-8 max-w-xs">
+    <dlc-select
+      placeholder="Select market…"
+      [options]="marketOptions"
+      [(ngModel)]="selectedMarket"
+    />
+    <p class="mt-2 text-xs text-(--dlc-on-surface-variant)">
+      14 options — open the panel to scroll (it caps at 280px, ~7 visible).
+    </p>
+  </div>
+
   <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Disabled State</h4>
   <div class="mb-8 max-w-xs">
     <dlc-select
