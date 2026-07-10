@@ -6,7 +6,7 @@
 ## How to resume in a new session
 1. Read this file + `docs/demos/personal-finance-demo-prompt.md` + the auto-loaded `MEMORY.md`
    (especially `project-ngx-experiments-stale-docs` — the repo's reference docs are partly stale).
-2. Check **Status** below for the current wave. Fine-grained API signatures are in **Appendix A** (no need to re-scout).
+2. Check **Status** below for the current wave. **Appendix B** = the BUILT API surface (Waves 0–2: `LedgerFacade`, the `ldg-*` components, models/utils/mocks) to consume next — read it before writing Wave 3 briefs. **Appendix A** = the shared-lib (`dlc-*`/charts/calendar) cheat-sheet. No re-scouting needed.
 3. Work on branch `feat/ledger-demo`. Update the Status checklist + Decisions log as you go.
 4. Model strategy: **Opus orchestrates + verifies; Sonnet workers build** (tight, de-staled briefs). Reuse shared `dlc-*` / charts / calendar; build only new `ldg-*` presentational pieces.
 
@@ -158,3 +158,45 @@ One component `<nge-chart [config]="cfg">` (+ standalone `<nge-chart-legend [ite
 - Themes: 6 host classes `.dlc-{professional|home|service-provider}-{light|dark}` set `--dlc-*`; **no theme service — swap the class** (bind via `[class]` from a signal). Persona files also bridge `--chart-*` and `--nge-calendar-*` onto `--dlc-*`. App opt-in: `@use 'dlc-themes'; @include dlc-themes.dlc-theme-mixin();` + `includePaths` has `libs/shared/themes/src/lib/styles`.
 - `@nge/rxjs` = **only `memoize`** (no delay). **Async-mock pattern (build it):** `of(SEED).pipe(delay(300))` → `toSignal(...)` (rxjs-interop) → consume with `@let` in the template. Use inside store effects for realistic NgRx flow.
 - create-storybook / create-chart-storybook skills are **stale on imports** — use `@nge/storybook` + `NgeStorybookReviewContainerComponent` (not `Giga*`) and `nge-chart`/`NgeChartComponent`. Real reference story: `libs/shared/calendar/src/lib/nge-calendar/stories/generic/`.
+
+---
+
+## Appendix B — Built API surface (Waves 0–2) — consume in Wave 3+ (no re-scouting)
+
+Everything below is BUILT, green, and committed on `feat/ledger-demo`. Wave 3 screens **consume** these — do not rebuild them. Commits: `641ea54` (W0 scaffold) · `61bb0d4`/`1412c80`/`113f8d5` (W1) · `6359736` (W2). Domain is fully green: `nx run-many -t lint,test --projects='ledger-*'` (quote the glob — zsh) + `ledger-app:build` + `storybook-app:build-storybook`.
+
+### `@nge/ledger-models`
+`Account { id; name; type: AccountType; balanceCents; currency; institution; last4? }` · `Transaction { id; accountId; categoryId; amountCents (SIGNED — neg=outflow/expense, pos=inflow); date 'YYYY-MM-DD'; merchant; notes?; pending? }` · `Category { id; name; kind:'income'|'expense'; accent (a `var(--ldg-category-N)` string); icon? (Material Symbol) }` · `Budget { id; categoryId; month 'YYYY-MM'; limitCents }` · `Bill { id; name; amountCents; dueDate 'YYYY-MM-DD'; recurrence; categoryId?; accountId?; autopay?; status? }`. Enums: `AccountType='checking'|'savings'|'credit'|'investment'|'cash'`, `CategoryKind`, `BillRecurrence`, `BillStatus`. **Money = signed integer cents everywhere; format only at the edge.**
+
+### `@nge/ledger-utils`
+- `formatMoney(cents, opts?: {currency?; locale?})` → e.g. `'-$12.34'`; `parseMoney(str)` → integer cents (inverse; tolerant of `$`/`,`/spaces/leading `-`).
+- `spendingByCategory(txns, cats, range?) → CategorySpending[] { accent; categoryId; name; totalCents }` (desc, expense-only, zero-omitted).
+- `netWorthSeries(accounts, txns, opts?) → NetWorthPoint[] { date; valueCents }`.
+- `budgetVsActual(budgets, txns, month) → CategoryBudgetActual[] { budgetCents; categoryId; spentCents }`.
+- `cashflow(txns, opts?) → CashflowPeriod[] { period 'YYYY-MM'; inflowCents; outflowCents; netCents }`.
+- `IsoDateRange { start; end }` (inclusive ISO). Date logic is plain-string/TZ-proof — don't reintroduce date-fns for `'YYYY-MM-DD'` math.
+
+### `@nge/ledger-store`
+**`LedgerFacade`** (`providedIn:'root'` — inject it, NEVER `Store`): signals `accounts/bills/budgets/categories/transactions` (entity lists), `status` ('idle'|'loading'|'loaded'|'error'), `error`, `cashflow`, `netWorthSeries`, `spendingByCategory`; methods `load(): void` (dispatch once from the shell), `budgetVsActual(month='2026-07'): Signal<CategoryBudgetActual[]>`. Also exports `provideLedgerStore()`, `ledgerFeature`, `LedgerActions`, `LedgerState`, `LedgerStatus`, `LEDGER_LOAD_LATENCY_MS`. **Not yet wired into the app** (app shows a placeholder) — Wave 4 adds `provideLedgerStore()` to `app.config.ts` + a root `load()`.
+
+### `@nge/ledger-mocks`
+`ledgerAccounts`(4) · `ledgerCategories`(10) · `ledgerTransactions`(~148, Feb–Jul 2026) · `ledgerBudgets`(2026-07) · `ledgerBills`(8) · `ledgerSeed` bundle. Store loads these; screens read via `LedgerFacade`, not directly.
+
+### `@nge/ledger-design-library` (all standalone, OnPush, `ViewEncapsulation.None`)
+- `<ldg-header-bar [title] [subtitle]>` + slots `[ldgHeaderLeading]` `[ldgHeaderActions]`
+- `<ldg-page-content [padded]>` + default content
+- `<ldg-empty-state [icon] [heading] [message]>` + slot `[ldgEmptyStateAction]`
+- `<ldg-icon-button [icon] [ariaLabel] [variant:'ghost'|'solid'] [disabled]>` `(pressed)`
+- `<ldg-category-chip [category] [selected]>` `(toggled: Category)`
+- `<ldg-amount-input [label] [placeholder] [allowNegative]>` — **CVA, value = integer cents** (null=empty); use with `[formControl]`/`ngModel`
+- `<ldg-account-card [account] [selected]>` `(pressed: Account)` — whole card is a `<button>`
+- `<ldg-budget-card [category] [limitCents] [spentCents]>` — over-budget auto-reddens (reuses `dlc-progress-bar`)
+- `<ldg-donut-chart [segments] [centerLabel] [centerValue] [showLegend] [thickness]>` `(segmentClick)`; `LdgDonutSegment { label; value; color }` — map `CategorySpending`→segments (`color: cat.accent`)
+
+### Wave 3 build notes (read before briefing workers)
+- **Screens → `libs/ledger/ui`** (`ledger-ui`, prefix `ldg`). Thin components: `input()/output()` + injected colocated SignalStore + `LedgerFacade` + template glue only. Local UI state (search/filter/date-range/sort/selected-row/dialog/edit-draft/trend-toggle) → **component-scoped `@ngrx/signals` SignalStore** (`providers:[Store]`, colocated, NEVER root; children `inject()` — no prop-drilling). App/domain data → `LedgerFacade`.
+- **`ngrx-component-state` skill is likely STALE** (same pattern as `ngrx-global-store` in W1): it cites an in-workspace Real-Estate CMA store that does NOT exist here. Take its signalStore API guidance; ignore workspace-template/Firestore refs; ground in NgRx source clone `~/Dev/open-source/platform`.
+- **`ledger-ui/jest.config.cts` needs the d3 `transformIgnorePatterns` fix** (copy from `ledger-design-library/jest.config.cts`) as soon as a screen/spec imports `@nge/charts`/`d3` — the Overview screen does. Orchestrator applies it (jest config is off-limits to workers).
+- **Screens (Blueprint §5):** Overview = stats + `dlc-analytics-card`s wrapping charts (net-worth `createLineChartConfig` x:Date+showArea · spending `ldg-donut-chart` · budget-vs-actual `createGroupedBarChartConfig` · cashflow composite) + `ldg-account-card` grid + recent-txns `dlc-data-table`. Transactions = filters (`dlc-search-input` + `ldg-category-chip` + date-range `dlc-filter-popover`+`nge-date-picker` + `dlc-sort-control`) + `dlc-data-table` (`dlcCell`/`dlcRowExpansion`) → row `dlc-drawer` + add/edit `dlc-dialog` (`ldg-amount-input`+`dlc-select`×2+`nge-date-picker`); state in `TransactionsStore`. Budgets = `ldg-budget-card` grid + edit (`ldg-amount-input`) + bills `<nge-calendar>` (events=bills, domain obj in `data`).
+- **`dlc-button` gotcha:** `w-full`, no `type` input (defaults to submit in a form) → drive dialogs via button-click outputs, not a native `<form>` submit.
+- **Isolation model (same as W2):** workers own disjoint screen folders + self-verify with **scoped** tests (`--testPathPatterns`, PLURAL); orchestrator owns the barrel (`libs/ledger/ui/src/index.ts`, currently `export {}`) + any project-config/jest edits + app wiring.
