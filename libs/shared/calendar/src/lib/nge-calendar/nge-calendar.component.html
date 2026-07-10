@@ -117,7 +117,7 @@
       } @else {
         <nge-calendar-default-event-overlay
           [event]="ctx.event"
-          [locale]="store.config()?.locale"
+          [locale]="$safeNavigationMigration(store.config()?.locale)"
         />
       }
     </nge-calendar-event-overlay>
