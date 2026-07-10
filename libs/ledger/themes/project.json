@@ -1,0 +1,13 @@
+{
+  "name": "ledger-themes",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/ledger/themes/src",
+  "prefix": "ldg",
+  "projectType": "library",
+  "tags": ["ledger", "themes", "lib"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

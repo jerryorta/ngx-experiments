@@ -22,7 +22,16 @@
       ],
       "@nge/themes": ["./libs/shared/themes/src/index.ts"],
       "@nge/date": ["./libs/shared/date/src/index.ts"],
-      "@nge/calendar": ["./libs/shared/calendar/src/index.ts"]
+      "@nge/calendar": ["./libs/shared/calendar/src/index.ts"],
+      "@nge/ledger-models": ["./libs/ledger/models/src/index.ts"],
+      "@nge/ledger-store": ["./libs/ledger/store/src/index.ts"],
+      "@nge/ledger-themes": ["./libs/ledger/themes/src/index.ts"],
+      "@nge/ledger-ui": ["./libs/ledger/ui/src/index.ts"],
+      "@nge/ledger-design-library": [
+        "./libs/ledger/design-library/src/index.ts"
+      ],
+      "@nge/ledger-utils": ["./libs/ledger/utils/src/index.ts"],
+      "@nge/ledger-mocks": ["./libs/ledger/mocks/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
