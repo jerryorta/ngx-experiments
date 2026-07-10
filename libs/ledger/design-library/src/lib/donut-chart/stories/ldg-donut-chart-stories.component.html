@@ -6,7 +6,9 @@
   <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
     Interactive (controlled by Storybook args)
   </h4>
-  <div class="mb-4 max-w-md">
+  <!-- ldg-donut-chart renders through <nge-chart>, which fills its container and
+       skips drawing at height 0 — so every wrapper needs an explicit height. -->
+  <div class="mb-4 h-64 max-w-md">
     <ldg-donut-chart
       [centerLabel]="centerLabelSig()"
       [centerValue]="centerValueSig()"
@@ -21,7 +23,7 @@
   </div>
 
   <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Thin Ring</h4>
-  <div class="mb-8 max-w-xs">
+  <div class="mb-8 h-56 max-w-xs">
     <ldg-donut-chart
       centerLabel="Spent"
       centerValue="$4,121"
@@ -34,12 +36,12 @@
   <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
     Filled Pie (thickness = 0)
   </h4>
-  <div class="mb-8 max-w-xs">
+  <div class="mb-8 h-56 max-w-xs">
     <ldg-donut-chart [segments]="segments" [showLegend]="false" [thickness]="0" />
   </div>
 
   <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">No Data</h4>
-  <div class="mb-8 max-w-xs">
+  <div class="mb-8 h-56 max-w-xs">
     <ldg-donut-chart centerLabel="No spending yet" [segments]="[]" />
   </div>
 </nge-storybook-review-container>
