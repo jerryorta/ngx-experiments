@@ -1,0 +1,46 @@
+// =============================================================================
+// Ledger CSS Variable Token Contract
+// =============================================================================
+// This file documents all --ldg-* CSS custom properties used across the app.
+// Semantic aliases resolve to the active --dlc-* persona value (see
+// libs/shared/themes) via CSS-variable indirection, so they need no persona
+// switching of their own. Ledger-only tokens (money, category accents) are
+// NEW values that vary by dark/light mode only. Actual values are defined in:
+//   _ldg-aliases.scss           --ldg-* passthrough aliases
+//   _ldg-money-tokens.scss      --ldg-money-*
+//   _ldg-category-tokens.scss   --ldg-category-*
+// =============================================================================
+
+// --- Surface ---
+// --ldg-surface              Page background (alias of --dlc-surface)
+// --ldg-card                 Card/panel background — stat tiles, transaction rows (alias of --dlc-surface-container)
+// --ldg-card-elevated        Modal/dropdown/popover background (alias of --dlc-surface-container-high)
+// --ldg-surface-hover        Hover/selected row tint (alias of --dlc-surface-variant)
+
+// --- Text ---
+// --ldg-on-surface           Primary text color (alias of --dlc-on-surface)
+// --ldg-muted                Secondary/muted text — timestamps, helper copy (alias of --dlc-on-surface-variant)
+
+// --- Brand ---
+// --ldg-primary              Primary brand color (alias of --dlc-primary)
+// --ldg-on-primary           Text/icon on primary-colored surfaces (alias of --dlc-on-primary)
+// --ldg-secondary            Accent / CTA color (alias of --dlc-secondary)
+// --ldg-on-secondary         Text/icon on accent-colored surfaces (alias of --dlc-on-secondary)
+
+// --- Borders ---
+// --ldg-border               Stronger border — inputs, focus rings (alias of --dlc-outline)
+// --ldg-border-subtle        Dividers, card edges (alias of --dlc-outline-variant)
+
+// --- Semantic states (generic UI feedback — NOT financial polarity) ---
+// --ldg-error                Form/validation error (alias of --dlc-error)
+// --ldg-warning              Warning state — e.g. a budget nearing its limit (alias of --dlc-warning)
+
+// --- Money (ledger-only — NEW values, dark/light tuned, not aliases) ---
+// --ldg-money-positive       Credit / income amounts — green
+// --ldg-money-negative       Debit / expense amounts — red
+
+// --- Category accents (ledger-only — NEW values, dark/light tuned) ---
+// --ldg-category-1..8        Qualitative palette for the spending-category donut
+//                            chart + category chips. Assign categories to slots
+//                            in a fixed, stable order — don't reassign a slot's
+//                            hue once data has shipped with it.

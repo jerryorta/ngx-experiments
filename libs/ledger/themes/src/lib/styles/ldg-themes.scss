@@ -1,4 +1,40 @@
-// @nge/ledger-themes entry — --ldg-* tokens aliasing the active --dlc-* persona,
-// plus ledger-only tokens (positive/negative money, category accents).
-// Populated in Wave 1/2. Kept as a resolvable stub so app / storybook-app
-// stylePreprocessorOptions.includePaths can @use 'ldg-themes'.
+// =============================================================================
+// Ledger — Theme Entry Point
+// =============================================================================
+// --ldg-* token layer over the shared @nge/themes personas (libs/shared/themes).
+// Semantic aliases are pure var(--dlc-*) passthroughs that follow whichever
+// .dlc-{persona}-{mode} class is active; ledger-only tokens (money, category
+// accents) are new values scoped to the dark/light class groups.
+// Import order: aliases → money → category
+// =============================================================================
+
+@use "ldg-aliases";
+@use "ldg-money-tokens";
+@use "ldg-category-tokens";
+
+@mixin ldg-theme-mixin() {
+  // Persona-agnostic — declared once for all six persona classes.
+  .dlc-professional-dark,
+  .dlc-professional-light,
+  .dlc-home-dark,
+  .dlc-home-light,
+  .dlc-service-provider-dark,
+  .dlc-service-provider-light {
+    @include ldg-aliases.ldg-aliases();
+  }
+
+  // Ledger-only tokens — vary by dark/light mode, identical across personas.
+  .dlc-professional-dark,
+  .dlc-home-dark,
+  .dlc-service-provider-dark {
+    @include ldg-money-tokens.ldg-money-tokens-dark();
+    @include ldg-category-tokens.ldg-category-tokens-dark();
+  }
+
+  .dlc-professional-light,
+  .dlc-home-light,
+  .dlc-service-provider-light {
+    @include ldg-money-tokens.ldg-money-tokens-light();
+    @include ldg-category-tokens.ldg-category-tokens-light();
+  }
+}

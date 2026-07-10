@@ -1,5 +1,7 @@
-/* Global styles — apply the @nge/themes personas so the app renders themed.
-   Wave 1/2 adds `@use 'ldg-themes'` for the ledger --ldg-* semantic aliases. */
+/* Global styles — apply the @nge/themes personas so the app renders themed,
+   then layer the ledger --ldg-* semantic aliases + money/category tokens. */
 @use 'dlc-themes';
+@use 'ldg-themes';
 
 @include dlc-themes.dlc-theme-mixin();
+@include ldg-themes.ldg-theme-mixin();

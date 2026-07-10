@@ -26,7 +26,7 @@
           "apps/ledger/app/src/styles.scss"
         ],
         "stylePreprocessorOptions": {
-          "includePaths": ["libs/shared/themes/src/lib/styles"]
+          "includePaths": ["libs/shared/themes/src/lib/styles", "libs/ledger/themes/src/lib/styles"]
         }
       },
       "configurations": {

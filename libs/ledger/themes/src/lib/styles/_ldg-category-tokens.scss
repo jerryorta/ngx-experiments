@@ -1,0 +1,38 @@
+// =============================================================================
+// Ledger — Category Accent Tokens
+// =============================================================================
+// NEW color values (not --dlc-* aliases) — an 8-slot qualitative palette for
+// the spending-category donut chart + category chips. Hues are spread evenly
+// around the wheel for at-a-glance discriminability and kept distinct from
+// --ldg-money-positive/negative (emerald/rose) so a category color never reads
+// as a positive/negative signal. Tuned per dark/light mode only (identical
+// across all three personas): light mode uses a deep 600-ish stop for contrast
+// against near-white surfaces; dark mode lightens to a 400-ish stop for
+// contrast against near-black surfaces.
+//
+// Assign categories to slots in a fixed, stable order (e.g. category creation
+// order) — don't reassign a slot's hue once data has shipped with it, or
+// historical charts/legends will relabel themselves.
+// =============================================================================
+
+@mixin ldg-category-tokens-light() {
+  --ldg-category-1: #2563eb; // blue
+  --ldg-category-2: #ea580c; // orange
+  --ldg-category-3: #7c3aed; // violet
+  --ldg-category-4: #0d9488; // teal
+  --ldg-category-5: #c026d3; // fuchsia
+  --ldg-category-6: #65a30d; // lime
+  --ldg-category-7: #0891b2; // cyan
+  --ldg-category-8: #475569; // slate — catch-all / "other"
+}
+
+@mixin ldg-category-tokens-dark() {
+  --ldg-category-1: #60a5fa; // blue
+  --ldg-category-2: #fb923c; // orange
+  --ldg-category-3: #a78bfa; // violet
+  --ldg-category-4: #2dd4bf; // teal
+  --ldg-category-5: #e879f9; // fuchsia
+  --ldg-category-6: #a3e635; // lime
+  --ldg-category-7: #22d3ee; // cyan
+  --ldg-category-8: #94a3b8; // slate — catch-all / "other"
+}

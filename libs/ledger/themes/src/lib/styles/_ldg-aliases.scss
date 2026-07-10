@@ -1,0 +1,37 @@
+// =============================================================================
+// Ledger — Semantic Token Aliases
+// =============================================================================
+// Pure var(--dlc-*) passthroughs. Custom-property indirection resolves against
+// whichever .dlc-{persona}-{mode} class is active on an ancestor, so these
+// aliases automatically follow the active persona — declared ONCE for all six
+// persona classes (see ldg-theme-mixin()), never duplicated per persona.
+// Literal fallbacks are @nge/themes professional-light's values, used only if
+// no .dlc-* ancestor class is present.
+// =============================================================================
+
+@mixin ldg-aliases() {
+  // --- Surface ---
+  --ldg-surface: var(--dlc-surface, #f8f9fa);
+  --ldg-card: var(--dlc-surface-container, #edf1f5);
+  --ldg-card-elevated: var(--dlc-surface-container-high, #e3e9ef);
+  --ldg-surface-hover: var(--dlc-surface-variant, #e3e9ef);
+
+  // --- Text ---
+  --ldg-on-surface: var(--dlc-on-surface, #121518);
+  --ldg-muted: var(--dlc-on-surface-variant, #5c6370);
+
+  // --- Brand ---
+  --ldg-primary: var(--dlc-primary, #0f2b3c);
+  --ldg-on-primary: var(--dlc-on-primary, #ffffff);
+  --ldg-secondary: var(--dlc-secondary, #c4841d);
+  --ldg-on-secondary: var(--dlc-on-secondary, #ffffff);
+
+  // --- Borders ---
+  --ldg-border: var(--dlc-outline, #c4d0da);
+  --ldg-border-subtle: var(--dlc-outline-variant, #e0e6ec);
+
+  // --- Semantic states — generic UI feedback (forms, toasts). NOT for
+  // financial amounts; use --ldg-money-positive / --ldg-money-negative for those. ---
+  --ldg-error: var(--dlc-error, #b3261e);
+  --ldg-warning: var(--dlc-warning, #f9a825);
+}

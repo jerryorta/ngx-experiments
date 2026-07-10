@@ -1,0 +1,27 @@
+// =============================================================================
+// Ledger — Money Tokens
+// =============================================================================
+// NEW color values (not --dlc-* aliases) for signed financial amounts —
+// transaction rows, balance deltas, budget-vs-actual. Tuned per dark/light
+// mode only (identical across all three personas): light mode uses a deep,
+// saturated tone for contrast against near-white surfaces; dark mode lightens
+// toward a mid-tone for contrast against near-black surfaces. Deliberately
+// distinct hues from --dlc-success/--dlc-error so financial polarity reads as
+// its own signal, not a generic validation state.
+// =============================================================================
+
+@mixin ldg-money-tokens-light() {
+  // --- Positive (emerald) — credits, income, balance increases ---
+  --ldg-money-positive: #047857;
+
+  // --- Negative (rose) — debits, expenses, balance decreases ---
+  --ldg-money-negative: #be123c;
+}
+
+@mixin ldg-money-tokens-dark() {
+  // --- Positive (emerald) ---
+  --ldg-money-positive: #34d399;
+
+  // --- Negative (rose) ---
+  --ldg-money-negative: #fb7185;
+}
