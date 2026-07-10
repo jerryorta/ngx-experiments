@@ -1,0 +1,47 @@
+.ldg-transactions {
+  color: var(--ldg-on-surface, #121518);
+  display: block;
+
+  &__search {
+    min-width: 220px;
+    flex: 1 1 220px;
+  }
+
+  // Reset the per-cell click target to a plain, full-width row surface —
+  // `dlc-data-table` has no row-click output of its own, so each templated
+  // cell is its own button (see the report's row-click deviation note).
+  &__cell-btn {
+    all: unset;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  &__amount {
+    font-variant-numeric: tabular-nums;
+
+    &--positive {
+      color: var(--ldg-money-positive, #047857);
+    }
+
+    &--negative {
+      color: var(--ldg-money-negative, #be123c);
+    }
+  }
+
+  &__pending-badge {
+    margin-left: 0.5rem;
+    color: var(--ldg-muted, #5c6370);
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+
+  &__drawer-fields {
+    dt {
+      color: var(--ldg-muted, #5c6370);
+    }
+  }
+}

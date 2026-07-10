@@ -1,0 +1,261 @@
+@let _range = store.dateRange();
+@let _selected = store.selectedRow();
+@let _draft = store.editDraft();
+@let _visibleTransactions = store.visibleTransactions();
+
+<ldg-header-bar title="Transactions">
+  <ldg-icon-button
+    ldgHeaderActions
+    icon="add"
+    ariaLabel="Add transaction"
+    (pressed)="store.openAddDialog()"
+  />
+</ldg-header-bar>
+
+<ldg-page-content>
+  <div class="ldg-transactions__filter-bar flex flex-wrap items-center gap-3">
+    <dlc-search-input
+      class="ldg-transactions__search"
+      placeholder="Search merchant or notes…"
+      [value]="store.searchQuery()"
+      (queryChange)="store.setSearch($event)"
+    />
+
+    <div class="ldg-transactions__chips flex flex-wrap items-center gap-2">
+      @for (cat of facade.categories(); track cat.id) {
+        <ldg-category-chip
+          [category]="cat"
+          [selected]="store.selectedCategoryIds().includes(cat.id)"
+          (toggled)="store.toggleCategory($event.id)"
+        />
+      }
+    </div>
+
+    <dlc-filter-popover
+      label="Date range"
+      [active]="!!_range"
+      [valueLabel]="_range ? _range.start + ' – ' + _range.end : ''"
+      [clearable]="true"
+      (cleared)="store.clearDateRange()"
+    >
+      <div class="ldg-transactions__date-range flex flex-col gap-3">
+        <div class="flex flex-col gap-1 text-sm">
+          <span>From</span>
+          <nge-date-picker
+            placeholder="Start date"
+            [max]="_range?.end ?? null"
+            [ngModel]="_range?.start ?? null"
+            (dateChange)="onRangeStartChange($event)"
+          />
+        </div>
+        <div class="flex flex-col gap-1 text-sm">
+          <span>To</span>
+          <nge-date-picker
+            placeholder="End date"
+            [min]="_range?.start ?? null"
+            [ngModel]="_range?.end ?? null"
+            (dateChange)="onRangeEndChange($event)"
+          />
+        </div>
+      </div>
+    </dlc-filter-popover>
+
+    <dlc-sort-control
+      [fieldOptions]="sortFieldOptions"
+      [field]="$any(store.sort().field)"
+      [direction]="store.sort().direction"
+      (sortChange)="onSortChange($event)"
+    />
+  </div>
+
+  @if (_visibleTransactions.length > 0) {
+    <dlc-data-table
+      class="ldg-transactions__table"
+      [columns]="columns"
+      [rows]="_visibleTransactions"
+    >
+      <ng-template
+        dlcCell="date"
+        let-row
+        let-value="value"
+      >
+        <button
+          type="button"
+          class="ldg-transactions__cell-btn"
+          (click)="store.selectRow(row.id)"
+        >
+          {{ value }}
+        </button>
+      </ng-template>
+
+      <ng-template
+        dlcCell="merchant"
+        let-row
+        let-value="value"
+      >
+        <button
+          type="button"
+          class="ldg-transactions__cell-btn"
+          (click)="store.selectRow(row.id)"
+        >
+          {{ value }}
+          @if (row.pending) {
+            <span class="ldg-transactions__pending-badge">Pending</span>
+          }
+        </button>
+      </ng-template>
+
+      <ng-template
+        dlcCell="categoryId"
+        let-row
+        let-value="value"
+      >
+        <button
+          type="button"
+          class="ldg-transactions__cell-btn"
+          (click)="store.selectRow(row.id)"
+        >
+          {{ categoryName(value) }}
+        </button>
+      </ng-template>
+
+      <ng-template
+        dlcCell="amountCents"
+        let-row
+        let-value="value"
+      >
+        <button
+          type="button"
+          class="ldg-transactions__cell-btn ldg-transactions__amount"
+          [class.ldg-transactions__amount--positive]="value >= 0"
+          [class.ldg-transactions__amount--negative]="value < 0"
+          (click)="store.selectRow(row.id)"
+        >
+          {{ formatAmount(value) }}
+        </button>
+      </ng-template>
+    </dlc-data-table>
+  } @else {
+    <ldg-empty-state
+      icon="receipt_long"
+      heading="No transactions found"
+      [message]="
+        store.hasActiveFilters() ? 'Try adjusting your filters.' : 'Add your first transaction to get started.'
+      "
+    >
+      @if (store.hasActiveFilters()) {
+        <dlc-button
+          ldgEmptyStateAction
+          variant="ghost"
+          size="sm"
+          (click)="store.clearFilters()"
+          >Clear filters</dlc-button
+        >
+      }
+    </ldg-empty-state>
+  }
+</ldg-page-content>
+
+<dlc-drawer
+  [opened]="!!_selected"
+  ariaLabel="Transaction details"
+  (closedStart)="store.closeDrawer()"
+>
+  @if (_selected) {
+    <div class="ldg-transactions__drawer flex flex-col gap-4 p-6">
+      <div class="flex items-start justify-between gap-2">
+        <h2 class="ldg-transactions__drawer-title text-lg font-semibold">{{ _selected.merchant }}</h2>
+        <dlc-button
+          variant="ghost"
+          size="sm"
+          (click)="store.openEditDialog(_selected)"
+          >Edit</dlc-button
+        >
+      </div>
+
+      <div
+        class="ldg-transactions__amount text-2xl font-semibold"
+        [class.ldg-transactions__amount--positive]="_selected.amountCents >= 0"
+        [class.ldg-transactions__amount--negative]="_selected.amountCents < 0"
+      >
+        {{ formatAmount(_selected.amountCents) }}
+      </div>
+
+      <dl class="ldg-transactions__drawer-fields grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+        <dt>Category</dt>
+        <dd>{{ categoryName(_selected.categoryId) }}</dd>
+        <dt>Account</dt>
+        <dd>{{ accountName(_selected.accountId) }}</dd>
+        <dt>Date</dt>
+        <dd>{{ _selected.date }}</dd>
+        @if (_selected.notes) {
+          <dt>Notes</dt>
+          <dd>{{ _selected.notes }}</dd>
+        }
+        @if (_selected.pending) {
+          <dt>Status</dt>
+          <dd>Pending</dd>
+        }
+      </dl>
+    </div>
+  }
+</dlc-drawer>
+
+<dlc-dialog
+  size="sm"
+  [ariaLabel]="_draft?.id ? 'Edit Transaction' : 'Add Transaction'"
+  [visible]="store.dialogOpen()"
+  (dismissed)="store.closeDialog()"
+>
+  <div dlc-dialog-title>
+    <h2 class="ldg-transactions__dialog-title text-lg font-semibold">
+      {{ _draft?.id ? 'Edit Transaction' : 'Add Transaction' }}
+    </h2>
+  </div>
+
+  <div dlc-dialog-content>
+    <div class="flex flex-col gap-4">
+      <ldg-amount-input
+        label="Amount"
+        [allowNegative]="true"
+        [ngModel]="_draft?.amountCents ?? null"
+        (ngModelChange)="store.updateDraft({ amountCents: $event })"
+      />
+      <dlc-select
+        placeholder="Category"
+        [options]="store.categoryOptions()"
+        [ngModel]="_draft?.categoryId ?? null"
+        (selectedValueChange)="store.updateDraft({ categoryId: $event ?? undefined })"
+      />
+      <dlc-select
+        placeholder="Account"
+        [options]="store.accountOptions()"
+        [ngModel]="_draft?.accountId ?? null"
+        (selectedValueChange)="store.updateDraft({ accountId: $event ?? undefined })"
+      />
+      <nge-date-picker
+        placeholder="Date"
+        [ngModel]="_draft?.date ?? null"
+        (dateChange)="store.updateDraft({ date: $event })"
+      />
+      <dlc-input
+        label="Merchant"
+        [ngModel]="_draft?.merchant ?? ''"
+        (ngModelChange)="store.updateDraft({ merchant: $event })"
+      />
+    </div>
+  </div>
+
+  <div dlc-dialog-actions>
+    <dlc-button
+      variant="ghost"
+      (click)="store.closeDialog()"
+      >Cancel</dlc-button
+    >
+    <dlc-button
+      variant="primary"
+      (click)="store.saveDraft()"
+      >Save</dlc-button
+    >
+  </div>
+</dlc-dialog>
