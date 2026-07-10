@@ -17,14 +17,16 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OSS="$(cd "$REPO_ROOT/.." && pwd)/open-source"
 mkdir -p "$OSS"
 
-# Pins: rxjs + ngrx match the installed versions exactly; angular + components use
-# the latest stable 21.x tag (installed 21.2.x isn't publicly tagged upstream -- the
-# 21.x public API is stable across patches). Bump these as you upgrade the workspace.
+# Pins match the installed dependency versions exactly (@angular/core, @angular/cdk,
+# @ngrx/store, rxjs in node_modules). NB the upstream tag formats DIFFER: angular +
+# components tag releases with a leading `v` (v22.0.6), while rxjs + ngrx use bare
+# version tags (7.8.2) -- get the prefix right or the clone fails. The /update command
+# re-pins these from node_modules whenever it bumps the framework; keep them in sync.
 REPOS=(
   "rxjs|https://github.com/ReactiveX/rxjs.git|7.8.2"
   "platform|https://github.com/ngrx/platform.git|21.1.1"
-  "components|https://github.com/angular/components.git|21.0.2"
-  "angular|https://github.com/angular/angular.git|21.0.3"
+  "components|https://github.com/angular/components.git|v22.0.4"
+  "angular|https://github.com/angular/angular.git|v22.0.6"
 )
 
 echo "Cloning framework sources -> $OSS"
