@@ -19,6 +19,10 @@
     --dlc-secondary: #d4921f;
     --dlc-secondary-container: #3d2910;
     --dlc-on-secondary: #fff7e6;
+    // Light content for text/icons ON the dark secondary-container (badges,
+    // active sort/filter chips). Undefined before, so it fell back to the dark
+    // literal and was illegible on the dark container in dark themes.
+    --dlc-on-secondary-container: #fff7e6;
 
     // --- Surface ---
     --dlc-surface: #07131b;
