@@ -5,6 +5,8 @@
   "scripts": {
     "s.app.demo": "npx nx run demo-app:serve:local-dev --skip-nx-cache --port 4201",
     "b.app.demo": "npx nx run demo-app:build --configuration=production --skip-nx-cache",
+    "storybook": "npx nx run storybook-app:storybook",
+    "build-storybook": "npx nx run storybook-app:build-storybook",
     "madge:analyze": "bash scripts/madge/analyze.sh",
     "madge:check": "bash scripts/madge/quick-check.sh",
     "madge:source": "bash scripts/madge/source-check.sh"
