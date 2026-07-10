@@ -13,14 +13,14 @@
 ---
 
 ## Status (living — update every session)
-- **Phase:** **Wave 0 COMPLETE** (2026-07-10) — scaffold + post-gen + green gate all passing. Ready for **Wave 1** (models → mocks → global store; theming backbone).
+- **Phase:** **Wave 1 COMPLETE** (2026-07-10) — data core (models/utils), deterministic mocks, global `@ngrx/store` + facade, and theming backbone all green (82 tests). Ready for **Wave 2** (`ldg-*` design-library components + stories).
 - **Branch:** `feat/ledger-demo` — create + commit this plan/brief as the baseline at the start of Wave 0.
 - **Resolved decisions:**
   - [x] **D1 — Spending-by-category viz:** BUILD `ldg-donut-chart` (bespoke d3 arc, token-themed, reuses `nge-chart-legend`). *Not* the horizontal-bar substitute.
   - [x] **D2 — Blueprint approved** by user.
 - **Wave checklist:**
   - [x] Wave 0 — scaffold + post-gen + green gate ✅ (2026-07-10)
-  - [ ] Wave 1 — models → mocks → global store; theming backbone
+  - [x] Wave 1 — models → mocks → global store; theming backbone ✅ (2026-07-10)
   - [ ] Wave 2 — `ldg-*` design-library components (incl. `ldg-donut-chart`) + stories
   - [ ] Wave 3 — three screens + component signal stores
   - [ ] Wave 4 — app shell / routing + theme-switcher showpiece
@@ -30,6 +30,8 @@
   - 2026-07-10: **D1 → build `ldg-donut-chart`** (donut, not bar). **D2 → blueprint approved.** Cleared to start Wave 0.
   - 2026-07-10 (**Wave 0 done**): Scaffolded 8 projects (`ledger-app` + 7 libs) via the corrected generator sequence. `@nx/js` libs (`models`, `mocks`) used `--bundler=none` to match `libs/shared/date` (no stray tsc build target). Generators **already emit zoneless `test-setup.ts`** (identical to shared libs) — no fixup needed; `zone.js` confirmed absent. Stripped the generator's sample components (they emitted `.component.css`, violating the scss convention) + the nx-welcome splash; every `index.ts` is now a documented `export {}` stub. `themes` reduced to styles-only (`export {}` + `src/lib/styles/ldg-themes.scss` stub). App wired for **Tailwind v4** (`src/tailwind.css` as a separate styles entry + `stylePreprocessorOptions.includePaths` → `libs/shared/themes/src/lib/styles`) and reuses `.dlc-professional-dark` on `<body>` until `ldg-themes` tokens land (Wave 1/2). Serve **port 4203** + `local-dev` build/serve configs added. **Green gate PASSED:** `nx run-many -t lint,test --projects=ledger-*` (8/8) + `nx run ledger-app:build` (clean).
   - 2026-07-10 (**Wave 0 deviations — flagged for confirm**): SKIPPED two plan post-gen items. (a) `apps/ledger/{backend,desktop,mobile}` `.nxignore` / nx.json eslint entries — those sibling apps don't exist (this is a web-app-only demo), and nx.json has no eslint-exclude array to mirror; adding entries for non-existent dirs is noise. (b) `s.app.ledger` / `b.app.ledger` npm scripts — recent commit `1ef5321` deliberately dropped the analogous `s.app.demo`/`b.app.demo`, and the repo now uses generic `nx run` scripts; serve via `nx run ledger-app:serve` (port 4203). Revisit if the sibling apps or per-app scripts are later wanted.
+  - 2026-07-10 (**Wave 1 done** — 3 commits, Opus-orchestrated + verified, Sonnet/Haiku workers): **round 1** (parallel) `ledger-models` + `ledger-utils` (Sonnet) ∥ `ledger-themes` backbone (Sonnet); **round 2** `ledger-mocks` seed (Haiku); **round 3** `ledger-store` (Sonnet, reused round-1 worker for warm model/util context). 82 tests green + app build. **API contract for later waves:** money = signed integer cents, `Transaction.amountCents` sign *is* the type (neg=outflow); utils aggregations `spendingByCategory`/`netWorthSeries`/`cashflow`/`budgetVsActual(month)`; store exposes `LedgerFacade` (root, signal reads + `load()`, `budgetVsActual(month='2026-07')`) — **components inject `LedgerFacade`, never `Store`**; `provideLedgerStore()` awaits Wave 4 app wiring; `LEDGER_LOAD_LATENCY_MS` token (300ms; 0 in tests). Theming: `--ldg-*` aliases follow the active `.dlc-*` persona; ledger-only `--ldg-money-positive/negative` + `--ldg-category-1..8` (slot 8 = "Other"); category `accent` values are `var(--ldg-category-N)`. Seed: ~148 txns Feb–Jul 2026, deterministic (no random/Date), anchored to "today" 2026-07-10.
+  - 2026-07-10 (**Wave 1 deviations — worth noting**): (a) **`ngrx-global-store` skill NOT used** — it's Firestore/concierge-specific (watch services, `firestoreWriteEffect`, `state.concierge-app.ts`) and references libs absent from this repo; the store is mock-loaded read-only, built from NgRx 21 source instead. The plan's "use the skill" line is stale for this demo. (b) **`ledger-utils` uses plain ISO-string date ops, not date-fns** — `new Date('YYYY-MM-DD')` + date-fns shifts a calendar day in non-UTC zones; string compare/`.slice(0,7)` is exact + TZ-proof. (c) **mocks on Haiku** per plan, guarded by a 39-assertion referential-integrity spec.
 
 ---
 
