@@ -5,6 +5,8 @@
   "scripts": {
     "storybook": "npx nx run storybook-app:storybook",
     "build-storybook": "npx nx run storybook-app:build-storybook",
+    "s.app.ledger": "npx nx run ledger-app:serve:local-dev --skip-nx-cache --port 4203",
+    "b.app.ledger": "npx nx run ledger-app:build --configuration=production --skip-nx-cache",
     "madge:analyze": "bash scripts/madge/analyze.sh",
     "madge:check": "bash scripts/madge/quick-check.sh",
     "madge:source": "bash scripts/madge/source-check.sh"
