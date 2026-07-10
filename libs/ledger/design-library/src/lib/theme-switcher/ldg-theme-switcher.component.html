@@ -1,0 +1,49 @@
+@let _options = options();
+
+<div
+  class="ldg-theme-switcher__grid grid grid-cols-2 gap-3 sm:grid-cols-3"
+  role="group"
+  aria-label="Theme"
+>
+  @for (option of _options; track option.theme.cssClass) {
+    <button
+      type="button"
+      class="ldg-theme-switcher__swatch {{
+        option.theme.cssClass
+      }} relative flex flex-col gap-2 rounded-(--dlc-radius-md) p-3 text-left"
+      [class.ldg-theme-switcher__swatch--active]="option.isActive"
+      [attr.aria-pressed]="option.isActive"
+      [attr.aria-label]="'Apply ' + option.displayName + ' theme'"
+      (click)="onSelect(option.theme)"
+    >
+      @if (option.isActive) {
+        <span
+          dlcIcon="check_circle"
+          class="ldg-theme-switcher__check absolute top-2 right-2 text-base"
+        ></span>
+      }
+
+      <span class="ldg-theme-switcher__chips flex gap-1.5" aria-hidden="true">
+        <span
+          class="ldg-theme-switcher__chip ldg-theme-switcher__chip--primary h-4 w-4 rounded-full"
+        ></span>
+        <span
+          class="ldg-theme-switcher__chip ldg-theme-switcher__chip--secondary h-4 w-4 rounded-full"
+        ></span>
+        <span
+          class="ldg-theme-switcher__chip ldg-theme-switcher__chip--surface h-4 w-4 rounded-full"
+        ></span>
+      </span>
+
+      <span
+        class="ldg-theme-switcher__name flex items-center gap-1.5 text-sm font-semibold"
+      >
+        <span
+          [dlcIcon]="option.theme.isDark ? 'dark_mode' : 'light_mode'"
+          class="ldg-theme-switcher__mode-icon text-base"
+        ></span>
+        {{ option.displayName }}
+      </span>
+    </button>
+  }
+</div>

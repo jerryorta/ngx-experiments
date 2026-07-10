@@ -1,0 +1,17 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  trackingNumber="NGE-LDG"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Interactive (controlled by Storybook args)
+  </h4>
+  <div class="max-w-xl">
+    <ldg-theme-switcher
+      [themes]="themes"
+      [activeCssClass]="activeSig()"
+      (themeSelected)="onThemeSelected($event)"
+    />
+  </div>
+  <p class="mt-4 text-xs opacity-60">Active: {{ activeSig() }}</p>
+</nge-storybook-review-container>

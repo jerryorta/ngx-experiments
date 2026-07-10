@@ -11,3 +11,4 @@ export * from './lib/empty-state/ldg-empty-state.component';
 export * from './lib/header-bar/ldg-header-bar.component';
 export * from './lib/icon-button/ldg-icon-button.component';
 export * from './lib/page-content/ldg-page-content.component';
+export * from './lib/theme-switcher/ldg-theme-switcher.component';

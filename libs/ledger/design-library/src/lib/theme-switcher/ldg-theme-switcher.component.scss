@@ -1,0 +1,61 @@
+.ldg-theme-switcher {
+  display: block;
+
+  // Each swatch below carries its OWN `.dlc-{persona}` class (see the
+  // template), so every --dlc-* read in this file resolves against THAT
+  // swatch's persona, not whichever persona is ambient app-wide — that's
+  // the whole trick. Never swap these for the --ldg-* aliases: those are
+  // declared once, higher up the tree, so they wouldn't follow the swap.
+
+  &__swatch {
+    background: var(--dlc-surface-container, #edf1f5);
+    border: 1px solid var(--dlc-outline, #c4d0da);
+    color: var(--dlc-on-surface, #121518);
+    cursor: pointer;
+    transition:
+      border-color var(--dlc-transition-duration, 160ms) ease,
+      box-shadow var(--dlc-transition-duration, 160ms) ease,
+      transform var(--dlc-transition-duration, 160ms) ease;
+
+    &:hover {
+      background: var(--dlc-surface-container-high, #e3e9ef);
+      transform: translateY(-1px);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--dlc-primary, #0f2b3c);
+      outline-offset: 2px;
+    }
+
+    &--active {
+      border-color: var(--dlc-primary, #0f2b3c);
+      box-shadow:
+        0 0 0 2px var(--dlc-surface, #f8f9fa),
+        0 0 0 4px var(--dlc-primary, #0f2b3c);
+    }
+  }
+
+  &__check {
+    color: var(--dlc-primary, #0f2b3c);
+  }
+
+  &__chip {
+    border: 1px solid var(--dlc-outline-variant, #e0e6ec);
+
+    &--primary {
+      background: var(--dlc-primary, #0f2b3c);
+    }
+
+    &--secondary {
+      background: var(--dlc-secondary, #c4841d);
+    }
+
+    &--surface {
+      background: var(--dlc-surface, #f8f9fa);
+    }
+  }
+
+  &__mode-icon {
+    color: var(--dlc-on-surface-variant, #5c6370);
+  }
+}
