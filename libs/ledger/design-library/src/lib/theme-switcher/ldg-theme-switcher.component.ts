@@ -24,8 +24,9 @@ interface LdgThemeOption {
 
 /**
  * Persona theme picker — the demo's flagship "prove the token architecture"
- * piece. Renders one swatch per `ThemeConfig`, and each swatch carries THAT
- * theme's own `cssClass` (see the template), so `var(--dlc-*)` inside it
+ * piece. Renders a column per persona (its dark tile on top, light on the
+ * bottom), and each swatch carries THAT theme's own `cssClass` (see the
+ * template), so `var(--dlc-*)` inside it
  * resolves to that persona's own palette regardless of whichever persona is
  * currently active app-wide — the option visually IS the theme it selects,
  * not just a label for it.
@@ -55,14 +56,34 @@ export class LdgThemeSwitcherComponent {
 
   readonly themeSelected = output<ThemeConfig>();
 
-  /** View-model for the template — one entry per theme, in input order. */
-  protected readonly options = computed<LdgThemeOption[]>(() => {
+  /**
+   * View-model — one column per persona, each ordered dark tile first (top),
+   * light tile second (bottom). Personas keep their first-seen order.
+   */
+  protected readonly columns = computed<LdgThemeOption[][]>(() => {
     const active = this.activeCssClass();
-    return this.themes().map((theme) => ({
-      displayName: formatThemeName(theme.name),
-      isActive: theme.cssClass === active,
-      theme,
-    }));
+    const byPersona = new Map<string, LdgThemeOption[]>();
+
+    for (const theme of this.themes()) {
+      // Group the light/dark pair under one persona key, e.g. 'dlc-professional'.
+      const persona = theme.cssClass.replace(/-(dark|light)$/, '');
+      const option: LdgThemeOption = {
+        displayName: formatThemeName(theme.name),
+        isActive: theme.cssClass === active,
+        theme,
+      };
+      const existing = byPersona.get(persona);
+      if (existing) {
+        existing.push(option);
+      } else {
+        byPersona.set(persona, [option]);
+      }
+    }
+
+    // Dark on top, light on bottom within each persona column.
+    return [...byPersona.values()].map((column) =>
+      [...column].sort((a, b) => Number(b.theme.isDark) - Number(a.theme.isDark))
+    );
   });
 
   protected onSelect(theme: ThemeConfig): void {
