@@ -15,7 +15,10 @@
 
   &--active {
     opacity: 1;
-    color: var(--dlc-primary, #6366f1);
+    // --ldg-accent (not --dlc-primary): the brand primary is a dark navy that
+    // is illegible on the dark pill background in dark themes; --ldg-accent
+    // stays legible per mode (dark navy on light, light on dark).
+    color: var(--ldg-accent, #6366f1);
     background: var(--dlc-surface-container-high, rgb(127 127 127 / 14%));
   }
 }

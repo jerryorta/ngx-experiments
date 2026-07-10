@@ -1,0 +1,26 @@
+// =============================================================================
+// Ledger — On-Surface Accent Token
+// =============================================================================
+// `--ldg-accent` is a primary-tinted accent used as a FOREGROUND on a ledger
+// surface/card (e.g. an account-card icon, the active nav link). It must stay
+// legible against the surface behind it — which `--ldg-primary` (= the brand
+// `--dlc-primary`) does NOT in dark themes: there the brand primary is a dark
+// navy that equals `--dlc-surface-container`, so primary-colored text/icons
+// vanish on dark surfaces.
+//
+// So this token varies by mode (like the money / category tokens):
+//   • light — the brand primary (dark navy), legible on light surfaces.
+//   • dark  — the persona's light on-surface tone, legible on every dark surface.
+//
+// Do NOT fold this into `--ldg-primary`: that token is also used as a
+// *background* (category-chip / icon-button fills) with light on-primary text,
+// and lightening it there would make that text illegible.
+// =============================================================================
+
+@mixin ldg-accent-tokens-light() {
+  --ldg-accent: var(--dlc-primary, #0f2b3c);
+}
+
+@mixin ldg-accent-tokens-dark() {
+  --ldg-accent: var(--dlc-on-surface, #e8f4fc);
+}

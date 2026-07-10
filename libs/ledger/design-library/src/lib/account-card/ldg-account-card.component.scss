@@ -28,7 +28,10 @@
 
   &__icon {
     background: var(--ldg-surface-hover, #e3e9ef);
-    color: var(--ldg-primary, #0f2b3c);
+    // --ldg-accent (not --ldg-primary): the brand primary is a dark navy that
+    // equals the dark surface, so it's illegible here in dark themes;
+    // --ldg-accent stays legible against the badge in both modes.
+    color: var(--ldg-accent, #0f2b3c);
   }
 
   &__meta {

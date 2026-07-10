@@ -11,6 +11,7 @@
 @use "ldg-aliases";
 @use "ldg-money-tokens";
 @use "ldg-category-tokens";
+@use "ldg-accent-tokens";
 
 @mixin ldg-theme-mixin() {
   // Persona-agnostic — declared once for all six persona classes.
@@ -29,6 +30,7 @@
   .dlc-service-provider-dark {
     @include ldg-money-tokens.ldg-money-tokens-dark();
     @include ldg-category-tokens.ldg-category-tokens-dark();
+    @include ldg-accent-tokens.ldg-accent-tokens-dark();
   }
 
   .dlc-professional-light,
@@ -36,5 +38,6 @@
   .dlc-service-provider-light {
     @include ldg-money-tokens.ldg-money-tokens-light();
     @include ldg-category-tokens.ldg-category-tokens-light();
+    @include ldg-accent-tokens.ldg-accent-tokens-light();
   }
 }
