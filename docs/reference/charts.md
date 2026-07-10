@@ -158,19 +158,76 @@ theme's chart bridge (per-repo locations are in `libs/shared/charts/AGENTS.md`).
 
 ---
 
-## Adding a new chart layer
+## Authoring a new chart type — the layer contract
 
-A layer is a pure D3 render function plus a namespaced theme slice, wired to a preset. Model
-a new one on an existing layer under `src/lib/layers/` (each is a self-contained
-`render-<name>-layer.ts`) and its `src/lib/presets/*.preset.ts`; generate its stories with
-the `create-chart-storybook` skill. The full step-by-step narrative (config interface →
-theme + defaults + merge fn → render fn → preset → stories) is preserved in the gigasoftware
-repo at `docs-projects/archive/features/chart-architecture/LAYER_IMPLEMENTATION_GUIDE.md` —
-accurate for the **layer mechanics**, though its theme defaults predate the `--chart-*`
-migration and show `--mat-sys-*`; use `--chart-*`.
+A "chart type" here is **not** an Angular component. It is four plain pieces that the
+`<giga-chart>` component orchestrates:
 
-Invariants to preserve: `ViewEncapsulation.None` + `OnPush`; theme structure namespaced by
-layer `type`; styling via D3 `.style()` (CSS classes for structure/queries only).
+| Piece | What it is | Lives in |
+| --- | --- | --- |
+| **Render fn** | `render<Name>Layer(context)` — a **pure D3 function** that draws into `context.bounds`. Type `GigaChartLayerRenderFn<Data, Config, Theme>` (`core/layer/`). | `layers/<name>/render-<name>-layer.ts` |
+| **Layer config** | A `type`-discriminated interface `{ type, data, renderer, …options, tooltip? }`, added to the `GigaChartLayerDefinition` union + the `GigaChartLayerType` string union. The layer **carries its own `renderer`**. | `core/config/` |
+| **Theme slice** | `theme.<type>` interface + defaults (in `--chart-*` tokens) + a `merge<Name>LayerTheme()`. Keyed by layer `type`. | `core/theme/` |
+| **Preset** | `create<Name>ChartConfig(options): GigaChartConfig` — builds `{ base, layers: [{ type, data, renderer, … }] }` for callers. | `presets/<name>-chart.preset.ts` |
+
+`renderChart()` (`giga-chart/giga-chart.renderer.ts`) resizes the layout, builds scales
+(`config.scaleFactory` or the default), renders axes, then `renderLayers()` calls each
+`layer.renderer(context)` with a shared context `{ bounds, data, dimensions, margins, scales,
+theme[type], tooltipConfig, tooltipElement, tooltipHandlers }`. A render fn draws SVG into
+`bounds`, reads geometry from `dimensions`, may build its **own** d3 scale (the bullet layer
+does — it ignores the shared `scales`), merges its theme via `merge<Name>LayerTheme()`, and
+emits `GigaTooltipEvent`s through `tooltipHandlers.onTooltip`.
+
+Invariants: theme namespaced by layer `type`; styling via D3 `.style()` with `--chart-*`
+tokens (CSS classes for structure/queries only, never `--mat-sys-*`). The full step-by-step
+narrative (config → theme + defaults + merge → render fn → preset → stories) is preserved in
+the gigasoftware repo at
+`docs-projects/archive/features/chart-architecture/LAYER_IMPLEMENTATION_GUIDE.md` (accurate
+for mechanics; its defaults predate the `--chart-*` migration). Generate stories with the
+`create-chart-storybook` skill.
+
+## Domain charts must be promotion-ready
+
+**A chart built in a domain lib follows the same layer contract as a shared one.** The point:
+when a domain chart's concept is approved, it should promote into `@gigasoftware/charts` by
+**moving files + registering a `type`** — never a rewrite. So build every chart as a layer
+(render fn + config + theme slice + preset) even while it incubates in your domain, and render
+it through `<giga-chart [config]>`.
+
+**Anti-pattern — do not do this.** A self-contained Angular chart component — one that owns
+its own `<svg viewBox>`, computes arcs/paths in a `computed()` and `@for`s them in its
+template, and takes arbitrary color strings — cannot mount inside `<giga-chart>` and cannot
+promote without a rewrite: none of its logic is a render fn, a config, or a `--chart-*` theme.
+(In ngx-experiments, `libs/ledger/design-library/src/lib/donut-chart/ldg-donut-chart.component.ts`
+is exactly this shape — a cautionary example, not a template to copy.)
+
+**Promotion-ready — do this instead.** Even a radial chart (donut/pie) fits the layer system.
+For a donut, build:
+
+- `render-donut-layer.ts` — a pure D3 fn that draws arcs into `context.bounds`, sizing from
+  `context.dimensions` (a radial layer **ignores** `scales`, computing `center` / `radius`
+  from `boundedWidth`/`boundedHeight` — the same way the bullet layer builds its own scale).
+- a `GigaDonutLayerConfig` (`{ type: 'donut', data, renderer, thickness?, tooltip? }`) + a
+  `GigaDonutDataPoint`.
+- a `theme.donut` slice defaulting to the `--chart-*` series tokens (not domain `--ldg-*`).
+- `createDonutChartConfig(options)` returning
+  `{ base: { showXAxis: false, showYAxis: false, margin: {…} }, layers: [{ type: 'donut', data, renderer: renderDonutLayer, … }] }`.
+
+Consume it as `<giga-chart [config]="createDonutChartConfig({ data })" />`. If you want a
+domain-branded element, wrap it in a **thin** domain component whose only job is to map domain
+inputs → the preset → `<giga-chart>` — all real logic stays in the promotable render fn/preset.
+
+**Incubate, then promote.** While unproven, keep the four pieces together in the domain (e.g.
+`libs/<domain>/design-library/src/lib/charts/<name>/`). When approved:
+
+1. Move `render-<name>-layer.ts` → `libs/shared/charts/src/lib/layers/<name>/`; the config →
+   `core/config/`; the theme slice/defaults/merge → `core/theme/`; the preset → `presets/`.
+2. Add `'<name>'` to the `GigaChartLayerType` union and the config to `GigaChartLayerDefinition`.
+3. Export all four from the charts barrel; move the stories; delete the domain copies (and the
+   thin wrapper, or repoint it at the now-shared preset).
+
+Because the incubated chart already used the layer contract + `--chart-*` tokens, promotion is
+a move + a `type` registration — no logic changes.
 
 ---
 
