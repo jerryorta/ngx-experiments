@@ -15,9 +15,13 @@
         [attr.stroke-width]="emptyRing().strokeWidth"
       />
     } @else {
-      @for (arcDatum of arcs(); track arcDatum.index) {
-        <path
-          class="ldg-donut-chart__slice"
+      <!-- d3.arc() emits paths centered at (0,0); translate the group to the
+           viewBox centre so the whole ring is in view (the empty-ring circle
+           above is already centred via its cx/cy=center). -->
+      <g [attr.transform]="'translate(' + center + ', ' + center + ')'">
+        @for (arcDatum of arcs(); track arcDatum.index) {
+          <path
+            class="ldg-donut-chart__slice"
           role="button"
           tabindex="0"
           [attr.aria-label]="arcDatum.label + ': ' + (arcDatum.percent | percent: '1.0-1')"
@@ -34,7 +38,8 @@
         >
           <title>{{ arcDatum.label }}: {{ arcDatum.percent | percent: '1.0-1' }}</title>
         </path>
-      }
+        }
+      </g>
     }
   </svg>
 
