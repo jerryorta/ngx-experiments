@@ -1,0 +1,6 @@
+.ldg-overview {
+  // Fills the app shell's content outlet; layout/spacing beyond this is
+  // handled by `ldg-page-content` + Tailwind utility classes in the template.
+  display: block;
+  height: 100%;
+}

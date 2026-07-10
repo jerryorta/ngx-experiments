@@ -1,0 +1,141 @@
+@let netWorth = store.netWorthKpi();
+@let totalBalance = store.totalBalanceKpi();
+@let monthSpending = store.monthSpendingKpi();
+@let monthNetCashflow = store.monthNetCashflowKpi();
+@let activeRange = store.trendRange();
+
+<ldg-header-bar title="Overview" subtitle="Your finances at a glance" />
+
+<ldg-page-content>
+  <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <dlc-stats-card
+      [label]="netWorth.label"
+      [value]="netWorth.value"
+      [trend]="netWorth.trend"
+      [trendLabel]="netWorth.trendLabel"
+    />
+    <dlc-stats-card
+      [label]="totalBalance.label"
+      [value]="totalBalance.value"
+      [trend]="totalBalance.trend"
+      [trendLabel]="totalBalance.trendLabel"
+    />
+    <dlc-stats-card
+      [label]="monthSpending.label"
+      [value]="monthSpending.value"
+      [trend]="monthSpending.trend"
+      [trendLabel]="monthSpending.trendLabel"
+    />
+    <dlc-stats-card
+      [label]="monthNetCashflow.label"
+      [value]="monthNetCashflow.value"
+      [trend]="monthNetCashflow.trend"
+      [trendLabel]="monthNetCashflow.trendLabel"
+    />
+  </section>
+
+  <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <dlc-analytics-card label="Net Worth Trend" explainer="Cumulative balance across every account over time.">
+      <div
+        class="ldg-overview__trend-toggle mb-3 inline-flex gap-1 rounded-(--dlc-radius-md) bg-(--dlc-surface-container) p-1"
+        data-testid="overview-trend-range-toggle"
+      >
+        @for (range of trendRangeOptions; track range.value) {
+          <button
+            type="button"
+            class="rounded-(--dlc-radius-sm) px-2.5 py-1 text-xs font-medium transition-all"
+            [attr.data-testid]="'overview-trend-range-' + range.value"
+            [class.bg-(--dlc-primary)]="activeRange === range.value"
+            [class.text-(--dlc-on-primary)]="activeRange === range.value"
+            [class.text-(--dlc-on-surface-variant)]="activeRange !== range.value"
+            [attr.aria-pressed]="activeRange === range.value"
+            (click)="store.setTrendRange(range.value)"
+          >
+            {{ range.label }}
+          </button>
+        }
+      </div>
+      @if (facade.netWorthSeries().length) {
+        <nge-chart [config]="store.netWorthChartConfig()" />
+      } @else {
+        <ldg-empty-state
+          icon="show_chart"
+          heading="No net worth history yet"
+          message="Once you have accounts and transactions, your trend shows up here."
+        />
+      }
+    </dlc-analytics-card>
+
+    <dlc-analytics-card label="Spending by Category">
+      @if (facade.spendingByCategory().length) {
+        <ldg-donut-chart [segments]="store.spendingSegments()" [showLegend]="true" />
+      } @else {
+        <ldg-empty-state
+          icon="donut_large"
+          heading="No spending yet"
+          message="Categorized expenses will show up here."
+        />
+      }
+    </dlc-analytics-card>
+
+    <dlc-analytics-card label="Budget vs. Actual" explainer="This month's spending against each category's limit.">
+      @if (store.hasBudgetData()) {
+        <nge-chart [config]="store.budgetChartConfig()" />
+      } @else {
+        <ldg-empty-state
+          icon="track_changes"
+          heading="No budgets set"
+          message="Create a budget to compare it against actual spending."
+        />
+      }
+    </dlc-analytics-card>
+
+    <dlc-analytics-card label="Cashflow" explainer="Inflow vs. outflow by month.">
+      @if (facade.cashflow().length) {
+        <nge-chart [config]="store.cashflowChartConfig()" />
+      } @else {
+        <ldg-empty-state
+          icon="swap_vert"
+          heading="No cashflow yet"
+          message="Monthly inflow and outflow will show up once you have transactions."
+        />
+      }
+    </dlc-analytics-card>
+  </div>
+
+  <section class="mt-6">
+    <h2 class="mb-3 text-lg font-semibold text-(--dlc-on-surface)">Accounts</h2>
+    @if (facade.accounts().length) {
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        @for (account of facade.accounts(); track account.id) {
+          <ldg-account-card [account]="account" />
+        }
+      </div>
+    } @else {
+      <ldg-empty-state
+        icon="account_balance"
+        heading="No accounts yet"
+        message="Connect an account to start tracking your money."
+      />
+    }
+  </section>
+
+  <section class="mt-6">
+    <h2 class="mb-3 text-lg font-semibold text-(--dlc-on-surface)">Recent Transactions</h2>
+    @if (store.recentTransactions().length) {
+      <dlc-data-table [columns]="transactionColumns" [rows]="store.recentTransactions()">
+        <ng-template dlcCell="amountCents" let-value="value">
+          <span [style.color]="value >= 0 ? 'var(--ldg-money-positive)' : 'var(--ldg-money-negative)'">
+            {{ formatMoney(value) }}
+          </span>
+        </ng-template>
+      </dlc-data-table>
+    } @else {
+      <ldg-empty-state
+        icon="receipt_long"
+        heading="No transactions yet"
+        message="Your recent activity will show up here."
+      />
+    }
+  </section>
+</ldg-page-content>
