@@ -1,4 +1,5 @@
-import type { Preview } from '@storybook/angular';
+import { applicationConfig, type Preview } from '@storybook/angular';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import {
   resolveThemeForGroup,
@@ -24,6 +25,8 @@ for (const href of [
 
 const preview: Preview = {
   decorators: [
+    // The app is zoneless (no zone.js); render every story with zoneless CD.
+    applicationConfig({ providers: [provideZonelessChangeDetection()] }),
     (storyFn, context) => {
       const selected =
         (context.globals as Record<string, string>)['theme'] ?? 'dlc-professional-dark';
