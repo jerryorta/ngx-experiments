@@ -1,0 +1,21 @@
+// Primary-nav link states. Tokens come from the active @nge persona (with
+// literal fallbacks); ViewEncapsulation.None on AppComponent makes these global,
+// so they stay namespaced under `ldg-shell__`.
+.ldg-shell__link {
+  color: var(--dlc-on-surface, #e7e7ea);
+  opacity: 0.65;
+  transition:
+    opacity 0.15s ease,
+    color 0.15s ease,
+    background-color 0.15s ease;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &--active {
+    opacity: 1;
+    color: var(--dlc-primary, #6366f1);
+    background: var(--dlc-surface-container-high, rgb(127 127 127 / 14%));
+  }
+}
