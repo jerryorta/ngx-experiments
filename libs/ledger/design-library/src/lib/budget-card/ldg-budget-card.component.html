@@ -1,0 +1,34 @@
+@let _category = category();
+@let _pct = pct();
+@let _isOver = isOver();
+@let _formattedSpent = formattedSpent();
+@let _formattedLimit = formattedLimit();
+@let _remainingLabel = remainingLabel();
+
+<div
+  class="ldg-budget-card__card flex flex-col gap-3 rounded-lg p-4"
+  [class.ldg-budget-card__card--over]="_isOver"
+>
+  <div class="flex items-center gap-2">
+    <span
+      class="ldg-budget-card__dot h-2.5 w-2.5 shrink-0 rounded-full"
+      [style.background-color]="_category.accent"
+      aria-hidden="true"
+    ></span>
+    <span class="ldg-budget-card__name truncate text-sm font-semibold">{{ _category.name }}</span>
+  </div>
+
+  <dlc-progress-bar
+    [value]="_pct"
+    [label]="_category.name + ' budget progress'"
+  />
+
+  <div class="flex items-center justify-between text-xs">
+    <span class="ldg-budget-card__spent">{{ _formattedSpent }} of {{ _formattedLimit }}</span>
+    <span
+      class="ldg-budget-card__remaining font-semibold"
+      [class.ldg-budget-card__remaining--over]="_isOver"
+      >{{ _remainingLabel }}</span
+    >
+  </div>
+</div>

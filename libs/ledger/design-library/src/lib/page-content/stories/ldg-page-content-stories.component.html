@@ -1,0 +1,30 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  trackingNumber="NGE-LDG"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Interactive (controlled by Storybook args)
+  </h4>
+  <div class="mb-8 h-72 w-80 overflow-hidden rounded-lg border border-(--dlc-outline-variant)">
+    <ldg-page-content [padded]="paddedSig()">
+      @for (row of rows; track row) {
+        <p class="mb-2 text-sm">Transaction row {{ row }}</p>
+      }
+    </ldg-page-content>
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Padded vs Unpadded</h4>
+  <div class="flex gap-4">
+    <div class="h-40 w-64 overflow-hidden rounded-lg border border-(--dlc-outline-variant)">
+      <ldg-page-content [padded]="true">
+        <p class="text-sm">padded = true</p>
+      </ldg-page-content>
+    </div>
+    <div class="h-40 w-64 overflow-hidden rounded-lg border border-(--dlc-outline-variant)">
+      <ldg-page-content [padded]="false">
+        <p class="text-sm">padded = false</p>
+      </ldg-page-content>
+    </div>
+  </div>
+</nge-storybook-review-container>

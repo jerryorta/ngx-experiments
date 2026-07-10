@@ -1,0 +1,23 @@
+@let _category = category();
+@let _selected = selected();
+
+<button
+  type="button"
+  class="ldg-category-chip__button inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+  [class.ldg-category-chip__button--selected]="_selected"
+  [attr.aria-pressed]="_selected"
+  (click)="onClick()"
+>
+  <span
+    class="ldg-category-chip__dot h-2.5 w-2.5 shrink-0 rounded-full"
+    aria-hidden="true"
+    [style.background-color]="_category.accent"
+  ></span>
+  @if (_category.icon) {
+    <span
+      class="ldg-category-chip__icon text-base"
+      [dlcIcon]="_category.icon"
+    ></span>
+  }
+  <span class="ldg-category-chip__label">{{ _category.name }}</span>
+</button>

@@ -9,6 +9,7 @@
     "../../../libs/shared/ui-design-library/src/**/*.stories.ts",
     "../../../libs/shared/charts/src/**/*.stories.ts",
     "../../../libs/shared/calendar/src/**/*.stories.ts",
+    "../../../libs/ledger/design-library/src/**/*.stories.ts",
     "preview.ts"
   ]
 }

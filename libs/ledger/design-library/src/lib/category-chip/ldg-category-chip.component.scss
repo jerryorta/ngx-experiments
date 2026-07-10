@@ -1,0 +1,23 @@
+.ldg-category-chip {
+  display: inline-flex;
+
+  &__button {
+    background-color: var(--ldg-card, #edf1f5);
+    border-color: var(--ldg-border, #c4d0da);
+    color: var(--ldg-on-surface, #121518);
+
+    &:hover {
+      background-color: var(--ldg-surface-hover, #e3e9ef);
+    }
+  }
+
+  &__button--selected {
+    background-color: var(--ldg-primary, #0f2b3c);
+    border-color: var(--ldg-primary, #0f2b3c);
+    color: var(--ldg-on-primary, #ffffff);
+
+    &:hover {
+      background-color: var(--ldg-primary, #0f2b3c);
+    }
+  }
+}

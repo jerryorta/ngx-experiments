@@ -1,0 +1,18 @@
+.ldg-amount-input {
+  display: block;
+  width: 100%;
+
+  &__label {
+    color: var(--ldg-muted, #5c6370);
+  }
+
+  &__adornment {
+    color: var(--ldg-muted, #5c6370);
+  }
+
+  &__field {
+    background-color: var(--ldg-card, #edf1f5);
+    border-color: var(--ldg-border, #c4d0da);
+    color: var(--ldg-on-surface, #121518);
+  }
+}

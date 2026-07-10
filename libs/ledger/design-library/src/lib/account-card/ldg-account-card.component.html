@@ -1,0 +1,32 @@
+@let _account = account();
+@let _selected = selected();
+@let _icon = typeIcon();
+@let _isNegative = isNegative();
+@let _balance = formattedBalance();
+@let _institutionLabel = institutionLabel();
+
+<button
+  type="button"
+  class="ldg-account-card__button flex w-full items-center gap-3 rounded-lg p-4 text-left"
+  [class.ldg-account-card__button--selected]="_selected"
+  [attr.aria-pressed]="_selected"
+  (click)="onPressed()"
+>
+  <span class="ldg-account-card__icon flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+    <span
+      [dlcIcon]="_icon"
+      class="text-xl"
+    ></span>
+  </span>
+
+  <span class="flex min-w-0 flex-1 flex-col items-start gap-0.5">
+    <span class="ldg-account-card__name truncate text-sm font-semibold">{{ _account.name }}</span>
+    <span class="ldg-account-card__meta truncate text-xs">{{ _institutionLabel }}</span>
+  </span>
+
+  <span
+    class="ldg-account-card__balance shrink-0 text-sm font-bold"
+    [class.ldg-account-card__balance--negative]="_isNegative"
+    >{{ _balance }}</span
+  >
+</button>

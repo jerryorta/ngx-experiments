@@ -1,0 +1,14 @@
+@let _subtitle = subtitle();
+
+<ng-content select="[ldgHeaderLeading]" />
+
+<div class="ldg-header-bar__titles flex min-w-0 flex-1 flex-col justify-center">
+  <span class="ldg-header-bar__title truncate text-base leading-tight font-semibold">{{ title() }}</span>
+  @if (_subtitle) {
+    <span class="ldg-header-bar__subtitle truncate text-sm leading-tight">{{ _subtitle }}</span>
+  }
+</div>
+
+<div class="ldg-header-bar__actions ml-auto flex shrink-0 items-center gap-1">
+  <ng-content select="[ldgHeaderActions]" />
+</div>

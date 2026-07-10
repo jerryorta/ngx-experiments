@@ -1,0 +1,29 @@
+.ldg-budget-card {
+  display: block;
+
+  &__card {
+    background: var(--ldg-card, #edf1f5);
+    border: 1px solid var(--ldg-border, #c4d0da);
+    color: var(--ldg-on-surface, #121518);
+
+    &--over {
+      background: color-mix(in srgb, var(--ldg-money-negative, #be123c) 8%, var(--ldg-card, #edf1f5));
+      border-color: var(--ldg-money-negative, #be123c);
+
+      // Retints the reused dlc-progress-bar's fill red for the over-budget state.
+      --dlc-secondary: var(--ldg-money-negative, #be123c);
+    }
+  }
+
+  &__spent {
+    color: var(--ldg-muted, #5c6370);
+  }
+
+  &__remaining {
+    color: var(--ldg-on-surface, #121518);
+
+    &--over {
+      color: var(--ldg-money-negative, #be123c);
+    }
+  }
+}

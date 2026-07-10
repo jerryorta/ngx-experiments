@@ -1,0 +1,34 @@
+@let _label = label();
+@let _placeholder = placeholder();
+@let _disabledByFormFlag = _disabledByForm();
+
+<div class="flex flex-col gap-1">
+  @if (_label) {
+    <label
+      class="ldg-amount-input__label text-xs font-medium"
+      [attr.for]="_inputId"
+    >
+      {{ _label }}
+    </label>
+  }
+  <div class="ldg-amount-input__control relative flex items-center">
+    <span
+      class="ldg-amount-input__adornment pointer-events-none absolute left-3 text-sm"
+      aria-hidden="true"
+      >$</span
+    >
+    <input
+      [id]="_inputId"
+      type="text"
+      inputmode="decimal"
+      class="ldg-amount-input__field w-full rounded-md border py-2 pr-3 pl-7 text-sm outline-none"
+      [class.opacity-50]="_disabledByFormFlag"
+      [class.cursor-not-allowed]="_disabledByFormFlag"
+      [placeholder]="_placeholder"
+      [disabled]="_disabledByFormFlag"
+      [value]="_value"
+      (input)="onInput($event)"
+      (blur)="onBlur()"
+    />
+  </div>
+</div>

@@ -1,0 +1,45 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  trackingNumber="NGE-LDG"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Interactive (controlled by Storybook args)
+  </h4>
+  <div class="mb-4 max-w-md">
+    <ldg-donut-chart
+      [centerLabel]="centerLabelSig()"
+      [centerValue]="centerValueSig()"
+      [segments]="segments"
+      [showLegend]="showLegendSig()"
+      [thickness]="thicknessSig()"
+      (segmentClick)="onSegmentClick($event)"
+    />
+  </div>
+  <div class="mb-8 text-sm opacity-70">
+    <strong>Last clicked:</strong> {{ lastClickedSig() }}
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Thin Ring</h4>
+  <div class="mb-8 max-w-xs">
+    <ldg-donut-chart
+      centerLabel="Spent"
+      centerValue="$4,121"
+      [segments]="segments"
+      [showLegend]="false"
+      [thickness]="0.8"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Filled Pie (thickness = 0)
+  </h4>
+  <div class="mb-8 max-w-xs">
+    <ldg-donut-chart [segments]="segments" [showLegend]="false" [thickness]="0" />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">No Data</h4>
+  <div class="mb-8 max-w-xs">
+    <ldg-donut-chart centerLabel="No spending yet" [segments]="[]" />
+  </div>
+</nge-storybook-review-container>

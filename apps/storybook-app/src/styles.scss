@@ -1,4 +1,7 @@
-/* Global styles — apply all @nge/themes personas so stories render themed. */
+/* Global styles — apply all @nge/themes personas + the ledger --ldg-* layer
+   so both shared dlc- and ledger ldg- stories render themed. */
 @use 'dlc-themes';
+@use 'ldg-themes';
 
 @include dlc-themes.dlc-theme-mixin();
+@include ldg-themes.ldg-theme-mixin();

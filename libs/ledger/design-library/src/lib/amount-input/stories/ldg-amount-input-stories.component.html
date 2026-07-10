@@ -1,0 +1,36 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  trackingNumber="NGE-LDG"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Interactive (controlled by Storybook args, bound via ngModel)
+  </h4>
+  <div class="mb-2 max-w-xs">
+    <ldg-amount-input
+      [label]="label"
+      [placeholder]="placeholder"
+      [allowNegative]="allowNegative"
+      [ngModel]="centsSig()"
+      (ngModelChange)="centsSig.set($event)"
+    />
+  </div>
+  <p class="mb-8 text-xs opacity-60">Current value: <code>{{ centsSig() }}</code> cents</p>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">States</h4>
+  <div class="flex max-w-xs flex-col gap-4">
+    <ldg-amount-input
+      label="Empty"
+      [ngModel]="null"
+    />
+    <ldg-amount-input
+      label="Positive amount"
+      [ngModel]="4999"
+    />
+    <ldg-amount-input
+      label="Allows negative"
+      [allowNegative]="true"
+      [ngModel]="-2500"
+    />
+  </div>
+</nge-storybook-review-container>

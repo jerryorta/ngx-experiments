@@ -1,0 +1,29 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  trackingNumber="NGE-LDG"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Interactive (controlled by Storybook args)
+  </h4>
+  <div class="mb-8 w-80">
+    <ldg-budget-card
+      [category]="category()"
+      [limitCents]="limitCentsSig()"
+      [spentCents]="spentCentsSig()"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Budget States (under / near / at / over the limit)
+  </h4>
+  <div class="grid w-full max-w-2xl grid-cols-1 gap-3 sm:grid-cols-2">
+    @for (state of budgetStates; track state.category.id) {
+      <ldg-budget-card
+        [category]="state.category"
+        [limitCents]="state.limitCents"
+        [spentCents]="state.spentCents"
+      />
+    }
+  </div>
+</nge-storybook-review-container>

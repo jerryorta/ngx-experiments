@@ -1,0 +1,15 @@
+@let _icon = icon();
+@let _disabled = disabled();
+
+<button
+  type="button"
+  class="ldg-icon-button__button"
+  [attr.aria-label]="ariaLabel()"
+  [attr.disabled]="_disabled ? '' : null"
+  (click)="pressed.emit()"
+>
+  <span
+    [dlcIcon]="_icon"
+    class="ldg-icon-button__icon"
+  ></span>
+</button>

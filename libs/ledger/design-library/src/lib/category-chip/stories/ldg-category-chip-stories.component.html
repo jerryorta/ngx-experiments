@@ -1,0 +1,26 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  trackingNumber="NGE-LDG"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Interactive (controlled by Storybook args)
+  </h4>
+  <div class="mb-8">
+    <ldg-category-chip
+      [category]="demoCategory"
+      [selected]="selectedSig()"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Click to Select</h4>
+  <div class="mb-8 flex flex-wrap gap-2">
+    @for (category of allCategories; track category.id) {
+      <ldg-category-chip
+        [category]="category"
+        [selected]="category.id === clickSelectedIdSig()"
+        (toggled)="onToggled($event)"
+      />
+    }
+  </div>
+</nge-storybook-review-container>

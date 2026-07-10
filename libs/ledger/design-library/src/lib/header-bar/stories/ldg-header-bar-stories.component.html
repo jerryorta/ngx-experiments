@@ -1,0 +1,67 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  trackingNumber="NGE-LDG"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Interactive (controlled by Storybook args)
+  </h4>
+  <div class="mb-8 overflow-hidden rounded-lg border border-(--dlc-outline-variant)">
+    <ldg-header-bar
+      [title]="titleSig()"
+      [subtitle]="subtitleSig()"
+    >
+      <span
+        ldgHeaderActions
+        dlcIcon="notifications"
+        class="text-xl"
+      ></span>
+    </ldg-header-bar>
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Title Only</h4>
+  <div class="mb-8 overflow-hidden rounded-lg border border-(--dlc-outline-variant)">
+    <ldg-header-bar title="Transactions" />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Leading + Trailing Actions
+  </h4>
+  <div class="overflow-hidden rounded-lg border border-(--dlc-outline-variant)">
+    <ldg-header-bar
+      title="Budgets"
+      subtitle="4 categories over limit"
+    >
+      <button
+        ldgHeaderLeading
+        type="button"
+        class="flex h-8 w-8 items-center justify-center rounded-full hover:bg-(--dlc-surface-container)"
+      >
+        <span
+          dlcIcon="arrow_back"
+          class="text-xl"
+        ></span>
+      </button>
+      <button
+        ldgHeaderActions
+        type="button"
+        class="flex h-8 w-8 items-center justify-center rounded-full hover:bg-(--dlc-surface-container)"
+      >
+        <span
+          dlcIcon="search"
+          class="text-xl"
+        ></span>
+      </button>
+      <button
+        ldgHeaderActions
+        type="button"
+        class="flex h-8 w-8 items-center justify-center rounded-full hover:bg-(--dlc-surface-container)"
+      >
+        <span
+          dlcIcon="more_vert"
+          class="text-xl"
+        ></span>
+      </button>
+    </ldg-header-bar>
+  </div>
+</nge-storybook-review-container>

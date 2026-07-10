@@ -1,0 +1,17 @@
+@let _icon = icon();
+@let _message = message();
+
+@if (_icon) {
+  <span
+    [dlcIcon]="_icon"
+    class="ldg-empty-state__icon text-4xl"
+  ></span>
+}
+
+<h3 class="ldg-empty-state__heading text-base font-semibold">{{ heading() }}</h3>
+
+@if (_message) {
+  <p class="ldg-empty-state__message max-w-xs text-sm">{{ _message }}</p>
+}
+
+<ng-content select="[ldgEmptyStateAction]" />

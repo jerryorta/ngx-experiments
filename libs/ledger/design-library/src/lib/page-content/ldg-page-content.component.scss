@@ -1,0 +1,11 @@
+.ldg-page-content {
+  // Transparent so the app surface (behind the shell) shows through.
+  background: transparent;
+  display: block;
+  height: 100%;
+  overflow-y: auto;
+
+  &--padded {
+    padding: 1.5rem;
+  }
+}

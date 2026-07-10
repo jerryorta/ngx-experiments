@@ -1,0 +1,40 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+  trackingNumber="NGE-LDG"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Interactive (controlled by Storybook args)
+  </h4>
+  <div class="mb-8 w-96 overflow-hidden rounded-lg border border-(--dlc-outline-variant)">
+    <ldg-empty-state
+      [icon]="iconSig()"
+      [heading]="headingSig()"
+      [message]="messageSig()"
+    >
+      <button
+        ldgEmptyStateAction
+        type="button"
+        class="rounded-md bg-(--dlc-secondary) px-4 py-2 text-sm font-medium text-(--dlc-on-secondary)"
+      >
+        Add Transaction
+      </button>
+    </ldg-empty-state>
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">Heading Only</h4>
+  <div class="mb-8 w-96 overflow-hidden rounded-lg border border-(--dlc-outline-variant)">
+    <ldg-empty-state heading="Nothing here" />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Icon + Heading + Message
+  </h4>
+  <div class="w-96 overflow-hidden rounded-lg border border-(--dlc-outline-variant)">
+    <ldg-empty-state
+      icon="search_off"
+      heading="No results"
+      message="Try a different search term or clear your filters."
+    />
+  </div>
+</nge-storybook-review-container>

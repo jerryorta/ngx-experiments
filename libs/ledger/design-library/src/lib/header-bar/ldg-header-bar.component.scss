@@ -1,0 +1,19 @@
+.ldg-header-bar {
+  align-items: center;
+  background: var(--ldg-surface, #f8f9fa);
+  border-bottom: 1px solid var(--ldg-border, #c4d0da);
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
+  &__title {
+    color: var(--ldg-on-surface, #121518);
+  }
+
+  &__subtitle {
+    color: var(--ldg-muted, #5c6370);
+  }
+}

@@ -1,0 +1,57 @@
+<div class="ldg-donut-chart__figure">
+  <svg
+    class="ldg-donut-chart__svg"
+    role="group"
+    [attr.aria-label]="ariaLabel()"
+    [attr.viewBox]="'0 0 ' + viewBoxSize + ' ' + viewBoxSize"
+  >
+    @if (isEmpty()) {
+      <circle
+        aria-hidden="true"
+        class="ldg-donut-chart__empty-ring"
+        [attr.cx]="center"
+        [attr.cy]="center"
+        [attr.r]="emptyRing().radius"
+        [attr.stroke-width]="emptyRing().strokeWidth"
+      />
+    } @else {
+      @for (arcDatum of arcs(); track arcDatum.index) {
+        <path
+          class="ldg-donut-chart__slice"
+          role="button"
+          tabindex="0"
+          [attr.aria-label]="arcDatum.label + ': ' + (arcDatum.percent | percent: '1.0-1')"
+          [attr.d]="arcDatum.path"
+          [class.ldg-donut-chart__slice--hovered]="arcDatum.isHovered"
+          [style.fill]="arcDatum.color"
+          (blur)="onSegmentHover(null)"
+          (click)="onSegmentClick(arcDatum)"
+          (focus)="onSegmentHover(arcDatum.index)"
+          (keydown.enter)="onSegmentClick(arcDatum)"
+          (keydown.space)="$event.preventDefault(); onSegmentClick(arcDatum)"
+          (mouseenter)="onSegmentHover(arcDatum.index)"
+          (mouseleave)="onSegmentHover(null)"
+        >
+          <title>{{ arcDatum.label }}: {{ arcDatum.percent | percent: '1.0-1' }}</title>
+        </path>
+      }
+    }
+  </svg>
+
+  @if (centerLabel() || centerValue()) {
+    <!-- Overlays the full figure (including the ring) so it must ignore pointer
+         events, or it would shadow the slices underneath from hover/click. -->
+    <div class="ldg-donut-chart__center">
+      @if (centerValue(); as value) {
+        <span class="ldg-donut-chart__center-value">{{ value }}</span>
+      }
+      @if (centerLabel(); as label) {
+        <span class="ldg-donut-chart__center-label">{{ label }}</span>
+      }
+    </div>
+  }
+</div>
+
+@if (showLegend()) {
+  <nge-chart-legend class="ldg-donut-chart__legend" [items]="legendItems()" />
+}

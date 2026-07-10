@@ -1,0 +1,45 @@
+.ldg-account-card {
+  display: block;
+
+  &__button {
+    background: var(--ldg-card, #edf1f5);
+    border: 1px solid var(--ldg-border, #c4d0da);
+    color: var(--ldg-on-surface, #121518);
+    cursor: pointer;
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+
+    &:hover {
+      background: var(--ldg-surface-hover, #e3e9ef);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ldg-primary, #0f2b3c);
+      outline-offset: 2px;
+    }
+
+    &--selected {
+      border-color: var(--ldg-primary, #0f2b3c);
+      box-shadow: 0 0 0 1px var(--ldg-primary, #0f2b3c);
+    }
+  }
+
+  &__icon {
+    background: var(--ldg-surface-hover, #e3e9ef);
+    color: var(--ldg-primary, #0f2b3c);
+  }
+
+  &__meta {
+    color: var(--ldg-muted, #5c6370);
+  }
+
+  &__balance {
+    color: var(--ldg-on-surface, #121518);
+
+    &--negative {
+      color: var(--ldg-money-negative, #be123c);
+    }
+  }
+}
