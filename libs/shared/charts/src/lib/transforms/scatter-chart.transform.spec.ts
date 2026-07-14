@@ -3,6 +3,8 @@ import type { ScaleLinear } from 'd3-scale';
 import type { NgeChartDimensions } from '../core/chart.models';
 import type { NgeChartConfig, NgeScatterDataPoint, NgeScatterLayerConfig } from '../core/config';
 
+import { clampDomain } from '../core/gesture';
+import { computeScatterXDataDomain, computeScatterYDataDomain } from '../presets/scatter-chart.preset';
 import { NgeScatterChartTransform } from './scatter-chart.transform';
 
 /** Narrow the first layer to a scatter layer config for assertions. */
@@ -170,6 +172,47 @@ describe('NgeScatterChartTransform', () => {
 
       transform.setXDomain(null);
       expect(xDomainOf(transform.config())).toEqual([0, 100]);
+    });
+  });
+
+  describe('range-axis focus clamps to the data extent (NGE-3 / ARCH-211)', () => {
+    const wide: NgeScatterDataPoint[] = [
+      { seriesId: 'A', x: 0, y: 0 },
+      { seriesId: 'A', x: 300, y: 300 },
+    ];
+    const narrow: NgeScatterDataPoint[] = [
+      { seriesId: 'A', x: 0, y: 0 },
+      { seriesId: 'A', x: 100, y: 100 },
+    ];
+
+    it('re-clamps a preserved zoom inside the new full domain when the data extent shrinks', () => {
+      const transform = createTransform({ data: wide, rangeAxisX: true, rangeAxisY: true });
+
+      // Zoom into a slice valid for the WIDE extent — nothing to clamp yet.
+      transform.setXDomain([200, 260]);
+      transform.setYDomain([200, 260]);
+      expect(xDomainOf(transform.config())).toEqual([200, 260]);
+      expect(yDomainOf(transform.config())).toEqual([200, 260]);
+
+      // The data shrinks (e.g. Randomize). The preserved focus now sits outside the
+      // new extent; without the clamp the brush window would project past the ruler.
+      transform.setData(narrow);
+
+      expect(xDomainOf(transform.config())).toEqual(
+        clampDomain([200, 260], computeScatterXDataDomain(narrow, 0.05))
+      );
+      expect(yDomainOf(transform.config())).toEqual(
+        clampDomain([200, 260], computeScatterYDataDomain(narrow, 0.1, false))
+      );
+    });
+
+    it('leaves an explicit out-of-extent override unclamped when no range axis is enabled', () => {
+      const transform = createTransform({ data: narrow });
+
+      // setXDomain is explicit control — a free axis-zoom honors it verbatim, even
+      // outside the data extent (there is no brush window that could overflow).
+      transform.setXDomain([200, 260]);
+      expect(xDomainOf(transform.config())).toEqual([200, 260]);
     });
   });
 

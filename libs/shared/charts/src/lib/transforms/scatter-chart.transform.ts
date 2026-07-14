@@ -284,6 +284,16 @@ export class NgeScatterChartTransform {
               : { ...point, opacity: fadedPointOpacity }
           );
 
+    // A range axis renders its brush window from the FOCUS domain projected onto the
+    // full data extent. Preserving a zoom across a data change (setData/updateOptions)
+    // can leave that focus outside the NEW extent — then the window edge projects past
+    // the ruler and the handle overflows the axis. Re-clamp the override to the current
+    // full domain whenever a range axis is enabled. A free axis-zoom (no range axis)
+    // keeps its explicit override, so setXDomain/setYDomain stay untouched.
+    const full = this.fullDomains();
+    const xOverride = this.xDomainOverride();
+    const yOverride = this.yDomainOverride();
+
     return createScatterChartConfig({
       ...presetOptions,
       animationMs: this.suppressAnimation() ? 0 : presetOptions.animationMs,
@@ -294,8 +304,14 @@ export class NgeScatterChartTransform {
         ...presetOptions.legend,
         items: this.legendItems(),
       },
-      xDomain: this.xDomainOverride() ?? presetOptions.xDomain,
-      yDomain: this.yDomainOverride() ?? presetOptions.yDomain,
+      xDomain:
+        xOverride && presetOptions.rangeAxisX
+          ? clampDomain(xOverride, full.x)
+          : (xOverride ?? presetOptions.xDomain),
+      yDomain:
+        yOverride && presetOptions.rangeAxisY
+          ? clampDomain(yOverride, full.y)
+          : (yOverride ?? presetOptions.yDomain),
     });
   }
 }
