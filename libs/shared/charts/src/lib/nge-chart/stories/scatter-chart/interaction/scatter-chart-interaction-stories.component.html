@@ -1,0 +1,68 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="interaction-container">
+    @if (rangeAxisX() || rangeAxisY()) {
+      <div class="range-axis-hint">
+        @if (rangeAxisX()) {
+          <span
+            >The X axis shows the full range with a brush — drag a handle to zoom the plot to that
+            slice, drag the window to pan. The plot's own drag/zoom still works and moves the
+            brush.</span
+          >
+        }
+        @if (rangeAxisY()) {
+          <span
+            >The Y axis is the full-range slider — drag a handle to zoom the plot to that slice,
+            drag the window to pan. The plot's own drag/zoom still works and moves the brush.</span
+          >
+        }
+      </div>
+    }
+    <div class="interaction-row">
+      <button
+        type="button"
+        class="interaction-btn interaction-btn--primary"
+        (click)="randomizeData()"
+      >
+        Randomize Data
+      </button>
+      @if (enableGestures()) {
+        <button
+          type="button"
+          class="interaction-btn"
+          (click)="transform.resetZoom()"
+        >
+          Reset Zoom
+        </button>
+        <span class="gesture-hint"
+          >Wheel = zoom at cursor · drag = pan · Shift+drag = zoom to rectangle · double-click =
+          reset</span
+        >
+      }
+    </div>
+    @if (externalLegend() && multiSeries()) {
+      <!-- Standalone reusable legend fed by the transform's legendItems signal,
+           placed just above the chart (custom placement). -->
+      <div class="external-legend-row">
+        <span class="external-legend-caption"
+          >Standalone &lt;nge-chart-legend&gt; — custom placement</span
+        >
+        <nge-chart-legend
+          [items]="transform.legendItems()"
+          [interactive]="true"
+          swatchShape="circle"
+          (itemClick)="transform.onLegendItemClick($event)"
+        />
+      </div>
+    }
+    <div class="chart-wrapper">
+      <nge-chart
+        [config]="config()"
+        (legendItemClick)="transform.onLegendItemClick($event)"
+        (chartGesture)="transform.onChartGesture($event)"
+      />
+    </div>
+  </div>
+</nge-storybook-review-container>

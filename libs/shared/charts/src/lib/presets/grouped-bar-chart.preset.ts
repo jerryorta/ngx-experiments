@@ -4,6 +4,7 @@ import type {
   NgeGroupedBarDataPoint,
   NgeGroupedBarLayerConfig,
 } from '../core/config';
+import type { NgeChartGesturesConfig } from '../core/gesture';
 import type { NgeChartLegendConfig } from '../core/legend';
 import type { NgeTooltipConfig, NgeTooltipContent, NgeTooltipStyle } from '../core/tooltip';
 
@@ -27,11 +28,22 @@ export interface GroupedBarChartTooltipOptions {
  * Options for creating a grouped bar chart config preset.
  */
 export interface GroupedBarChartPresetOptions {
+  /**
+   * Enter/update/exit transition duration in ms. Default 300.
+   * Set 0 for instant renders (used during zoom/pan gestures).
+   */
+  animationMs?: number;
   /** Padding between bars within a group (0-1) */
   barPadding?: number;
   /** Bar corner radius (px) */
   barRadius?: number;
   data: NgeGroupedBarDataPoint[];
+  /**
+   * Opt-in wheel-zoom / drag-pan / brush-zoom gesture capture. Pair the chart's
+   * `(chartGesture)` output with NgeGroupedBarChartTransform.onChartGesture —
+   * the group (category) axis windows by whole categories, the value axis auto-fits.
+   */
+  gestures?: NgeChartGesturesConfig;
   /** Padding between groups (0-1) */
   groupPadding?: number;
   /** Format function for value labels */
@@ -43,7 +55,11 @@ export interface GroupedBarChartPresetOptions {
   orientation?: 'horizontal' | 'vertical';
   showLabels?: boolean;
   showXAxis?: boolean;
+  /** Show vertical gridlines at the X axis tick positions. @default false */
+  showXGrid?: boolean;
   showYAxis?: boolean;
+  /** Show horizontal gridlines at the Y axis tick positions. @default false */
+  showYGrid?: boolean;
   tooltip?: GroupedBarChartTooltipOptions;
   xAxisLabel?: string;
   /** Custom format function for X axis tick labels */
@@ -85,9 +101,11 @@ export function createGroupedBarChartConfig(
   options: GroupedBarChartPresetOptions
 ): NgeChartConfig {
   const {
+    animationMs,
     barPadding,
     barRadius,
     data,
+    gestures,
     groupPadding,
     labelFormat,
     legend,
@@ -96,7 +114,9 @@ export function createGroupedBarChartConfig(
     orientation = 'vertical',
     showLabels = false,
     showXAxis = false,
+    showXGrid = false,
     showYAxis = false,
+    showYGrid = false,
     tooltip,
     xAxisLabel,
     xAxisTickFormat,
@@ -129,7 +149,9 @@ export function createGroupedBarChartConfig(
     base: {
       margin,
       showXAxis,
+      showXGrid,
       showYAxis,
+      showYGrid,
       xAxisLabel,
       xAxisTickFormat,
       xAxisTicks,
@@ -137,8 +159,10 @@ export function createGroupedBarChartConfig(
       yAxisTickFormat,
       yAxisTicks,
     },
+    gestures,
     layers: [
       {
+        animationMs,
         barPadding,
         barRadius,
         data,

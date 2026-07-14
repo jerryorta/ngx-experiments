@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, input, signal, ViewEncapsulation } from '@angular/core';
+import { Component, computed, effect, input, signal, ViewEncapsulation } from '@angular/core';
 import {
   NgeStorybookReviewContainerComponent,
   REVIEW_STATUS,
@@ -7,7 +7,7 @@ import {
 
 import type { NgeBarDataPoint, NgeChartConfig } from '../../../../core/config';
 
-import { createBarChartConfig } from '../../../../presets/bar-chart.preset';
+import { NgeBarChartTransform } from '../../../../transforms/bar-chart.transform';
 import { NgeChartComponent } from '../../../nge-chart.component';
 
 @Component({
@@ -15,12 +15,8 @@ import { NgeChartComponent } from '../../../nge-chart.component';
   host: {
     class: 'bar-chart-interaction-stories',
   },
-  imports: [
-    CommonModule,
-    NgeChartComponent,
-    NgeStorybookReviewContainerComponent,
-  ],
-  selector: 'nge-bar-chart-interaction-stories',
+  imports: [CommonModule, NgeChartComponent, NgeStorybookReviewContainerComponent],
+  selector: 'bar-chart-interaction-stories',
   standalone: true,
   styleUrl: './bar-chart-interaction-stories.component.scss',
   templateUrl: './bar-chart-interaction-stories.component.html',
@@ -54,6 +50,14 @@ export class BarChartInteractionStoriesComponent {
   readonly showMeanLine = input<boolean>(false);
   readonly showMedianLine = input<boolean>(false);
 
+  // Interaction inputs (ARCH-174)
+  /**
+   * Enable wheel-zoom / drag-pan / brush-zoom gestures (double-click resets).
+   * The band (category) axis windows by whole categories; the value axis
+   * auto-fits to the visible window.
+   */
+  readonly enableGestures = input<boolean>(true);
+
   // Theme inputs - Bar styling
   readonly barColor = input<string>('');
   readonly barHoverColor = input<string>('');
@@ -71,57 +75,80 @@ export class BarChartInteractionStoriesComponent {
   readonly statisticalLabelFontSize = input<number>(12);
   readonly statisticalLabelFontWeight = input<number>(500);
 
-  // Sample data as signal for dynamic updates
-  readonly sampleData = signal<NgeBarDataPoint[]>([
-    { label: 'Jan', value: 30 },
-    { label: 'Feb', value: 45 },
-    { label: 'Mar', value: 60 },
-    { label: 'Apr', value: 35 },
-    { label: 'May', value: 50 },
-    { label: 'Jun', value: 70 },
-  ]);
+  // Bumped by "Randomize Data" to re-roll the generated bars.
+  private readonly randomizeSeed = signal(0);
 
-  // Randomize data values
-  randomizeData(): void {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-    this.sampleData.set(
-      months.map(label => ({
-        label,
-        value: Math.floor(Math.random() * 80) + 10,
-      }))
-    );
+  // 12 categorical months — enough to window into with band-window zoom.
+  readonly sampleData = computed<NgeBarDataPoint[]>(() => {
+    this.randomizeSeed();
+    return this.buildData();
+  });
+
+  // Transform owns the interaction state (the category window) and derives the
+  // preset config; the constructor effect keeps its options in sync with the
+  // Storybook controls (window state survives control changes).
+  readonly transform = new NgeBarChartTransform({ data: [] });
+
+  constructor() {
+    effect(() => {
+      this.transform.updateOptions({
+        data: this.sampleData(),
+        gestures: this.enableGestures() ? { brushZoom: true, pan: true, zoom: true } : undefined,
+        orientation: this.orientation(),
+        showLabels: this.showLabels(),
+        showMeanLine: this.showMeanLine(),
+        showMedianLine: this.showMedianLine(),
+        showXAxis: this.showXAxis(),
+        showYAxis: this.showYAxis(),
+        tooltip: this.showTooltip()
+          ? {
+              enabled: true,
+              height: this.tooltipHeight(),
+              position: this.tooltipPosition(),
+              style: {
+                backgroundColor: this.tooltipBackgroundColor() || undefined,
+                borderColor: this.tooltipBorderColor() || undefined,
+                borderWidth: this.tooltipBorderWidth(),
+                divotHeight: this.tooltipDivotHeight(),
+                divotWidth: this.tooltipDivotWidth(),
+              },
+              width: this.tooltipWidth(),
+            }
+          : undefined,
+        xAxisLabel: this.xAxisLabel() || undefined,
+        yAxisLabel: this.yAxisLabel() || undefined,
+      });
+    });
   }
 
-  // Computed config that rebuilds when any input changes
-  readonly config = computed<NgeChartConfig>(() => {
-    const baseConfig = createBarChartConfig({
-      data: this.sampleData(),
-      orientation: this.orientation(),
-      showLabels: this.showLabels(),
-      showMeanLine: this.showMeanLine(),
-      showMedianLine: this.showMedianLine(),
-      showXAxis: this.showXAxis(),
-      showYAxis: this.showYAxis(),
-      tooltip: this.showTooltip()
-        ? {
-            enabled: true,
-            height: this.tooltipHeight(),
-            position: this.tooltipPosition(),
-            style: {
-              backgroundColor: this.tooltipBackgroundColor() || undefined,
-              borderColor: this.tooltipBorderColor() || undefined,
-              borderWidth: this.tooltipBorderWidth(),
-              divotHeight: this.tooltipDivotHeight(),
-              divotWidth: this.tooltipDivotWidth(),
-            },
-            width: this.tooltipWidth(),
-          }
-        : undefined,
-      xAxisLabel: this.xAxisLabel() || undefined,
-      yAxisLabel: this.yAxisLabel() || undefined,
-    });
+  // Re-roll the generated data.
+  randomizeData(): void {
+    this.randomizeSeed.update(seed => seed + 1);
+  }
 
-    // Apply base and theme overrides from controls
+  // 12 months of bars with random values.
+  private buildData(): NgeBarDataPoint[] {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return months.map(label => ({ label, value: Math.floor(Math.random() * 80) + 10 }));
+  }
+
+  // The transform's derived config with control-driven margin + theme layered on.
+  readonly config = computed<NgeChartConfig>(() => {
+    const baseConfig = this.transform.config();
+
     return {
       ...baseConfig,
       base: {

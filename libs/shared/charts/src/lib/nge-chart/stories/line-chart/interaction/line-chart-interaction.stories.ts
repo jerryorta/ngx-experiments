@@ -31,6 +31,18 @@ const meta: Meta<LineChartInteractionStoriesComponent> = {
       options: ['linear', 'monotone', 'step'],
       table: { category: 'Layer - Line Style' },
     },
+    // Interaction (ARCH-174)
+    dataMode: {
+      control: 'radio',
+      description: 'X data type: categorical (band-window zoom) or time (continuous zoom)',
+      options: ['categorical', 'time'],
+      table: { category: 'Interaction' },
+    },
+    enableGestures: {
+      control: 'boolean',
+      description: 'Wheel-zoom / drag-pan / brush-zoom (double-click resets)',
+      table: { category: 'Interaction' },
+    },
     // Theme - Line Styling
     lineColor: {
       control: 'color',
@@ -178,6 +190,9 @@ export const Interaction: Story = {
     axisTickFontSize: 12,
     // Layer - Line Style
     curveType: 'linear',
+    // Interaction
+    dataMode: 'categorical',
+    enableGestures: true,
     // Theme - Line Styling
     lineColor: '',
     lineWidth: 2,

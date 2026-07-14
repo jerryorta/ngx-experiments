@@ -6,6 +6,7 @@ import type {
   NgeDivergingBarLayerTheme,
   NgeGroupedBarLayerTheme,
   NgeLineLayerTheme,
+  NgeScatterLayerTheme,
 } from './nge-chart-theme.models';
 
 /**
@@ -13,6 +14,16 @@ import type {
  */
 export const DEFAULT_CHART_BASE_THEME: Required<NgeChartBaseTheme> = {
   axis: {
+    group: {
+      labelColor: 'var(--chart-on-surface-variant)',
+      labelFontSize: 11,
+      // Opaque surface fill so a 'pill'-style badge masks the baseline it straddles.
+      pillBackground: 'var(--chart-surface)',
+      pillPaddingX: 8,
+      separatorColor: 'var(--chart-outline-variant)',
+      separatorWidth: 1,
+      tint: 'var(--chart-surface-variant)',
+    },
     labelColor: 'var(--chart-on-surface-variant)',
     labelFontSize: 14,
     labelFontWeight: 500,
@@ -97,6 +108,30 @@ export const DEFAULT_LINE_LAYER_THEME: Required<NgeLineLayerTheme> = {
 };
 
 /**
+ * Default scatter layer theme.
+ * Literal color defaults (carried over from the original scatter renderer) so
+ * points render a stable blue when no theme override is supplied.
+ */
+export const DEFAULT_SCATTER_LAYER_THEME: Required<NgeScatterLayerTheme> = {
+  point: {
+    color: '#1976D2',
+    colors: [
+      'var(--chart-primary)',
+      'var(--chart-secondary)',
+      'var(--chart-tertiary)',
+      'var(--chart-error)',
+      '#4CAF50',
+      '#FF9800',
+    ],
+    hoverColor: '#1565C0',
+    opacity: 0.7,
+    radius: 5,
+    strokeColor: '#ffffff',
+    strokeWidth: 1,
+  },
+};
+
+/**
  * Default bullet chart layer theme using Material Design CSS variables
  */
 export const DEFAULT_BULLET_LAYER_THEME: Required<NgeBulletLayerTheme> = {
@@ -177,4 +212,5 @@ export const DEFAULT_CHART_THEME: NgeChartTheme = {
   divergingBar: DEFAULT_DIVERGING_BAR_LAYER_THEME,
   'grouped-bar': DEFAULT_GROUPED_BAR_LAYER_THEME,
   line: DEFAULT_LINE_LAYER_THEME,
+  scatter: DEFAULT_SCATTER_LAYER_THEME,
 };

@@ -54,7 +54,8 @@
       font-size: 11px;
       font-weight: 500;
       margin-bottom: 2px;
-      opacity: 0.7;
+      // 0.85 (was 0.7) so the muted tooltip label stays legible on dark surfaces
+      opacity: 0.85;
     }
 
     .tooltip-value {

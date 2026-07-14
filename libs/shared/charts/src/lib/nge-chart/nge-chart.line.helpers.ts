@@ -21,6 +21,19 @@ export interface CreateLineChartScalesOptions {
   valueHeadroom?: number;
 
   /**
+   * Explicit X domain — continuous zoom override for LINEAR / TIME x only
+   * (epoch ms for time). Ignored for categorical/point x (band-window zoom is a
+   * separate mechanism). When set, replaces the data-driven x extent.
+   */
+  xDomain?: [number, number];
+
+  /**
+   * Explicit Y domain `[min, max]` — continuous zoom override. When set,
+   * replaces the data-driven y extent (and `yStartAtZero`).
+   */
+  yDomain?: [number, number];
+
+  /**
    * Whether to start y-axis at zero
    * @default true
    */
@@ -30,11 +43,54 @@ export interface CreateLineChartScalesOptions {
 /**
  * Default options for line chart scales
  */
-const DEFAULT_OPTIONS: Required<CreateLineChartScalesOptions> = {
+const DEFAULT_OPTIONS: Required<Omit<CreateLineChartScalesOptions, 'xDomain' | 'yDomain'>> = {
   bandPadding: 0.1,
   valueHeadroom: 1.1,
   yStartAtZero: true,
 };
+
+/**
+ * The line chart's data-driven CONTINUOUS x extent `[min, max]` as numbers
+ * (epoch ms for `Date` x), or `null` when x is categorical (string) — a point
+ * scale has no continuous extent and windows by category instead.
+ *
+ * Exported because two consumers must agree on it: `createLineChartScales`'
+ * default linear/time x domain AND `NgeLineChartTransform`'s zoom/pan clamp
+ * bound, so the gesture floor is exactly the un-zoomed view.
+ */
+export function computeLineXDataDomain(points: NgeLineDataPoint[]): [number, number] | null {
+  if (points.length === 0 || typeof points[0].x === 'string') {
+    return null;
+  }
+
+  const xNumbers = points.map(point =>
+    point.x instanceof Date ? point.x.getTime() : (point.x as number)
+  );
+
+  return [Math.min(...xNumbers), Math.max(...xNumbers)];
+}
+
+/**
+ * The line chart's data-driven y extent `[min, max]`, honouring `startAtZero`
+ * (pins the floor to 0) and `headroom` (multiplies the max for top padding) —
+ * the same defaults `createLineChartScales` applies. Returns `[0, 1]` when there
+ * are no points. Shared by the scale factory's default y domain and the
+ * transform's zoom/pan clamp bound.
+ */
+export function computeLineYDataDomain(
+  points: NgeLineDataPoint[],
+  startAtZero = true,
+  headroom = 1.1
+): [number, number] {
+  if (points.length === 0) {
+    return [0, 1];
+  }
+
+  const yValues = points.map(point => point.y);
+  const minY = startAtZero ? 0 : Math.min(...yValues);
+
+  return [minY, Math.max(...yValues) * headroom];
+}
 
 /**
  * Creates scales for line chart visualization.
@@ -79,13 +135,11 @@ export function createLineChartScales(
   const firstX = allPoints[0].x;
   const xType = firstX instanceof Date ? 'time' : typeof firstX === 'number' ? 'number' : 'string';
 
-  // Extract unique x values and all y values
+  // Extract unique x values (the categorical/point-scale domain; continuous x
+  // derives its extent from computeLineXDataDomain below).
   const xValues: (Date | number | string)[] = [];
-  const yValues: number[] = [];
 
   for (const point of allPoints) {
-    yValues.push(point.y);
-
     // Collect unique x values
     const xVal = point.x;
     if (xType === 'string') {
@@ -104,12 +158,12 @@ export function createLineChartScales(
     }
   }
 
-  // Calculate y domain
-  const minY = opts.yStartAtZero ? 0 : Math.min(...yValues);
-  const maxY = Math.max(...yValues) * opts.valueHeadroom;
+  // Calculate y domain (an explicit yDomain override wins — continuous zoom)
+  const yScaleDomain =
+    opts.yDomain ?? computeLineYDataDomain(allPoints, opts.yStartAtZero, opts.valueHeadroom);
 
   // Create y scale (always linear for line charts)
-  const yScale = scaleLinear().domain([minY, maxY]).range([dimensions.boundedHeight, 0]);
+  const yScale = scaleLinear().domain(yScaleDomain).range([dimensions.boundedHeight, 0]);
 
   // Create x scale based on type
   let xScale: NgeChartScales['x'];
@@ -120,18 +174,17 @@ export function createLineChartScales(
       .domain(xValues as string[])
       .range([0, dimensions.boundedWidth])
       .padding(0);
-  } else if (xType === 'number') {
-    // Numeric x-axis with linear scale
-    const numValues = xValues as number[];
-    const minX = Math.min(...numValues);
-    const maxX = Math.max(...numValues);
-    xScale = scaleLinear().domain([minX, maxX]).range([0, dimensions.boundedWidth]);
   } else {
-    // Time x-axis with time scale
-    const dateValues = xValues as Date[];
-    const minDate = new Date(Math.min(...dateValues.map(d => d.getTime())));
-    const maxDate = new Date(Math.max(...dateValues.map(d => d.getTime())));
-    xScale = scaleTime().domain([minDate, maxDate]).range([0, dimensions.boundedWidth]);
+    // Continuous x (linear or time). The data-driven extent is the shared
+    // computeLineXDataDomain (epoch ms for Date x); an explicit xDomain
+    // (continuous zoom) wins. Time scales map the numeric domain back to Dates.
+    const [xLo, xHi] = opts.xDomain ?? computeLineXDataDomain(allPoints) ?? [0, 1];
+    xScale =
+      xType === 'number'
+        ? scaleLinear().domain([xLo, xHi]).range([0, dimensions.boundedWidth])
+        : scaleTime()
+            .domain([new Date(xLo), new Date(xHi)])
+            .range([0, dimensions.boundedWidth]);
   }
 
   return { x: xScale, y: yScale };

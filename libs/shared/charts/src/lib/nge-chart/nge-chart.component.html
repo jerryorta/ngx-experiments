@@ -1,21 +1,39 @@
-<div class="nge-chart-layout" [class]="legendLayoutClass()">
+<div
+  class="nge-chart-layout"
+  [class]="legendLayoutClass()"
+>
   @if (config().legend; as legend) {
-    @if (legend.enabled && (legend.position === 'top' || legend.position === 'left')) {
-      <nge-chart-legend [items]="legend.items" [orientation]="legendOrientation()" />
+    @if (legend.enabled && (legend.position === "top" || legend.position === "left")) {
+      <nge-chart-legend
+        [items]="legend.items"
+        [orientation]="legendOrientation()"
+        [interactive]="legend.interactive ?? false"
+        [swatchShape]="legend.swatchShape ?? 'square'"
+        (itemClick)="legendItemClick.emit($event)"
+      />
     }
   }
 
   <div class="nge-chart-container"></div>
 
   @if (config().legend; as legend) {
-    @if (legend.enabled && legend.position !== 'top' && legend.position !== 'left') {
-      <nge-chart-legend [items]="legend.items" [orientation]="legendOrientation()" />
+    @if (legend.enabled && legend.position !== "top" && legend.position !== "left") {
+      <nge-chart-legend
+        [items]="legend.items"
+        [orientation]="legendOrientation()"
+        [interactive]="legend.interactive ?? false"
+        [swatchShape]="legend.swatchShape ?? 'square'"
+        (itemClick)="legendItemClick.emit($event)"
+      />
     }
   }
 </div>
 
 <!-- Tooltip always in DOM, positioned/shown via D3 for performance -->
-<nge-charts-tooltip [calc]="tooltipCalc" style="display: none">
+<nge-charts-tooltip
+  [calc]="tooltipCalc"
+  style="display: none"
+>
   @if (customTooltipTemplate(); as template) {
     <ng-container *ngTemplateOutlet="template; context: { $implicit: tooltipContent() }" />
   } @else if (tooltipContent()) {

@@ -1,0 +1,195 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Axis Grouping Tiers - Usage Examples</h2>
+    <p class="intro-text">
+      A second row of structure drawn beneath the tick labels — set
+      <code>base.xAxisGroups</code> / <code>base.yAxisGroups</code> to an
+      <code>AxisTierConfig[]</code> to tile the axis into labeled bands. Each example below proves
+      one of the three band-resolution strategies (<code>ranges</code>, <code>interval</code>,
+      <code>groupBy</code>) across the scale kinds that support it.
+    </p>
+
+    <!-- EXAMPLE 1: Linear Numeric Ranges -->
+    <section class="story-section">
+      <h4>1. Linear Numeric Ranges</h4>
+      <p class="story-description">
+        Explicit <code>{{ "{" }} ranges: {{ "{" }} from, to, label {{ "}" }}[] {{ "}" }}</code>
+        bands on a linear scale. Boundaries are stated outright in domain units — here three even
+        thirds of a 0-100 domain.
+      </p>
+      <div class="code-block">
+        <pre>
+config = {{ "{" }}
+  ...createScatterChartConfig({{ "{" }} data, xDomain: [0, 100] {{ "}" }}),
+  base: {{ "{" }}
+    xAxisGroups: [
+      {{ "{" }} ranges: [
+        {{ "{" }} from: 0, to: 33, label: 'Low' {{ "}" }},
+        {{ "{" }} from: 33, to: 66, label: 'Medium' {{ "}" }},
+        {{ "{" }} from: 66, to: 100, label: 'High' {{ "}" }},
+      ] {{ "}" }},
+    ],
+  {{ "}" }},
+{{ "}" }};</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="linearRangesConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Calendar Interval -->
+    <section class="story-section">
+      <h4>2. Calendar Interval (Time Scale)</h4>
+      <p class="story-description">
+        <code>{{ "{" }} interval: 'day' | 'week' | 'month' | 'quarter' | 'year' {{ "}" }}</code>
+        tiles a time-scaled X axis into calendar bands derived from the visible domain — no manual
+        boundaries. A short window ticks by week; a multi-year window automatically ticks coarser.
+      </p>
+      <div class="code-block">
+        <pre>
+weekly = {{ "{" }}
+  ...createLineChartConfig({{ "{" }} data: sixWeeksOfData, showXAxis: true {{ "}" }}),
+  base: {{ "{" }} xAxisGroups: [{{ "{" }} interval: 'week' {{ "}" }}] {{ "}" }},
+{{ "}" }};
+
+threeYears = {{ "{" }}
+  ...createLineChartConfig({{ "{" }} data: threeYearsOfData, showXAxis: true {{ "}" }}),
+  base: {{ "{" }} xAxisGroups: [{{ "{" }} interval: 'month' {{ "}" }}] {{ "}" }},
+{{ "}" }};</pre
+        >
+      </div>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>~6-week domain → <code>interval: 'week'</code></h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="weeklyIntervalConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>~3-year domain → <code>interval: 'month'</code></h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="monthlyIntervalConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Custom Ranges on a Continuous Scale -->
+    <section class="story-section">
+      <h4>3. Custom Ranges on a Continuous Scale</h4>
+      <p class="story-description">
+        <code>ranges</code> bands don't need to be uniform width — group a numeric domain into
+        arbitrary, non-uniform brackets (e.g. price bands) the same way as Example 1.
+      </p>
+      <div class="code-block">
+        <pre>
+config = {{ "{" }}
+  ...createLineChartConfig({{ "{" }} data: homesByPrice, showArea: true, showXAxis: true {{ "}" }}),
+  base: {{ "{" }}
+    xAxisGroups: [
+      {{ "{" }} ranges: [
+        {{ "{" }} from: 0, to: 250000, label: '$0–250K' {{ "}" }},
+        {{ "{" }} from: 250000, to: 500000, label: '$250K–500K' {{ "}" }},
+        {{ "{" }} from: 500000, to: 1000000, label: '$500K–1M' {{ "}" }},
+      ] {{ "}" }},
+    ],
+  {{ "}" }},
+{{ "}" }};</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="priceBracketConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Band-Scale Category Grouping -->
+    <section class="story-section">
+      <h4>4. Band-Scale Category Grouping</h4>
+      <p class="story-description">
+        <code>{{ "{" }} groupBy: (category) => string {{ "}" }}</code> coalesces adjacent categories
+        on a band scale that share a group value into one band — here 12 month categories fold into
+        4 quarters.
+      </p>
+      <div class="code-block">
+        <pre>
+config = {{ "{" }}
+  ...createGroupedBarChartConfig({{ "{" }} data: monthlySales, showXAxis: true {{ "}" }}),
+  base: {{ "{" }}
+    xAxisGroups: [{{ "{" }} groupBy: quarterOfMonth {{ "}" }}],
+  {{ "}" }},
+{{ "}" }};</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="quarterGroupingConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Y-Axis Range Tiers + Y-Axis Label -->
+    <section class="story-section">
+      <h4>5. Y-Axis Range Tiers + Y-Axis Label</h4>
+      <p class="story-description">
+        Tiers aren't X-only — set <code>base.yAxisGroups</code> to tile the Y axis into labeled
+        bands. Because the rotated <code>base.yAxisLabel</code> and the tier stack share the left
+        margin, the title seats just beyond the outermost tier so it clears the bands instead of
+        overprinting them.
+      </p>
+      <div class="code-block">
+        <pre>
+config = {{ "{" }}
+  ...createScatterChartConfig({{ "{" }} data, xDomain: [0, 100], yDomain: [0, 100] {{ "}" }}),
+  base: {{ "{" }}
+    yAxisLabel: 'Score',
+    yAxisGroups: [
+      {{ "{" }} ranges: [
+        {{ "{" }} from: 0, to: 33, label: 'Low' {{ "}" }},
+        {{ "{" }} from: 33, to: 66, label: 'Mid' {{ "}" }},
+        {{ "{" }} from: 66, to: 100, label: 'High' {{ "}" }},
+      ] {{ "}" }},
+    ],
+  {{ "}" }},
+{{ "}" }};</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="yRangeTierConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Pill / Bracket Render Style -->
+    <section class="story-section">
+      <h4>6. Pill / Bracket Render Style</h4>
+      <p class="story-description">
+        Set <code>style: 'pill'</code> on any tier to swap the default full-height tint + separators
+        for an open-top bracket per band — a baseline with end ticks and a centered rounded-pill
+        badge around the label. Same bands as Example 1; only the render style differs.
+      </p>
+      <div class="code-block">
+        <pre>
+config = {{ "{" }}
+  ...createScatterChartConfig({{ "{" }} data, xDomain: [0, 100] {{ "}" }}),
+  base: {{ "{" }}
+    xAxisGroups: [
+      {{ "{" }}
+        style: 'pill',
+        ranges: [
+          {{ "{" }} from: 0, to: 33, label: 'Low' {{ "}" }},
+          {{ "{" }} from: 33, to: 66, label: 'Medium' {{ "}" }},
+          {{ "{" }} from: 66, to: 100, label: 'High' {{ "}" }},
+        ],
+      {{ "}" }},
+    ],
+  {{ "}" }},
+{{ "}" }};</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="pillStyleConfig" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

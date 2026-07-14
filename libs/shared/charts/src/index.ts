@@ -9,3 +9,7 @@ export * from './lib/nge-chart-legend/nge-chart-legend.component';
 
 export * from './lib/layers';
 export * from './lib/presets';
+export * from './lib/transforms/bar-chart.transform';
+export * from './lib/transforms/grouped-bar-chart.transform';
+export * from './lib/transforms/line-chart.transform';
+export * from './lib/transforms/scatter-chart.transform';

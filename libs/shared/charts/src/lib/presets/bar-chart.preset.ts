@@ -1,5 +1,6 @@
 import type { NgeChartBaseConfig } from '../core/base-layout';
 import type { NgeBarDataPoint, NgeBarLayerConfig, NgeChartConfig } from '../core/config';
+import type { NgeChartGesturesConfig } from '../core/gesture';
 import type { NgeChartLegendConfig } from '../core/legend';
 import type { NgeTooltipConfig, NgeTooltipContent, NgeTooltipStyle } from '../core/tooltip';
 
@@ -45,9 +46,20 @@ export interface BarChartTooltipOptions {
  * Options for creating a bar chart config preset.
  */
 export interface BarChartPresetOptions {
+  /**
+   * Enter/update/exit transition duration in ms. Default 300.
+   * Set 0 for instant renders (used during zoom/pan gestures).
+   */
+  animationMs?: number;
   barPadding?: number;
   barRadius?: number;
   data: NgeBarDataPoint[];
+  /**
+   * Opt-in wheel-zoom / drag-pan / brush-zoom gesture capture. Pair the chart's
+   * `(chartGesture)` output with NgeBarChartTransform.onChartGesture — the band
+   * (category) axis windows by whole categories, the value axis auto-fits.
+   */
+  gestures?: NgeChartGesturesConfig;
   /** Format function for value labels displayed on bars */
   labelFormat?: (value: number) => string;
   /** Legend configuration. Set `enabled: true` to auto-generate legend from trend lines. */
@@ -59,7 +71,11 @@ export interface BarChartPresetOptions {
   showMeanLine?: boolean;
   showMedianLine?: boolean;
   showXAxis?: boolean;
+  /** Show vertical gridlines at the X axis tick positions. @default false */
+  showXGrid?: boolean;
   showYAxis?: boolean;
+  /** Show horizontal gridlines at the Y axis tick positions. @default false */
+  showYGrid?: boolean;
   /**
    * Tooltip configuration. Use `{ enabled: true }` for default tooltip,
    * or provide custom options.
@@ -105,9 +121,11 @@ function defaultBarTooltipFormatter(data: NgeBarDataPoint): NgeTooltipContent {
  */
 export function createBarChartConfig(options: BarChartPresetOptions): NgeChartConfig {
   const {
+    animationMs,
     barPadding,
     barRadius,
     data,
+    gestures,
     labelFormat,
     legend,
     margin,
@@ -117,7 +135,9 @@ export function createBarChartConfig(options: BarChartPresetOptions): NgeChartCo
     showMeanLine = false,
     showMedianLine = false,
     showXAxis = false,
+    showXGrid = false,
     showYAxis = false,
+    showYGrid = false,
     tooltip,
     xAxisLabel,
     xAxisTickFormat,
@@ -152,7 +172,9 @@ export function createBarChartConfig(options: BarChartPresetOptions): NgeChartCo
     base: {
       margin,
       showXAxis,
+      showXGrid,
       showYAxis,
+      showYGrid,
       xAxisLabel,
       xAxisTickFormat,
       xAxisTicks,
@@ -160,8 +182,10 @@ export function createBarChartConfig(options: BarChartPresetOptions): NgeChartCo
       yAxisTickFormat,
       yAxisTicks,
     },
+    gestures,
     layers: [
       {
+        animationMs,
         barPadding,
         barRadius,
         data,

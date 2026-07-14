@@ -227,7 +227,12 @@ function renderSeries(
   });
 
   // Exit
-  seriesGroups.exit().transition().duration(200).style('opacity', 0).remove();
+  seriesGroups
+    .exit()
+    .transition()
+    .duration(config.animationMs ?? 200)
+    .style('opacity', 0)
+    .remove();
 }
 
 /**
@@ -262,7 +267,7 @@ function renderArea(
     .style('fill', areaColor)
     .style('fill-opacity', areaOpacity)
     .transition()
-    .duration(300)
+    .duration(config.animationMs ?? 300)
     .attr('d', areaGenerator(series.points));
 }
 
@@ -298,7 +303,7 @@ function renderLinePath(
     .style('stroke-width', `${lineWidth}px`)
     .style('stroke-dasharray', mergedTheme.line.dash || 'none')
     .transition()
-    .duration(300)
+    .duration(config.animationMs ?? 300)
     .attr('d', lineGenerator(series.points));
 }
 
@@ -336,7 +341,10 @@ function renderPoints(
     .style('cursor', config.onClick || tooltipEnabled ? 'pointer' : 'default');
 
   // Animate enter
-  enterPoints.transition().duration(300).attr('r', pointRadius);
+  enterPoints
+    .transition()
+    .duration(config.animationMs ?? 300)
+    .attr('r', pointRadius);
 
   // Update
   points
@@ -344,13 +352,18 @@ function renderPoints(
     .style('stroke', series.color)
     .style('stroke-width', `${mergedTheme.point.strokeWidth}px`)
     .transition()
-    .duration(300)
+    .duration(config.animationMs ?? 300)
     .attr('cx', d => getXPosition(d, scales))
     .attr('cy', d => getYPosition(d.y, scales, useSecondaryAxis))
     .attr('r', pointRadius);
 
   // Exit
-  points.exit().transition().duration(200).attr('r', 0).remove();
+  points
+    .exit()
+    .transition()
+    .duration(config.animationMs ?? 200)
+    .attr('r', 0)
+    .remove();
 
   // Merge for event handlers
   const allPoints = enterPoints.merge(points);

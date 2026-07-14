@@ -4,6 +4,28 @@
  */
 export interface NgeChartBaseTheme {
   axis?: {
+    /**
+     * Styles the scale-agnostic grouping-tier rows drawn below the tick row —
+     * band label, boundary separators, and optional band tint.
+     */
+    group?: {
+      /** Group label color */
+      labelColor?: string;
+      /** Group label font size (px) */
+      labelFontSize?: number;
+      /** Pill-style badge background fill (opaque, so the baseline doesn't strike through) */
+      pillBackground?: string;
+      /** Pill-style horizontal padding (px) between the label and each rounded end */
+      pillPaddingX?: number;
+      /** Pill-style corner radius (px); omit for a full pill (radius = pill height / 2) */
+      pillRadius?: number;
+      /** Group separator line color */
+      separatorColor?: string;
+      /** Group separator line width (px) */
+      separatorWidth?: number;
+      /** Group band tint (background fill) color */
+      tint?: string;
+    };
     /** Axis title/label color */
     labelColor?: string;
     /** Axis title/label font size (px) */
@@ -133,7 +155,13 @@ export interface NgeScatterLayerTheme {
   point?: {
     /** Default point fill color */
     color?: string;
-    /** Point fill color on hover */
+    /** Array of colors for multi-series charts */
+    colors?: string[];
+    /**
+     * Point fill color on hover.
+     * Not currently applied by the scatter renderer — multi-series hover keeps the
+     * resolved series/point color and only grows the radius. Kept for API compatibility.
+     */
     hoverColor?: string;
     /** Point opacity (0-1) */
     opacity?: number;

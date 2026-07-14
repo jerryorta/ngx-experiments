@@ -2,234 +2,275 @@
   [reviewStatus]="reviewStatus"
   [storybookFilePath]="storybookFilePath"
 >
-<div class="stories-container">
-  <h2>Bar Chart - Usage Examples</h2>
-  <p class="intro-text">
-    Practical examples showing common usage patterns for the unified chart component with bar charts.
-  </p>
-
-  <!-- EXAMPLE 1: Basic Usage -->
-  <section class="story-section">
-    <h4>1. Basic Usage</h4>
-    <p class="story-description">
-      Simplest way to create a bar chart using <code>createBarChartConfig()</code>
+  <div class="stories-container">
+    <h2>Bar Chart - Usage Examples</h2>
+    <p class="intro-text">
+      Practical examples showing common usage patterns for the unified chart component with bar
+      charts.
     </p>
-    <div class="code-block">
-      <pre>
+
+    <!-- EXAMPLE 1: Basic Usage -->
+    <section class="story-section">
+      <h4>1. Basic Usage</h4>
+      <p class="story-description">
+        Simplest way to create a bar chart using <code>createBarChartConfig()</code>
+      </p>
+      <div class="code-block">
+        <pre>
 data = [
-  {{ '{' }} label: 'Jan', value: 30 {{ '}' }},
-  {{ '{' }} label: 'Feb', value: 45 {{ '}' }},
+  {{ "{" }} label: 'Jan', value: 30 {{ "}" }},
+  {{ "{" }} label: 'Feb', value: 45 {{ "}" }},
   // ...
 ];
 
-config = createBarChartConfig({{ '{' }}
+config = createBarChartConfig({{ "{" }}
   data: this.data,
   showLabels: true,
-{{ '}' }});
+{{ "}" }});
 
-&lt;nge-chart [config]="config" /&gt;</pre>
-    </div>
-    <div class="chart-container">
-      <nge-chart [config]="basicConfig" />
-    </div>
-  </section>
+&lt;nge-chart [config]="config" /&gt;</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="basicConfig" />
+      </div>
+    </section>
 
-  <!-- EXAMPLE 2: Click Handling -->
-  <section class="story-section">
-    <h4>2. Click Handling</h4>
-    <p class="story-description">
-      Handle bar clicks by providing an <code>onClick</code> callback in the config.
-      The event contains the clicked data point.
-    </p>
-    <div class="code-block">
-      <pre>
-config = createBarChartConfig({{ '{' }}
+    <!-- EXAMPLE 2: Click Handling -->
+    <section class="story-section">
+      <h4>2. Click Handling</h4>
+      <p class="story-description">
+        Handle bar clicks by providing an <code>onClick</code> callback in the config. The event
+        contains the clicked data point.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createBarChartConfig({{ "{" }}
   data: this.data,
-  onClick: (event) => {{ '{' }}
+  onClick: (event) => {{ "{" }}
     console.log('Clicked:', event.data.label, event.data.value);
-  {{ '}' }},
-{{ '}' }});</pre>
-    </div>
-    <div class="interaction-display">
-      <strong>Last clicked:</strong> {{ lastClickedBar() }}
-    </div>
-    <div class="chart-container">
-      <nge-chart [config]="clickableConfig" />
-    </div>
-  </section>
+  {{ "}" }},
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="interaction-display"> <strong>Last clicked:</strong> {{ lastClickedBar() }} </div>
+      <div class="chart-container">
+        <nge-chart [config]="clickableConfig" />
+      </div>
+    </section>
 
-  <!-- EXAMPLE 3: Dynamic Data with Signals -->
-  <section class="story-section story-section--highlight">
-    <h4>3. Dynamic Data with Signals</h4>
-    <p class="story-description">
-      <strong>Recommended pattern:</strong> Use a computed signal to rebuild the config when data changes.
-      This ensures the chart re-renders when data updates.
-    </p>
-    <div class="code-block">
-      <pre>
+    <!-- EXAMPLE 3: Dynamic Data with Signals -->
+    <section class="story-section story-section--highlight">
+      <h4>3. Dynamic Data with Signals</h4>
+      <p class="story-description">
+        <strong>Recommended pattern:</strong> Use a computed signal to rebuild the config when data
+        changes. This ensures the chart re-renders when data updates.
+      </p>
+      <div class="code-block">
+        <pre>
 // Signal holds the reactive data
 data = signal&lt;NgeBarDataPoint[]&gt;([...]);
 
 // Computed signal rebuilds config when data changes
 config = computed(() =>
-  createBarChartConfig({{ '{' }}
+  createBarChartConfig({{ "{" }}
     data: this.data(),
     showLabels: true,
-  {{ '}' }})
+  {{ "}" }})
 );
 
 // Template uses the computed signal
-&lt;nge-chart [config]="config()" /&gt;</pre>
-    </div>
-    <div class="interaction-row">
-      <button class="action-button" (click)="randomizeData()">
-        Randomize Data
-      </button>
-    </div>
-    <div class="chart-container">
-      <nge-chart [config]="dynamicConfig()" />
-    </div>
-  </section>
+&lt;nge-chart [config]="config()" /&gt;</pre
+        >
+      </div>
+      <div class="interaction-row">
+        <button
+          class="action-button"
+          (click)="randomizeData()"
+        >
+          Randomize Data
+        </button>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
 
-  <!-- EXAMPLE 4: Horizontal Bar Chart -->
-  <section class="story-section">
-    <h4>4. Horizontal Bar Chart</h4>
-    <p class="story-description">
-      Set <code>orientation: 'horizontal'</code> for horizontal bars.
-      Useful for category labels that are long or numerous.
-    </p>
-    <div class="code-block">
-      <pre>
-config = createBarChartConfig({{ '{' }}
+    <!-- EXAMPLE 4: Horizontal Bar Chart -->
+    <section class="story-section">
+      <h4>4. Horizontal Bar Chart</h4>
+      <p class="story-description">
+        Set <code>orientation: 'horizontal'</code> for horizontal bars. Useful for category labels
+        that are long or numerous.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createBarChartConfig({{ "{" }}
   data: this.data,
   orientation: 'horizontal',
   showLabels: true,
   showYAxis: true,
-{{ '}' }});</pre>
-    </div>
-    <div class="chart-container chart-container--horizontal">
-      <nge-chart [config]="horizontalConfig" />
-    </div>
-  </section>
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container chart-container--horizontal">
+        <nge-chart [config]="horizontalConfig" />
+      </div>
+    </section>
 
-  <!-- EXAMPLE 5: Statistical Lines -->
-  <section class="story-section">
-    <h4>5. Statistical Lines</h4>
-    <p class="story-description">
-      Enable <code>showMeanLine</code> and <code>showMedianLine</code> to display
-      statistical reference lines across the chart.
-    </p>
-    <div class="code-block">
-      <pre>
-config = createBarChartConfig({{ '{' }}
+    <!-- EXAMPLE 5: Statistical Lines -->
+    <section class="story-section">
+      <h4>5. Statistical Lines</h4>
+      <p class="story-description">
+        Enable <code>showMeanLine</code> and <code>showMedianLine</code> to display statistical
+        reference lines across the chart.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createBarChartConfig({{ "{" }}
   data: this.data,
   showLabels: true,
   showMeanLine: true,
   showMedianLine: true,
-{{ '}' }});</pre>
-    </div>
-    <div class="chart-container">
-      <nge-chart [config]="statisticalConfig" />
-    </div>
-  </section>
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="statisticalConfig" />
+      </div>
+    </section>
 
-  <!-- EXAMPLE 6: Per-Bar Colors -->
-  <section class="story-section">
-    <h4>6. Per-Bar Colors (Status Indicators)</h4>
-    <p class="story-description">
-      Add a <code>color</code> property to individual data points to override the theme color.
-      Useful for status indicators or categorical data.
-    </p>
-    <div class="code-block">
-      <pre>
+    <!-- EXAMPLE 6: Per-Bar Colors -->
+    <section class="story-section">
+      <h4>6. Per-Bar Colors (Status Indicators)</h4>
+      <p class="story-description">
+        Add a <code>color</code> property to individual data points to override the theme color.
+        Useful for status indicators or categorical data.
+      </p>
+      <div class="code-block">
+        <pre>
 data = [
-  {{ '{' }} label: 'Completed', value: 85, color: '#4CAF50' {{ '}' }},
-  {{ '{' }} label: 'In Progress', value: 45, color: '#2196F3' {{ '}' }},
-  {{ '{' }} label: 'Pending', value: 30, color: '#FF9800' {{ '}' }},
-  {{ '{' }} label: 'Failed', value: 12, color: '#F44336' {{ '}' }},
-];</pre>
-    </div>
-    <div class="chart-container">
-      <nge-chart [config]="statusConfig" />
-    </div>
-  </section>
+  {{ "{" }} label: 'Completed', value: 85, color: '#4CAF50' {{ "}" }},
+  {{ "{" }} label: 'In Progress', value: 45, color: '#2196F3' {{ "}" }},
+  {{ "{" }} label: 'Pending', value: 30, color: '#FF9800' {{ "}" }},
+  {{ "{" }} label: 'Failed', value: 12, color: '#F44336' {{ "}" }},
+];</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="statusConfig" />
+      </div>
+    </section>
 
-  <!-- EXAMPLE 7: Tooltip on Hover -->
-  <section class="story-section">
-    <h4>7. Tooltip on Hover</h4>
-    <p class="story-description">
-      Enable tooltips by adding <code>tooltip: {{ '{' }} enabled: true {{ '}' }}</code> to show
-      data details on hover. The <code>position</code> option controls where the tooltip appears:
-      <code>'above'</code>, <code>'below'</code>, or <code>'follow-mouse'</code>.
-    </p>
-    <div class="code-block">
-      <pre>
-config = createBarChartConfig({{ '{' }}
+    <!-- EXAMPLE 7: Tooltip on Hover -->
+    <section class="story-section">
+      <h4>7. Tooltip on Hover</h4>
+      <p class="story-description">
+        Enable tooltips by adding <code>tooltip: {{ "{" }} enabled: true {{ "}" }}</code> to show
+        data details on hover. The <code>position</code> option controls where the tooltip appears:
+        <code>'above'</code>, <code>'below'</code>, or <code>'follow-mouse'</code>.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createBarChartConfig({{ "{" }}
   data: this.data,
   showLabels: true,
-  tooltip: {{ '{' }}
+  tooltip: {{ "{" }}
     enabled: true,
     position: 'follow-mouse', // 'above' | 'below' | 'follow-mouse'
-  {{ '}' }},
-{{ '}' }});</pre>
-    </div>
-    <div class="chart-container">
-      <nge-chart [config]="tooltipConfig" />
-    </div>
-  </section>
+  {{ "}" }},
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="tooltipConfig" />
+      </div>
+    </section>
 
-  <!-- EXAMPLE 8: Custom Tooltip Template -->
-  <section class="story-section story-section--highlight">
-    <h4>8. Custom Tooltip Template</h4>
-    <p class="story-description">
-      Provide a custom tooltip template using <code>ng-template</code> with the
-      <code>#ngeChartTooltip</code> reference. The template receives the tooltip content
-      as the implicit context variable.
-    </p>
-    <div class="code-block">
-      <pre>
+    <!-- EXAMPLE 8: Custom Tooltip Template -->
+    <section class="story-section story-section--highlight">
+      <h4>8. Custom Tooltip Template</h4>
+      <p class="story-description">
+        Provide a custom tooltip template using <code>ng-template</code> with the
+        <code>#ngeChartTooltip</code> reference. The template receives the tooltip content as the
+        implicit context variable.
+      </p>
+      <div class="code-block">
+        <pre>
 &lt;nge-chart [config]="config"&gt;
   &lt;ng-template #ngeChartTooltip let-content&gt;
     &lt;div class="my-custom-tooltip"&gt;
-      &lt;strong&gt;{{ '{{' }} content?.label {{ '}}' }}&lt;/strong&gt;
-      &lt;span&gt;{{ '{{' }} content?.value | currency:'USD':'symbol':'1.0-0' {{ '}}' }}&lt;/span&gt;
+      &lt;strong&gt;{{ "{{" }} content?.label {{ '}}' }}&lt;/strong&gt;
+      &lt;span&gt;{{ "{{" }} content?.value | currency:'USD':'symbol':'1.0-0' {{ '
+          }}' }}&lt;/span&gt;
     &lt;/div&gt;
   &lt;/ng-template&gt;
-&lt;/nge-chart&gt;</pre>
-    </div>
-    <div class="chart-container">
-      <nge-chart [config]="customTooltipConfig">
-        <ng-template #ngeChartTooltip let-content>
-          <div class="custom-tooltip-content">
-            <div class="custom-tooltip-label">{{ content?.label }}</div>
-            <div class="custom-tooltip-value">{{ content?.value | currency:'USD':'symbol':'1.0-0' }}</div>
-          </div>
-        </ng-template>
-      </nge-chart>
-    </div>
-  </section>
+&lt;/nge-chart&gt;</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="customTooltipConfig">
+          <ng-template
+            #ngeChartTooltip
+            let-content
+          >
+            <div class="custom-tooltip-content">
+              <div class="custom-tooltip-label">{{ content?.label }}</div>
+              <div class="custom-tooltip-value">{{
+                content?.value | currency: "USD" : "symbol" : "1.0-0"
+              }}</div>
+            </div>
+          </ng-template>
+        </nge-chart>
+      </div>
+    </section>
 
-  <!-- EXAMPLE 9: Label Formatting -->
-  <section class="story-section">
-    <h4>9. Label Formatting</h4>
-    <p class="story-description">
-      Use <code>labelFormat</code> to format value labels on bars, and
-      <code>yAxisTickFormat</code> to format Y axis tick labels. Both accept a callback
-      <code>(value: number) => string</code>.
-    </p>
-    <div class="code-block">
-      <pre>
-config = createBarChartConfig({{ '{' }}
+    <!-- EXAMPLE 9: Label Formatting -->
+    <section class="story-section">
+      <h4>9. Label Formatting</h4>
+      <p class="story-description">
+        Use <code>labelFormat</code> to format value labels on bars, and
+        <code>yAxisTickFormat</code> to format Y axis tick labels. Both accept a callback
+        <code>(value: number) => string</code>.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createBarChartConfig({{ "{" }}
   data: this.data,
   labelFormat: (v) => '$' + (v / 1000).toFixed(0) + 'K',
   showLabels: true,
   showYAxis: true,
   yAxisTickFormat: (d) => '$' + (d / 1000) + 'K',
-{{ '}' }});</pre>
-    </div>
-    <div class="chart-container">
-      <nge-chart [config]="labelFormatConfig" />
-    </div>
-  </section>
-</div>
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="labelFormatConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 10: Gridlines -->
+    <section class="story-section">
+      <h4>10. Gridlines</h4>
+      <p class="story-description">
+        Enable <code>showXGrid</code> and <code>showYGrid</code> to draw gridlines at the X and Y
+        axis tick positions. Gridlines render behind the bars using the theme's grid style.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createBarChartConfig({{ "{" }}
+  data: this.data,
+  showLabels: true,
+  showXAxis: true,
+  showXGrid: true,
+  showYAxis: true,
+  showYGrid: true,
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="gridlinesConfig" />
+      </div>
+    </section>
+  </div>
 </nge-storybook-review-container>

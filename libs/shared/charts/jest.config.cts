@@ -12,7 +12,11 @@ module.exports = {
       },
     ],
   },
-  transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
+  // d3 ships ESM (.js) — transform the d3 family (+ its ESM deps) so the axis /
+  // gesture / layer code that imports it parses under jest, alongside .mjs deps.
+  transformIgnorePatterns: [
+    'node_modules/(?!(?:.*\\.mjs$|(?:d3|d3-[a-z-]+|internmap|delaunator|robust-predicates)/))',
+  ],
   snapshotSerializers: [
     'jest-preset-angular/build/serializers/no-ng-attributes',
     'jest-preset-angular/build/serializers/ng-snapshot',

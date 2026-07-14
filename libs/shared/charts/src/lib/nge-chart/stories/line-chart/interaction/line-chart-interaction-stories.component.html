@@ -4,12 +4,29 @@
 >
   <div class="interaction-container">
     <div class="interaction-row">
-      <button class="story-action-button" (click)="randomizeData()">
+      <button
+        type="button"
+        class="interaction-btn interaction-btn--primary"
+        (click)="randomizeData()"
+      >
         Randomize Data
       </button>
+      @if (enableGestures()) {
+        <span class="interaction-hint">
+          Wheel to zoom · drag to pan · shift-drag to brush-zoom · double-click to reset.
+          {{
+            dataMode() === "time"
+              ? "Time axis zooms continuously."
+              : "Category axis windows by whole categories."
+          }}
+        </span>
+      }
     </div>
     <div class="chart-wrapper">
-      <nge-chart [config]="config()" />
+      <nge-chart
+        [config]="config()"
+        (chartGesture)="transform.onChartGesture($event)"
+      />
     </div>
   </div>
 </nge-storybook-review-container>

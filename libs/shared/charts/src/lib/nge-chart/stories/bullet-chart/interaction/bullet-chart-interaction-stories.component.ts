@@ -15,12 +15,8 @@ import { NgeChartComponent } from '../../../nge-chart.component';
   host: {
     class: 'bullet-chart-interaction-stories',
   },
-  imports: [
-    CommonModule,
-    NgeChartComponent,
-    NgeStorybookReviewContainerComponent,
-  ],
-  selector: 'nge-bullet-chart-interaction-stories',
+  imports: [CommonModule, NgeChartComponent, NgeStorybookReviewContainerComponent],
+  selector: 'bullet-chart-interaction-stories',
   standalone: true,
   styleUrl: './bullet-chart-interaction-stories.component.scss',
   templateUrl: './bullet-chart-interaction-stories.component.html',

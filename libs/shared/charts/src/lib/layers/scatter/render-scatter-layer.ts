@@ -7,10 +7,7 @@ import 'd3-transition';
 
 import type { NgeScatterDataPoint, NgeScatterLayerConfig } from '../../core/config';
 import type { NgeChartLayerContext } from '../../core/layer';
-import type {
-  NgeScatterLayerTheme,
-  ResolvedNgeScatterLayerTheme,
-} from '../../core/theme/nge-chart-theme.models';
+import type { NgeScatterLayerTheme, ResolvedNgeScatterLayerTheme } from '../../core/theme';
 import type {
   NgeTooltipConfig,
   NgeTooltipContent,
@@ -18,33 +15,7 @@ import type {
   NgeTooltipHandlers,
 } from '../../core/tooltip';
 
-/**
- * Default scatter theme values
- */
-const DEFAULT_SCATTER_THEME: ResolvedNgeScatterLayerTheme = {
-  point: {
-    color: '#1976D2',
-    hoverColor: '#1565C0',
-    opacity: 0.7,
-    radius: 5,
-    strokeColor: '#ffffff',
-    strokeWidth: 1,
-  },
-};
-
-/**
- * Merge user theme with defaults
- */
-function mergeScatterLayerTheme(
-  theme: NgeScatterLayerTheme | undefined
-): ResolvedNgeScatterLayerTheme {
-  return {
-    point: {
-      ...DEFAULT_SCATTER_THEME.point,
-      ...theme?.point,
-    },
-  };
-}
+import { mergeScatterLayerTheme } from '../../core/theme';
 
 /**
  * Get X position for a scatter data point
@@ -63,17 +34,69 @@ function getYPosition(y: number, scales: { y: unknown }): number {
 }
 
 /**
- * Default content formatter for scatter points
+ * Default content formatter for scatter points.
+ * Prefixes the series name when a point belongs to a named series.
  */
 function defaultScatterTooltipFormatter(data: NgeScatterDataPoint): NgeTooltipContent {
+  const seriesLabel = data.seriesId ? `${data.seriesId} · ` : '';
+
   return {
-    label: `x: ${data.x.toFixed(1)}`,
+    extra: { seriesId: data.seriesId },
+    label: `${seriesLabel}x: ${data.x.toFixed(1)}`,
     value: data.y.toFixed(1),
   };
 }
 
 /**
+ * Internal representation of a scatter series for rendering.
+ */
+interface ScatterSeries {
+  color: string;
+  id: string;
+  points: NgeScatterDataPoint[];
+}
+
+/**
+ * Group scatter points by seriesId.
+ * Points without a seriesId are collected into a single '__default__' series,
+ * preserving single-series behavior. Unlike the line renderer, scatter points
+ * are NOT sorted — scatter x values are not ordered.
+ *
+ * Per-series color follows the documented precedence:
+ * `seriesColors[i] ?? theme.point.colors[i] ?? theme.point.color`.
+ */
+function groupBySeries(
+  data: NgeScatterDataPoint[],
+  config: NgeScatterLayerConfig,
+  theme: ResolvedNgeScatterLayerTheme
+): ScatterSeries[] {
+  const seriesMap = new Map<string, NgeScatterDataPoint[]>();
+
+  for (const point of data) {
+    const seriesId = point.seriesId ?? '__default__';
+    if (!seriesMap.has(seriesId)) {
+      seriesMap.set(seriesId, []);
+    }
+    seriesMap.get(seriesId)!.push(point);
+  }
+
+  const palette = config.seriesColors ?? theme.point.colors;
+  const seriesArray: ScatterSeries[] = [];
+  let index = 0;
+
+  for (const [id, points] of seriesMap) {
+    const color = palette.length ? palette[index % palette.length] : theme.point.color;
+    seriesArray.push({ color, id, points });
+    index++;
+  }
+
+  return seriesArray;
+}
+
+/**
  * Render scatter layer with Voronoi-based tooltip detection.
+ * Supports single and multi-series scatters via hybrid seriesId detection,
+ * mirroring the line-chart series model inside one scatter layer.
  * Uses Delaunay triangulation for efficient nearest-point lookup.
  */
 export function renderScatterLayer(
@@ -108,8 +131,16 @@ export function renderScatterLayer(
   // Default margins for tooltip calculations
   const resolvedMargins = margins ?? { bottom: 25, left: 45, right: 15, top: 15 };
 
-  // Interrupt any running transitions
-  bounds.selectAll('.nge-scatter-group').interrupt();
+  // Group points into series and resolve each point's final color once.
+  // colorByPoint maps a datum to `point.color ?? series.color`, threaded into the
+  // renderers and Voronoi overlay so highlight/reset stay identity-based.
+  const seriesArray = groupBySeries(data, config, mergedTheme);
+  const colorByPoint = new Map<NgeScatterDataPoint, string>();
+  for (const series of seriesArray) {
+    for (const point of series.points) {
+      colorByPoint.set(point, point.color ?? series.color);
+    }
+  }
 
   // Create or select scatter group
   let scatterGroup = bounds.select<SVGGElement>('.nge-scatter-group');
@@ -117,36 +148,40 @@ export function renderScatterLayer(
     scatterGroup = bounds.append('g').attr('class', 'nge-scatter-group');
   }
 
-  // Render points with D3 join pattern
-  renderPoints(scatterGroup, data, {
+  // Interrupt any running transitions
+  scatterGroup.selectAll('.nge-scatter-series').interrupt();
+  scatterGroup.selectAll('.nge-scatter-point').interrupt();
+
+  const params: RenderScatterParams = {
     baseRadius,
+    colorByPoint,
     config,
+    data,
     dimensions,
     margins: resolvedMargins,
     mergedTheme,
     scales,
     tooltipConfig,
     tooltipHandlers,
-  });
+  };
 
-  // Set up Voronoi overlay for better tooltip detection
+  // Render each series into its own keyed <g class="nge-scatter-series">
+  renderSeries(scatterGroup, seriesArray, params);
+
+  // Single Voronoi overlay across ALL series' points, appended AFTER the series
+  // groups so it stays on top now that points live in sub-groups.
   if (tooltipConfig?.enabled && tooltipHandlers?.onTooltip) {
-    setupVoronoiOverlay(scatterGroup, data, {
-      baseRadius,
-      config,
-      dimensions,
-      margins: resolvedMargins,
-      mergedTheme,
-      scales,
-      tooltipConfig,
-      tooltipHandlers,
-    });
+    setupVoronoiOverlay(scatterGroup, data, params);
   }
 }
 
-interface RenderPointsParams {
+interface RenderScatterParams {
   baseRadius: number;
+  /** Resolved color per datum: `point.color ?? series.color`. */
+  colorByPoint: Map<NgeScatterDataPoint, string>;
   config: NgeScatterLayerConfig;
+  /** Original, ungrouped data — used for stable click indices. */
+  data: NgeScatterDataPoint[];
   dimensions: NgeChartLayerContext<unknown, unknown, unknown>['dimensions'];
   margins: { bottom: number; left: number; right: number; top: number };
   mergedTheme: ResolvedNgeScatterLayerTheme;
@@ -161,9 +196,9 @@ interface RenderPointsParams {
 function computeTooltipEvent(
   event: PointerEvent,
   d: NgeScatterDataPoint,
-  params: RenderPointsParams
+  params: RenderScatterParams
 ): NgeTooltipEvent | null {
-  const { dimensions, margins, scales, tooltipConfig } = params;
+  const { colorByPoint, dimensions, margins, mergedTheme, scales, tooltipConfig } = params;
 
   if (!tooltipConfig) return null;
 
@@ -231,6 +266,13 @@ function computeTooltipEvent(
     divotPosition = 'top';
   }
 
+  // Border color follows the point's resolved series color unless overridden
+  const pointColor = colorByPoint.get(d) ?? mergedTheme.point.color;
+  const mergedStyle = {
+    ...tooltipConfig.style,
+    borderColor: tooltipConfig.style?.borderColor ?? pointColor,
+  };
+
   return {
     content,
     dimensions: {
@@ -244,7 +286,7 @@ function computeTooltipEvent(
       x: tooltipX,
       y: tooltipY,
     },
-    style: tooltipConfig.style,
+    style: mergedStyle,
     visible: true,
   };
 }
@@ -265,26 +307,63 @@ function createHideTooltipEvent(
 }
 
 /**
- * Render scatter points with D3 join pattern
+ * Render each series into a keyed `<g class="nge-scatter-series">` via a D3 join.
+ */
+function renderSeries(
+  group: Selection<SVGGElement, unknown, null, undefined>,
+  seriesArray: ScatterSeries[],
+  params: RenderScatterParams
+): void {
+  const animationMs = params.config.animationMs ?? 300;
+
+  const seriesGroups = group
+    .selectAll<SVGGElement, ScatterSeries>('.nge-scatter-series')
+    .data(seriesArray, d => d.id);
+
+  // Enter
+  const enterGroups = seriesGroups
+    .enter()
+    .append('g')
+    .attr('class', 'nge-scatter-series')
+    .attr('data-series-id', d => d.id);
+
+  // Enter + update: render this series' points into its own group
+  enterGroups.merge(seriesGroups).each(function (this: SVGGElement, series) {
+    renderPoints(select<SVGGElement, ScatterSeries>(this), series, params);
+  });
+
+  // Exit
+  seriesGroups.exit().transition().duration(animationMs).style('opacity', 0).remove();
+}
+
+/**
+ * Render one series' scatter points with a D3 join.
+ * Fill + stroke are applied synchronously via `.style()` (never `.attr()`) so the
+ * `var(--chart-*)` palette resolves — a `var()` in an SVG presentation attribute
+ * fails silently. Geometry (`cx`/`cy`/`r`) and `opacity` animate in.
  */
 function renderPoints(
-  group: Selection<SVGGElement, unknown, null, undefined>,
-  data: NgeScatterDataPoint[],
-  params: RenderPointsParams
+  group: Selection<SVGGElement, ScatterSeries, null, undefined>,
+  series: ScatterSeries,
+  params: RenderScatterParams
 ): void {
-  const { baseRadius, config, mergedTheme, scales, tooltipConfig, tooltipHandlers } = params;
+  const { baseRadius, colorByPoint, config, mergedTheme, scales, tooltipConfig, tooltipHandlers } =
+    params;
 
   const tooltipEnabled = tooltipConfig?.enabled && tooltipHandlers?.onTooltip;
+
+  // 0 during zoom/pan gestures so per-frame re-renders don't smear
+  const animationMs = config.animationMs ?? 300;
 
   // Data join
   const points = group
     .selectAll<SVGCircleElement, NgeScatterDataPoint>('.nge-scatter-point')
-    .data(data, (d, i) => `${d.x}-${d.y}-${i}`);
+    .data(series.points, (d, i) => `${d.x}-${d.y}-${i}`);
 
   // Exit
-  points.exit().transition().duration(300).attr('r', 0).attr('opacity', 0).remove();
+  points.exit().transition().duration(animationMs).attr('r', 0).attr('opacity', 0).remove();
 
-  // Enter
+  // Enter — fill/stroke set synchronously with .style() so var() palette resolves
   const pointsEnter = points
     .enter()
     .append('circle')
@@ -292,32 +371,37 @@ function renderPoints(
     .attr('cx', d => getXPosition(d.x, scales))
     .attr('cy', d => getYPosition(d.y, scales))
     .attr('r', 0)
-    .attr('opacity', 0);
+    .attr('opacity', 0)
+    .style('fill', d => colorByPoint.get(d) ?? mergedTheme.point.color)
+    .style('stroke', mergedTheme.point.strokeColor)
+    .attr('stroke-width', mergedTheme.point.strokeWidth);
+
+  // Update — keep fill/stroke in sync
+  points
+    .style('fill', d => colorByPoint.get(d) ?? mergedTheme.point.color)
+    .style('stroke', mergedTheme.point.strokeColor)
+    .attr('stroke-width', mergedTheme.point.strokeWidth);
 
   // Merge enter + update
   const allPoints = pointsEnter.merge(points);
 
-  // Transition to final state
+  // Cursor (sync), then animate geometry + opacity to final state
+  allPoints.style('cursor', config.onClick || tooltipEnabled ? 'pointer' : 'default');
   allPoints
     .transition()
-    .duration(300)
+    .duration(animationMs)
     .attr('cx', d => getXPosition(d.x, scales))
     .attr('cy', d => getYPosition(d.y, scales))
     .attr('r', d => d.size ?? baseRadius)
-    .attr('opacity', mergedTheme.point.opacity)
-    .attr('fill', d => d.color ?? mergedTheme.point.color)
-    .attr('stroke', mergedTheme.point.strokeColor)
-    .attr('stroke-width', mergedTheme.point.strokeWidth);
+    .attr('opacity', d => d.opacity ?? mergedTheme.point.opacity);
 
-  // Set up mouse events on points (direct hover fallback)
+  // Direct hover fallback — keep the point's resolved color, just bump the radius
   allPoints
-    .style('cursor', config.onClick || tooltipEnabled ? 'pointer' : 'default')
     .on('pointerenter', function (event: PointerEvent, d: NgeScatterDataPoint) {
-      // Highlight on hover
       select(this)
         .transition()
         .duration(150)
-        .attr('fill', d.color ? d.color : mergedTheme.point.hoverColor)
+        .style('fill', colorByPoint.get(d) ?? mergedTheme.point.color)
         .attr('r', (d.size ?? baseRadius) * 1.3);
 
       // Show tooltip
@@ -337,11 +421,11 @@ function renderPoints(
       }
     })
     .on('pointerleave', function (_event: PointerEvent, d: NgeScatterDataPoint) {
-      // Reset styling
+      // Reset styling to the resolved series color
       select(this)
         .transition()
         .duration(150)
-        .attr('fill', d.color ?? mergedTheme.point.color)
+        .style('fill', colorByPoint.get(d) ?? mergedTheme.point.color)
         .attr('r', d.size ?? baseRadius);
 
       // Hide tooltip
@@ -351,7 +435,7 @@ function renderPoints(
     })
     .on('click', function (event: PointerEvent, d: NgeScatterDataPoint) {
       if (config.onClick) {
-        const clickIndex = data.indexOf(d);
+        const clickIndex = params.data.indexOf(d);
         config.onClick({
           data: d,
           event,
@@ -362,24 +446,37 @@ function renderPoints(
 }
 
 /**
- * Set up Voronoi overlay for improved tooltip detection.
- * This allows tooltips to show when hovering near a point,
- * not just directly over it.
+ * Set up a single Voronoi overlay across ALL series' points for improved tooltip
+ * detection. This allows tooltips to show when hovering near a point, not just
+ * directly over it.
+ *
+ * Highlight/reset select `.nge-scatter-point` across every series sub-group and
+ * filter by datum identity — once points are grouped by series, DOM order no
+ * longer matches data order, so positional-index selection would highlight the
+ * wrong circle.
  */
 function setupVoronoiOverlay(
   group: Selection<SVGGElement, unknown, null, undefined>,
   data: NgeScatterDataPoint[],
-  params: RenderPointsParams
+  params: RenderScatterParams
 ): void {
-  const { baseRadius, config, dimensions, mergedTheme, scales, tooltipConfig, tooltipHandlers } =
-    params;
+  const {
+    baseRadius,
+    colorByPoint,
+    config,
+    dimensions,
+    mergedTheme,
+    scales,
+    tooltipConfig,
+    tooltipHandlers,
+  } = params;
 
   const tooltipEnabled = tooltipConfig?.enabled && tooltipHandlers?.onTooltip;
 
-  // Remove existing overlay
+  // Remove existing overlay so it can be re-appended AFTER the series groups
   group.select('.nge-scatter-voronoi-overlay').remove();
 
-  // Create Delaunay triangulation from scaled point positions
+  // Build the Delaunay from the full flattened point set
   const points: [number, number][] = data.map(d => [
     getXPosition(d.x, scales),
     getYPosition(d.y, scales),
@@ -388,7 +485,7 @@ function setupVoronoiOverlay(
   const delaunay = Delaunay.from(points);
   const voronoi = delaunay.voronoi([0, 0, dimensions.boundedWidth, dimensions.boundedHeight]);
 
-  // Create overlay group
+  // Create overlay group (appended last → on top of every series group)
   const overlayGroup = group
     .append('g')
     .attr('class', 'nge-scatter-voronoi-overlay')
@@ -406,35 +503,38 @@ function setupVoronoiOverlay(
     .attr('stroke', 'none')
     .style('cursor', config.onClick || tooltipEnabled ? 'pointer' : 'default');
 
-  // Track currently hovered point for smooth transitions
-  let currentHoveredIndex: null | number = null;
+  // Track currently hovered point by datum identity for smooth transitions
+  let currentHovered: NgeScatterDataPoint | null = null;
+
+  // Reset a point's fill + radius by selecting it across ALL series groups by identity
+  const resetPoint = (point: NgeScatterDataPoint): void => {
+    group
+      .selectAll<SVGCircleElement, NgeScatterDataPoint>('.nge-scatter-point')
+      .filter(pointDatum => pointDatum === point)
+      .transition()
+      .duration(150)
+      .style('fill', colorByPoint.get(point) ?? mergedTheme.point.color)
+      .attr('r', point.size ?? baseRadius);
+  };
 
   cells
     .on('pointerenter', function (event: PointerEvent, d: NgeScatterDataPoint) {
-      const index = data.indexOf(d);
-      if (currentHoveredIndex === index) return;
+      if (currentHovered === d) return;
 
-      // Reset previous point if any
-      if (currentHoveredIndex !== null) {
-        const prevData = data[currentHoveredIndex];
-        group
-          .selectAll<SVGCircleElement, NgeScatterDataPoint>('.nge-scatter-point')
-          .filter((_, i) => i === currentHoveredIndex)
-          .transition()
-          .duration(150)
-          .attr('fill', prevData.color ?? mergedTheme.point.color)
-          .attr('r', prevData.size ?? baseRadius);
+      // Reset previously hovered point (if any)
+      if (currentHovered !== null) {
+        resetPoint(currentHovered);
       }
 
-      currentHoveredIndex = index;
+      currentHovered = d;
 
-      // Highlight point
+      // Highlight the hovered point by datum identity (not positional index)
       group
         .selectAll<SVGCircleElement, NgeScatterDataPoint>('.nge-scatter-point')
-        .filter((_, i) => i === index)
+        .filter(pointDatum => pointDatum === d)
         .transition()
         .duration(150)
-        .attr('fill', d.color ? d.color : mergedTheme.point.hoverColor)
+        .style('fill', colorByPoint.get(d) ?? mergedTheme.point.color)
         .attr('r', (d.size ?? baseRadius) * 1.3);
 
       // Show tooltip
@@ -454,20 +554,10 @@ function setupVoronoiOverlay(
       }
     })
     .on('pointerleave', function (_event: PointerEvent, d: NgeScatterDataPoint) {
-      const index = data.indexOf(d);
-
-      // Only reset if we're leaving this specific cell
-      if (currentHoveredIndex === index) {
-        currentHoveredIndex = null;
-
-        // Reset point styling
-        group
-          .selectAll<SVGCircleElement, NgeScatterDataPoint>('.nge-scatter-point')
-          .filter((_, i) => i === index)
-          .transition()
-          .duration(150)
-          .attr('fill', d.color ?? mergedTheme.point.color)
-          .attr('r', d.size ?? baseRadius);
+      // Only reset if we're leaving the currently hovered point
+      if (currentHovered === d) {
+        currentHovered = null;
+        resetPoint(d);
 
         // Hide tooltip
         if (tooltipEnabled) {

@@ -1,5 +1,6 @@
 import type { NgeChartBaseConfig } from '../core/base-layout';
 import type { NgeChartConfig, NgeLineDataPoint, NgeLineLayerConfig } from '../core/config';
+import type { NgeChartGesturesConfig } from '../core/gesture';
 import type { NgeChartLegendConfig } from '../core/legend';
 import type { NgeTooltipConfig, NgeTooltipContent, NgeTooltipStyle } from '../core/tooltip';
 
@@ -47,6 +48,12 @@ export interface LineChartTooltipOptions {
  */
 export interface LineChartPresetOptions {
   /**
+   * Enter/update/exit transition duration in ms. Default 300.
+   * Set 0 for instant renders (used during zoom/pan gestures).
+   */
+  animationMs?: number;
+
+  /**
    * Area fill opacity (0-1). Only applies when showArea is true.
    */
   areaOpacity?: number;
@@ -61,6 +68,13 @@ export interface LineChartPresetOptions {
    * Points without `seriesId` are treated as a single default series.
    */
   data: NgeLineDataPoint[];
+
+  /**
+   * Opt-in wheel-zoom / drag-pan / brush-zoom gesture capture. Pair the chart's
+   * `(chartGesture)` output with NgeLineChartTransform.onChartGesture. Works on
+   * linear / time x (continuous zoom); categorical x is not continuously zoomable.
+   */
+  gestures?: NgeChartGesturesConfig;
 
   /** Legend configuration. Set `enabled: true` to auto-generate legend from series data. */
   legend?: Partial<NgeChartLegendConfig>;
@@ -106,9 +120,21 @@ export interface LineChartPresetOptions {
   showXAxis?: boolean;
 
   /**
+   * Show vertical gridlines at the X axis tick positions
+   * @default false
+   */
+  showXGrid?: boolean;
+
+  /**
    * Show Y axis
    */
   showYAxis?: boolean;
+
+  /**
+   * Show horizontal gridlines at the Y axis tick positions
+   * @default false
+   */
+  showYGrid?: boolean;
 
   /**
    * Tooltip configuration. Use `{ enabled: true }` for default tooltip,
@@ -130,9 +156,21 @@ export interface LineChartPresetOptions {
   xAxisLabel?: string;
 
   /**
+   * Explicit X domain `[min, max]` — continuous zoom override for linear/time x
+   * (epoch ms for time), used by NgeLineChartTransform. Ignored for categorical x.
+   */
+  xDomain?: [number, number];
+
+  /**
    * Y axis label
    */
   yAxisLabel?: string;
+
+  /**
+   * Explicit Y domain `[min, max]` — continuous zoom override used by
+   * NgeLineChartTransform.
+   */
+  yDomain?: [number, number];
 }
 
 /**
@@ -179,9 +217,11 @@ function defaultLineTooltipFormatter(data: NgeLineDataPoint): NgeTooltipContent 
  */
 export function createLineChartConfig(options: LineChartPresetOptions): NgeChartConfig {
   const {
+    animationMs,
     areaOpacity,
     curveType = 'linear',
     data,
+    gestures,
     legend,
     lineWidth,
     margin,
@@ -191,11 +231,15 @@ export function createLineChartConfig(options: LineChartPresetOptions): NgeChart
     showArea = false,
     showPoints = true,
     showXAxis = false,
+    showXGrid = false,
     showYAxis = false,
+    showYGrid = false,
     tooltip,
     useSecondaryAxis,
     xAxisLabel,
+    xDomain,
     yAxisLabel,
+    yDomain,
   } = options;
 
   // Build tooltip config if enabled
@@ -223,12 +267,16 @@ export function createLineChartConfig(options: LineChartPresetOptions): NgeChart
     base: {
       margin,
       showXAxis,
+      showXGrid,
       showYAxis,
+      showYGrid,
       xAxisLabel,
       yAxisLabel,
     },
+    gestures,
     layers: [
       {
+        animationMs,
         areaOpacity,
         curveType,
         data,
@@ -245,6 +293,9 @@ export function createLineChartConfig(options: LineChartPresetOptions): NgeChart
       },
     ],
     legend: legendConfig as NgeChartLegendConfig | undefined,
-    scaleFactory: createLineChartScales,
+    // Continuous-zoom overrides (linear/time x, y) are captured in the factory
+    // closure — the transform rebuilds this config to change them.
+    scaleFactory: (config, dimensions) =>
+      createLineChartScales(config, dimensions, { xDomain, yDomain }),
   };
 }

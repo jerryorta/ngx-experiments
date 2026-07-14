@@ -19,6 +19,31 @@
     display: flex;
     align-items: center;
     gap: 6px;
+    transition: opacity 150ms ease;
+  }
+
+  // Interactive entries are real <button>s — reset chrome, add affordances
+  .nge-chart-legend-item--interactive {
+    background: none;
+    border: none;
+    margin: 0;
+    padding: 2px 6px;
+    font: inherit;
+    color: inherit;
+    border-radius: 4px;
+    cursor: pointer;
+    transition:
+      opacity 150ms ease,
+      background-color 150ms ease;
+
+    &:hover {
+      background-color: var(--chart-surface-container-highest, rgba(128, 128, 128, 0.12));
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--chart-primary, #1976d2);
+      outline-offset: 1px;
+    }
   }
 
   .nge-chart-legend-swatch {
@@ -27,6 +52,17 @@
     height: 12px;
     border-radius: 2px;
     flex-shrink: 0;
+
+    // Shape variants — match the mark the entry represents
+    &--circle {
+      border-radius: 50%;
+    }
+
+    &--line {
+      width: 16px;
+      height: 3px;
+      border-radius: 1.5px;
+    }
   }
 
   .nge-chart-legend-label {

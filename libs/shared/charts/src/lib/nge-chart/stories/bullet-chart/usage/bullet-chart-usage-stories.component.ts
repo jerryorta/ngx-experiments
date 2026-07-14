@@ -16,7 +16,7 @@ import { NgeChartComponent } from '../../../nge-chart.component';
     class: 'bullet-chart-usage-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'nge-bullet-chart-usage-stories',
+  selector: 'bullet-chart-usage-stories',
   standalone: true,
   styleUrl: './bullet-chart-usage-stories.component.scss',
   templateUrl: './bullet-chart-usage-stories.component.html',

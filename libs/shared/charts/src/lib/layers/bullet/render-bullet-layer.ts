@@ -25,9 +25,14 @@ function clamp(value: number, min: number, max: number): number {
  * Pure function - no side effects outside of D3 DOM manipulation.
  */
 export function renderBulletLayer(
-  context: NgeChartLayerContext<NgeBulletDataPoint, NgeBulletLayerConfig, NgeBulletLayerTheme | undefined>
+  context: NgeChartLayerContext<
+    NgeBulletDataPoint,
+    NgeBulletLayerConfig,
+    NgeBulletLayerTheme | undefined
+  >
 ): void {
-  const { bounds, config, dimensions, margins, tooltipConfig, tooltipElement, tooltipHandlers } = context;
+  const { bounds, config, dimensions, margins, tooltipConfig, tooltipElement, tooltipHandlers } =
+    context;
 
   // Bullet chart data comes from config.data (single object, not array)
   const datum = config.data;
@@ -207,11 +212,17 @@ export function renderBulletLayer(
       .attr('x', xScale(progress) - progressIndicatorWidth / 2)
       .tween('tooltip-content', () => {
         // Only animate tooltip content if showDuringAnimation is true (default)
-        if (tooltipConfig?.showDuringAnimation === false) return () => undefined;
+        if (tooltipConfig?.showDuringAnimation === false)
+          return () => {
+            /* no-op tween: tooltip content stays frozen during the animation */
+          };
         // Tween only updates content (value shown), position is animated separately
         return (t: number) => {
           const currentProgress = interpolateProgress(animateFromProgress, progress, t);
-          const tooltipEvent = computeTooltipEvent(new PointerEvent('pointermove'), currentProgress);
+          const tooltipEvent = computeTooltipEvent(
+            new PointerEvent('pointermove'),
+            currentProgress
+          );
           if (tooltipEvent && tooltipHandlers?.onTooltip) {
             // Skip position - it's being animated by separate D3 transition
             tooltipHandlers.onTooltip({ ...tooltipEvent, skipPosition: true });
@@ -262,11 +273,17 @@ export function renderBulletLayer(
       .attr('x', xScale(progress) - progressIndicatorWidth / 2)
       .tween('tooltip-content', () => {
         // Only animate tooltip content if showDuringAnimation is true (default)
-        if (tooltipConfig?.showDuringAnimation === false) return () => undefined;
+        if (tooltipConfig?.showDuringAnimation === false)
+          return () => {
+            /* no-op tween: tooltip content stays frozen during the animation */
+          };
         // Tween only updates content (value shown), position is animated separately
         return (t: number) => {
           const currentProgress = interpolateProgress(animateFromProgress, progress, t);
-          const tooltipEvent = computeTooltipEvent(new PointerEvent('pointermove'), currentProgress);
+          const tooltipEvent = computeTooltipEvent(
+            new PointerEvent('pointermove'),
+            currentProgress
+          );
           if (tooltipEvent && tooltipHandlers?.onTooltip) {
             // Skip position - it's being animated by separate D3 transition
             tooltipHandlers.onTooltip({ ...tooltipEvent, skipPosition: true });

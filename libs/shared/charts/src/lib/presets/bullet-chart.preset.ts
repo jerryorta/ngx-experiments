@@ -91,6 +91,18 @@ export interface BulletChartPresetOptions {
   progressIndicatorWidth?: number;
 
   /**
+   * Show vertical gridlines at the X axis tick positions
+   * @default false
+   */
+  showXGrid?: boolean;
+
+  /**
+   * Show horizontal gridlines at the Y axis tick positions
+   * @default false
+   */
+  showYGrid?: boolean;
+
+  /**
    * Tooltip configuration. Use `{ enabled: true }` for default tooltip,
    * or provide custom options.
    */
@@ -139,6 +151,8 @@ export function createBulletChartConfig(options: BulletChartPresetOptions): NgeC
     onClick,
     progressIndicatorHeight,
     progressIndicatorWidth,
+    showXGrid = false,
+    showYGrid = false,
     tooltip,
   } = options;
 
@@ -155,11 +169,15 @@ export function createBulletChartConfig(options: BulletChartPresetOptions): NgeC
       }
     : undefined;
 
+  // Gestures (ARCH-174): bullet is a single-row linear micro-chart — no
+  // meaningful zoom/pan surface, so it exposes no `gestures` option.
   return {
     base: {
       margin: margin ?? { bottom: 10, left: 10, right: 10, top: 10 },
       showXAxis: false,
+      showXGrid,
       showYAxis: false,
+      showYGrid,
     },
     layers: [
       {

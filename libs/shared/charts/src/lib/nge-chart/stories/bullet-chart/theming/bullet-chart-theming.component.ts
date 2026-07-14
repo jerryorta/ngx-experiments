@@ -13,7 +13,7 @@ import { NgeChartComponent } from '../../../nge-chart.component';
     class: 'bullet-chart-theming',
   },
   imports: [CommonModule, NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'nge-bullet-chart-theming',
+  selector: 'bullet-chart-theming',
   standalone: true,
   styleUrl: './bullet-chart-theming.component.scss',
   templateUrl: './bullet-chart-theming.component.html',

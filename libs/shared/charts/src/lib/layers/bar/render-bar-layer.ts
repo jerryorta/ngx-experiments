@@ -43,6 +43,8 @@ export function renderBarLayer(
   const orientation = config.orientation ?? 'vertical';
   const showLabels = config.showLabels ?? false;
   const isVertical = orientation === 'vertical';
+  const animationMs = config.animationMs ?? 300;
+  const exitMs = config.animationMs ?? 200;
 
   const categoryScale = isVertical ? scales.x : scales.y;
   const valueScale = isVertical ? scales.y : scales.x;
@@ -59,6 +61,7 @@ export function renderBarLayer(
 
   // Enter
   const enterGroups = enterBars(groups.enter(), {
+    animationMs,
     categoryScale,
     config,
     data,
@@ -75,6 +78,7 @@ export function renderBarLayer(
 
   // Update
   updateBars(groups, {
+    animationMs,
     categoryScale,
     dimensions,
     isVertical,
@@ -85,13 +89,14 @@ export function renderBarLayer(
   });
 
   // Exit
-  groups.exit().transition().duration(200).style('opacity', 0).remove();
+  groups.exit().transition().duration(exitMs).style('opacity', 0).remove();
 
   // Merge for future updates
   const allGroups = enterGroups.merge(groups);
 
   // Update event handlers on ALL bars (not just entered ones) to handle config changes
   updateBarEventHandlers(allGroups, {
+    animationMs,
     categoryScale,
     config,
     data,
@@ -128,6 +133,7 @@ export function renderBarLayer(
 }
 
 interface BarRenderParams {
+  animationMs: number;
   categoryScale: any;
   config?: NgeBarLayerConfig;
   data?: NgeBarDataPoint[];
@@ -147,6 +153,7 @@ function enterBars(
   params: BarRenderParams
 ): Selection<SVGGElement, NgeBarDataPoint, SVGGElement, unknown> {
   const {
+    animationMs,
     categoryScale,
     config,
     data,
@@ -324,7 +331,7 @@ function enterBars(
       .style('fill', d => d.color ?? theme.bar.color)
       .style('transition', 'fill 0.15s ease-in-out, opacity 0.15s ease-in-out')
       .transition()
-      .duration(300)
+      .duration(animationMs)
       .attr('y', d => valueScale(d.value))
       .attr('height', d => dimensions.boundedHeight - valueScale(d.value));
   } else {
@@ -342,7 +349,7 @@ function enterBars(
       .style('fill', d => d.color ?? theme.bar.color)
       .style('transition', 'fill 0.15s ease-in-out, opacity 0.15s ease-in-out')
       .transition()
-      .duration(300)
+      .duration(animationMs)
       .attr('x', d => (d.value >= 0 ? zeroX : valueScale(d.value)))
       .attr('width', d => Math.abs(valueScale(d.value) - zeroX));
   }
@@ -383,8 +390,16 @@ function updateBars(
   update: Selection<SVGGElement, NgeBarDataPoint, SVGGElement, unknown>,
   params: Omit<BarRenderParams, 'config' | 'data'>
 ): Selection<SVGGElement, NgeBarDataPoint, SVGGElement, unknown> {
-  const { categoryScale, dimensions, isVertical, labelFormat, showLabels, theme, valueScale } =
-    params;
+  const {
+    animationMs,
+    categoryScale,
+    dimensions,
+    isVertical,
+    labelFormat,
+    showLabels,
+    theme,
+    valueScale,
+  } = params;
 
   // Update all position attributes regardless of orientation to handle orientation changes
   if (isVertical) {
@@ -394,7 +409,7 @@ function updateBars(
       .attr('ry', theme.bar.radius)
       .style('fill', d => d.color ?? theme.bar.color)
       .transition()
-      .duration(300)
+      .duration(animationMs)
       .attr('x', d => categoryScale(d.label) ?? 0)
       .attr('width', categoryScale.bandwidth())
       .attr('y', d => valueScale(d.value))
@@ -408,7 +423,7 @@ function updateBars(
       .attr('ry', theme.bar.radius)
       .style('fill', d => d.color ?? theme.bar.color)
       .transition()
-      .duration(300)
+      .duration(animationMs)
       .attr('x', d => (d.value >= 0 ? zeroX : valueScale(d.value)))
       .attr('y', d => categoryScale(d.label) ?? 0)
       .attr('height', categoryScale.bandwidth())
@@ -427,7 +442,7 @@ function updateBars(
         .attr('dominant-baseline', null)
         .text(d => (labelFormat ? labelFormat(d.value) : String(d.value)))
         .transition()
-        .duration(300)
+        .duration(animationMs)
         .attr('x', d => (categoryScale(d.label) ?? 0) + categoryScale.bandwidth() / 2)
         .attr('y', d => valueScale(d.value) - 6);
     } else {
@@ -440,7 +455,7 @@ function updateBars(
         .attr('dominant-baseline', 'middle')
         .text(d => (labelFormat ? labelFormat(d.value) : String(d.value)))
         .transition()
-        .duration(300)
+        .duration(animationMs)
         .attr('x', d => valueScale(d.value) + 6)
         .attr('y', d => (categoryScale(d.label) ?? 0) + categoryScale.bandwidth() / 2);
     }

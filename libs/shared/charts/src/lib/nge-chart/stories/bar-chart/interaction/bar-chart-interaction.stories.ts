@@ -33,6 +33,12 @@ const meta: Meta<BarChartInteractionStoriesComponent> = {
       description: 'Bar corner radius',
       table: { category: 'Theme - Bar Styling' },
     },
+    // Interaction (ARCH-174)
+    enableGestures: {
+      control: 'boolean',
+      description: 'Wheel-zoom / drag-pan / brush-zoom; band axis windows by whole categories',
+      table: { category: 'Interaction' },
+    },
     // Theme - Label Styling
     labelColor: {
       control: 'color',
@@ -196,6 +202,8 @@ export const Interaction: Story = {
     barColor: '',
     barHoverColor: '',
     barRadius: 2,
+    // Interaction
+    enableGestures: true,
     // Theme - Label Styling (defaults from DEFAULT_BAR_LAYER_THEME)
     labelColor: '',
     labelFontSize: 12,

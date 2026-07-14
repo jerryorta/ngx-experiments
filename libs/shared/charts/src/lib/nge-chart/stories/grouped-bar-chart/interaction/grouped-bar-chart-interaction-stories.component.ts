@@ -15,11 +15,7 @@ import { NgeChartComponent } from '../../../nge-chart.component';
   host: {
     class: 'nge-grouped-bar-chart-interaction-stories',
   },
-  imports: [
-    CommonModule,
-    NgeChartComponent,
-    NgeStorybookReviewContainerComponent,
-  ],
+  imports: [CommonModule, NgeChartComponent, NgeStorybookReviewContainerComponent],
   selector: 'nge-grouped-bar-chart-interaction-stories',
   standalone: true,
   styleUrl: './grouped-bar-chart-interaction-stories.component.scss',

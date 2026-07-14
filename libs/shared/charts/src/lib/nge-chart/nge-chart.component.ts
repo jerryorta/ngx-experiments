@@ -10,6 +10,7 @@ import {
   ElementRef,
   inject,
   input,
+  output,
   signal,
   ViewEncapsulation,
 } from '@angular/core';
@@ -19,6 +20,8 @@ import { debounceTime, merge } from 'rxjs';
 
 import type { NgeChartBaseLayoutInstance } from '../core/base-layout';
 import type { NgeChartConfig } from '../core/config';
+import type { NgeChartGestureEvent } from '../core/gesture';
+import type { NgeLegendItem } from '../core/legend';
 import type { NgeTooltipContent, NgeTooltipEvent } from '../core/tooltip';
 
 import { ChartsTooltipCalc } from '../charts-tooltip/charts-tooltip.calc';
@@ -40,6 +43,18 @@ import { renderChart } from './nge-chart.renderer';
 export class NgeChartComponent implements AfterViewInit, OnDestroy {
   /** Chart configuration including base settings and layers */
   readonly config = input.required<NgeChartConfig>();
+
+  /**
+   * Emitted when an interactive legend entry is clicked
+   * (requires `config.legend.interactive: true`).
+   */
+  readonly legendItemClick = output<NgeLegendItem>();
+
+  /**
+   * Semantic zoom/pan/reset gesture events (requires `config.gestures`).
+   * Wire to a transform, e.g. `(chartGesture)="transform.onChartGesture($event)"`.
+   */
+  readonly chartGesture = output<NgeChartGestureEvent>();
 
   private readonly el = inject(ElementRef).nativeElement as HTMLElement;
   private readonly destroyRef = inject(DestroyRef);
@@ -156,6 +171,9 @@ export class NgeChartComponent implements AfterViewInit, OnDestroy {
     renderChart({
       config: this.config(),
       container: this.container,
+      gestureHandler: {
+        onGesture: event => this.chartGesture.emit(event),
+      },
       layout: this.layout,
       tooltipElement: this.tooltipElement,
       tooltipHandler: {

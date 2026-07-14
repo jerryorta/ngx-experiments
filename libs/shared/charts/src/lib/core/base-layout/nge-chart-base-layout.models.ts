@@ -1,6 +1,7 @@
 import type { ScaleBand, ScaleLinear, ScalePoint, ScaleTime } from 'd3-scale';
 import type { Selection } from 'd3-selection';
 
+import type { AxisTierConfig } from '../axis/nge-axis.models';
 import type { NgeChartDimensions } from '../chart.models';
 
 /**
@@ -16,6 +17,22 @@ export interface NgeChartMargin {
   left: number;
   right: number;
   top: number;
+}
+
+/**
+ * Configuration for an optional range/slider axis — a full-range ruler with a
+ * draggable brush (window + handles) that zooms the plot to the brushed slice.
+ * When set on a dimension it REPLACES that dimension's standard axis: the plot's
+ * layers keep rendering the current focus (zoomed) domain, while this axis renders
+ * the full extent so the brush window shows which slice is in view.
+ */
+export interface NgeRangeAxisConfig {
+  /**
+   * The full data extent the ruler spans, `[min, max]`. The brush window maps the
+   * plot's current focus domain onto this, and dragging the handles picks a new
+   * focus within it. Needs an invertible (linear/time) scale.
+   */
+  fullDomain: [number, number];
 }
 
 /**
@@ -35,6 +52,12 @@ export interface NgeChartBaseConfig {
   showXAxis?: boolean;
 
   /**
+   * Show vertical gridlines at the X axis tick positions
+   * @default false
+   */
+  showXGrid?: boolean;
+
+  /**
    * Show secondary Y axis (right side)
    * @default false
    */
@@ -45,6 +68,21 @@ export interface NgeChartBaseConfig {
    * @default false
    */
   showYAxis?: boolean;
+
+  /**
+   * Show horizontal gridlines at the Y axis tick positions
+   * @default false
+   */
+  showYGrid?: boolean;
+
+  /**
+   * Grouping-tier rows rendered below the X-axis tick row (e.g. months under
+   * days, quarters under months) — a second dimension of structure over the
+   * ticks. Each entry is one tier row, stacked outward from the axis. Scale-
+   * agnostic: resolved to pixel bands by explicit ranges, a calendar interval,
+   * or a category grouping fn (see {@link AxisTierConfig}).
+   */
+  xAxisGroups?: AxisTierConfig[];
 
   /**
    * X axis label (e.g., "Month", "Category")
@@ -73,6 +111,13 @@ export interface NgeChartBaseConfig {
   xAxisTicks?: number;
 
   /**
+   * Optional range/slider axis for X — a full-range ruler + draggable brush that
+   * zooms the plot along X. When set it REPLACES the standard X axis. Needs an
+   * invertible (linear/time) X scale (e.g. scatter).
+   */
+  xRangeAxis?: NgeRangeAxisConfig;
+
+  /**
    * X axis scale type
    * @default 'band'
    */
@@ -97,6 +142,13 @@ export interface NgeChartBaseConfig {
   y2ScaleType?: 'band' | 'linear';
 
   /**
+   * Grouping-tier rows rendered to the left of the Y-axis tick labels — the
+   * vertical counterpart of {@link xAxisGroups}. Each entry is one tier row,
+   * stacked leftward from the tick labels.
+   */
+  yAxisGroups?: AxisTierConfig[];
+
+  /**
    * Y axis label (e.g., "Value", "Count")
    */
   yAxisLabel?: string;
@@ -115,6 +167,12 @@ export interface NgeChartBaseConfig {
   yAxisTicks?: number;
 
   /**
+   * Optional range/slider axis for Y — the vertical counterpart of
+   * {@link NgeChartBaseConfig.xRangeAxis}. When set it REPLACES the standard Y axis.
+   */
+  yRangeAxis?: NgeRangeAxisConfig;
+
+  /**
    * Y axis scale type
    * @default 'linear'
    */
@@ -128,19 +186,25 @@ export interface NgeChartBaseConfig {
 export interface ResolvedNgeChartBaseConfig {
   margin: NgeChartMargin;
   showXAxis: boolean;
+  showXGrid: boolean;
   showY2Axis: boolean;
   showYAxis: boolean;
+  showYGrid: boolean;
+  xAxisGroups: AxisTierConfig[] | undefined;
   xAxisLabel: string;
   xAxisTickFormat: ((d: any) => string) | undefined;
   xAxisTickRotation: number;
   xAxisTicks: number | undefined;
+  xRangeAxis: NgeRangeAxisConfig | undefined;
   xScaleType: NgeChartScaleType;
   y2AxisLabel: string;
   y2AxisLabelColor: string;
   y2ScaleType: 'band' | 'linear';
+  yAxisGroups: AxisTierConfig[] | undefined;
   yAxisLabel: string;
   yAxisTickFormat: ((d: any) => string) | undefined;
   yAxisTicks: number | undefined;
+  yRangeAxis: NgeRangeAxisConfig | undefined;
   yScaleType: 'band' | 'linear';
 }
 
@@ -155,19 +219,25 @@ export const DEFAULT_BASE_LAYOUT_CONFIG: ResolvedNgeChartBaseConfig = {
     top: 20,
   },
   showXAxis: false,
+  showXGrid: false,
   showY2Axis: false,
   showYAxis: false,
+  showYGrid: false,
+  xAxisGroups: undefined,
   xAxisLabel: '',
   xAxisTickFormat: undefined,
   xAxisTickRotation: 0,
   xAxisTicks: undefined,
+  xRangeAxis: undefined,
   xScaleType: 'band',
   y2AxisLabel: '',
   y2AxisLabelColor: '',
   y2ScaleType: 'linear',
+  yAxisGroups: undefined,
   yAxisLabel: '',
   yAxisTickFormat: undefined,
   yAxisTicks: undefined,
+  yRangeAxis: undefined,
   yScaleType: 'linear',
 };
 
@@ -200,6 +270,13 @@ export interface NgeChartScales {
 export interface NgeChartLayoutState {
   bounds: Selection<SVGGElement, unknown, null, undefined>;
   dimensions: NgeChartDimensions;
+  /**
+   * Clipped group INSIDE bounds that all chart layers render into. A clipPath
+   * sized to boundedWidth × boundedHeight keeps marks (dots/bars/lines) from
+   * spilling over the axes and margins when zoomed or panned. Axes render as
+   * unclipped siblings in `bounds`.
+   */
+  layers: Selection<SVGGElement, unknown, null, undefined>;
 }
 
 /**
@@ -218,19 +295,25 @@ export function mergeBaseConfig(
       ...config.margin,
     },
     showXAxis: config.showXAxis ?? DEFAULT_BASE_LAYOUT_CONFIG.showXAxis,
+    showXGrid: config.showXGrid ?? DEFAULT_BASE_LAYOUT_CONFIG.showXGrid,
     showY2Axis: config.showY2Axis ?? DEFAULT_BASE_LAYOUT_CONFIG.showY2Axis,
     showYAxis: config.showYAxis ?? DEFAULT_BASE_LAYOUT_CONFIG.showYAxis,
+    showYGrid: config.showYGrid ?? DEFAULT_BASE_LAYOUT_CONFIG.showYGrid,
+    xAxisGroups: config.xAxisGroups ?? DEFAULT_BASE_LAYOUT_CONFIG.xAxisGroups,
     xAxisLabel: config.xAxisLabel ?? DEFAULT_BASE_LAYOUT_CONFIG.xAxisLabel,
     xAxisTickFormat: config.xAxisTickFormat ?? DEFAULT_BASE_LAYOUT_CONFIG.xAxisTickFormat,
     xAxisTickRotation: config.xAxisTickRotation ?? DEFAULT_BASE_LAYOUT_CONFIG.xAxisTickRotation,
     xAxisTicks: config.xAxisTicks ?? DEFAULT_BASE_LAYOUT_CONFIG.xAxisTicks,
+    xRangeAxis: config.xRangeAxis ?? DEFAULT_BASE_LAYOUT_CONFIG.xRangeAxis,
     xScaleType: config.xScaleType ?? DEFAULT_BASE_LAYOUT_CONFIG.xScaleType,
     y2AxisLabel: config.y2AxisLabel ?? DEFAULT_BASE_LAYOUT_CONFIG.y2AxisLabel,
     y2AxisLabelColor: config.y2AxisLabelColor ?? DEFAULT_BASE_LAYOUT_CONFIG.y2AxisLabelColor,
     y2ScaleType: config.y2ScaleType ?? DEFAULT_BASE_LAYOUT_CONFIG.y2ScaleType,
+    yAxisGroups: config.yAxisGroups ?? DEFAULT_BASE_LAYOUT_CONFIG.yAxisGroups,
     yAxisLabel: config.yAxisLabel ?? DEFAULT_BASE_LAYOUT_CONFIG.yAxisLabel,
     yAxisTickFormat: config.yAxisTickFormat ?? DEFAULT_BASE_LAYOUT_CONFIG.yAxisTickFormat,
     yAxisTicks: config.yAxisTicks ?? DEFAULT_BASE_LAYOUT_CONFIG.yAxisTicks,
+    yRangeAxis: config.yRangeAxis ?? DEFAULT_BASE_LAYOUT_CONFIG.yRangeAxis,
     yScaleType: config.yScaleType ?? DEFAULT_BASE_LAYOUT_CONFIG.yScaleType,
   };
 }

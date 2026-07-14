@@ -1,0 +1,321 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Scatter Chart - Usage Examples</h2>
+    <p class="intro-text">
+      Practical examples showing common usage patterns for the unified chart component with scatter
+      plots. Each point needs a numeric <code>x</code> and <code>y</code>; <code>color</code> and
+      <code>size</code> are optional per point.
+    </p>
+
+    <!-- EXAMPLE 1: Basic Usage -->
+    <section class="story-section">
+      <h4>1. Basic Usage</h4>
+      <p class="story-description">
+        Simplest way to create a scatter plot using <code>createScatterChartConfig()</code>
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} x: 12, y: 18 {{ "}" }},
+  {{ "{" }} x: 18, y: 25 {{ "}" }},
+  // ...
+];
+
+config = createScatterChartConfig({{ "{" }}
+  data: this.data,
+  tooltip: {{ "{" }} enabled: true {{ "}" }},
+{{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="basicConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Click Handling -->
+    <section class="story-section">
+      <h4>2. Click Handling</h4>
+      <p class="story-description">
+        Handle point clicks by providing an <code>onClick</code> callback in the config. The event
+        contains the clicked data point.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createScatterChartConfig({{ "{" }}
+  data: this.data,
+  onClick: (event) => {{ "{" }}
+    console.log('Clicked:', event.data.x, event.data.y);
+  {{ "}" }},
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="interaction-display">
+        <strong>Last clicked:</strong> {{ lastClickedPoint() }}
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="clickableConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Dynamic Data with Signals -->
+    <section class="story-section story-section--highlight">
+      <h4>3. Dynamic Data with Signals</h4>
+      <p class="story-description">
+        <strong>Recommended pattern:</strong> Use a computed signal to rebuild the config when data
+        changes. This ensures the chart re-renders when data updates.
+      </p>
+      <div class="code-block">
+        <pre>
+// Signal holds the reactive data
+data = signal&lt;NgeScatterDataPoint[]&gt;([...]);
+
+// Computed signal rebuilds config when data changes
+config = computed(() =>
+  createScatterChartConfig({{ "{" }}
+    data: this.data(),
+    tooltip: {{ "{" }} enabled: true {{ "}" }},
+  {{ "}" }})
+);
+
+// Template uses the computed signal
+&lt;nge-chart [config]="config()" /&gt;</pre
+        >
+      </div>
+      <div class="interaction-row">
+        <button
+          class="action-button"
+          (click)="randomizeData()"
+        >
+          Randomize Data
+        </button>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Per-Point Colors -->
+    <section class="story-section">
+      <h4>4. Per-Point Colors (Clusters)</h4>
+      <p class="story-description">
+        Add a <code>color</code> property to individual data points to override the theme color.
+        Useful for highlighting clusters or categorical groups.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} x: 15, y: 20, color: '#F44336' {{ "}" }},
+  {{ "{" }} x: 60, y: 65, color: '#2196F3' {{ "}" }},
+  // ...
+];</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="coloredConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Per-Point Sizes -->
+    <section class="story-section">
+      <h4>5. Per-Point Sizes (Bubble Style)</h4>
+      <p class="story-description">
+        Add a <code>size</code> property (radius in px) to individual points to encode a third
+        dimension, turning the scatter plot into a bubble chart.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} x: 20, y: 30, size: 6 {{ "}" }},
+  {{ "{" }} x: 50, y: 35, size: 16 {{ "}" }},
+  {{ "{" }} x: 75, y: 72, size: 20 {{ "}" }},
+  // ...
+];</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="bubbleConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Tooltip on Hover -->
+    <section class="story-section">
+      <h4>6. Tooltip on Hover</h4>
+      <p class="story-description">
+        Enable tooltips by adding <code>tooltip: {{ "{" }} enabled: true {{ "}" }}</code
+        >. Scatter uses Voronoi hit detection, so tooltips appear when hovering <em>near</em> a
+        point, not only over it. The <code>position</code> option accepts <code>'above'</code>,
+        <code>'below'</code>, or <code>'follow-mouse'</code>.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createScatterChartConfig({{ "{" }}
+  data: this.data,
+  tooltip: {{ "{" }}
+    enabled: true,
+    position: 'follow-mouse', // 'above' | 'below' | 'follow-mouse'
+  {{ "}" }},
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="tooltipConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7: Custom Tooltip Content -->
+    <section class="story-section story-section--highlight">
+      <h4>7. Custom Tooltip Content</h4>
+      <p class="story-description">
+        Provide <code>formatContent</code> to map each point to a custom
+        <code>{{ "{" }} label, value {{ "}" }}</code
+        >. Here raw x/y become "sqft" and "$K".
+      </p>
+      <div class="code-block">
+        <pre>
+config = createScatterChartConfig({{ "{" }}
+  data: this.data,
+  tooltip: {{ "{" }}
+    enabled: true,
+    formatContent: (point) => ({{ "{" }}
+      label: `${{ "{" }}point.x.toLocaleString(){{ "}" }} sqft`,
+      value: `$${{ "{" }}point.y{{ "}" }}K`,
+    {{ "}" }}),
+  {{ "}" }},
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="customTooltipConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 8: Axis Labels & Domain Padding -->
+    <section class="story-section">
+      <h4>8. Axis Labels & Domain Padding</h4>
+      <p class="story-description">
+        Show axes with <code>showXAxis</code>/<code>showYAxis</code>, label them with
+        <code>xAxisLabel</code>/<code>yAxisLabel</code>, and control breathing room around the data
+        with <code>xDomainPadding</code>/<code>yDomainPadding</code>. Set <code>yStartAtZero</code>
+        to anchor the Y axis at zero.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createScatterChartConfig({{ "{" }}
+  data: this.data,
+  showXAxis: true,
+  showYAxis: true,
+  xAxisLabel: 'Square Feet',
+  yAxisLabel: 'Price ($K)',
+  xDomainPadding: 0.1,
+  yDomainPadding: 0.15,
+  yStartAtZero: true,
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="axisConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 9: Multi-Series with Legend -->
+    <section class="story-section story-section--highlight">
+      <h4>9. Multi-Series with Legend</h4>
+      <p class="story-description">
+        Group points into series by giving them a <code>seriesId</code>. Each series renders in a
+        distinct palette color, and <code>legend: {{ "{" }} enabled: true {{ "}" }}</code> generates
+        one legend entry per series (position defaults to <code>'bottom'</code>). Because each point
+        carries a <code>seriesId</code>, the default tooltip prefixes the series name on hover.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} x: 12, y: 22, seriesId: 'Series A' {{ "}" }},
+  {{ "{" }} x: 40, y: 48, seriesId: 'Series B' {{ "}" }},
+  {{ "{" }} x: 66, y: 70, seriesId: 'Series C' {{ "}" }},
+  // ...
+];
+
+config = createScatterChartConfig({{ "{" }}
+  data: this.data,
+  legend: {{ "{" }} enabled: true {{ "}" }},
+  tooltip: {{ "{" }} enabled: true {{ "}" }},
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="multiSeriesConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 10: Per-Point Override within a Series -->
+    <section class="story-section">
+      <h4>10. Per-Point Override within a Series</h4>
+      <p class="story-description">
+        Series membership sets the default color, but a per-point <code>color</code> still wins over
+        the series palette color, and a per-point <code>size</code> still sets that bubble's radius.
+        Here one Series A point is forced red and one Series B point is enlarged, while the rest
+        inherit their series color.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} x: 14, y: 24, seriesId: 'Series A' {{ "}" }},
+  // per-point color overrides the Series A palette color:
+  {{ "{" }} x: 30, y: 28, seriesId: 'Series A', color: '#F44336' {{ "}" }},
+  {{ "{" }} x: 46, y: 54, seriesId: 'Series B' {{ "}" }},
+  // per-point size sets this bubble's radius (keeps the series color):
+  {{ "{" }} x: 62, y: 58, seriesId: 'Series B', size: 20 {{ "}" }},
+  // ...
+];</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="overrideSeriesConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 11: Legend Series Selection (transform) -->
+    <section class="story-section story-section--highlight">
+      <h4>11. Legend Series Selection (transform)</h4>
+      <p class="story-description">
+        <strong>Click a legend entry below.</strong> The selected series stays prominent while the
+        other series fade; clicking it again clears the selection.
+        <code>NgeScatterChartTransform</code> is a plain class (no DI) that owns the interaction
+        semantics — it turns legend clicks into a new config (fading via per-point
+        <code>opacity</code>, which composes with the <code>var(--chart-*)</code> palette, unlike
+        color math) and exposes it as a signal. It also supports programmatic axis zoom via
+        <code>setXDomain</code>/<code>setYDomain</code>.
+      </p>
+      <div class="code-block">
+        <pre>
+// Component — plain class, no providers needed
+transform = new NgeScatterChartTransform({{ "{" }}
+  data: this.multiSeriesData, // points carry seriesId
+  tooltip: {{ "{" }} enabled: true {{ "}" }},
+{{ "}" }});
+
+// Template — bind the derived config, wire legend clicks back in
+&lt;nge-chart
+  [config]="transform.config()"
+  (legendItemClick)="transform.onLegendItemClick($event)"
+/&gt;</pre
+        >
+      </div>
+      <div class="interaction-display">
+        <strong>Selected series:</strong>
+        {{ legendSelectionTransform.selectedSeries() ?? "None (click a legend entry)" }}
+      </div>
+      <div class="chart-container">
+        <nge-chart
+          [config]="legendSelectionTransform.config()"
+          (legendItemClick)="legendSelectionTransform.onLegendItemClick($event)"
+        />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

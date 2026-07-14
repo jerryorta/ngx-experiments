@@ -5,23 +5,35 @@
   <div class="stories-container">
     <h2>Bullet Chart - Interactive Controls</h2>
     <p class="intro-text">
-      Use the Storybook controls panel to adjust bullet chart configuration in real-time.
-      All changes are applied immediately to the chart below.
+      Use the Storybook controls panel to adjust bullet chart configuration in real-time. All
+      changes are applied immediately to the chart below.
     </p>
 
     <div class="interaction-row">
-      <button class="story-action-button" (click)="randomizeProgress()">
+      <button
+        type="button"
+        class="interaction-btn interaction-btn--primary"
+        (click)="randomizeProgress()"
+      >
         Randomize Progress
       </button>
     </div>
 
     <div class="chart-container">
       <nge-chart [config]="config()">
-        <ng-template #ngeChartTooltip let-content>
+        <ng-template
+          #ngeChartTooltip
+          let-content
+        >
           <div class="bullet-tooltip-content">
             <div class="bullet-tooltip-label">{{ content?.label }}</div>
             <div class="bullet-tooltip-value">
-              {{ content?.extra?.progress }}<br/> ({{ ((content?.extra?.progress - content?.extra?.min) / (content?.extra?.max - content?.extra?.min) * 100) | number:'1.1-1' }}%)
+              {{ content?.extra?.progress }}<br />
+              ({{
+                ((content?.extra?.progress - content?.extra?.min) /
+                  (content?.extra?.max - content?.extra?.min)) *
+                  100 | number: "1.1-1"
+              }}%)
             </div>
           </div>
         </ng-template>

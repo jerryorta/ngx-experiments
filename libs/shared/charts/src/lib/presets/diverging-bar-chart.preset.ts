@@ -101,6 +101,18 @@ export interface DivergingBarChartPresetOptions {
   onClick?: NgeDivergingBarLayerConfig['onClick'];
 
   /**
+   * Show vertical gridlines at the X axis tick positions
+   * @default false
+   */
+  showXGrid?: boolean;
+
+  /**
+   * Show horizontal gridlines at the Y axis tick positions
+   * @default false
+   */
+  showYGrid?: boolean;
+
+  /**
    * Tooltip configuration. Use `{ enabled: true }` for default tooltip,
    * or provide custom options.
    */
@@ -166,6 +178,8 @@ export function createDivergingBarChartConfig(
     limitIndicatorWidth,
     margin,
     onClick,
+    showXGrid = false,
+    showYGrid = false,
     tooltip,
     valueIndicatorHeight,
     valueIndicatorWidth,
@@ -184,11 +198,16 @@ export function createDivergingBarChartConfig(
       }
     : undefined;
 
+  // Gestures (ARCH-174): diverging-bar is a single-value micro-chart (one datum,
+  // no category axis) — no meaningful zoom/pan surface, so it exposes no
+  // `gestures` option (same rationale as bullet).
   return {
     base: {
       margin: margin ?? { bottom: 10, left: 10, right: 10, top: 10 },
       showXAxis: false,
+      showXGrid,
       showYAxis: false,
+      showYGrid,
     },
     layers: [
       {

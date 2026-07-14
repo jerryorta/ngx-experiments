@@ -17,7 +17,7 @@ import { NgeChartComponent } from '../../../nge-chart.component';
     class: 'bar-chart-usage-stories',
   },
   imports: [CurrencyPipe, NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'nge-bar-chart-usage-stories',
+  selector: 'bar-chart-usage-stories',
   standalone: true,
   styleUrl: './bar-chart-usage-stories.component.scss',
   templateUrl: './bar-chart-usage-stories.component.html',
@@ -199,5 +199,17 @@ export class BarChartUsageStoriesComponent {
     showLabels: true,
     showYAxis: true,
     yAxisTickFormat: d => '$' + d / 1000 + 'K',
+  });
+
+  // ============================================
+  // EXAMPLE 10: Gridlines
+  // ============================================
+  gridlinesConfig = createBarChartConfig({
+    data: this.basicData,
+    showLabels: true,
+    showXAxis: true,
+    showXGrid: true,
+    showYAxis: true,
+    showYGrid: true,
   });
 }

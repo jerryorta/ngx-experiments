@@ -31,4 +31,14 @@ export default [
     // Override or add rules here
     rules: {},
   },
+  {
+    // Storybook story-wrapper components are test scaffolding, not shipped
+    // components — exempt them from the nge- element-selector prefix and the
+    // empty-callback rule (mirrors the source repo's stories exemption).
+    files: ['**/stories/**/*.component.ts'],
+    rules: {
+      '@angular-eslint/component-selector': 'off',
+      '@typescript-eslint/no-empty-function': 'off',
+    },
+  },
 ];

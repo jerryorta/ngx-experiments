@@ -1,6 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, ViewEncapsulation } from '@angular/core';
-import { NgeStorybookReviewContainerComponent, REVIEW_STATUS } from '@nge/storybook';
+import {
+  NgeStorybookReviewContainerComponent,
+  REVIEW_STATUS,
+} from '@nge/storybook';
 
 import type { NgeChartConfig, NgeLineDataPoint } from '../../../../core/config';
 
@@ -13,7 +16,7 @@ import { NgeChartComponent } from '../../../nge-chart.component';
     class: 'line-chart-theming',
   },
   imports: [CommonModule, NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'nge-line-chart-theming',
+  selector: 'line-chart-theming',
   standalone: true,
   styleUrl: './line-chart-theming.component.scss',
   templateUrl: './line-chart-theming.component.html',
@@ -196,6 +199,26 @@ export class LineChartThemingComponent {
       line: {
         line: { color: '#607D8B' },
         point: { color: '#607D8B' },
+      },
+    },
+  };
+
+  // Grid theming
+  gridThemedConfig: NgeChartConfig = {
+    ...createLineChartConfig({
+      data: this.sampleData,
+      seriesColors: ['#2196F3'],
+      showPoints: true,
+      showXAxis: true,
+      showXGrid: true,
+      showYAxis: true,
+      showYGrid: true,
+    }),
+    theme: {
+      grid: {
+        lineColor: '#5C6BC0',
+        lineDash: '4 4',
+        lineWidth: 1,
       },
     },
   };

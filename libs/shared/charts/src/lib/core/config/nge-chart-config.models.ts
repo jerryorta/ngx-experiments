@@ -3,6 +3,7 @@ import type {
   NgeChartScales,
 } from '../base-layout/nge-chart-base-layout.models';
 import type { NgeChartDimensions } from '../chart.models';
+import type { NgeChartGesturesConfig } from '../gesture/nge-chart-gesture.models';
 import type {
   NgeChartLayerClickEvent,
   NgeChartLayerRenderFn,
@@ -37,6 +38,11 @@ export type NgeChartLayerType =
  * Bar layer configuration
  */
 export interface NgeBarLayerConfig {
+  /**
+   * Enter/update/exit transition duration in ms. Default 300.
+   * Set 0 for instant renders — used during zoom/pan gestures.
+   */
+  animationMs?: number;
   barPadding?: number;
   barRadius?: number;
   data: NgeBarDataPoint[];
@@ -58,6 +64,12 @@ export interface NgeBarLayerConfig {
  * Line layer configuration
  */
 export interface NgeLineLayerConfig {
+  /**
+   * Enter/update/exit transition duration in ms. Default 300.
+   * Set 0 for instant renders — used during zoom/pan gestures where per-frame
+   * re-renders must not smear.
+   */
+  animationMs?: number;
   /** Area fill opacity (0-1). Only applies when showArea is true */
   areaOpacity?: number;
   /** Curve interpolation type */
@@ -107,11 +119,19 @@ export interface NgeAreaLayerConfig {
  * Scatter layer configuration
  */
 export interface NgeScatterLayerConfig {
+  /**
+   * Enter/update/exit transition duration in ms. Default 300.
+   * Set 0 for instant renders — used during zoom/pan gestures where per-frame
+   * re-renders must not smear.
+   */
+  animationMs?: number;
   data: NgeScatterDataPoint[];
   onClick?: (event: NgeChartLayerClickEvent<NgeScatterDataPoint>) => void;
   pointRadius?: number;
   /** Renderer function. Import `renderScatterLayer` from '@nge/charts'. */
   renderer: NgeChartLayerRenderFn<NgeScatterDataPoint, NgeScatterLayerConfig, any>;
+  /** Color palette for multi-series. Series index maps to colors[index % length] */
+  seriesColors?: string[];
   /** Tooltip configuration. Set `enabled: true` to show tooltips on hover. */
   tooltip?: Partial<NgeTooltipConfig<NgeScatterDataPoint>>;
   type: 'scatter';
@@ -179,6 +199,11 @@ export interface NgeDivergingBarLayerConfig {
  * Used for showing side-by-side bars grouped by category (e.g., Active vs Closed with Avg/Min/Max bars).
  */
 export interface NgeGroupedBarLayerConfig {
+  /**
+   * Enter/update/exit transition duration in ms. Default 300.
+   * Set 0 for instant renders — used during zoom/pan gestures.
+   */
+  animationMs?: number;
   /** Padding between bars within a group (0-1) */
   barPadding?: number;
   /** Bar corner radius (px) */
@@ -261,6 +286,14 @@ export interface NgeLineDataPoint {
 
 export interface NgeScatterDataPoint {
   color?: string;
+  /**
+   * Optional per-point opacity override (0-1). Falls back to theme.point.opacity.
+   * The de-emphasis primitive used by series selection: unlike color math, opacity
+   * composes with unresolved `var(--chart-*)` palette colors.
+   */
+  opacity?: number;
+  /** Optional series identifier for multi-series charts */
+  seriesId?: string;
   size?: number;
   x: number;
   y: number;
@@ -308,6 +341,13 @@ export interface NgeChartConfig {
    * Base layout configuration (margins, axes, scale types)
    */
   base?: NgeChartBaseConfig;
+
+  /**
+   * Opt-in wheel-zoom / drag-pan gesture capture. The chart emits semantic
+   * `NgeChartGestureEvent`s (via `<nge-chart (chartGesture)>`) — pair with a
+   * transform (e.g. NgeScatterChartTransform.onChartGesture) for zoom/pan.
+   */
+  gestures?: NgeChartGesturesConfig;
 
   /**
    * Array of layer definitions to render.

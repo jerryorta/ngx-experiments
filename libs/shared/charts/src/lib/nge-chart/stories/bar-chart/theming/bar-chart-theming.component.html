@@ -2,128 +2,144 @@
   [reviewStatus]="reviewStatus"
   [storybookFilePath]="storybookFilePath"
 >
-<div class="stories-container">
-  <h2>Unified Chart Component - Theming Examples</h2>
+  <div class="stories-container">
+    <h2>Unified Chart Component - Theming Examples</h2>
 
-  <!-- Default Theme -->
-  <section class="story-section">
-    <h4>Default Theme (Material Design)</h4>
-    <p class="story-description">No theme provided - uses Material Design CSS variables</p>
-    <div class="chart-container">
-      <nge-chart [config]="defaultConfig" />
-    </div>
-  </section>
+    <!-- Default Theme -->
+    <section class="story-section">
+      <h4>Default Theme (Material Design)</h4>
+      <p class="story-description">No theme provided - uses Material Design CSS variables</p>
+      <div class="chart-container">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
 
-  <!-- Green Theme -->
-  <section class="story-section">
-    <h4>Green Theme</h4>
-    <p class="story-description">Custom bar colors via config.theme.bar.bar</p>
-    <div class="chart-container">
-      <nge-chart [config]="greenConfig" />
-    </div>
-  </section>
+    <!-- Green Theme -->
+    <section class="story-section">
+      <h4>Green Theme</h4>
+      <p class="story-description">Custom bar colors via config.theme.bar.bar</p>
+      <div class="chart-container">
+        <nge-chart [config]="greenConfig" />
+      </div>
+    </section>
 
-  <!-- Large Typography Theme -->
-  <section class="story-section">
-    <h4>Large Typography Theme</h4>
-    <p class="story-description">Custom font sizes via config.theme.bar.label and config.theme.axis</p>
-    <div class="chart-container">
-      <nge-chart [config]="largeTypographyConfig" />
-    </div>
-  </section>
+    <!-- Large Typography Theme -->
+    <section class="story-section">
+      <h4>Large Typography Theme</h4>
+      <p class="story-description"
+        >Custom font sizes via config.theme.bar.label and config.theme.axis</p
+      >
+      <div class="chart-container">
+        <nge-chart [config]="largeTypographyConfig" />
+      </div>
+    </section>
 
-  <!-- Per-Bar Colors -->
-  <section class="story-section">
-    <h4>Per-Bar Colors</h4>
-    <p class="story-description">Individual colors via data[].color - overrides theme</p>
-    <div class="chart-container">
-      <nge-chart [config]="perBarColorConfig" />
-    </div>
-  </section>
+    <!-- Per-Bar Colors -->
+    <section class="story-section">
+      <h4>Per-Bar Colors</h4>
+      <p class="story-description">Individual colors via data[].color - overrides theme</p>
+      <div class="chart-container">
+        <nge-chart [config]="perBarColorConfig" />
+      </div>
+    </section>
 
-  <!-- Horizontal with Theme -->
-  <section class="story-section">
-    <h4>Horizontal + Purple Theme</h4>
-    <p class="story-description">Horizontal orientation with custom bar radius</p>
-    <div class="chart-container chart-container--horizontal">
-      <nge-chart [config]="purpleConfig" />
-    </div>
-  </section>
+    <!-- Horizontal with Theme -->
+    <section class="story-section">
+      <h4>Horizontal + Purple Theme</h4>
+      <p class="story-description">Horizontal orientation with custom bar radius</p>
+      <div class="chart-container chart-container--horizontal">
+        <nge-chart [config]="purpleConfig" />
+      </div>
+    </section>
 
-  <!-- Custom Axis Theme -->
-  <section class="story-section">
-    <h4>Custom Axis Theme</h4>
-    <p class="story-description">Axis colors via config.theme.axis</p>
-    <div class="chart-container">
-      <nge-chart [config]="customAxisConfig" />
-    </div>
-  </section>
+    <!-- Custom Axis Theme -->
+    <section class="story-section">
+      <h4>Custom Axis Theme</h4>
+      <p class="story-description">Axis colors via config.theme.axis</p>
+      <div class="chart-container">
+        <nge-chart [config]="customAxisConfig" />
+      </div>
+    </section>
 
-  <!-- Statistical Lines -->
-  <section class="story-section">
-    <h4>Statistical Lines Theme</h4>
-    <p class="story-description">Mean/median line colors via config.theme.bar.statistical</p>
-    <div class="chart-container">
-      <nge-chart [config]="statsConfig" />
-    </div>
-  </section>
+    <!-- Grid Theme -->
+    <section class="story-section">
+      <h4>Grid Theme</h4>
+      <p class="story-description"
+        >Custom gridline color, dash pattern, and width via config.theme.grid</p
+      >
+      <div class="chart-container">
+        <nge-chart [config]="gridThemedConfig" />
+      </div>
+    </section>
 
-  <!-- Tooltip Positioning -->
-  <section class="story-section story-section--highlight">
-    <h4>Tooltip Positioning</h4>
-    <p class="story-description">
-      <strong>Hover over bars to see tooltips.</strong> Tooltip position is configured via
-      <code>tooltip: &#123; enabled: true, position: 'above' | 'below' | 'follow-mouse' &#125;</code>
-    </p>
-    <div class="chart-row">
-      <div class="chart-column">
-        <h5>Position: Above</h5>
-        <div class="chart-container chart-container--small">
-          <nge-chart [config]="tooltipAboveConfig" />
+    <!-- Statistical Lines -->
+    <section class="story-section">
+      <h4>Statistical Lines Theme</h4>
+      <p class="story-description">Mean/median line colors via config.theme.bar.statistical</p>
+      <div class="chart-container">
+        <nge-chart [config]="statsConfig" />
+      </div>
+    </section>
+
+    <!-- Tooltip Positioning -->
+    <section class="story-section story-section--highlight">
+      <h4>Tooltip Positioning</h4>
+      <p class="story-description">
+        <strong>Hover over bars to see tooltips.</strong> Tooltip position is configured via
+        <code
+          >tooltip: &#123; enabled: true, position: 'above' | 'below' | 'follow-mouse' &#125;</code
+        >
+      </p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>Position: Above</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="tooltipAboveConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Position: Below</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="tooltipBelowConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Position: Follow Mouse</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="tooltipFollowConfig" />
+          </div>
         </div>
       </div>
-      <div class="chart-column">
-        <h5>Position: Below</h5>
-        <div class="chart-container chart-container--small">
-          <nge-chart [config]="tooltipBelowConfig" />
-        </div>
-      </div>
-      <div class="chart-column">
-        <h5>Position: Follow Mouse</h5>
-        <div class="chart-container chart-container--small">
-          <nge-chart [config]="tooltipFollowConfig" />
-        </div>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- MAIN DEMO: Multiple Different Themes -->
-  <section class="story-section story-section--highlight">
-    <h4>Multiple Charts with Different Themes</h4>
-    <p class="story-description">
-      <strong>This demonstrates the core feature:</strong> Different themed charts on the same page.
-      Each chart uses the same <code>&lt;nge-chart&gt;</code> component with different configs.
-    </p>
-    <div class="chart-row">
-      <div class="chart-column">
-        <h5>Revenue (Blue)</h5>
-        <div class="chart-container chart-container--small">
-          <nge-chart [config]="blueConfig" />
+    <!-- MAIN DEMO: Multiple Different Themes -->
+    <section class="story-section story-section--highlight">
+      <h4>Multiple Charts with Different Themes</h4>
+      <p class="story-description">
+        <strong>This demonstrates the core feature:</strong> Different themed charts on the same
+        page. Each chart uses the same <code>&lt;nge-chart&gt;</code> component with different
+        configs.
+      </p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>Revenue (Blue)</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="blueConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Expenses (Red)</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="redConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Profit (Green)</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="profitConfig" />
+          </div>
         </div>
       </div>
-      <div class="chart-column">
-        <h5>Expenses (Red)</h5>
-        <div class="chart-container chart-container--small">
-          <nge-chart [config]="redConfig" />
-        </div>
-      </div>
-      <div class="chart-column">
-        <h5>Profit (Green)</h5>
-        <div class="chart-container chart-container--small">
-          <nge-chart [config]="profitConfig" />
-        </div>
-      </div>
-    </div>
-  </section>
-</div>
+    </section>
+  </div>
 </nge-storybook-review-container>

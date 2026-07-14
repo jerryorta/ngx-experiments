@@ -4,6 +4,8 @@ import type { NgeChartScales } from '../core/base-layout';
 import type { NgeChartDimensions } from '../core/chart.models';
 import type { NgeBarDataPoint, NgeBarLayerConfig, NgeChartConfig } from '../core/config';
 
+import { orderedBandCategories } from '../core/gesture';
+
 /**
  * Options for creating bar chart scales
  */
@@ -47,26 +49,27 @@ export function createBarChartScales(
 ): NgeChartScales {
   const opts = { ...DEFAULT_OPTIONS, ...options };
 
-  // Collect all data points from bar layers to determine scale domains
-  const allLabels: string[] = [];
-  const allValues: number[] = [];
-
+  // Collect all bar points. When a band-window zoom is active, the consuming
+  // transform passes only the VISIBLE window's data — so the band axis and the
+  // value axis both derive from exactly what should be on screen (the value
+  // axis auto-fits as you zoom; no off-window bars pile up at the origin).
+  const barData: NgeBarDataPoint[] = [];
   for (const layer of config.layers.flat()) {
     if (layer.type === 'bar') {
-      for (const d of layer.data as NgeBarDataPoint[]) {
-        if (!allLabels.includes(d.label)) {
-          allLabels.push(d.label);
-        }
-        allValues.push(d.value);
-      }
+      barData.push(...(layer.data as NgeBarDataPoint[]));
     }
   }
+
+  const allLabels = orderedBandCategories(barData, d => d.label);
+  const allValues = barData.map(d => d.value);
 
   const maxValue = Math.max(...allValues, 0);
   const minValue = Math.min(...allValues, 0);
 
   // Determine orientation from first bar layer (if any)
-  const barLayer = config.layers.flat().find(l => l.type === 'bar') as NgeBarLayerConfig | undefined;
+  const barLayer = config.layers.flat().find(l => l.type === 'bar') as
+    | NgeBarLayerConfig
+    | undefined;
   const isVertical = !barLayer || barLayer.orientation !== 'horizontal';
 
   // Use layer-specific padding if provided, otherwise use options
@@ -80,15 +83,14 @@ export function createBarChartScales(
   // Create scales based on orientation
   const xScale = isVertical
     ? scaleBand<string>().domain(allLabels).range([0, dimensions.boundedWidth]).padding(barPadding)
-    : scaleLinear()
-        .domain([valueDomainMin, valueDomainMax])
-        .range([0, dimensions.boundedWidth]);
+    : scaleLinear().domain([valueDomainMin, valueDomainMax]).range([0, dimensions.boundedWidth]);
 
   const yScale = isVertical
-    ? scaleLinear()
-        .domain([valueDomainMin, valueDomainMax])
-        .range([dimensions.boundedHeight, 0])
-    : scaleBand<string>().domain(allLabels).range([0, dimensions.boundedHeight]).padding(barPadding);
+    ? scaleLinear().domain([valueDomainMin, valueDomainMax]).range([dimensions.boundedHeight, 0])
+    : scaleBand<string>()
+        .domain(allLabels)
+        .range([0, dimensions.boundedHeight])
+        .padding(barPadding);
 
   return { x: xScale, y: yScale };
 }

@@ -1,12 +1,14 @@
 import type {
   NgeGroupedBarDataPoint,
   NgeLineDataPoint,
+  NgeScatterDataPoint,
 } from '../config/nge-chart-config.models';
 import type { NgeLegendItem } from './nge-chart-legend.models';
 
 import {
   DEFAULT_BAR_LAYER_THEME,
   DEFAULT_LINE_LAYER_THEME,
+  DEFAULT_SCATTER_LAYER_THEME,
 } from '../theme/nge-chart-theme.defaults';
 
 /**
@@ -86,6 +88,42 @@ export function extractLineChartLegendItems(
 
   return uniqueSeries.map((seriesId, i) => ({
     color: seriesColors?.[i] ?? colors[i % colors.length] ?? 'var(--chart-primary)',
+    label: seriesId,
+  }));
+}
+
+/**
+ * Extract legend items from scatter chart multi-series data.
+ * Returns one item per unique seriesId, using colors from seriesColors or theme defaults.
+ * Returns empty array for single-series data (no seriesId).
+ */
+export function extractScatterChartLegendItems(
+  data: NgeScatterDataPoint[],
+  seriesColors?: string[],
+  themeColors?: string[]
+): NgeLegendItem[] {
+  const fallbackColors = DEFAULT_SCATTER_LAYER_THEME.point.colors ?? [];
+  const colors = themeColors ?? fallbackColors;
+  const uniqueSeries: string[] = [];
+
+  for (const d of data) {
+    if (d.seriesId && !uniqueSeries.includes(d.seriesId)) {
+      uniqueSeries.push(d.seriesId);
+    }
+  }
+
+  if (uniqueSeries.length === 0) {
+    return [];
+  }
+
+  // Cycle seriesColors WITH modulo so the legend matches the renderer's
+  // `palette[i % palette.length]` when seriesColors is shorter than the series count.
+  return uniqueSeries.map((seriesId, i) => ({
+    color:
+      seriesColors?.[i % seriesColors.length] ??
+      colors[i % colors.length] ??
+      'var(--chart-primary)',
+    id: seriesId,
     label: seriesId,
   }));
 }

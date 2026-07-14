@@ -207,4 +207,19 @@ export class LineChartUsageStoriesComponent {
     xAxisLabel: 'Month',
     yAxisLabel: 'Revenue ($)',
   });
+
+  // ============================================
+  // EXAMPLE 8: Gridlines
+  // ============================================
+  gridlinesConfig = createLineChartConfig({
+    data: this.basicData,
+    margin: { bottom: 40, left: 50, right: 20, top: 20 },
+    showPoints: true,
+    showXAxis: true,
+    showXGrid: true,
+    showYAxis: true,
+    showYGrid: true,
+    xAxisLabel: 'Month',
+    yAxisLabel: 'Value',
+  });
 }
