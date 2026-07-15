@@ -1,0 +1,76 @@
+name: Deploy Pages (Ledger demo + Storybook)
+
+# Publishes two static artifacts to GitHub Pages on every push to main:
+#   /                -> Ledger demo (Angular SPA)
+#   /storybook/      -> Storybook component library
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Least-privilege token: read the repo, publish to Pages via OIDC.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time. Don't cancel an in-flight deploy — let it finish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # Clean, lockfile-exact install (repo pins a Storybook beta — no drift).
+      - name: Install dependencies
+        run: npm ci
+
+      # Project Pages serves under /<repo>/, so the SPA needs a matching base href.
+      # Derived from the repo name so it survives a future repo rename.
+      - name: Build Ledger demo
+        run: npx nx build ledger-app --configuration=production --base-href="/${{ github.event.repository.name }}/"
+
+      - name: Build Storybook (static)
+        run: npx nx run storybook-app:build-storybook
+
+      - name: Assemble Pages site
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          mkdir -p _site/storybook
+          # Ledger SPA at the site root.
+          cp -r dist/apps/ledger/app/browser/. _site/
+          # Storybook under /storybook/ (its assets are relative, so a subpath is fine).
+          cp -r dist/storybook/storybook-app/. _site/storybook/
+          # SPA deep-link fallback: Pages serves 404.html for unknown paths;
+          # a copy of index.html lets the Angular router resolve /overview, /transactions, etc.
+          cp _site/index.html _site/404.html
+          # Disable Jekyll so files/dirs beginning with "_" are served verbatim.
+          touch _site/.nojekyll
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
