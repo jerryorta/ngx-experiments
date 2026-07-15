@@ -66,6 +66,20 @@ Claude Code commands (`.claude/commands/`):
 | `/new-domain` | Scaffold your own domain-library-set — your sandbox |
 | `/update` | Update npm dependencies (Nx-migrate flow, `--legacy-peer-deps`) |
 
+## Deploying
+
+The Ledger demo and Storybook publish to **GitHub Pages** automatically on every push to `main`, via `.github/workflows/pages.yml`:
+
+```bash
+git add -A
+git commit -m "your message"
+git push origin main
+```
+
+The workflow builds the Ledger app and the Storybook static site and assembles them into one Pages artifact — landing hub at `/`, the **demo** at `/demo/`, **Storybook** at `/storybook/`, plus a `404.html` SPA fallback — then deploys. **Live in ~2–4 minutes**; watch it in the repo's [Actions](https://github.com/jerryorta/ngx-experiments/actions) tab. Hard-refresh (⌘⇧R) if the browser caches the old build.
+
+Loop: **commit → push → `main`**. Pages is already configured — nothing else to run or re-enable.
+
 ## Architecture
 
 - **Nx monorepo**, npm, the `@angular/build` (esbuild) builder, Tailwind v4 (CSS-first).
