@@ -171,8 +171,8 @@ export const OverviewStore = signalStore(
       // -----------------------------------------------------------------
 
       /** Net-worth trend line, sliced to `trendRange`. */
-      netWorthChartConfig: computed<NgeChartConfig>(() =>
-        createLineChartConfig({
+      netWorthChartConfig: computed<NgeChartConfig>(() => ({
+        ...createLineChartConfig({
           // The line preset (unlike the bar presets) has no Y-tick formatter, so
           // scale cents → dollars in the data to keep the axis readable; the
           // tooltip rounds back to cents for exact `formatMoney` output.
@@ -180,6 +180,9 @@ export const OverviewStore = signalStore(
             x: parseIsoDateLocal(point.date),
             y: point.valueCents / 100,
           })),
+          // Widen the left margin: the default (45) clips the 6-digit "120,000"-
+          // scale tick labels AND collides with the rotated "Net worth" title.
+          margin: { top: 20, right: 10, bottom: 45, left: 88 },
           showArea: true,
           showXAxis: true,
           showYAxis: true,
@@ -191,8 +194,13 @@ export const OverviewStore = signalStore(
             }),
           },
           yAxisLabel: 'Net worth',
-        })
-      ),
+        }),
+        // The point FILL defaults to --chart-surface (the panel bg), which is
+        // near-black in every dark persona → invisible dots. Fill with
+        // --chart-on-surface so markers stay legible in all themes. Safe as a
+        // .style() var(); a var() in seriesColors would break d3's area color math.
+        theme: { line: { point: { color: 'var(--chart-on-surface)' } } },
+      })),
 
       /** Spending-by-category donut segments — `CategorySpending` mapped 1:1 to `LdgDonutSegment`. */
       spendingSegments: computed<LdgDonutSegment[]>(() =>
