@@ -2,12 +2,14 @@
 
 > A standalone **Nx + Angular** reference workspace — a clean-room design system and experiments playground for **modern Angular** (standalone, signals, zero Angular Material), built under the `@nge` namespace.
 
-![Angular](https://img.shields.io/badge/Angular-21-DD0031?logo=angular&logoColor=white)
-![Nx](https://img.shields.io/badge/Nx-22-143055?logo=nx&logoColor=white)
+![Angular](https://img.shields.io/badge/Angular-22-DD0031?logo=angular&logoColor=white)
+![Nx](https://img.shields.io/badge/Nx-23-143055?logo=nx&logoColor=white)
 ![NgRx](https://img.shields.io/badge/NgRx-21-BA2BD2?logo=reactivex&logoColor=white)
-![Storybook](https://img.shields.io/badge/Storybook-10-FF4785?logo=storybook&logoColor=white)
+![Storybook](https://img.shields.io/badge/Storybook-10.5-FF4785?logo=storybook&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06B6D4?logo=tailwindcss&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)
+
+**🔗 Live:** [Ledger demo](https://jerryorta.github.io/ngx-experiments/demo/) · [Storybook](https://jerryorta.github.io/ngx-experiments/storybook/)
 
 ## What it is
 

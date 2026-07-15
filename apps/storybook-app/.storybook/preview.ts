@@ -29,7 +29,7 @@ const preview: Preview = {
     applicationConfig({ providers: [provideZonelessChangeDetection()] }),
     (storyFn, context) => {
       const selected =
-        (context.globals as Record<string, string>)['theme'] ?? 'dlc-professional-dark';
+        (context.globals as Record<string, string>)['theme'] ?? 'dlc-home-light';
 
       // Scope the theme to the story's group: a story declares
       // `parameters: { themeGroup: 'cg' }` to restrict which themes apply.
@@ -48,7 +48,7 @@ const preview: Preview = {
     // The theme global default; the SWITCHER UI is the custom manager toolbar
     // (.storybook/manager.tsx → ThemeSelectorTool), so no `toolbar` here.
     theme: {
-      defaultValue: 'dlc-professional-dark',
+      defaultValue: 'dlc-home-light',
       name: 'Theme',
     },
   },
