@@ -15,7 +15,7 @@ export type { LdgDonutSegment } from './ldg-donut.models';
  * this folder) and renders it through the shared `<nge-chart [config]>`. All
  * real logic lives in the layer, so the donut can promote into `@nge/charts` by
  * moving those files + registering a `'donut'` layer type — no rewrite. See
- * `docs/reference/charts.md` ("Domain charts must be promotion-ready").
+ * `docs/architecture/charts.md` ("Domain charts must be promotion-ready").
  *
  * @example
  * <ldg-donut-chart

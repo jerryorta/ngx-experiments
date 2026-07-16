@@ -32,7 +32,7 @@ const FALLBACK_COLORS = DEFAULT_LDG_DONUT_LAYER_THEME.seriesColors;
  * color/label. The donut layer is a domain-incubated `type: 'donut'` — not yet
  * in the shared `NgeChartLayerType` union — so it's cast into `layers` here; the
  * `<nge-chart>` layer registry still calls its `renderer` generically
- * (`docs/reference/charts.md`).
+ * (`docs/architecture/charts.md`).
  */
 export function createLdgDonutChartConfig(options: LdgDonutChartPresetOptions): NgeChartConfig {
   const { centerLabel, centerValue, data, legend = false, legendPosition = 'right', onSegmentClick, thickness } = options;

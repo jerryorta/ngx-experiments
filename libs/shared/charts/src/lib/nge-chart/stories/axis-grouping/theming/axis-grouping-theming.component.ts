@@ -63,7 +63,7 @@ function buildMonthlySalesData(): NgeGroupedBarDataPoint[] {
 /**
  * Layers grouping tiers PLUS a `theme.axis.group` override onto an already-built preset config —
  * the theming counterpart of the usage story's `withXAxisGroups` (see
- * docs/reference/charts.md § Axis grouping tiers).
+ * docs/architecture/charts.md § Axis grouping tiers).
  */
 function withThemedXAxisGroups(
   config: NgeChartConfig,

@@ -33,7 +33,7 @@ export interface LdgDonutLayerTheme {
  * renders. `type: 'donut'` is a domain-incubated layer type (not yet in the
  * shared `NgeChartLayerType` union), so the preset casts it into `config.layers`;
  * the registry still calls `renderer` generically. Promoting it upstream is a
- * file move + a `type` registration — see `docs/reference/charts.md`.
+ * file move + a `type` registration — see `docs/architecture/charts.md`.
  */
 export interface LdgDonutLayerConfig {
   /** Center label drawn in the donut hole, e.g. 'Total'. */

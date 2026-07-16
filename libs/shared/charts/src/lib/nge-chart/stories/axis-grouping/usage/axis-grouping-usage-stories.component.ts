@@ -62,7 +62,7 @@ function buildMonthlySalesData(): NgeGroupedBarDataPoint[] {
 
 /**
  * Layers grouping tiers onto an already-built preset config's base layout. Presets don't expose
- * a tier option directly (see docs/reference/charts.md § Axis grouping tiers), so every example
+ * a tier option directly (see docs/architecture/charts.md § Axis grouping tiers), so every example
  * below builds its preset config first, then overrides `base.xAxisGroups`.
  */
 function withXAxisGroups(config: NgeChartConfig, groups: AxisTierConfig[]): NgeChartConfig {

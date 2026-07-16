@@ -1,6 +1,6 @@
 # Shared Charts — Contributor Notes
 
-> **Charts guide**: `docs/reference/charts.md`
+> **Charts guide**: `docs/architecture/charts.md`
 > **Workspace invariants**: `docs/ai/CONSTRAINTS.md`
 
 ## Shared specifics
@@ -8,7 +8,7 @@
 - **Holds**: the unified `nge-chart` D3 chart system — one config-driven `<nge-chart>`
   plus pluggable layers (bar / line / bullet / grouped-bar / diverging-bar / scatter),
   presets, generic tooltip, and legend. Architecture, public API, the `--chart-*` token
-  contract, and the Jest shims consumers need all live in `docs/reference/charts.md`
+  contract, and the Jest shims consumers need all live in `docs/architecture/charts.md`
   (that guide is mirrored from gigasoftware — read `giga-`→`nge-` for selectors/aliases).
 - **`--chart-*` token bridge (repo-specific — the part that isn't in the shared guide).**
   Charts render off the domain-agnostic `--chart-*` contract (defaults in

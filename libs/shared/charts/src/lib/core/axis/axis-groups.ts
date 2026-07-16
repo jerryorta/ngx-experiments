@@ -347,7 +347,7 @@ function fitPillLabel(
  * so the same machinery yields a horizontal bracket for a bottom axis and a rotated
  * one for a left/right axis. On a vertical axis the label stays horizontal, so its
  * badge reads as a horizontal chip pinned on the vertical baseline (and may extend
- * past the ~22px row width for a long label — see docs/reference/charts.md).
+ * past the ~22px row width for a long label — see docs/architecture/charts.md).
  */
 function renderPillTier(
   row: Selection<SVGGElement, unknown, null, undefined>,

@@ -5,7 +5,7 @@ import type { LdgDonutLayerTheme } from './ldg-donut.models';
  * correctly with no theme applied and stays promotion-ready. Values are applied
  * as D3 `.style()` strings (which the browser resolves in context), never as a
  * `seriesColors` array fed through a d3 scale — an unresolved `var()` fails
- * there (see `docs/reference/charts.md`).
+ * there (see `docs/architecture/charts.md`).
  */
 export const DEFAULT_LDG_DONUT_LAYER_THEME: LdgDonutLayerTheme = {
   centerLabelColor: 'var(--chart-on-surface-variant)',
