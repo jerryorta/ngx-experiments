@@ -32,7 +32,12 @@
       ],
       "@nge/ledger-utils": ["./libs/ledger/utils/src/index.ts"],
       "@nge/ledger-mocks": ["./libs/ledger/mocks/src/index.ts"]
-    }
+    },
+    "strict": false,
+    "noUncheckedSideEffectImports": false,
+    "types": ["*"],
+    "esModuleInterop": false,
+    "ignoreDeprecations": "6.0"
   },
   "exclude": ["node_modules", "tmp"]
 }
