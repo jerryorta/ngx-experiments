@@ -55,7 +55,7 @@
     "@angular/compiler-cli": "22.0.7",
     "@angular/language-service": "22.0.7",
     "@capacitor/cli": "^8.4.0",
-    "@eslint/js": "^9.8.0",
+    "@eslint/js": "^9.39.5",
     "@nx/angular": "23.1.0",
     "@nx/devkit": "23.1.0",
     "@nx/eslint": "23.1.0",
@@ -76,11 +76,11 @@
     "@types/d3": "^7.4.3",
     "@types/jest": "~30.0.0",
     "@types/node": "^22.0.0",
-    "@typescript-eslint/utils": "^8.63.0",
+    "@typescript-eslint/utils": "^8.64.0",
     "angular-eslint": "22.1.0",
     "autoprefixer": "^10.5.4",
     "es-toolkit": "^1.49.0",
-    "eslint": "^9.8.0",
+    "eslint": "^9.39.5",
     "eslint-config-prettier": "^10.0.0",
     "eslint-plugin-playwright": "^1.6.2",
     "jest": "~30.4.0",
@@ -100,6 +100,6 @@
     "ts-node": "10.9.2",
     "tslib": "^2.3.0",
     "typescript": "~6.0.3",
-    "typescript-eslint": "^8.63.0"
+    "typescript-eslint": "^8.64.0"
   }
 }
