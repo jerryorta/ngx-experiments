@@ -1,3 +1,4 @@
+import type { NgeChartAnimationConfig } from '../core/animation';
 import type { NgeChartBaseConfig } from '../core/base-layout';
 import type {
   NgeChartConfig,
@@ -54,6 +55,12 @@ export interface DivergingBarChartTooltipOptions {
  * Options for creating a diverging bar chart config preset.
  */
 export interface DivergingBarChartPresetOptions {
+  /**
+   * Chart-wide enter/update/exit animation (per-phase durations + easing) applied to
+   * every layer. A layer's own `animationMs` shorthand still wins over it.
+   */
+  animation?: NgeChartAnimationConfig;
+
   /**
    * Height of the main value bar in pixels
    */
@@ -169,6 +176,7 @@ export function createDivergingBarChartConfig(
   options: DivergingBarChartPresetOptions
 ): NgeChartConfig {
   const {
+    animation,
     barHeight,
     centerIndicatorHeight,
     centerIndicatorWidth,
@@ -202,6 +210,7 @@ export function createDivergingBarChartConfig(
   // no category axis) — no meaningful zoom/pan surface, so it exposes no
   // `gestures` option (same rationale as bullet).
   return {
+    animation,
     base: {
       margin: margin ?? { bottom: 10, left: 10, right: 10, top: 10 },
       showXAxis: false,

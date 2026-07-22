@@ -1,4 +1,4 @@
-import { easeCubicInOut, interpolateNumber, scaleLinear, select } from 'd3';
+import { interpolateNumber, scaleLinear, select } from 'd3';
 import 'd3-transition';
 
 import type { NgeBulletDataPoint, NgeBulletLayerConfig } from '../../core/config';
@@ -31,8 +31,16 @@ export function renderBulletLayer(
     NgeBulletLayerTheme | undefined
   >
 ): void {
-  const { bounds, config, dimensions, margins, tooltipConfig, tooltipElement, tooltipHandlers } =
-    context;
+  const {
+    animation,
+    bounds,
+    config,
+    dimensions,
+    margins,
+    tooltipConfig,
+    tooltipElement,
+    tooltipHandlers,
+  } = context;
 
   // Bullet chart data comes from config.data (single object, not array)
   const datum = config.data;
@@ -175,7 +183,8 @@ export function renderBulletLayer(
       .attr('width', 0)
       .style('fill', progressBarColor)
       .transition()
-      .duration(300)
+      .duration(animation.enterMs)
+      .ease(animation.easing)
       .attr('width', xScale(progress));
 
     // Left limit indicator
@@ -208,7 +217,8 @@ export function renderBulletLayer(
       .attr('y', 0)
       .style('fill', progressIndicatorColor)
       .transition()
-      .duration(300)
+      .duration(animation.enterMs)
+      .ease(animation.easing)
       .attr('x', xScale(progress) - progressIndicatorWidth / 2)
       .tween('tooltip-content', () => {
         // Only animate tooltip content if showDuringAnimation is true (default)
@@ -239,8 +249,8 @@ export function renderBulletLayer(
         select(tooltipElement)
           .style('display', 'block')
           .transition()
-          .duration(300)
-          .ease(easeCubicInOut)
+          .duration(animation.enterMs)
+          .ease(animation.easing)
           .style('left', `${finalTooltipEvent.position.x}px`)
           .style('top', `${finalTooltipEvent.position.y}px`);
       }
@@ -257,7 +267,8 @@ export function renderBulletLayer(
       .select('.nge-bullet-progress-bar')
       .style('fill', progressBarColor)
       .transition()
-      .duration(300)
+      .duration(animation.updateMs)
+      .ease(animation.easing)
       .attr('width', xScale(progress));
 
     container
@@ -269,7 +280,8 @@ export function renderBulletLayer(
       .select('.nge-bullet-progress-indicator')
       .style('fill', progressIndicatorColor)
       .transition()
-      .duration(300)
+      .duration(animation.updateMs)
+      .ease(animation.easing)
       .attr('x', xScale(progress) - progressIndicatorWidth / 2)
       .tween('tooltip-content', () => {
         // Only animate tooltip content if showDuringAnimation is true (default)
@@ -300,8 +312,8 @@ export function renderBulletLayer(
         select(tooltipElement)
           .style('display', 'block')
           .transition()
-          .duration(300)
-          .ease(easeCubicInOut)
+          .duration(animation.updateMs)
+          .ease(animation.easing)
           .style('left', `${finalTooltipEvent.position.x}px`)
           .style('top', `${finalTooltipEvent.position.y}px`);
       }

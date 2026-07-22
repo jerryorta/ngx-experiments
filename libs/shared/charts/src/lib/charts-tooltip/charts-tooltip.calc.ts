@@ -27,7 +27,7 @@ export class ChartsTooltipCalc<TooltipData> {
     distinctUntilChanged()
   );
 
-  tooltipStyle: Signal<string> = <Signal<string>>toSignal(this.tooltipStyle$);
+  readonly tooltipStyle: Signal<string> = <Signal<string>>toSignal(this.tooltipStyle$);
 
   status$: BehaviorSubject<NgeChartStatus> = new BehaviorSubject<NgeChartStatus>('none');
 
@@ -60,7 +60,7 @@ export class ChartsTooltipCalc<TooltipData> {
     distinctUntilChanged()
   );
 
-  chartTooltipState: Signal<ChartTooltipState> = <Signal<ChartTooltipState>>(
+  readonly chartTooltipState: Signal<ChartTooltipState> = <Signal<ChartTooltipState>>(
     toSignal(this.chartTooltipState$)
   );
 

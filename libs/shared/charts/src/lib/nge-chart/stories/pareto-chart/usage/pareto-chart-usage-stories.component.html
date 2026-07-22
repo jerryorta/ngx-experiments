@@ -1,0 +1,155 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Pareto Chart - Usage Examples</h2>
+    <p class="intro-text">
+      A Pareto chart pairs descending bars (individual category values, left axis) with a cumulative
+      percentage line (right axis) — the classic 80/20 view for spotting the vital few contributors.
+    </p>
+
+    <!-- EXAMPLE 1: Basic Pareto -->
+    <section class="story-section">
+      <h4>1. Basic Pareto</h4>
+      <p class="story-description">
+        Pass category values to <code>createParetoChartConfig()</code>. Bars sort descending and the
+        cumulative % line climbs to 100% on the right-hand axis.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} label: 'Scratches', value: 42 {{ "}" }},
+  {{ "{" }} label: 'Dents', value: 30 {{ "}" }},
+  // ...
+];
+
+config = createParetoChartConfig({{ "{" }}
+  data: this.data,
+{{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="basicConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: With Value Labels -->
+    <section class="story-section">
+      <h4>2. With Value Labels</h4>
+      <p class="story-description">
+        Set <code>showLabels: true</code> to print each bar's value.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createParetoChartConfig({{ "{" }}
+  data: this.data,
+  showLabels: true,
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="labeledConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Preserve Input Order -->
+    <section class="story-section">
+      <h4>3. Preserve Input Order</h4>
+      <p class="story-description">
+        Set <code>sort: false</code> to keep the data's original order (bars are no longer forced
+        descending). The cumulative line still tracks the running total in that order.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createParetoChartConfig({{ "{" }}
+  data: this.data,
+  sort: false,
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="unsortedConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Click Handling -->
+    <section class="story-section story-section--highlight">
+      <h4>4. Click Handling</h4>
+      <p class="story-description">
+        Provide an <code>onBarClick</code> callback; the event carries the clicked bar's data point.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createParetoChartConfig({{ "{" }}
+  data: this.data,
+  onBarClick: (event) => {{ "{" }}
+    console.log('Clicked:', event.data.label, event.data.value);
+  {{ "}" }},
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="interaction-display"> <strong>Last clicked:</strong> {{ lastClicked() }} </div>
+      <div class="chart-container">
+        <nge-chart [config]="clickableConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Custom Colors -->
+    <section class="story-section">
+      <h4>5. Custom Colors</h4>
+      <p class="story-description">
+        Use <code>barColor</code> for a uniform bar fill and <code>lineColor</code> for the
+        cumulative line.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createParetoChartConfig({{ "{" }}
+  data: this.data,
+  barColor: '#4CAF50',
+  lineColor: '#E53935',
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="customColorConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Dynamic Data with Signals -->
+    <section class="story-section story-section--highlight">
+      <h4>6. Dynamic Data with Signals</h4>
+      <p class="story-description">
+        <strong>Recommended pattern:</strong> rebuild the config from a computed signal so the chart
+        re-sorts and recomputes the cumulative line whenever the data changes.
+      </p>
+      <div class="code-block">
+        <pre>
+data = signal&lt;NgeBarDataPoint[]&gt;([...]);
+
+config = computed(() =>
+  createParetoChartConfig({{ "{" }}
+    data: this.data(),
+    showTooltip: true,
+  {{ "}" }})
+);
+
+&lt;nge-chart [config]="config()" /&gt;</pre
+        >
+      </div>
+      <div class="interaction-row">
+        <button
+          class="action-button"
+          (click)="randomizeData()"
+        >
+          Randomize Data
+        </button>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

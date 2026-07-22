@@ -1,0 +1,151 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Pie Chart - Theming Examples</h2>
+    <p class="intro-text">
+      Slice colours resolve per-datum <code>color</code> &rarr; the layer's
+      <code>seriesColors</code> &rarr; the theme <code>slice.colors</code> palette (by input index).
+      Override <code>theme.pie.slice.colors</code> to reskin the whole cycle, or set
+      <code>stroke</code> / <code>strokeWidth</code> / <code>opacity</code> for separators and
+      transparency. Light / dark is handled by the review container.
+    </p>
+
+    <!-- Default Theme -->
+    <section class="story-section">
+      <h4>Default Theme</h4>
+      <p class="story-description">
+        No theme provided — uses the built-in <code>--chart-*</code> token palette, which adapts to
+        the surrounding light / dark surface.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <!-- Palette Overrides Grid -->
+    <section class="story-section">
+      <h4>Palette Overrides</h4>
+      <p class="story-description">
+        Provide a custom <code>theme.pie.slice.colors</code> array. Slice input index maps to
+        <code>colors[index % length]</code>, so the palette cycles for any slice count.
+      </p>
+      <div class="themes-grid">
+        <div class="theme-item">
+          <span class="theme-label">Warm</span>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="warmConfig" />
+          </div>
+        </div>
+        <div class="theme-item">
+          <span class="theme-label">Cool</span>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="coolConfig" />
+          </div>
+        </div>
+      </div>
+      <div class="code-block">
+        <pre>
+const warmConfig = {{ "{" }}
+  ...createPieChartConfig({{ "{" }} data, innerRadius: 0.5 {{ "}" }}),
+  theme: {{ "{" }}
+    pie: {{ "{" }}
+      slice: {{ "{" }}
+        colors: ['#E53935', '#FB8C00', '#FDD835', '#F4511E', '#D81B60', '#8E24AA'],
+      {{ "}" }},
+    {{ "}" }},
+  {{ "}" }},
+{{ "}" }};</pre
+        >
+      </div>
+    </section>
+
+    <!-- Per-datum Colors -->
+    <section class="story-section">
+      <h4>Per-datum Colors</h4>
+      <p class="story-description">
+        Set <code>color</code> on each data point to assign semantic colours. A per-datum
+        <code>color</code> wins over the <code>seriesColors</code> / theme palette for that slice.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="perDatumConfig" />
+      </div>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} label: 'Rent', value: 1800, color: '#5C6BC0' {{ "}" }},
+  {{ "{" }} label: 'Food', value: 600, color: '#66BB6A' {{ "}" }},
+  // ...
+];</pre
+        >
+      </div>
+    </section>
+
+    <!-- Stroke Separators -->
+    <section class="story-section">
+      <h4>Stroke Separators</h4>
+      <p class="story-description">
+        A thicker <code>slice.stroke</code> / <code>strokeWidth</code> cleanly separates adjacent
+        wedges — useful on dense pies or when slices share similar hues.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="strokeConfig" />
+      </div>
+      <div class="code-block">
+        <pre>
+theme: {{ "{" }}
+  pie: {{ "{" }} slice: {{ "{" }} stroke: '#ffffff', strokeWidth: 3 {{ "}" }} {{ "}" }},
+{{ "}" }}</pre
+        >
+      </div>
+    </section>
+
+    <!-- Translucent Slices -->
+    <section class="story-section">
+      <h4>Translucent Slices</h4>
+      <p class="story-description">
+        Lower <code>slice.opacity</code> for a softer, layered look.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="translucentConfig" />
+      </div>
+      <div class="code-block">
+        <pre>
+theme: {{ "{" }}
+  pie: {{ "{" }} slice: {{ "{" }} opacity: 0.7 {{ "}" }} {{ "}" }},
+{{ "}" }}</pre
+        >
+      </div>
+    </section>
+
+    <!-- Highlight: side-by-side comparison -->
+    <section class="story-section story-section--highlight">
+      <h4>Multiple Palettes Side by Side</h4>
+      <p class="story-description">
+        The same data rendered with three palettes — swap <code>theme.pie.slice.colors</code> to
+        rebrand without touching the data.
+      </p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>Default</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="comparisonDefault" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Warm</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="comparisonWarm" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Cool</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="comparisonCool" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

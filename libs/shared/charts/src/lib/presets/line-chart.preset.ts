@@ -1,3 +1,4 @@
+import type { NgeChartAnimationConfig } from '../core/animation';
 import type { NgeChartBaseConfig } from '../core/base-layout';
 import type { NgeChartConfig, NgeLineDataPoint, NgeLineLayerConfig } from '../core/config';
 import type { NgeChartGesturesConfig } from '../core/gesture';
@@ -48,6 +49,12 @@ export interface LineChartTooltipOptions {
  */
 export interface LineChartPresetOptions {
   /**
+   * Chart-wide enter/update/exit animation (per-phase durations + easing) applied to
+   * every layer. A layer's own `animationMs` shorthand still wins over it.
+   */
+  animation?: NgeChartAnimationConfig;
+
+  /**
    * Enter/update/exit transition duration in ms. Default 300.
    * Set 0 for instant renders (used during zoom/pan gestures).
    */
@@ -61,7 +68,7 @@ export interface LineChartPresetOptions {
   /**
    * Curve interpolation type
    */
-  curveType?: 'linear' | 'monotone' | 'step';
+  curveType?: 'basis' | 'linear' | 'monotone' | 'step';
 
   /**
    * Data points. Points with the same `seriesId` will be grouped into a series.
@@ -217,6 +224,7 @@ function defaultLineTooltipFormatter(data: NgeLineDataPoint): NgeTooltipContent 
  */
 export function createLineChartConfig(options: LineChartPresetOptions): NgeChartConfig {
   const {
+    animation,
     animationMs,
     areaOpacity,
     curveType = 'linear',
@@ -264,6 +272,7 @@ export function createLineChartConfig(options: LineChartPresetOptions): NgeChart
     : undefined;
 
   return {
+    animation,
     base: {
       margin,
       showXAxis,

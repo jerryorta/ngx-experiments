@@ -1,0 +1,214 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Radial Bar - Usage Examples</h2>
+    <p class="intro-text">
+      Practical examples for the radial-bar (polar) layer. One radial primitive fans out across the
+      catalog via two options: <code>mark</code> picks the shape (<code
+        >{{ "{" }} 'bar' | 'area' | 'cell' {{ "}" }}</code
+      >) and <code>wedge</code> picks how the circle's angle is divided. Geometry is self-computed
+      from the container (center + radius) — the cartesian axes stay off.
+    </p>
+
+    <!-- EXAMPLE 1: Basic Radial Bar -->
+    <section class="story-section">
+      <h4>1. Basic Radial Bar</h4>
+      <p class="story-description">
+        Simplest way to create a radial bar using <code>createRadialBarChartConfig()</code>. Each
+        datum draws one arc from the center out to <code>radialScale(value)</code>; a small
+        <code>padAngle</code> separates the bars.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} label: 'Mon', value: 30 {{ "}" }},
+  {{ "{" }} label: 'Tue', value: 55 {{ "}" }},
+  // ...
+];
+
+config = createRadialBarChartConfig({{ "{" }}
+  data: this.data,
+  padAngle: 0.02,
+{{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="basicConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Polar Area / Nightingale Rose -->
+    <section class="story-section">
+      <h4>2. Polar Area / Nightingale Rose</h4>
+      <p class="story-description">
+        With <code>wedge: 'equal'</code> and <code>padAngle: 0</code> the bars become full
+        contiguous wedges — the classic <strong>Nightingale rose</strong> / polar-area chart. Every
+        category gets the same angular slot; only the radius encodes value.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createRadialBarChartConfig({{ "{" }}
+  data: this.data,
+  mark: 'bar',
+  wedge: 'equal',
+  padAngle: 0, // contiguous wedges
+{{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="roseConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Coxcomb -->
+    <section class="story-section">
+      <h4>3. Coxcomb (Value-proportional Wedges)</h4>
+      <p class="story-description">
+        <code>wedge: 'value'</code> makes each wedge's <strong>angular</strong> extent proportional
+        to its value (<code>d3.pie()</code>-style), so the angle encodes magnitude alongside the
+        radius — a coxcomb.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createRadialBarChartConfig({{ "{" }}
+  data: this.data,
+  mark: 'bar',
+  wedge: 'value', // angle also encodes value
+{{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="coxcombConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Radial Line + Area -->
+    <section class="story-section">
+      <h4>4. Radial Line + Area (Multi-series)</h4>
+      <p class="story-description">
+        <code>mark: 'area'</code> draws a closed radial area + outline per <code>seriesId</code>
+        group over the category band centers — a multi-series radial line / area. Series colors
+        cycle the palette by series index.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} label: 'Q1', seriesId: '2023', value: 30 {{ "}" }},
+  {{ "{" }} label: 'Q1', seriesId: '2024', value: 45 {{ "}" }},
+  // ...
+];
+
+config = createRadialBarChartConfig({{ "{" }}
+  data: this.data,
+  mark: 'area',
+  innerRadius: 0.1,
+{{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="areaConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Circular Heat Map -->
+    <section class="story-section">
+      <h4>5. Circular Heat Map</h4>
+      <p class="story-description">
+        <code>mark: 'cell'</code> lays out a 2D grid of arc cells — the angular
+        <code>label</code> crossed with the radial <code>band</code> ring — whose fill
+        <strong>opacity</strong> encodes <code>value</code> (from the theme
+        <code>cell.minOpacity</code> floor up to 1).
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} label: 'Mon', band: 'AM', value: 100 {{ "}" }},
+  {{ "{" }} label: 'Mon', band: 'PM', value: 40 {{ "}" }},
+  // ...
+];
+
+config = createRadialBarChartConfig({{ "{" }}
+  data: this.data,
+  mark: 'cell',
+  innerRadius: 0.2,
+{{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="cellConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Donut Hole -->
+    <section class="story-section">
+      <h4>6. Donut Hole (innerRadius ratio)</h4>
+      <p class="story-description">
+        <code>innerRadius</code> is a <strong>ratio</strong> (0–1) of the self-computed outer
+        radius, not pixels — so it stays resize-safe. <code>0.4</code> carves a center hole, pushing
+        the bars outward.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createRadialBarChartConfig({{ "{" }}
+  data: this.data,
+  innerRadius: 0.4, // donut hole
+  padAngle: 0.02,
+{{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="donutConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7: Click Handling -->
+    <section class="story-section">
+      <h4>7. Click Handling</h4>
+      <p class="story-description">
+        Provide an <code>onClick</code> callback in the config. The event carries the full data
+        point for the clicked arc, so you can react to a selection.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createRadialBarChartConfig({{ "{" }}
+  data: this.data,
+  onClick: (event) => {{ "{" }}
+    console.log('Clicked:', event.data.label, event.data.value);
+  {{ "}" }},
+{{ "}" }});</pre>
+      </div>
+      <div class="interaction-display"> <strong>Last clicked:</strong> {{ lastClicked() }} </div>
+      <div class="chart-container">
+        <nge-chart [config]="clickableConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 8: Dynamic Data with Signals -->
+    <section class="story-section story-section--highlight">
+      <h4>8. Dynamic Data with Signals</h4>
+      <p class="story-description">
+        Drive the chart from a <code>signal</code> and rebuild the config with
+        <code>computed()</code>. Re-rolling every <code>value</code> re-runs the radial scale — the
+        arcs grow / shrink to their new radius, animated.
+      </p>
+      <div class="code-block">
+        <pre>
+dynamicData = signal&lt;NgeRadialBarDataPoint[]&gt;(this.data);
+
+dynamicConfig = computed(() =>
+  createRadialBarChartConfig({{ "{" }} data: this.dynamicData(), padAngle: 0.02 {{ "}" }})
+);
+
+&lt;nge-chart [config]="dynamicConfig()" /&gt;</pre>
+      </div>
+      <div class="interaction-row">
+        <button
+          class="action-button"
+          (click)="randomizeData()"
+          >Randomize Data</button
+        >
+      </div>
+      <div class="chart-container chart-container--tall">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

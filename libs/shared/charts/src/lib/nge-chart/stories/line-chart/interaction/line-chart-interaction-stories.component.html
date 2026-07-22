@@ -22,6 +22,23 @@
         </span>
       }
     </div>
+    @if (interactiveLegend()) {
+      <!-- Standalone interactive legend above the chart: clicking a series
+           toggles its line in/out; a toggled-off series stays listed but dimmed
+           (opacity 0.4) so it can be toggled back on. -->
+      <div class="external-legend-row">
+        <span class="external-legend-caption"
+          >Standalone &lt;nge-chart-legend&gt; — click a series to toggle its line on/off</span
+        >
+        <nge-chart-legend
+          [items]="legendItems()"
+          [interactive]="true"
+          swatchShape="line"
+          layout="grid"
+          (itemClick)="onLegendItemClick($event)"
+        />
+      </div>
+    }
     <div class="chart-wrapper">
       <nge-chart
         [config]="config()"

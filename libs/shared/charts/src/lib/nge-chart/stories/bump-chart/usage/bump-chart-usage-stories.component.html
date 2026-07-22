@@ -1,0 +1,220 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Bump Chart - Usage Examples</h2>
+    <p class="intro-text">
+      Practical examples for the bump (rank-over-time) chart. A bump chart plots how several named
+      series <strong>rank</strong> against each other across an ordered x axis — each datum carries
+      a metric <code>value</code> and the layer derives a <code>1..N</code> rank per x-tick (highest
+      value = rank 1 by default). Every point needs a <code>seriesId</code>.
+    </p>
+
+    <!-- EXAMPLE 1: Basic Usage -->
+    <section class="story-section">
+      <h4>1. Basic Usage</h4>
+      <p class="story-description">
+        Simplest way to create a bump chart using <code>createBumpChartConfig()</code>. Each datum
+        has <code>x</code> (ordered position), <code>seriesId</code> (the rank line it belongs to),
+        and <code>value</code> (the metric driving the rank).
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} x: '2019', seriesId: 'Nova', value: 45 {{ "}" }},
+  {{ "{" }} x: '2019', seriesId: 'Pulse', value: 60 {{ "}" }},
+  {{ "{" }} x: '2020', seriesId: 'Nova', value: 52 {{ "}" }},
+  // ...one row per (series, year)
+];
+
+config = createBumpChartConfig({{ "{" }}
+  data: this.data,
+  xAxisLabel: 'Year',
+{{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="basicConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Rank Order -->
+    <section class="story-section story-section--highlight">
+      <h4>2. Rank Order (desc vs asc)</h4>
+      <p class="story-description">
+        <code>rankOrder</code> controls which direction the per-x-tick ranking runs.
+        <code>'desc'</code> (default) ranks the highest <code>value</code> as rank 1;
+        <code>'asc'</code>
+        ranks the lowest as rank 1. Rank 1 always sits at the top.
+      </p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>desc — highest value = rank 1</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="descConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>asc — lowest value = rank 1</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="ascConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Curve Types -->
+    <section class="story-section">
+      <h4>3. Curve Types</h4>
+      <p class="story-description">
+        Choose the rank-line interpolation via <code>curveType</code>: <code>'bump'</code> (default,
+        symmetric S-bend), <code>'linear'</code>, or <code>'monotone'</code>.
+      </p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>bump</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="bumpCurveConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>linear</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="linearCurveConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>monotone</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="monotoneCurveConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Points & Labels -->
+    <section class="story-section">
+      <h4>4. Points &amp; Labels</h4>
+      <p class="story-description">
+        Per-rank circles (<code>showPoints</code>) and end-of-line series labels
+        (<code>showLabels</code>) both default on and aid reading. Turn both off for a clean
+        lines-only rank plot.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createBumpChartConfig({{ "{" }}
+  data: this.data,
+  showPoints: false,
+  showLabels: false,
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="linesOnlyConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Click Handling -->
+    <section class="story-section">
+      <h4>5. Click Handling</h4>
+      <p class="story-description">
+        Handle point clicks by providing an <code>onClick</code> callback. Requires
+        <code>showPoints: true</code> (the default) to enable clickable circles.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createBumpChartConfig({{ "{" }}
+  data: this.data,
+  onClick: (event) => {{ "{" }}
+    console.log(event.data.seriesId, event.data.x, event.data.value);
+  {{ "}" }},
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="interaction-display"> <strong>Last clicked:</strong> {{ lastClicked() }} </div>
+      <div class="chart-container">
+        <nge-chart [config]="clickConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Dynamic Data with Signals -->
+    <section class="story-section story-section--highlight">
+      <h4>6. Dynamic Data with Signals</h4>
+      <p class="story-description">
+        <strong>Recommended pattern:</strong> use a computed signal to rebuild the config when data
+        changes. Ranks re-derive and the lines animate smoothly between states.
+      </p>
+      <div class="code-block">
+        <pre>
+data = signal&lt;NgeBumpDataPoint[]&gt;([...]);
+
+config = computed(() =>
+  createBumpChartConfig({{ "{" }}
+    data: this.data(),
+    xAxisLabel: 'Year',
+  {{ "}" }})
+);
+
+&lt;nge-chart [config]="config()" /&gt;</pre
+        >
+      </div>
+      <div class="interaction-row">
+        <button
+          class="action-button"
+          (click)="randomizeData()"
+        >
+          Randomize Data
+        </button>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7: Tooltip on Hover -->
+    <section class="story-section">
+      <h4>7. Tooltip on Hover</h4>
+      <p class="story-description">
+        Enable tooltips by adding <code>tooltip: {{ "{" }} enabled: true {{ "}" }}</code
+        >. Hovering a point shows its series, x, and derived rank.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createBumpChartConfig({{ "{" }}
+  data: this.data,
+  tooltip: {{ "{" }}
+    enabled: true,
+    position: 'follow-mouse',
+  {{ "}" }},
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="tooltipConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 8: Legend -->
+    <section class="story-section">
+      <h4>8. Legend</h4>
+      <p class="story-description">
+        Set <code>legend: {{ "{" }} enabled: true {{ "}" }}</code> to auto-generate a legend from
+        the series data. The swatch color matches each series' rank line.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createBumpChartConfig({{ "{" }}
+  data: this.data,
+  legend: {{ "{" }} enabled: true, position: 'bottom' {{ "}" }},
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="legendConfig" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

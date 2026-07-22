@@ -13,6 +13,21 @@
       align-items: flex-start;
       gap: 8px;
     }
+
+    // Tabular grid: entries fill left-justified, column-aligned tracks that wrap
+    // responsively — so a legend spanning multiple rows reads as a table, not
+    // independently-centered rows. `auto-fit` requires a FIXED track min (an
+    // intrinsic min like `max-content` is invalid with a flexible `1fr` max and
+    // silently collapses the grid to one column), so the min is a fixed width
+    // sized for a swatch + short label; each track then grows to `1fr`, keeping
+    // swatches/labels aligned column-to-column across rows.
+    &--grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+      justify-content: start;
+      align-items: center;
+      gap: 8px 16px;
+    }
   }
 
   .nge-chart-legend-item {

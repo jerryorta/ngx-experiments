@@ -1,0 +1,37 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="interaction-container">
+    <div class="interaction-row">
+      <button
+        type="button"
+        class="interaction-btn interaction-btn--primary"
+        (click)="randomizeData()"
+      >
+        Randomize Data
+      </button>
+    </div>
+    @if (interactiveLegend()) {
+      <!-- Standalone interactive legend placed above the chart: clicking a series
+           toggles it in/out of the area; a toggled-off series stays listed but
+           dimmed (opacity 0.4) so it can be toggled back on. -->
+      <div class="external-legend-row">
+        <span class="external-legend-caption"
+          >Standalone &lt;nge-chart-legend&gt; — click a series to toggle it in/out of the
+          area</span
+        >
+        <nge-chart-legend
+          [items]="legendItems()"
+          [interactive]="true"
+          swatchShape="square"
+          layout="grid"
+          (itemClick)="onLegendItemClick($event)"
+        />
+      </div>
+    }
+    <div class="chart-wrapper">
+      <nge-chart [config]="config()" />
+    </div>
+  </div>
+</nge-storybook-review-container>

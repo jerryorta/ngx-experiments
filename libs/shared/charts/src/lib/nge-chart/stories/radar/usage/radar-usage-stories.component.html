@@ -1,0 +1,179 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Radar - Usage Examples</h2>
+    <p class="intro-text">
+      Practical examples for the radar / polar (spider / star) layer. The unique dimension
+      <code>label</code>s become evenly-angled spokes (first straight up), and each
+      <code>seriesId</code> draws a closed polygon whose vertex radius encodes <code>value</code>.
+      <code>render</code> picks the shape: <code>'area'</code> fills the polygon (Radar Diagram),
+      <code>'line'</code> strokes the outline only (Polar Chart). Geometry is self-computed from the
+      container (center + radius) — the cartesian axes stay off.
+    </p>
+
+    <!-- EXAMPLE 1: Basic Radar -->
+    <section class="story-section">
+      <h4>1. Basic Radar (single series)</h4>
+      <p class="story-description">
+        Simplest way to create a radar using <code>createRadarChartConfig()</code>. One value per
+        attribute axis draws a single filled polygon over the spoke web.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} label: 'Speed', value: 80 {{ "}" }},
+  {{ "{" }} label: 'Power', value: 65 {{ "}" }},
+  // ...
+];
+
+config = createRadarChartConfig({{ "{" }}
+  data: this.data,
+{{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="basicConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Multi-series Comparison -->
+    <section class="story-section">
+      <h4>2. Multi-series Comparison</h4>
+      <p class="story-description">
+        Group points by <code>seriesId</code> to overlay several profiles on the same axes — one
+        closed polygon per series, colored from the palette by series index. Ideal for comparing
+        products / candidates across shared metrics.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} label: 'Speed', seriesId: 'Falcon', value: 80 {{ "}" }},
+  {{ "{" }} label: 'Speed', seriesId: 'Vortex', value: 55 {{ "}" }},
+  // ...
+];
+
+config = createRadarChartConfig({{ "{" }}
+  data: this.data,
+  tooltip: {{ "{" }} enabled: true {{ "}" }},
+{{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="multiConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Polar Chart (line mode) -->
+    <section class="story-section">
+      <h4>3. Polar Chart (render: 'line')</h4>
+      <p class="story-description">
+        <code>render: 'line'</code> strokes the series outline only — no fill — with small vertex
+        dots. The same radial axes read as a <strong>polar chart</strong>, cleaner when several
+        series overlap.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createRadarChartConfig({{ "{" }}
+  data: this.data,
+  render: 'line', // outline only, no fill
+{{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="polarConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Grid Levels -->
+    <section class="story-section">
+      <h4>4. Grid Levels</h4>
+      <p class="story-description">
+        <code>levels</code> sets how many concentric value rings the grid web draws. Unset, the
+        rings fall on the radial scale's own ticks; a fixed <code>levels</code> pins the count.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createRadarChartConfig({{ "{" }}
+  data: this.data,
+  levels: 3, // three concentric rings
+{{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="levelsConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Inner Hub -->
+    <section class="story-section">
+      <h4>5. Inner Hub (innerRadius ratio)</h4>
+      <p class="story-description">
+        <code>innerRadius</code> is a <strong>ratio</strong> (0–1) of the self-computed outer
+        radius, not pixels — so it stays resize-safe. A small value lifts the axes off a center hub
+        so low values near the middle stay readable.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createRadarChartConfig({{ "{" }}
+  data: this.data,
+  innerRadius: 0.15, // center hub
+{{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="hubConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Click Handling -->
+    <section class="story-section">
+      <h4>6. Click Handling</h4>
+      <p class="story-description">
+        Provide an <code>onClick</code> callback in the config. The event carries the full data
+        point for the hovered vertex (series + dimension + value), so you can react to a selection.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createRadarChartConfig({{ "{" }}
+  data: this.data,
+  onClick: (event) => {{ "{" }}
+    console.log('Clicked:', event.data.seriesId, event.data.label, event.data.value);
+  {{ "}" }},
+{{ "}" }});</pre>
+      </div>
+      <div class="interaction-display"> <strong>Last clicked:</strong> {{ lastClicked() }} </div>
+      <div class="chart-container">
+        <nge-chart [config]="clickableConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7: Dynamic Data with Signals -->
+    <section class="story-section story-section--highlight">
+      <h4>7. Dynamic Data with Signals</h4>
+      <p class="story-description">
+        Drive the chart from a <code>signal</code> and rebuild the config with
+        <code>computed()</code>. Re-rolling every <code>value</code> re-runs the radial scale — the
+        polygon grows / shrinks to its new shape, animated.
+      </p>
+      <div class="code-block">
+        <pre>
+dynamicData = signal&lt;NgeRadarDataPoint[]&gt;(this.data);
+
+dynamicConfig = computed(() =>
+  createRadarChartConfig({{ "{" }} data: this.dynamicData() {{ "}" }})
+);
+
+&lt;nge-chart [config]="dynamicConfig()" /&gt;</pre>
+      </div>
+      <div class="interaction-row">
+        <button
+          class="action-button"
+          (click)="randomizeData()"
+          >Randomize Data</button
+        >
+      </div>
+      <div class="chart-container chart-container--tall">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

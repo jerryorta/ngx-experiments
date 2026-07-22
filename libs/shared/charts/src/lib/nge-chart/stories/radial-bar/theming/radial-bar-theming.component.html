@@ -1,0 +1,112 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Radial Bar - Theming Examples</h2>
+    <p class="intro-text">
+      Fill colors resolve per-datum <code>color</code> &rarr; the preset's
+      <code>seriesColors</code> palette &rarr; the theme <code>bar.colors</code> palette. Override
+      <code>theme['radial-bar']</code> to reskin each mark: <code>bar.colors</code> for the arc
+      palette, <code>cell.color</code> / <code>cell.minOpacity</code> for the heatmap intensity
+      ramp, and <code>area.fillOpacity</code> / <code>area.lineWidth</code> for the radial area.
+      Light / dark is handled by the review container.
+    </p>
+
+    <!-- Default Theme -->
+    <section class="story-section">
+      <h4>Default Theme</h4>
+      <p class="story-description">
+        No theme provided — uses the built-in <code>--chart-*</code> token palette, which adapts to
+        the surrounding light / dark surface.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <!-- Bar Palette Overrides -->
+    <section class="story-section">
+      <h4>Bar Palette Overrides</h4>
+      <p class="story-description">
+        Reskin the arc palette with <code>theme['radial-bar'].bar.colors</code>. The datum index
+        maps to <code>colors[index % length]</code>, so the palette cycles for any category count.
+      </p>
+      <div class="themes-grid">
+        <div class="theme-item">
+          <span class="theme-label">Green</span>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="greenConfig" />
+          </div>
+        </div>
+        <div class="theme-item">
+          <span class="theme-label">Blue</span>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="blueConfig" />
+          </div>
+        </div>
+        <div class="theme-item">
+          <span class="theme-label">Red</span>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="redConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cell Intensity -->
+    <section class="story-section">
+      <h4>Cell Intensity (Circular Heat Map)</h4>
+      <p class="story-description">
+        The <code>cell</code> mark encodes value as fill <strong>opacity</strong> of a single base
+        color. Set <code>cell.color</code> for the hue and raise <code>cell.minOpacity</code> to
+        keep the faintest cells legible.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="cellConfig" />
+      </div>
+    </section>
+
+    <!-- Area Styling -->
+    <section class="story-section">
+      <h4>Area Styling</h4>
+      <p class="story-description">
+        The <code>area</code> mark tunes the radial area fill + outline: a denser
+        <code>area.fillOpacity</code> and a thicker <code>area.lineWidth</code> emphasise the series
+        boundary. Series colors still come from the shared <code>bar</code> palette by series index.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="areaConfig" />
+      </div>
+    </section>
+
+    <!-- Highlight: side-by-side comparison -->
+    <section class="story-section story-section--highlight">
+      <h4>Multiple Palettes Side by Side</h4>
+      <p class="story-description">
+        The same weekday data rendered with three palettes — swap
+        <code>theme['radial-bar'].bar.colors</code> to rebrand without touching the data.
+      </p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>Green</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="comparisonGreen" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Blue</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="comparisonBlue" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Red</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="comparisonRed" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

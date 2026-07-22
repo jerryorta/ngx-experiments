@@ -4,6 +4,7 @@ import { scaleBand } from 'd3-scale';
 import { select } from 'd3-selection';
 import 'd3-transition';
 
+import type { ResolvedNgeChartAnimation } from '../../core/animation';
 import type { NgeGroupedBarDataPoint, NgeGroupedBarLayerConfig } from '../../core/config';
 import type { NgeChartLayerContext } from '../../core/layer';
 import type { NgeGroupedBarLayerTheme, ResolvedNgeGroupedBarLayerTheme } from '../../core/theme';
@@ -15,7 +16,7 @@ import { mergeGroupedBarLayerTheme } from '../../core/theme';
  * Internal params shared between enter/update helpers.
  */
 interface GroupedBarRenderParams {
-  animationMs: number;
+  animation: ResolvedNgeChartAnimation;
   barPadding: number;
   /** Data grouped by label (category). Each entry: [label, dataPoints[]] */
   categoryData: Map<string, NgeGroupedBarDataPoint[]>;
@@ -49,6 +50,7 @@ export function renderGroupedBarLayer(
   >
 ): void {
   const {
+    animation,
     bounds,
     config,
     data,
@@ -71,7 +73,6 @@ export function renderGroupedBarLayer(
   const isVertical = orientation === 'vertical';
   const barPadding = config.barPadding ?? 0.05;
   const labelFormat = config.labelFormat;
-  const animationMs = config.animationMs ?? 300;
 
   const outerScale = isVertical ? scales.x : scales.y;
   const valueScale = isVertical ? scales.y : scales.x;
@@ -122,7 +123,7 @@ export function renderGroupedBarLayer(
     });
 
   const renderParams: GroupedBarRenderParams = {
-    animationMs,
+    animation,
     barPadding,
     categoryData,
     config,
@@ -146,7 +147,8 @@ export function renderGroupedBarLayer(
   // Update groups position
   groups
     .transition()
-    .duration(300)
+    .duration(animation.updateMs)
+    .ease(animation.easing)
     .attr('transform', d => {
       const pos = (outerScale as any)(d[0]) ?? 0;
       return isVertical ? `translate(${pos}, 0)` : `translate(0, ${pos})`;
@@ -156,7 +158,13 @@ export function renderGroupedBarLayer(
   updateGroupedBars(groups, renderParams);
 
   // Exit
-  groups.exit().transition().duration(300).style('opacity', 0).remove();
+  groups
+    .exit()
+    .transition()
+    .duration(animation.exitMs)
+    .ease(animation.easing)
+    .style('opacity', 0)
+    .remove();
 
   // Merge enter + update groups for event handler attachment
   const allGroups = enterGroups.merge(groups);
@@ -173,7 +181,7 @@ export function renderGroupedBarLayer(
 function appendGroupedBarElements(
   barEnter: Selection<SVGGElement, NgeGroupedBarDataPoint, SVGGElement, unknown>,
   params: {
-    animationMs: number;
+    animation: ResolvedNgeChartAnimation;
     barRadius: number;
     dimensions: GroupedBarRenderParams['dimensions'];
     innerScale: GroupedBarRenderParams['innerScale'];
@@ -185,7 +193,7 @@ function appendGroupedBarElements(
   }
 ): void {
   const {
-    animationMs,
+    animation,
     barRadius,
     dimensions,
     innerScale,
@@ -209,7 +217,8 @@ function appendGroupedBarElements(
       .style('fill', d => d.color ?? theme.bar.color)
       .style('transition', 'fill 0.15s ease-in-out, opacity 0.15s ease-in-out')
       .transition()
-      .duration(animationMs)
+      .duration(animation.enterMs)
+      .ease(animation.easing)
       .attr('y', d => valueScale(d.value))
       .attr('height', d => dimensions.boundedHeight - valueScale(d.value));
   } else {
@@ -226,7 +235,8 @@ function appendGroupedBarElements(
       .style('fill', d => d.color ?? theme.bar.color)
       .style('transition', 'fill 0.15s ease-in-out, opacity 0.15s ease-in-out')
       .transition()
-      .duration(animationMs)
+      .duration(animation.enterMs)
+      .ease(animation.easing)
       .attr('x', d => (d.value >= 0 ? zeroX : valueScale(d.value)))
       .attr('width', d => Math.abs(valueScale(d.value) - zeroX));
   }
@@ -265,7 +275,7 @@ function enterGroupedBars(
   params: GroupedBarRenderParams
 ): void {
   const {
-    animationMs,
+    animation,
     config,
     dimensions,
     innerScale,
@@ -290,7 +300,7 @@ function enterGroupedBars(
 
     // Render bar rects and labels
     appendGroupedBarElements(barEnter, {
-      animationMs,
+      animation,
       barRadius,
       dimensions,
       innerScale,
@@ -308,7 +318,7 @@ function updateGroupedBars(
   params: GroupedBarRenderParams
 ): void {
   const {
-    animationMs,
+    animation,
     dimensions,
     innerScale,
     isVertical,
@@ -331,7 +341,7 @@ function updateGroupedBars(
 
     // Render bar rects and labels using shared helper
     appendGroupedBarElements(barEnter, {
-      animationMs,
+      animation,
       barRadius,
       dimensions,
       innerScale,
@@ -350,7 +360,8 @@ function updateGroupedBars(
         .attr('ry', barRadius)
         .style('fill', d => d.color ?? theme.bar.color)
         .transition()
-        .duration(animationMs)
+        .duration(animation.updateMs)
+        .ease(animation.easing)
         .attr('x', d => innerScale(d.groupId) ?? 0)
         .attr('width', innerScale.bandwidth())
         .attr('y', d => valueScale(d.value))
@@ -363,7 +374,8 @@ function updateGroupedBars(
         .attr('ry', barRadius)
         .style('fill', d => d.color ?? theme.bar.color)
         .transition()
-        .duration(animationMs)
+        .duration(animation.updateMs)
+        .ease(animation.easing)
         .attr('x', d => (d.value >= 0 ? zeroX : valueScale(d.value)))
         .attr('y', d => innerScale(d.groupId) ?? 0)
         .attr('height', innerScale.bandwidth())
@@ -382,7 +394,8 @@ function updateGroupedBars(
           .attr('dominant-baseline', null)
           .text(d => (labelFormat ? labelFormat(d.value) : String(d.value)))
           .transition()
-          .duration(animationMs)
+          .duration(animation.updateMs)
+          .ease(animation.easing)
           .attr('x', d => (innerScale(d.groupId) ?? 0) + innerScale.bandwidth() / 2)
           .attr('y', d => valueScale(d.value) - 4);
       } else {
@@ -395,14 +408,21 @@ function updateGroupedBars(
           .attr('dominant-baseline', 'middle')
           .text(d => (labelFormat ? labelFormat(d.value) : String(d.value)))
           .transition()
-          .duration(animationMs)
+          .duration(animation.updateMs)
+          .ease(animation.easing)
           .attr('x', d => valueScale(d.value) + 4)
           .attr('y', d => (innerScale(d.groupId) ?? 0) + innerScale.bandwidth() / 2);
       }
     }
 
     // Exit bars
-    bars.exit().transition().duration(300).style('opacity', 0).remove();
+    bars
+      .exit()
+      .transition()
+      .duration(animation.exitMs)
+      .ease(animation.easing)
+      .style('opacity', 0)
+      .remove();
   });
 }
 

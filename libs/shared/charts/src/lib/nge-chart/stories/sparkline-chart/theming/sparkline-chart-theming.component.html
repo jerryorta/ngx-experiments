@@ -1,0 +1,126 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Sparkline Chart - Theming Examples</h2>
+    <p class="intro-text">
+      Sparklines resolve their colours from the ambient <code>--chart-*</code> tokens, so the
+      <strong>same config</strong> re-themes just by overriding those tokens on a wrapping element.
+      Per-mark colours can also be pinned directly through preset options
+      (<code>lastValueColor</code>, <code>winColor</code> / <code>lossColor</code> /
+      <code>tieColor</code>).
+    </p>
+
+    <!-- Default tokens -->
+    <section class="story-section">
+      <h4>Default Tokens</h4>
+      <p class="story-description">
+        No overrides — line + last-value dot, columns, and win/loss marks all read the default
+        <code>--chart-*</code> palette.
+      </p>
+      <div class="chart-grid">
+        <div class="chart-cell">
+          <h5>Line</h5>
+          <div class="chart-container chart-container--sparkline">
+            <nge-chart [config]="lineConfig" />
+          </div>
+        </div>
+        <div class="chart-cell">
+          <h5>Column</h5>
+          <div class="chart-container chart-container--sparkline">
+            <nge-chart [config]="columnConfig" />
+          </div>
+        </div>
+        <div class="chart-cell">
+          <h5>Win-Loss</h5>
+          <div class="chart-container chart-container--winloss">
+            <nge-chart [config]="winLossConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ocean token override -->
+    <section class="story-section story-section--highlight">
+      <h4>Token Override — Ocean</h4>
+      <p class="story-description">
+        <strong>The core lever.</strong> The same three configs, wrapped in an element that
+        redefines <code>--chart-primary</code>, <code>--chart-secondary</code>, and
+        <code>--chart-error</code>. No config changes.
+      </p>
+      <div class="chart-grid sparkline-theme--ocean">
+        <div class="chart-cell">
+          <h5>Line</h5>
+          <div class="chart-container chart-container--sparkline">
+            <nge-chart [config]="lineConfig" />
+          </div>
+        </div>
+        <div class="chart-cell">
+          <h5>Column</h5>
+          <div class="chart-container chart-container--sparkline">
+            <nge-chart [config]="columnConfig" />
+          </div>
+        </div>
+        <div class="chart-cell">
+          <h5>Win-Loss</h5>
+          <div class="chart-container chart-container--winloss">
+            <nge-chart [config]="winLossConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Warm token override -->
+    <section class="story-section story-section--highlight">
+      <h4>Token Override — Warm</h4>
+      <p class="story-description">
+        The same configs again under a warm token set — proof the marks follow the ambient tokens.
+      </p>
+      <div class="chart-grid sparkline-theme--warm">
+        <div class="chart-cell">
+          <h5>Line</h5>
+          <div class="chart-container chart-container--sparkline">
+            <nge-chart [config]="lineConfig" />
+          </div>
+        </div>
+        <div class="chart-cell">
+          <h5>Column</h5>
+          <div class="chart-container chart-container--sparkline">
+            <nge-chart [config]="columnConfig" />
+          </div>
+        </div>
+        <div class="chart-cell">
+          <h5>Win-Loss</h5>
+          <div class="chart-container chart-container--winloss">
+            <nge-chart [config]="winLossConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Per-config colour options -->
+    <section class="story-section">
+      <h4>Per-Config Colour Options</h4>
+      <p class="story-description">
+        Pin colours through preset options instead of tokens: a red
+        <code>lastValueColor</code> on the line sparkline, and custom <code>winColor</code> /
+        <code>lossColor</code> / <code>tieColor</code> on the win-loss set.
+      </p>
+      <div class="chart-grid">
+        <div class="chart-cell">
+          <h5>lastValueColor</h5>
+          <div class="chart-container chart-container--sparkline">
+            <nge-chart [config]="lastValueDotConfig" />
+          </div>
+        </div>
+        <div class="chart-cell">
+          <h5>win/loss/tie colours</h5>
+          <div class="chart-container chart-container--winloss">
+            <nge-chart [config]="customWinLossConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

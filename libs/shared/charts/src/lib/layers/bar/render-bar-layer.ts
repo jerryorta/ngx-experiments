@@ -3,6 +3,7 @@ import type { EnterElement, Selection } from 'd3-selection';
 import { select } from 'd3-selection';
 import 'd3-transition';
 
+import type { ResolvedNgeChartAnimation } from '../../core/animation';
 import type { NgeBarDataPoint, NgeBarLayerConfig } from '../../core/config';
 import type { NgeChartLayerContext } from '../../core/layer';
 import type { NgeBarLayerTheme, ResolvedNgeBarLayerTheme } from '../../core/theme';
@@ -22,6 +23,7 @@ export function renderBarLayer(
   >
 ): void {
   const {
+    animation,
     bounds,
     config,
     data,
@@ -43,8 +45,6 @@ export function renderBarLayer(
   const orientation = config.orientation ?? 'vertical';
   const showLabels = config.showLabels ?? false;
   const isVertical = orientation === 'vertical';
-  const animationMs = config.animationMs ?? 300;
-  const exitMs = config.animationMs ?? 200;
 
   const categoryScale = isVertical ? scales.x : scales.y;
   const valueScale = isVertical ? scales.y : scales.x;
@@ -61,7 +61,7 @@ export function renderBarLayer(
 
   // Enter
   const enterGroups = enterBars(groups.enter(), {
-    animationMs,
+    animation,
     categoryScale,
     config,
     data,
@@ -78,7 +78,7 @@ export function renderBarLayer(
 
   // Update
   updateBars(groups, {
-    animationMs,
+    animation,
     categoryScale,
     dimensions,
     isVertical,
@@ -89,14 +89,20 @@ export function renderBarLayer(
   });
 
   // Exit
-  groups.exit().transition().duration(exitMs).style('opacity', 0).remove();
+  groups
+    .exit()
+    .transition()
+    .duration(animation.exitMs)
+    .ease(animation.easing)
+    .style('opacity', 0)
+    .remove();
 
   // Merge for future updates
   const allGroups = enterGroups.merge(groups);
 
   // Update event handlers on ALL bars (not just entered ones) to handle config changes
   updateBarEventHandlers(allGroups, {
-    animationMs,
+    animation,
     categoryScale,
     config,
     data,
@@ -130,10 +136,54 @@ export function renderBarLayer(
     bounds.select('.nge-bar-median-line').remove();
     bounds.select('.nge-bar-median-label').remove();
   }
+
+  // Render the zero baseline rule if enabled, kept BEHIND the bars.
+  if (config.showZeroLine) {
+    renderZeroLine(bounds, dimensions, valueScale, isVertical, mergedTheme);
+  } else {
+    bounds.select('.nge-bar-zero-line').remove();
+  }
+}
+
+/**
+ * Draw a labelless rule at the value-scale zero baseline: a horizontal line across
+ * the plot for vertical bars, a vertical line for horizontal bars. Uses the
+ * select-or-append idiom (matching the statistical lines) and is `lower()`ed so the
+ * bars always paint on top of it. Styling comes from the bar theme's `statistical`
+ * `zeroLine*` tokens.
+ */
+function renderZeroLine(
+  bounds: Selection<SVGGElement, unknown, null, undefined>,
+  dimensions: { boundedHeight: number; boundedWidth: number },
+  valueScale: any,
+  isVertical: boolean,
+  theme: ResolvedNgeBarLayerTheme
+): void {
+  const zeroPos = valueScale(0);
+
+  let line = bounds.select<SVGLineElement>('.nge-bar-zero-line');
+  if (line.empty()) {
+    line = bounds.append('line').classed('nge-bar-zero-line', true);
+  }
+
+  line
+    .style('stroke', theme.statistical.zeroLineColor)
+    .style('stroke-width', `${theme.statistical.zeroLineWidth}px`)
+    .style('stroke-dasharray', theme.statistical.zeroLineDash || 'none')
+    .style('pointer-events', 'none');
+
+  if (isVertical) {
+    line.attr('x1', 0).attr('x2', dimensions.boundedWidth).attr('y1', zeroPos).attr('y2', zeroPos);
+  } else {
+    line.attr('x1', zeroPos).attr('x2', zeroPos).attr('y1', 0).attr('y2', dimensions.boundedHeight);
+  }
+
+  // Keep the baseline behind the bars (and any statistical lines).
+  line.lower();
 }
 
 interface BarRenderParams {
-  animationMs: number;
+  animation: ResolvedNgeChartAnimation;
   categoryScale: any;
   config?: NgeBarLayerConfig;
   data?: NgeBarDataPoint[];
@@ -153,7 +203,7 @@ function enterBars(
   params: BarRenderParams
 ): Selection<SVGGElement, NgeBarDataPoint, SVGGElement, unknown> {
   const {
-    animationMs,
+    animation,
     categoryScale,
     config,
     data,
@@ -319,21 +369,28 @@ function enterBars(
 
   // Bar rect with theme styles
   if (isVertical) {
+    // Anchor bars at the value-scale zero line (the vertical mirror of the
+    // horizontal path below) so negative values render BELOW the baseline. The bar
+    // helper's value domain always spans 0 (Math.max(...values, 0) /
+    // Math.min(...values, 0)), so for all-positive data zeroY === boundedHeight and
+    // this reduces identically to the previous bottom-anchored formula.
+    const zeroY = valueScale(0);
     barGroup
       .append('rect')
       .classed('nge-bar', true)
       .attr('x', d => categoryScale(d.label) ?? 0)
       .attr('width', categoryScale.bandwidth())
-      .attr('y', dimensions.boundedHeight)
+      .attr('y', zeroY)
       .attr('height', 0)
       .attr('rx', theme.bar.radius)
       .attr('ry', theme.bar.radius)
       .style('fill', d => d.color ?? theme.bar.color)
       .style('transition', 'fill 0.15s ease-in-out, opacity 0.15s ease-in-out')
       .transition()
-      .duration(animationMs)
-      .attr('y', d => valueScale(d.value))
-      .attr('height', d => dimensions.boundedHeight - valueScale(d.value));
+      .duration(animation.enterMs)
+      .ease(animation.easing)
+      .attr('y', d => (d.value >= 0 ? valueScale(d.value) : zeroY))
+      .attr('height', d => Math.abs(valueScale(d.value) - zeroY));
   } else {
     // For horizontal bars, calculate zero point for proper negative value handling
     const zeroX = valueScale(0);
@@ -349,7 +406,8 @@ function enterBars(
       .style('fill', d => d.color ?? theme.bar.color)
       .style('transition', 'fill 0.15s ease-in-out, opacity 0.15s ease-in-out')
       .transition()
-      .duration(animationMs)
+      .duration(animation.enterMs)
+      .ease(animation.easing)
       .attr('x', d => (d.value >= 0 ? zeroX : valueScale(d.value)))
       .attr('width', d => Math.abs(valueScale(d.value) - zeroX));
   }
@@ -361,7 +419,10 @@ function enterBars(
         .append('text')
         .classed('nge-bar-label', true)
         .attr('x', d => (categoryScale(d.label) ?? 0) + categoryScale.bandwidth() / 2)
-        .attr('y', d => valueScale(d.value) - 6)
+        // Positive: just above the top edge; negative: just below the bottom edge.
+        .attr('y', d =>
+          d.value >= 0 ? valueScale(d.value) - 6 : valueScale(d.value) + theme.label.fontSize + 2
+        )
         .attr('text-anchor', 'middle')
         .attr('fill', d => d.labelColor ?? theme.label.color)
         .attr('font-size', theme.label.fontSize)
@@ -390,30 +451,26 @@ function updateBars(
   update: Selection<SVGGElement, NgeBarDataPoint, SVGGElement, unknown>,
   params: Omit<BarRenderParams, 'config' | 'data'>
 ): Selection<SVGGElement, NgeBarDataPoint, SVGGElement, unknown> {
-  const {
-    animationMs,
-    categoryScale,
-    dimensions,
-    isVertical,
-    labelFormat,
-    showLabels,
-    theme,
-    valueScale,
-  } = params;
+  const { animation, categoryScale, isVertical, labelFormat, showLabels, theme, valueScale } =
+    params;
 
   // Update all position attributes regardless of orientation to handle orientation changes
   if (isVertical) {
+    // Zero-anchored (mirrors the enter path) so updated negative values stay below
+    // the baseline; identical to the old formula when zeroY === boundedHeight.
+    const zeroY = valueScale(0);
     update
       .select('.nge-bar')
       .attr('rx', theme.bar.radius)
       .attr('ry', theme.bar.radius)
       .style('fill', d => d.color ?? theme.bar.color)
       .transition()
-      .duration(animationMs)
+      .duration(animation.updateMs)
+      .ease(animation.easing)
       .attr('x', d => categoryScale(d.label) ?? 0)
       .attr('width', categoryScale.bandwidth())
-      .attr('y', d => valueScale(d.value))
-      .attr('height', d => dimensions.boundedHeight - valueScale(d.value));
+      .attr('y', d => (d.value >= 0 ? valueScale(d.value) : zeroY))
+      .attr('height', d => Math.abs(valueScale(d.value) - zeroY));
   } else {
     // For horizontal bars, calculate zero point for proper negative value handling
     const zeroX = valueScale(0);
@@ -423,7 +480,8 @@ function updateBars(
       .attr('ry', theme.bar.radius)
       .style('fill', d => d.color ?? theme.bar.color)
       .transition()
-      .duration(animationMs)
+      .duration(animation.updateMs)
+      .ease(animation.easing)
       .attr('x', d => (d.value >= 0 ? zeroX : valueScale(d.value)))
       .attr('y', d => categoryScale(d.label) ?? 0)
       .attr('height', categoryScale.bandwidth())
@@ -442,9 +500,12 @@ function updateBars(
         .attr('dominant-baseline', null)
         .text(d => (labelFormat ? labelFormat(d.value) : String(d.value)))
         .transition()
-        .duration(animationMs)
+        .duration(animation.updateMs)
+        .ease(animation.easing)
         .attr('x', d => (categoryScale(d.label) ?? 0) + categoryScale.bandwidth() / 2)
-        .attr('y', d => valueScale(d.value) - 6);
+        .attr('y', d =>
+          d.value >= 0 ? valueScale(d.value) - 6 : valueScale(d.value) + theme.label.fontSize + 2
+        );
     } else {
       update
         .select('.nge-bar-label')
@@ -455,7 +516,8 @@ function updateBars(
         .attr('dominant-baseline', 'middle')
         .text(d => (labelFormat ? labelFormat(d.value) : String(d.value)))
         .transition()
-        .duration(animationMs)
+        .duration(animation.updateMs)
+        .ease(animation.easing)
         .attr('x', d => valueScale(d.value) + 6)
         .attr('y', d => (categoryScale(d.label) ?? 0) + categoryScale.bandwidth() / 2);
     }

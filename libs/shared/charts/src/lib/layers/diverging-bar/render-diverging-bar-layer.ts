@@ -1,4 +1,4 @@
-import { easeCubicInOut, interpolateNumber, scaleLinear, select } from 'd3';
+import { interpolateNumber, scaleLinear, select } from 'd3';
 import 'd3-transition';
 
 import type { NgeDivergingBarDataPoint, NgeDivergingBarLayerConfig } from '../../core/config';
@@ -32,8 +32,16 @@ export function renderDivergingBarLayer(
     NgeDivergingBarLayerTheme | undefined
   >
 ): void {
-  const { bounds, config, dimensions, margins, tooltipConfig, tooltipElement, tooltipHandlers } =
-    context;
+  const {
+    animation,
+    bounds,
+    config,
+    dimensions,
+    margins,
+    tooltipConfig,
+    tooltipElement,
+    tooltipHandlers,
+  } = context;
 
   // Diverging bar data comes from config.data (single object, not array)
   const datum = config.data;
@@ -209,7 +217,8 @@ export function renderDivergingBarLayer(
       .attr('width', initialBarGeom.width)
       .style('fill', currentBarColor)
       .transition()
-      .duration(300)
+      .duration(animation.enterMs)
+      .ease(animation.easing)
       .attr('x', barGeometry.x)
       .attr('width', barGeometry.width)
       .style('fill', currentBarColor);
@@ -311,7 +320,8 @@ export function renderDivergingBarLayer(
       .attr('y', valueIndicatorY)
       .style('fill', currentBarColor)
       .transition()
-      .duration(300)
+      .duration(animation.enterMs)
+      .ease(animation.easing)
       .attr('x', xScale(value) - valueIndicatorWidth / 2)
       .style('fill', currentBarColor)
       .tween('tooltip-content', () => {
@@ -335,8 +345,8 @@ export function renderDivergingBarLayer(
         select(tooltipElement)
           .style('display', 'block')
           .transition()
-          .duration(300)
-          .ease(easeCubicInOut)
+          .duration(animation.enterMs)
+          .ease(animation.easing)
           .style('left', `${finalTooltipEvent.position.x}px`)
           .style('top', `${finalTooltipEvent.position.y}px`);
       }
@@ -352,7 +362,8 @@ export function renderDivergingBarLayer(
     container
       .select('.nge-diverging-bar-value-bar')
       .transition()
-      .duration(300)
+      .duration(animation.updateMs)
+      .ease(animation.easing)
       .attr('x', barGeometry.x)
       .attr('width', barGeometry.width)
       .style('fill', currentBarColor);
@@ -370,7 +381,8 @@ export function renderDivergingBarLayer(
     container
       .select('.nge-diverging-bar-value-indicator')
       .transition()
-      .duration(300)
+      .duration(animation.updateMs)
+      .ease(animation.easing)
       .attr('x', xScale(value) - valueIndicatorWidth / 2)
       .style('fill', currentBarColor)
       .tween('tooltip-content', () => {
@@ -394,8 +406,8 @@ export function renderDivergingBarLayer(
         select(tooltipElement)
           .style('display', 'block')
           .transition()
-          .duration(300)
-          .ease(easeCubicInOut)
+          .duration(animation.updateMs)
+          .ease(animation.easing)
           .style('left', `${finalTooltipEvent.position.x}px`)
           .style('top', `${finalTooltipEvent.position.y}px`);
       }

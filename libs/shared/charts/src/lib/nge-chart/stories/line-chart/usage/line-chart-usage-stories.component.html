@@ -99,8 +99,9 @@ config = createLineChartConfig({{ "{" }}
     <section class="story-section">
       <h4>4. Curve Types</h4>
       <p class="story-description">
-        Choose from three curve interpolation types:
-        <code>'linear'</code> (default), <code>'monotone'</code> (smooth), or <code>'step'</code>.
+        Choose from four curve interpolation types:
+        <code>'linear'</code> (default), <code>'monotone'</code> (smooth), <code>'step'</code>, or
+        <code>'basis'</code> (B-spline — the smooth "Spline Graph").
       </p>
       <div class="curve-comparison">
         <div class="curve-example">
@@ -119,6 +120,12 @@ config = createLineChartConfig({{ "{" }}
           <h5>Step</h5>
           <div class="chart-container chart-container--small">
             <nge-chart [config]="stepConfig" />
+          </div>
+        </div>
+        <div class="curve-example">
+          <h5>Basis (Spline)</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="basisConfig" />
           </div>
         </div>
       </div>

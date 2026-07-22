@@ -1,0 +1,124 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Gauge - Theming Examples</h2>
+    <p class="intro-text">
+      Every part of the gauge is themeable via <code>theme.gauge</code>: <code>value</code> for the
+      filled arc / fill, <code>track</code> for the unfilled background, <code>needle</code> for the
+      angular-gauge needle, <code>threshold.colors</code> for the ascending band palette, and
+      <code>label</code> for the center readout. Colors default to the
+      <code>--chart-*</code> tokens. Light / dark is handled by the review container.
+    </p>
+
+    <!-- Default Theme -->
+    <section class="story-section">
+      <h4>Default Theme</h4>
+      <p class="story-description">
+        No theme provided — uses the built-in <code>--chart-*</code> token palette, which adapts to
+        the surrounding light / dark surface.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <!-- Value + Track Palette -->
+    <section class="story-section">
+      <h4>Value + Track Palette</h4>
+      <p class="story-description">
+        Recolor the filled value arc with <code>theme.gauge.value.color</code> and the unfilled
+        background with <code>theme.gauge.track.color</code> to rebrand the meter.
+      </p>
+      <div class="themes-grid">
+        <div class="theme-item">
+          <span class="theme-label">Green</span>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="greenConfig" />
+          </div>
+        </div>
+        <div class="theme-item">
+          <span class="theme-label">Blue</span>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="blueConfig" />
+          </div>
+        </div>
+        <div class="theme-item">
+          <span class="theme-label">Red</span>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="redConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Needle Styling -->
+    <section class="story-section">
+      <h4>Needle Styling (Angular Gauge)</h4>
+      <p class="story-description">
+        On an angular gauge (<code>indicator: 'needle'</code>),
+        <code>theme.gauge.needle.color</code> and <code>needle.width</code> restyle the needle
+        independently of the value arc color.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="needleConfig" />
+      </div>
+    </section>
+
+    <!-- Threshold Palette -->
+    <section class="story-section">
+      <h4>Threshold Palette</h4>
+      <p class="story-description">
+        <code>theme.gauge.threshold.colors</code> recolors the ascending zone bands — the band index
+        maps to <code>colors[index % length]</code>, so the palette cycles for any band count.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="thresholdConfig" />
+      </div>
+    </section>
+
+    <!-- Center Label Styling -->
+    <section class="story-section">
+      <h4>Center Label Styling</h4>
+      <p class="story-description">
+        <code>theme.gauge.label</code> restyles the center value readout — <code>color</code>,
+        <code>fontSize</code>, and <code>fontWeight</code> (the font family is inherited by
+        default).
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="labelConfig" />
+      </div>
+    </section>
+
+    <!-- Highlight: one theme across all three shapes -->
+    <section class="story-section story-section--highlight">
+      <h4>One Theme, Three Shapes</h4>
+      <p class="story-description">
+        The same <code>theme.gauge</code> slices apply across every catalog variant — the Solid
+        Gauge, Angular Gauge, and Progress Bar all read the value + track (+ needle) colors the same
+        way.
+      </p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>Solid Gauge</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="solidComparison" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Angular Gauge</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="angularComparison" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Progress Bar</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="linearComparison" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

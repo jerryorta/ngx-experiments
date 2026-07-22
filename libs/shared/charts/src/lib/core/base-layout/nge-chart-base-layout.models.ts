@@ -20,6 +20,44 @@ export interface NgeChartMargin {
 }
 
 /**
+ * Configuration for the optional shared crosshair + shared multi-series tooltip
+ * (ARCH-213). Opt-in — omit it (or leave every flag off) and the chart behaves
+ * exactly as before. When enabled, moving the pointer over the plot snaps a
+ * vertical guide to the nearest datum x and (with `shared`) shows one tooltip
+ * listing every series' value at that x. Prototype scope: continuous-x LINE +
+ * AREA hosts (snap via a d3 bisector over the merged datum x-positions).
+ */
+export interface NgeCrosshairConfig {
+  /**
+   * Render ONE shared tooltip listing every series' value at the snapped x
+   * (legend-style rows: colour swatch + series label + y value). When false,
+   * only the crosshair guide(s) render.
+   * @default false
+   */
+  shared?: boolean;
+
+  /**
+   * How the vertical guide snaps to data. `'datum'` (default) snaps to the
+   * nearest real data x; `'tick'` is reserved for snap-to-axis-tick (not yet
+   * implemented in the prototype — treated as `'datum'`).
+   * @default 'datum'
+   */
+  snap?: 'datum' | 'tick';
+
+  /**
+   * Draw the vertical guide line that snaps to the nearest datum x.
+   * @default false
+   */
+  x?: boolean;
+
+  /**
+   * Draw a horizontal guide line at the pointer's y position.
+   * @default false
+   */
+  y?: boolean;
+}
+
+/**
  * Configuration for an optional range/slider axis — a full-range ruler with a
  * draggable brush (window + handles) that zooms the plot to the brushed slice.
  * When set on a dimension it REPLACES that dimension's standard axis: the plot's
@@ -40,6 +78,12 @@ export interface NgeRangeAxisConfig {
  * Shared across all chart types in a composition.
  */
 export interface NgeChartBaseConfig {
+  /**
+   * Opt-in shared crosshair + shared multi-series tooltip (ARCH-213). Off by
+   * default (undefined → no behaviour change). See {@link NgeCrosshairConfig}.
+   */
+  crosshair?: NgeCrosshairConfig;
+
   /**
    * Margins around the chart area
    */
@@ -184,6 +228,7 @@ export interface NgeChartBaseConfig {
  * This is the return type of mergeBaseConfig().
  */
 export interface ResolvedNgeChartBaseConfig {
+  crosshair: NgeCrosshairConfig | undefined;
   margin: NgeChartMargin;
   showXAxis: boolean;
   showXGrid: boolean;
@@ -212,6 +257,7 @@ export interface ResolvedNgeChartBaseConfig {
  * Default base layout configuration
  */
 export const DEFAULT_BASE_LAYOUT_CONFIG: ResolvedNgeChartBaseConfig = {
+  crosshair: undefined,
   margin: {
     bottom: 45,
     left: 45,
@@ -290,6 +336,7 @@ export function mergeBaseConfig(
   }
 
   return {
+    crosshair: config.crosshair ?? DEFAULT_BASE_LAYOUT_CONFIG.crosshair,
     margin: {
       ...DEFAULT_BASE_LAYOUT_CONFIG.margin,
       ...config.margin,

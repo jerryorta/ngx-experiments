@@ -1,3 +1,4 @@
+import type { NgeChartAnimationConfig } from '../core/animation';
 import type { NgeChartBaseConfig } from '../core/base-layout';
 import type { NgeBulletDataPoint, NgeBulletLayerConfig, NgeChartConfig } from '../core/config';
 import type { NgeTooltipConfig, NgeTooltipContent, NgeTooltipStyle } from '../core/tooltip';
@@ -50,6 +51,12 @@ export interface BulletChartTooltipOptions {
  * Options for creating a bullet chart config preset.
  */
 export interface BulletChartPresetOptions {
+  /**
+   * Chart-wide enter/update/exit animation (per-phase durations + easing) applied to
+   * every layer. A layer's own `animationMs` shorthand still wins over it.
+   */
+  animation?: NgeChartAnimationConfig;
+
   /**
    * Height of the main progress bar in pixels
    */
@@ -143,6 +150,7 @@ function defaultBulletTooltipFormatter(data: NgeBulletDataPoint): NgeTooltipCont
  */
 export function createBulletChartConfig(options: BulletChartPresetOptions): NgeChartConfig {
   const {
+    animation,
     barHeight,
     data,
     limitIndicatorHeight,
@@ -172,6 +180,7 @@ export function createBulletChartConfig(options: BulletChartPresetOptions): NgeC
   // Gestures (ARCH-174): bullet is a single-row linear micro-chart — no
   // meaningful zoom/pan surface, so it exposes no `gestures` option.
   return {
+    animation,
     base: {
       margin: margin ?? { bottom: 10, left: 10, right: 10, top: 10 },
       showXAxis: false,

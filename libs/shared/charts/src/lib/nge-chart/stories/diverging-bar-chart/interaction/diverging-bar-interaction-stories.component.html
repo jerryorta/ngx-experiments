@@ -1,0 +1,39 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Diverging Bar Chart - Interactive Controls</h2>
+    <p class="intro-text">
+      Use the Storybook controls panel to adjust the diverging bar configuration in real-time. Hover
+      the chart (or press Randomize) to see the tooltip - toggle it with the
+      <strong>showTooltip</strong>
+      control.
+    </p>
+
+    <div class="interaction-row">
+      <button
+        type="button"
+        class="interaction-btn interaction-btn--primary"
+        (click)="randomizeValue()"
+      >
+        Randomize Value
+      </button>
+    </div>
+
+    <div class="chart-container">
+      <nge-chart [config]="config()" />
+    </div>
+
+    <div class="controls-info">
+      <h4>Available Controls</h4>
+      <ul>
+        <li><strong>Data:</strong> value, min, max, units, and positive / negative colors</li>
+        <li><strong>Dimensions:</strong> bar height and value / center / limit indicator sizes</li>
+        <li><strong>Center Label:</strong> the text in the bubble above the zero point</li>
+        <li><strong>Margins:</strong> chart margins</li>
+        <li><strong>Tooltip:</strong> enable / disable, position, size, and styling</li>
+      </ul>
+    </div>
+  </div>
+</nge-storybook-review-container>

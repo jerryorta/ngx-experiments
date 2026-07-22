@@ -1,0 +1,180 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Lollipop Chart - Usage Examples</h2>
+    <p class="intro-text">
+      Practical patterns for <code>createLollipopChartConfig()</code>. One preset spans the whole
+      family: the default is a <strong>lollipop</strong> (stem + marker),
+      <code>showStem: false</code> gives a <strong>dot plot</strong>, per-point
+      <code>valueEnd</code> gives a <strong>dumbbell</strong>, and <code>connect: true</code> joins
+      same-<code>seriesId</code> markers across categories into a <strong>slope</strong> chart.
+    </p>
+
+    <!-- EXAMPLE 1: Basic lollipop -->
+    <section class="story-section story-section--highlight">
+      <h4>1. Basic Lollipop</h4>
+      <p class="story-description">
+        A stem from the baseline to an end marker per category — the defaults. It reads like a bar
+        chart with far less ink, so a long list of categories stays legible.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} category: 'Austin',  value: 78 {{ "}" }},
+  {{ "{" }} category: 'Denver',  value: 64 {{ "}" }},
+  {{ "{" }} category: 'Seattle', value: 55 {{ "}" }},
+  // ...
+];
+
+config = createLollipopChartConfig({{ "{" }} data {{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="basicConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Dot plot -->
+    <section class="story-section">
+      <h4>2. Dot Plot (<code>showStem: false</code>)</h4>
+      <p class="story-description">
+        Drop the stems for a bare dot plot — pure marker positions, the minimal-ink reading of the
+        same comparison.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createLollipopChartConfig({{ "{" }} data, showStem: false, showLabels: true {{
+            "}"
+          }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="dotPlotConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Dumbbell / span -->
+    <section class="story-section story-section--highlight">
+      <h4>3. Dumbbell / Span (<code>valueEnd</code>)</h4>
+      <p class="story-description">
+        Give each row a <code>valueEnd</code> and the category renders two markers joined by a span
+        segment (the baseline stem is dropped) — the classic before → after comparison.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} category: 'Austin',  value: 1450, valueEnd: 1980 {{ "}" }},
+  {{ "{" }} category: 'Seattle', value: 1900, valueEnd: 2350 {{ "}" }},
+  // ...
+];
+
+config = createLollipopChartConfig({{ "{" }} data, showTooltip: true {{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="dumbbellConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Slope chart -->
+    <section class="story-section">
+      <h4>4. Slope Chart (<code>connect: true</code>)</h4>
+      <p class="story-description">
+        Share a <code>seriesId</code> across categories and set <code>connect: true</code> — each
+        series' markers join into a slope line, so its rise / fall between the two years reads at a
+        glance.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} category: '2019', seriesId: 'Brand A', value: 32 {{ "}" }},
+  {{ "{" }} category: '2024', seriesId: 'Brand A', value: 48 {{ "}" }},
+  // ...
+];
+
+config = createLollipopChartConfig({{ "{" }} data, connect: true, seriesColors {{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="slopeConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Click to inspect -->
+    <section class="story-section">
+      <h4>5. Click to Inspect a Marker</h4>
+      <p class="story-description">
+        Provide an <code>onClick</code> callback — each marker hands back its source datum
+        (<code>category</code>, <code>value</code>, and any <code>valueEnd</code> /
+        <code>seriesId</code>).
+      </p>
+      <div class="code-block">
+        <pre>
+config = createLollipopChartConfig({{ "{" }}
+  data,
+  onClick: (event) => inspect(event.data.category, event.data.value),
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="interaction-display"> <strong>Clicked:</strong> {{ lastClicked() }} </div>
+      <div class="chart-container">
+        <nge-chart [config]="clickConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Dynamic data with signals -->
+    <section class="story-section">
+      <h4>6. Dynamic Data With Signals</h4>
+      <p class="story-description">
+        <strong>Recommended pattern:</strong> hold the data in a <code>signal()</code> and rebuild
+        the config inside a <code>computed()</code>. Re-rolling the scores recomputes the config and
+        the markers animate between states.
+      </p>
+      <div class="code-block">
+        <pre>
+liveData = signal&lt;NgeLollipopDataPoint[]&gt;(buildData());
+
+config = computed(() => createLollipopChartConfig({{ "{" }} data: liveData() {{ "}" }}));
+
+&lt;nge-chart [config]="config()" /&gt;</pre
+        >
+      </div>
+      <div class="interaction-row">
+        <button
+          class="action-button"
+          (click)="randomizeData()"
+        >
+          Randomize Data
+        </button>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7: Shapes & orientation -->
+    <section class="story-section">
+      <h4>7. Shapes &amp; Orientation</h4>
+      <p class="story-description">
+        <code>orientation: 'horizontal'</code> swaps categories onto the y axis,
+        <code>shape</code> changes the marker glyph (<code>'circle'</code> /
+        <code>'diamond'</code> / <code>'square'</code>), and <code>showLabels</code> prints each
+        value.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createLollipopChartConfig({{
+            "{"
+          }} data, orientation: 'horizontal', shape: 'diamond', showLabels: true {{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="horizontalConfig" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

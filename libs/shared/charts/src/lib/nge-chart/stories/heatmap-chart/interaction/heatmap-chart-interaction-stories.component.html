@@ -1,0 +1,55 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Heatmap Chart - Interactive Controls</h2>
+    <p class="intro-text">
+      Use the Storybook controls panel to adjust the heatmap in real-time. Switch
+      <strong>mark</strong> between cell and bubble, tune the <strong>colPadding</strong> /
+      <strong>rowPadding</strong> band gaps, pick a named <strong>scheme</strong> (or leave it blank
+      for the token ramp), pin a <strong>domain</strong>, toggle <strong>showValues</strong> and the
+      axes, and restyle the cell / bubble / label theme slots. Press Randomize to re-roll the grid.
+    </p>
+
+    <div class="interaction-row">
+      <button
+        type="button"
+        class="interaction-btn interaction-btn--primary"
+        (click)="randomizeData()"
+      >
+        Randomize Data
+      </button>
+    </div>
+
+    <div class="chart-container">
+      <nge-chart [config]="config()" />
+    </div>
+
+    <div class="controls-info">
+      <h4>Available Controls</h4>
+      <ul>
+        <li><strong>Margins:</strong> chart margins</li>
+        <li
+          ><strong>Layout:</strong> mark (cell / bubble), column &amp; row band padding, and bubble
+          max radius (bubble mode)</li
+        >
+        <li
+          ><strong>Color:</strong> named scheme (blank ⇒ token ramp) and an optional pinned color
+          domain (min / max)</li
+        >
+        <li><strong>Visibility:</strong> per-cell values, and X / Y axis visibility</li>
+        <li><strong>Tooltip:</strong> enable / disable hover tooltips and their position</li>
+        <li
+          ><strong>Cell Styling:</strong> ramp endpoints (+ optional midpoint), empty-cell fill,
+          corner radius, separator stroke width and opacity</li
+        >
+        <li
+          ><strong>Bubble Styling:</strong> bubble fill color and opacity, outline stroke and width
+          (bubble mode)</li
+        >
+        <li><strong>Label Styling:</strong> value label color, font size and weight</li>
+      </ul>
+    </div>
+  </div>
+</nge-storybook-review-container>

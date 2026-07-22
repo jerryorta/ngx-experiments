@@ -1,3 +1,4 @@
+import type { NgeChartAnimationConfig } from '../core/animation';
 import type { NgeChartBaseConfig } from '../core/base-layout';
 import type { NgeBarDataPoint, NgeBarLayerConfig, NgeChartConfig } from '../core/config';
 import type { NgeChartGesturesConfig } from '../core/gesture';
@@ -47,6 +48,12 @@ export interface BarChartTooltipOptions {
  */
 export interface BarChartPresetOptions {
   /**
+   * Chart-wide enter/update/exit animation (per-phase durations + easing) applied to
+   * every layer. A layer's own `animationMs` shorthand still wins over it.
+   */
+  animation?: NgeChartAnimationConfig;
+
+  /**
    * Enter/update/exit transition duration in ms. Default 300.
    * Set 0 for instant renders (used during zoom/pan gestures).
    */
@@ -76,6 +83,8 @@ export interface BarChartPresetOptions {
   showYAxis?: boolean;
   /** Show horizontal gridlines at the Y axis tick positions. @default false */
   showYGrid?: boolean;
+  /** Draw a rule at the value-scale zero baseline (behind the bars). @default false */
+  showZeroLine?: boolean;
   /**
    * Tooltip configuration. Use `{ enabled: true }` for default tooltip,
    * or provide custom options.
@@ -121,6 +130,7 @@ function defaultBarTooltipFormatter(data: NgeBarDataPoint): NgeTooltipContent {
  */
 export function createBarChartConfig(options: BarChartPresetOptions): NgeChartConfig {
   const {
+    animation,
     animationMs,
     barPadding,
     barRadius,
@@ -138,6 +148,7 @@ export function createBarChartConfig(options: BarChartPresetOptions): NgeChartCo
     showXGrid = false,
     showYAxis = false,
     showYGrid = false,
+    showZeroLine = false,
     tooltip,
     xAxisLabel,
     xAxisTickFormat,
@@ -169,6 +180,7 @@ export function createBarChartConfig(options: BarChartPresetOptions): NgeChartCo
     : undefined;
 
   return {
+    animation,
     base: {
       margin,
       showXAxis,
@@ -196,6 +208,7 @@ export function createBarChartConfig(options: BarChartPresetOptions): NgeChartCo
         showLabels,
         showMeanLine,
         showMedianLine,
+        showZeroLine,
         tooltip: tooltipConfig,
         type: 'bar',
       },

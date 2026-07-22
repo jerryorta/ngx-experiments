@@ -4,7 +4,10 @@ import type { NgeChartDimensions } from '../core/chart.models';
 import type { NgeChartConfig, NgeScatterDataPoint, NgeScatterLayerConfig } from '../core/config';
 
 import { clampDomain } from '../core/gesture';
-import { computeScatterXDataDomain, computeScatterYDataDomain } from '../presets/scatter-chart.preset';
+import {
+  computeScatterXDataDomain,
+  computeScatterYDataDomain,
+} from '../presets/scatter-chart.preset';
 import { NgeScatterChartTransform } from './scatter-chart.transform';
 
 /** Narrow the first layer to a scatter layer config for assertions. */
@@ -175,7 +178,7 @@ describe('NgeScatterChartTransform', () => {
     });
   });
 
-  describe('range-axis focus clamps to the data extent (NGE-3 / ARCH-211)', () => {
+  describe('range-axis focus clamps to the data extent (ARCH-211)', () => {
     const wide: NgeScatterDataPoint[] = [
       { seriesId: 'A', x: 0, y: 0 },
       { seriesId: 'A', x: 300, y: 300 },

@@ -48,3 +48,5 @@ Thumbs.db
 
 storybook-static
 .nx/migrate-runs
+# direnv (local env overrides — never commit)
+.envrc

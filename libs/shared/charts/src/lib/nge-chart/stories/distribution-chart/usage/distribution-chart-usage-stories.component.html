@@ -1,0 +1,240 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Distribution Chart - Usage Examples</h2>
+    <p class="intro-text">
+      Practical patterns for <code>createDistributionChartConfig()</code>. Feed each category its
+      RAW observations (<code>{{ "{" }} category, values: number[] {{ "}" }}</code
+      >) — the layer computes the quartiles / KDE / jitter itself. One preset spans the family:
+      <code>render: 'box'</code> (default) is a box-and-whisker, <code>render: 'violin'</code> a KDE
+      density, and <code>render: 'points'</code> a strip / jitter / beeswarm point cloud.
+    </p>
+
+    <!-- EXAMPLE 1: Basic box-and-whisker -->
+    <section class="story-section story-section--highlight">
+      <h4>1. Basic Box-and-Whisker</h4>
+      <p class="story-description">
+        Simplest usage: pass raw values per category and let the layer summarise them. The box spans
+        the IQR, the line marks the median, whiskers reach the 1.5·IQR fences, and dots are
+        outliers.
+      </p>
+      <div class="code-block">
+        <pre>
+// raw observations per category — NOT pre-aggregated stats
+data = [
+  {{ "{" }} category: 'Class A', values: [76, 81, 68, /* ... */] {{ "}" }},
+  {{ "{" }} category: 'Class B', values: [83, 79, 90, /* ... */] {{ "}" }},
+];
+
+config = createDistributionChartConfig({{ "{" }} data {{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="basicConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Violin -->
+    <section class="story-section story-section--highlight">
+      <h4>2. Violin (KDE density)</h4>
+      <p class="story-description">
+        <code>render: 'violin'</code> mirrors a kernel-density estimate around each category's axis
+        so the width reads as local density; <code>showInnerBox: true</code> overlays a mini
+        box-and-whisker for the quartiles.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createDistributionChartConfig({{ "{" }}
+  data,
+  render: 'violin',
+  showInnerBox: true,
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="violinConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Beeswarm -->
+    <section class="story-section">
+      <h4>3. Beeswarm Point Cloud</h4>
+      <p class="story-description">
+        <code>render: 'points'</code> plots every raw observation; <code>jitter: 'beeswarm'</code>
+        packs them into a symmetric, non-overlapping swarm so density reads as swarm width.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createDistributionChartConfig({{ "{" }} data, render: 'points', jitter: 'beeswarm' {{
+            "}"
+          }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="beeswarmConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Jitter vs strip -->
+    <section class="story-section">
+      <h4>4. Jitter vs Strip</h4>
+      <p class="story-description">
+        The same point cloud with two scatter strategies: <code>jitter: 'uniform'</code> spreads
+        points randomly across the band width, while <code>jitter: 'none'</code> collapses them onto
+        a single strip.
+      </p>
+      <div class="code-block">
+        <pre>
+uniform = createDistributionChartConfig({{ "{" }} data, render: 'points', jitter: 'uniform' {{
+            "}"
+          }});
+strip   = createDistributionChartConfig({{ "{" }} data, render: 'points', jitter: 'none' {{
+            "}"
+          }});</pre
+        >
+      </div>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>Uniform jitter</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="uniformJitterConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Strip (no jitter)</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="stripConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Error bars -->
+    <section class="story-section">
+      <h4>5. Error Bars (±σ)</h4>
+      <p class="story-description">
+        Drop the box with <code>showBox: false</code> for an error-bar plot;
+        <code>whiskerStat: 'stddev'</code> sizes the whiskers to ±1 standard deviation and
+        <code>showMean: true</code> marks the mean glyph.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createDistributionChartConfig({{ "{" }}
+  data,
+  showBox: false,       // whiskers only — no IQR box
+  whiskerStat: 'stddev', // ±1σ extent
+  showMean: true,
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="errorBarConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Horizontal -->
+    <section class="story-section">
+      <h4>6. Horizontal Orientation</h4>
+      <p class="story-description">
+        <code>orientation: 'horizontal'</code> swaps the scales — categories run down the y axis and
+        the values read left-to-right. Ideal when category labels are long.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createDistributionChartConfig({{ "{" }} data, orientation: 'horizontal' {{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="horizontalConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7: Whisker statistic -->
+    <section class="story-section">
+      <h4>7. Whisker Statistic (IQR vs min–max)</h4>
+      <p class="story-description">
+        <code>whiskerStat</code> sets the whisker extent: <code>'iqr'</code> draws Tukey 1.5·IQR
+        fences and flags points beyond them as outliers, while <code>'minmax'</code> stretches the
+        whiskers all the way to the data extremes (no outliers).
+      </p>
+      <div class="code-block">
+        <pre>
+iqr    = createDistributionChartConfig({{ "{" }} data, whiskerStat: 'iqr' {{ "}" }});
+minMax = createDistributionChartConfig({{ "{" }} data, whiskerStat: 'minmax' {{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>IQR fences + outliers</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="iqrConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Min–max whiskers</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="minMaxConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 8: Click to inspect a category -->
+    <section class="story-section">
+      <h4>8. Click to Inspect a Category</h4>
+      <p class="story-description">
+        The <code>onClick</code> payload carries the whole distribution (<code
+          >{{ "{" }} category, values {{ "}" }}</code
+        >), so you can drill into the clicked category's raw observations.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createDistributionChartConfig({{ "{" }}
+  data,
+  onClick: (event) => inspect(event.data.category, event.data.values),
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="interaction-display"> <strong>Clicked:</strong> {{ lastClicked() }} </div>
+      <div class="chart-container">
+        <nge-chart [config]="clickConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 9: Dynamic data with signals -->
+    <section class="story-section">
+      <h4>9. Dynamic Data With Signals</h4>
+      <p class="story-description">
+        <strong>Recommended pattern:</strong> hold the raw observations in a
+        <code>signal()</code> and rebuild the config inside a <code>computed()</code>. Re-rolling
+        the sample re-summarises every violin.
+      </p>
+      <div class="code-block">
+        <pre>
+liveData = signal&lt;NgeDistributionDataPoint[]&gt;(makeClasses());
+
+config = computed(() => createDistributionChartConfig({{
+            "{"
+          }} data: liveData(), render: 'violin' {{ "}" }}));
+
+&lt;nge-chart [config]="config()" /&gt;</pre
+        >
+      </div>
+      <div class="interaction-row">
+        <button
+          class="action-button"
+          (click)="randomizeData()"
+        >
+          Randomize Data
+        </button>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

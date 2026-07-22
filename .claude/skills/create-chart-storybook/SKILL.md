@@ -26,6 +26,8 @@ Parse `$ARGUMENTS` to determine the chart type. Common chart types:
 | `scatter-chart` | `createScatterChartConfig()` | (check preset) |
 | `diverging-bar-chart` | `createDivergingBarChartConfig()` | (check preset) |
 
+**Multi-series vs single-series (this gates the interactive-legend example).** Charts whose data carries a `seriesId` / `groupId` dimension or stacks multiple series — **area, line, grouped-bar, scatter, stacked-bar** — get an **interactive-legend example** in their interaction story (see Subdirectory 3). Single-series charts — **bar, bullet, diverging-bar** — SKIP it.
+
 1. **Find the preset** to understand the config API:
    ```
    Glob pattern: "libs/shared/charts/src/lib/presets/<chart-type>.preset.ts"
@@ -315,8 +317,8 @@ export class <ChartType>ThemingComponent {
   <h2><Chart Type> - Theming Examples</h2>
 
   <section class="story-section">
-    <h4>Default Theme (Material Design)</h4>
-    <p class="story-description">No theme provided - uses Material Design CSS variables</p>
+    <h4>Default Theme</h4>
+    <p class="story-description">No theme provided — renders on the chart's <code>--chart-*</code> token defaults</p>
     <div class="chart-container">
       <giga-chart [config]="defaultConfig" />
     </div>
@@ -388,12 +390,13 @@ export const Theming: Story = {
 
 **Purpose:** Full Storybook controls via `input()` signals. Every configurable property becomes a control. The chart rebuilds via `computed()` when any control changes.
 
+Beyond the per-property controls, the interaction story ships two standard interactive examples: a **tooltip** example (a `showTooltip` control + `tooltipPosition` + `tooltip: { enabled: true }`) for **all** chart types, and — for **multi-series / stackable charts only** — an **interactive-legend** example (see the dedicated subsection at the end of this phase).
+
 #### `<chart-type>-interaction-stories.component.ts`
 
 ```typescript
 import { CommonModule } from '@angular/common';
 import { Component, computed, input, signal, ViewEncapsulation } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
 import { GigaStorybookReviewContainerComponent, REVIEW_STATUS } from '@gigasoftware/themes/storybook';
 
 import type { <DataPointType>, GigaChartConfig } from '../../../../core/config';
@@ -405,7 +408,7 @@ import { GigaChartComponent } from '../../../giga-chart.component';
   host: {
     class: '<chart-type>-interaction-stories',
   },
-  imports: [CommonModule, GigaChartComponent, GigaStorybookReviewContainerComponent, MatButtonModule],
+  imports: [CommonModule, GigaChartComponent, GigaStorybookReviewContainerComponent],
   selector: '<chart-type>-interaction-stories',
   standalone: true,
   styleUrl: './<chart-type>-interaction-stories.component.scss',
@@ -476,9 +479,10 @@ export class <ChartType>InteractionStoriesComponent {
 **Key rules for interaction:**
 - Every configurable property is an `input()` signal (NOT `@Input()`)
 - Use `computed()` to rebuild the full `GigaChartConfig` when any input changes
-- Include `MatButtonModule` for the randomize button
+- Use a **plain** `<button type="button" class="interaction-btn">` for the randomize button — **never** Angular Material (`MatButtonModule` / `mat-raised-button`). Angular Material is legacy-only and banned for new development (CLAUDE.md → "Angular Material: legacy only"); the pie / sunburst / area sibling stories all use a plain `.interaction-btn` styled in their SCSS
 - Empty string `''` for color inputs means "use default" — check with `|| undefined`
 - Group inputs by concern: base margins, layer layout, layer visibility, layer tooltip, theme bar/line/bullet styling, theme label, theme axis, theme statistical
+- **Standard interactive examples:** always ship the **tooltip** example (`showTooltip` + `tooltipPosition`); for **multi-series / stackable charts** (area, line, grouped-bar, scatter, stacked-bar) ALSO ship the **interactive-legend** example (see "Interactive legend (multi-series charts only)" below). Single-series charts (bar, bullet, diverging-bar) skip the legend example.
 
 #### `<chart-type>-interaction-stories.component.html`
 
@@ -489,7 +493,7 @@ export class <ChartType>InteractionStoriesComponent {
 >
   <div class="interaction-container">
     <div class="interaction-row">
-      <button mat-raised-button color="primary" (click)="randomizeData()">
+      <button type="button" class="interaction-btn" (click)="randomizeData()">
         Randomize Data
       </button>
     </div>
@@ -504,7 +508,7 @@ The interaction template is intentionally minimal — all configuration comes fr
 
 #### `<chart-type>-interaction-stories.component.scss`
 
-Minimal — just layout for the container, button row, and chart wrapper. Use Tailwind or simple flex for spacing.
+Minimal — just layout for the container, button row, and chart wrapper (simple flex). Style the `.interaction-btn` randomize button here as a **plain** button (padding, border-radius, a neutral/`--chart-*` background + hover state) — do NOT use Angular Material. Copy the `.interaction-btn` rule from a sibling chart's interaction SCSS (e.g. `pie-chart` / `sunburst-chart`).
 
 #### `<chart-type>-interaction.stories.ts`
 
@@ -614,6 +618,145 @@ export const Interaction: Story = {
 - Control types: `'range'` for numbers (with min/max/step), `'color'` for colors, `'boolean'` for toggles, `'radio'` for enums, `'text'` for strings
 - Sort argTypes alphabetically within each category
 - `args` must provide defaults for every `argType`
+
+#### Interactive legend (multi-series charts only)
+
+**Gate:** ship this ONLY for charts whose data carries a `seriesId` / `groupId` dimension or stacks multiple series — **area, line, grouped-bar, scatter, stacked-bar**. Single-series charts (**bar, bullet, diverging-bar**) have nothing to toggle — **SKIP this entire subsection** for them.
+
+Alongside the tooltip example, multi-series interaction stories ship an `interactiveLegend` control that **suppresses the chart's internal legend** and renders a **standalone `<giga-chart-legend>` above the chart**. Clicking a series toggles it in/out of the chart; the toggled-off series stays listed but **dimmed** (opacity 0.4) so it can be toggled back on.
+
+**Exemplar to mirror** (read all four files, then adapt — the sketches below are the shape, NOT a copy):
+`libs/shared/charts/src/lib/giga-chart/stories/stacked-bar-chart/interaction/stacked-bar-chart-interaction-stories.component.{ts,html,scss}` + `stacked-bar-chart-interaction.stories.ts`.
+
+**Imports to add** to the interaction component: the `GigaLegendItem` type from `'../../../../core/legend'`, and `GigaChartLegendComponent` from `'../../../../giga-chart-legend/giga-chart-legend.component'` (also add it to the component `imports` array).
+
+**The stable-color rule (READ FIRST — the one thing that's easy to get wrong).** Toggling a series off must **NEVER recolor the survivors**. Build ONE stable `seriesId → color` map over the **full** series order, then keep colors stable in the way your layer's renderer demands — **check which mechanism your renderer uses**:
+
+- **Renderers that honor a per-datum `color`** (stacked-bar, grouped-bar): **stamp each visible datum's `color`** from the stable map before handing the data to the preset.
+- **Renderers that color by `seriesColors[index]` / first-seen index** (area, line): color is positional, so a *filtered* data array would shift the survivors' colors. Instead **pass a stable `seriesColors` array aligned to the surviving series' original order** (don't stamp the data).
+
+Either way, the **legend swatches must read from that same stable map** so the swatches always match the marks. (The layer's `extract…LegendItems` helper builds the identical map — mirror it.)
+
+**`.component.ts`** — sketch of the members to add:
+
+```typescript
+// interactiveLegend suppresses the internal legend + shows the standalone one.
+readonly interactiveLegend = input<boolean>(false);
+
+// Series toggled OFF. Immutable Set (replaced, never mutated) so the signal fires.
+private readonly hiddenSeries = signal<Set<string>>(new Set());
+
+// Stable seriesId → color over the FULL series order. Feeds BOTH marks and swatches.
+private readonly seriesColorById = computed<Map<string, string>>(() => {
+  const colors = this.palette().length
+    ? this.palette()
+    : (DEFAULT_<LAYER>_THEME.<mark>.colors ?? []);
+  return new Map(
+    SERIES_IDS.map((id, i) => [id, colors[i % colors.length] ?? 'var(--chart-primary)'])
+  );
+});
+
+// One legend entry per series (FULL order). Hidden → opacity 0.4 + selected:false, id set.
+readonly legendItems = computed<GigaLegendItem[]>(() =>
+  SERIES_IDS.map(id => {
+    const isHidden = this.hiddenSeries().has(id);
+    return {
+      color: this.seriesColorById().get(id),
+      id,
+      label: id,
+      opacity: isHidden ? 0.4 : 1,
+      selected: !isHidden,
+    };
+  })
+);
+
+// Data → preset: drop hidden series when interactive. For per-datum-color renderers,
+// ALSO stamp point.color from the stable map. (Positional renderers skip the stamp and
+// pass a stable `seriesColors` slice into the preset instead.)
+readonly chartData = computed(() => {
+  const data = this.sampleData();
+  if (!this.interactiveLegend()) return data;
+  const hidden = this.hiddenSeries();
+  return data
+    .filter(p => !hidden.has(p.seriesId))
+    .map(p => ({ ...p, color: this.seriesColorById().get(p.seriesId) })); // per-datum-color renderers only
+});
+
+// Toggle a series (immutable Set so the signal fires).
+onLegendItemClick(item: GigaLegendItem): void {
+  const key = item.id ?? item.label;
+  this.hiddenSeries.update(prev => {
+    const next = new Set(prev);
+    if (next.has(key)) {
+      next.delete(key);
+    } else {
+      next.add(key);
+    }
+    return next;
+  });
+}
+
+// In the computed config: feed chartData() as `data`, and suppress the internal legend
+// when interactive.
+legend: this.interactiveLegend()
+  ? undefined
+  : this.showLegend()
+    ? { enabled: true, position: this.legendPosition() }
+    : undefined,
+```
+
+**`.component.html`** — render the standalone legend above the chart when the control is on:
+
+```html
+@if (interactiveLegend()) {
+  <div class="external-legend-row">
+    <giga-chart-legend
+      [items]="legendItems()"
+      [interactive]="true"
+      swatchShape="square"
+      layout="grid"
+      (itemClick)="onLegendItemClick($event)"
+    />
+  </div>
+}
+<div class="chart-wrapper">
+  <giga-chart [config]="config()" />
+</div>
+```
+
+- **`swatchShape` MUST match the mark:** `square` for bars/areas, `line` for line charts, `circle` for scatter.
+- `layout="grid"` is an **opt-in** input on `GigaChartLegendComponent` (default `flow`); it only resolves to an aligned, column-tabular legend when the legend has a **definite width** — see the SCSS below.
+
+**`.component.scss`** — give the row a definite width (~300px) so `layout="grid"` lays the swatches out as an aligned table instead of collapsing to one column in the shrink-to-fit flex slot:
+
+```scss
+.external-legend-row {
+  display: flex;
+  margin-bottom: 12px;
+
+  giga-chart-legend {
+    flex: 0 0 auto;
+    width: 300px;
+  }
+}
+```
+
+**`.stories.ts`** — one argType plus one named story:
+
+```typescript
+// in meta.argTypes:
+interactiveLegend: {
+  control: 'boolean',
+  description:
+    'Suppress the internal legend and show the standalone interactive <giga-chart-legend> above the chart; click a series to toggle it in/out.',
+  table: { category: 'Layer - Legend' },
+},
+
+// default interactiveLegend to false in the base story's `args`, then:
+export const InteractiveLegend: Story = {
+  args: { ...Interaction.args, interactiveLegend: true },
+};
+```
 
 ## Phase 4: Verify
 

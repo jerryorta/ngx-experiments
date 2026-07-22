@@ -22,7 +22,8 @@ import { defaultChartTooltipState } from './charts-tooltip.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
-    '[style.width.px]': 'chartTooltipState().svgWidth - 1',
+    '[class.nge-charts-tooltip--chromeless]': 'chromeless()',
+    '[style.width.px]': 'chromeless() ? null : chartTooltipState().svgWidth - 1',
     class: 'nge-charts-tooltip',
   },
   imports: [],
@@ -38,6 +39,13 @@ export class ChartsTooltipComponent implements OnDestroy {
    * The tooltip calculator instance
    */
   readonly calc = input.required<ChartsTooltipCalc<any>>();
+
+  /**
+   * When true, the SVG bubble chrome is not rendered — only the projected content.
+   * Lets a consumer's `#ngeChartTooltip` template fully replace the tooltip with
+   * its own chrome (the "bring your own tooltip" mode).
+   */
+  readonly chromeless = input<boolean>(false);
 
   readonly chartTooltipState: WritableSignal<ChartTooltipState> = signal(defaultChartTooltipState);
 

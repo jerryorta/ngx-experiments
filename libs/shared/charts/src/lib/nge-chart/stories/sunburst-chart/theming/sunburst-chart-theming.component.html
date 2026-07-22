@@ -1,0 +1,162 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Sunburst Chart - Theming Examples</h2>
+    <p class="intro-text">
+      Node colours resolve per-node <code>color</code> &rarr; the preset's
+      <code>seriesColors</code> palette (by top-level branch index) &rarr; the theme
+      <code>segment.colors</code> palette. Every descendant inherits its top-level branch colour
+      unless it sets its own. Override <code>theme.sunburst.segment.colors</code> to reskin the
+      whole cycle, or set <code>stroke</code> / <code>strokeWidth</code> / <code>opacity</code> for
+      separators and transparency. Light / dark is handled by the review container.
+    </p>
+
+    <!-- Default Theme -->
+    <section class="story-section">
+      <h4>Default Theme</h4>
+      <p class="story-description">
+        No theme provided — uses the built-in <code>--chart-*</code> token palette, which adapts to
+        the surrounding light / dark surface.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <!-- Palette Overrides Grid -->
+    <section class="story-section">
+      <h4>Palette Overrides</h4>
+      <p class="story-description">
+        Recolour the branch cycle two ways: pass <code>seriesColors</code> to the preset, or
+        override <code>theme.sunburst.segment.colors</code>. Both map the top-level branch input
+        index to <code>colors[index % length]</code>, so the palette cycles for any branch count.
+      </p>
+      <div class="themes-grid">
+        <div class="theme-item">
+          <span class="theme-label">Warm (seriesColors)</span>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="warmConfig" />
+          </div>
+        </div>
+        <div class="theme-item">
+          <span class="theme-label">Cool (theme override)</span>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="coolConfig" />
+          </div>
+        </div>
+      </div>
+      <div class="code-block">
+        <pre>
+// Warm — via the preset's seriesColors option
+const warmConfig = createSunburstChartConfig({{ "{" }}
+  data,
+  seriesColors: ['#E53935', '#FB8C00', '#FDD835'],
+{{ "}" }});
+
+// Cool — via a theme override
+const coolConfig = {{ "{" }}
+  ...createSunburstChartConfig({{ "{" }} data, innerRadius: 0.3 {{ "}" }}),
+  theme: {{ "{" }}
+    sunburst: {{ "{" }}
+      segment: {{ "{" }}
+        colors: ['#1E88E5', '#00ACC1', '#43A047'],
+      {{ "}" }},
+    {{ "}" }},
+  {{ "}" }},
+{{ "}" }};</pre>
+      </div>
+    </section>
+
+    <!-- Per-node Colors -->
+    <section class="story-section">
+      <h4>Per-node Colors</h4>
+      <p class="story-description">
+        Set <code>color</code> on a node to assign it a semantic colour. Descendants inherit their
+        branch colour, and a per-node <code>color</code> (here on <code>Rent</code>) wins over the
+        inherited branch / palette colour for that node.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="perNodeConfig" />
+      </div>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }}
+    label: 'Housing', color: '#5C6BC0',
+    children: [
+      {{ "{" }} label: 'Rent', value: 1800, color: '#26C6DA' {{ "}" }}, // overrides branch
+      // ...
+    ],
+  {{ "}" }},
+  // ...
+];</pre>
+      </div>
+    </section>
+
+    <!-- Stroke Separators -->
+    <section class="story-section">
+      <h4>Stroke Separators</h4>
+      <p class="story-description">
+        A thicker <code>segment.stroke</code> / <code>strokeWidth</code> cleanly separates adjacent
+        arcs — useful on dense sunbursts or when neighbouring branches share similar hues.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="strokeConfig" />
+      </div>
+      <div class="code-block">
+        <pre>
+theme: {{ "{" }}
+  sunburst: {{ "{" }} segment: {{ "{" }} stroke: '#ffffff', strokeWidth: 3 {{ "}" }} {{ "}" }},
+{{ "}" }}</pre>
+      </div>
+    </section>
+
+    <!-- Translucent Segments -->
+    <section class="story-section">
+      <h4>Translucent Segments</h4>
+      <p class="story-description">
+        Lower <code>segment.opacity</code> for a softer, layered look.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="translucentConfig" />
+      </div>
+      <div class="code-block">
+        <pre>
+theme: {{ "{" }}
+  sunburst: {{ "{" }} segment: {{ "{" }} opacity: 0.7 {{ "}" }} {{ "}" }},
+{{ "}" }}</pre>
+      </div>
+    </section>
+
+    <!-- Highlight: side-by-side comparison -->
+    <section class="story-section story-section--highlight">
+      <h4>Multiple Palettes Side by Side</h4>
+      <p class="story-description">
+        The same hierarchy rendered with three palettes — swap <code>seriesColors</code> or
+        <code>theme.sunburst.segment.colors</code> to rebrand without touching the data.
+      </p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>Default</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="comparisonDefault" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Warm</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="comparisonWarm" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Cool</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="comparisonCool" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

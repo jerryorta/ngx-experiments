@@ -1,0 +1,120 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Crosshair — Theming</h2>
+    <p class="intro-text">
+      Same chart config, three looks. The dashed guide reads
+      <code>var(--chart-crosshair-guide, var(--chart-on-surface))</code>, so a container can
+      recolour it with one token. The shared tooltip card is an Angular template — it follows the
+      <code>--chart-*</code> surface tokens, and its own <code>crosshair-tip--*</code> classes can
+      override anything further. Move the pointer across each plot.
+    </p>
+
+    <!-- Default -->
+    <section class="story-section">
+      <h4>1. Default surface</h4>
+      <p class="story-description">
+        No overrides — the guide inherits <code>--chart-on-surface</code> and the card uses the
+        default surface tokens.
+      </p>
+      <div class="chart-container">
+        <nge-chart
+          [config]="config"
+          [chromelessTooltip]="true"
+        >
+          <ng-template
+            #ngeChartTooltip
+            let-content
+          >
+            <div class="crosshair-tip">
+              <div class="crosshair-tip__header">{{ content?.label }}</div>
+              @for (row of rowsOf(content); track row.label) {
+                <div class="crosshair-tip__row">
+                  <span
+                    class="crosshair-tip__swatch"
+                    [style.background]="row.color"
+                  ></span>
+                  <span class="crosshair-tip__label">{{ row.label }}</span>
+                  <span class="crosshair-tip__value">{{ row.value }}</span>
+                </div>
+              }
+            </div>
+          </ng-template>
+        </nge-chart>
+      </div>
+    </section>
+
+    <!-- Midnight: token bundle retheme -->
+    <section class="story-section">
+      <h4>2. Midnight (token bundle)</h4>
+      <p class="story-description">
+        The container overrides <code>--chart-surface</code> / <code>--chart-on-surface</code> /
+        <code>--chart-outline</code> (dark surface, light text) plus a cyan
+        <code>--chart-crosshair-guide</code>. The card follows the surface tokens automatically — no
+        card-specific class needed.
+      </p>
+      <div class="chart-container chart-container--midnight">
+        <nge-chart
+          [config]="config"
+          [chromelessTooltip]="true"
+        >
+          <ng-template
+            #ngeChartTooltip
+            let-content
+          >
+            <div class="crosshair-tip crosshair-tip--midnight">
+              <div class="crosshair-tip__header">{{ content?.label }}</div>
+              @for (row of rowsOf(content); track row.label) {
+                <div class="crosshair-tip__row">
+                  <span
+                    class="crosshair-tip__swatch"
+                    [style.background]="row.color"
+                  ></span>
+                  <span class="crosshair-tip__label">{{ row.label }}</span>
+                  <span class="crosshair-tip__value">{{ row.value }}</span>
+                </div>
+              }
+            </div>
+          </ng-template>
+        </nge-chart>
+      </div>
+    </section>
+
+    <!-- Sunset: template-class card override -->
+    <section class="story-section">
+      <h4>3. Sunset (card class override)</h4>
+      <p class="story-description">
+        An orange <code>--chart-crosshair-guide</code> pairs with a
+        <code>crosshair-tip--sunset</code> card class that sets its own gradient, border, and text
+        colour — the "bring your own chrome" path.
+      </p>
+      <div class="chart-container chart-container--sunset">
+        <nge-chart
+          [config]="config"
+          [chromelessTooltip]="true"
+        >
+          <ng-template
+            #ngeChartTooltip
+            let-content
+          >
+            <div class="crosshair-tip crosshair-tip--sunset">
+              <div class="crosshair-tip__header">{{ content?.label }}</div>
+              @for (row of rowsOf(content); track row.label) {
+                <div class="crosshair-tip__row">
+                  <span
+                    class="crosshair-tip__swatch"
+                    [style.background]="row.color"
+                  ></span>
+                  <span class="crosshair-tip__label">{{ row.label }}</span>
+                  <span class="crosshair-tip__value">{{ row.value }}</span>
+                </div>
+              }
+            </div>
+          </ng-template>
+        </nge-chart>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

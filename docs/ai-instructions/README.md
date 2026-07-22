@@ -33,7 +33,7 @@ The full companions to the fragments: `accessibility-selectors`, `angular-app-co
 
 ## `procedures/` — task-time how-tos (opened by intent, never auto-injected)
 
-`angular-generator` (scaffold), `angular-signals` / `angular-inject` (convert), `ngrx-mutation-flow`, `query-engine-service-setup`, `angular-guided-popup`, `angular-file-rename`, `refactoring-procedures`, `module-update-procedures`, `angular-procedures`, `procedures`, `feature-flags`.
+`angular-generator` (scaffold), `angular-signals` / `angular-inject` (convert), `ngrx-mutation-flow`, `query-engine-service-setup`, `giga-chart-scatter` (implement a production scatter/bubble chart — data model, multi-series, legend selection, zoom/pan/brush gestures, theming, testing), `angular-guided-popup`, `angular-file-rename`, `refactoring-procedures`, `module-update-procedures`, `angular-procedures`, `procedures`, `feature-flags`.
 
 ## `legacy/` — Angular Material (evolving-cognition / real-estate only)
 

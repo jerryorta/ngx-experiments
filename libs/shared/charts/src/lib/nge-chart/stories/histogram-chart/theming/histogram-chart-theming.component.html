@@ -1,0 +1,120 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Histogram Chart - Theming Examples</h2>
+    <p class="intro-text">
+      The histogram reads four <code>--chart-*</code> token slots through its
+      <code>theme.histogram</code> slice: bar fill (<code>--chart-primary</code>), the rootogram
+      curve stroke and its per-bin nodes (both <code>--chart-secondary</code>), and count-label
+      color (<code>--chart-on-surface</code>). Override any of them with an explicit color.
+    </p>
+
+    <!-- 1. Default -->
+    <section class="story-section">
+      <h4>Default Theme</h4>
+      <p class="story-description">
+        No overrides — bars fill <code>--chart-primary</code>, the fitted rootogram curve reads
+        <code>--chart-secondary</code>, and count labels read <code>--chart-on-surface</code>.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <!-- 2. Bar fill -->
+    <section class="story-section">
+      <h4>Bar Fill (<code>theme.histogram.bar.color</code>)</h4>
+      <p class="story-description">
+        Recolor the bins by overriding the bar fill — the <code>--chart-primary</code> slot — with
+        an explicit color.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="barFillConfig" />
+      </div>
+    </section>
+
+    <!-- 3. Bar shape -->
+    <section class="story-section">
+      <h4>Bar Stroke &amp; Radius</h4>
+      <p class="story-description">
+        A surface-toned <code>stroke</code> cleanly separates adjacent bins and a corner
+        <code>radius</code> rounds each bar (radius comes from the theme slice, not a preset
+        option).
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="barShapeConfig" />
+      </div>
+    </section>
+
+    <!-- 4. Rootogram curve + nodes -->
+    <section class="story-section">
+      <h4>Rootogram Curve &amp; Nodes (<code>theme.histogram.curve</code> / <code>node</code>)</h4>
+      <p class="story-description">
+        In <code>mode: 'rootogram'</code> the fitted normal curve takes its stroke from the
+        <code>curve</code> slot and the dots threading each bar top from the <code>node</code> slot
+        (both the <code>--chart-secondary</code> slot) — here a bold red dash with matching nodes.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="curveConfig" />
+      </div>
+    </section>
+
+    <!-- 5. Label color -->
+    <section class="story-section">
+      <h4>Label Color (<code>theme.histogram.label.color</code>)</h4>
+      <p class="story-description">
+        With <code>showLabels: true</code>, the per-bin count labels read the
+        <code>label</code> slot — the <code>--chart-on-surface</code> slot — overridable alongside
+        font size and weight.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="labelConfig" />
+      </div>
+    </section>
+
+    <!-- 6. Full slice -->
+    <section class="story-section">
+      <h4>Full Control via <code>theme.histogram</code></h4>
+      <p class="story-description">
+        Compose the whole slice — <code>bar</code> fill / opacity / stroke / radius, the rootogram
+        <code>curve</code> and its <code>node</code> dots, the <code>zeroLine</code> baseline, and
+        the count <code>label</code> — in one theme object.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="fullSliceConfig" />
+      </div>
+    </section>
+
+    <!-- 7. Palette variations side-by-side -->
+    <section class="story-section story-section--highlight">
+      <h4>Multiple Charts with Different Palettes</h4>
+      <p class="story-description">
+        The same distribution rendered with three bar-fill colors. Each is the same
+        <code>&lt;nge-chart&gt;</code> component with a different
+        <code>theme.histogram.bar.color</code>.
+      </p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>Green</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="greenConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Amber</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="amberConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Indigo</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="indigoConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

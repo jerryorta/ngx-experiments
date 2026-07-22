@@ -1,0 +1,134 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Crosshair — Usage</h2>
+    <p class="intro-text">
+      The shared crosshair snaps a dashed vertical guide to the nearest datum x, marks each series
+      with a focus dot, and — with <code>shared: true</code> — shows ONE tooltip listing every
+      series' value at that x. The shared tooltip is a real Angular tooltip: the chart runs
+      <code>[chromelessTooltip]="true"</code> and each <code>&lt;nge-chart&gt;</code> projects a
+      <code>#ngeChartTooltip</code> template that renders the card from
+      <code>content.rows</code> (a swatch <code>row.color</code>, <code>row.label</code>, and
+      <code>row.value</code> per series). Move the pointer across a plot to try it.
+    </p>
+
+    <!-- EXAMPLE 1: Line host, multi-series -->
+    <section class="story-section">
+      <h4>1. Line host — multi-series</h4>
+      <p class="story-description">
+        Three series on a LINE host. Enable the crosshair on the chart's
+        <code>base.crosshair</code>, then render the shared card from <code>content.rows</code> in a
+        chromeless <code>#ngeChartTooltip</code> template.
+      </p>
+      <div class="code-block">
+        <pre>
+const cfg = createLineChartConfig({{ "{" }} data, seriesColors {{ "}" }});
+cfg.base.crosshair = {{ "{" }} x: true, shared: true {{ "}" }};
+
+&lt;nge-chart [config]="cfg" [chromelessTooltip]="true"&gt;
+  &lt;ng-template #ngeChartTooltip let-content&gt;
+    &lt;!-- header = content.label, one row per content.rows entry --&gt;
+  &lt;/ng-template&gt;
+&lt;/nge-chart&gt;</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart
+          [config]="lineMultiConfig"
+          [chromelessTooltip]="true"
+        >
+          <ng-template
+            #ngeChartTooltip
+            let-content
+          >
+            <div class="crosshair-tip">
+              <div class="crosshair-tip__header">{{ content?.label }}</div>
+              @for (row of rowsOf(content); track row.label) {
+                <div class="crosshair-tip__row">
+                  <span
+                    class="crosshair-tip__swatch"
+                    [style.background]="row.color"
+                  ></span>
+                  <span class="crosshair-tip__label">{{ row.label }}</span>
+                  <span class="crosshair-tip__value">{{ row.value }}</span>
+                </div>
+              }
+            </div>
+          </ng-template>
+        </nge-chart>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Area host, multi-series -->
+    <section class="story-section">
+      <h4>2. Area host — multi-series</h4>
+      <p class="story-description">
+        The SAME crosshair over an AREA host (overlaid fills with a top stroke). The engine-level
+        crosshair sources its rows from any line/area layer, so nothing about the tooltip wiring
+        changes between host types.
+      </p>
+      <div class="chart-container">
+        <nge-chart
+          [config]="areaMultiConfig"
+          [chromelessTooltip]="true"
+        >
+          <ng-template
+            #ngeChartTooltip
+            let-content
+          >
+            <div class="crosshair-tip">
+              <div class="crosshair-tip__header">{{ content?.label }}</div>
+              @for (row of rowsOf(content); track row.label) {
+                <div class="crosshair-tip__row">
+                  <span
+                    class="crosshair-tip__swatch"
+                    [style.background]="row.color"
+                  ></span>
+                  <span class="crosshair-tip__label">{{ row.label }}</span>
+                  <span class="crosshair-tip__value">{{ row.value }}</span>
+                </div>
+              }
+            </div>
+          </ng-template>
+        </nge-chart>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Single-series -->
+    <section class="story-section">
+      <h4>3. Single series</h4>
+      <p class="story-description">
+        With one series the shared tooltip degrades gracefully to a single row (labelled
+        <code>Value</code> when the data carries no <code>seriesId</code>). The guide + focus dot
+        behave exactly as in the multi-series case.
+      </p>
+      <div class="chart-container">
+        <nge-chart
+          [config]="lineSingleConfig"
+          [chromelessTooltip]="true"
+        >
+          <ng-template
+            #ngeChartTooltip
+            let-content
+          >
+            <div class="crosshair-tip">
+              <div class="crosshair-tip__header">{{ content?.label }}</div>
+              @for (row of rowsOf(content); track row.label) {
+                <div class="crosshair-tip__row">
+                  <span
+                    class="crosshair-tip__swatch"
+                    [style.background]="row.color"
+                  ></span>
+                  <span class="crosshair-tip__label">{{ row.label }}</span>
+                  <span class="crosshair-tip__value">{{ row.value }}</span>
+                </div>
+              }
+            </div>
+          </ng-template>
+        </nge-chart>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

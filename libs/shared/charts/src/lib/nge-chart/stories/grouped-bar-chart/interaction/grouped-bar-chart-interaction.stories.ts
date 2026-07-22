@@ -33,6 +33,13 @@ const meta: Meta<GroupedBarChartInteractionStoriesComponent> = {
       description: 'Bar corner radius',
       table: { category: 'Theme - Bar Styling' },
     },
+    // Layer - Legend
+    interactiveLegend: {
+      control: 'boolean',
+      description:
+        'Suppress the internal legend and show the standalone interactive <nge-chart-legend> above the chart; click a group to toggle its bars in/out of every category.',
+      table: { category: 'Layer - Legend' },
+    },
     // Theme - Label Styling
     labelColor: {
       control: 'color',
@@ -177,6 +184,8 @@ export const Interaction: Story = {
     barColor: '',
     barHoverColor: '',
     barRadius: 2,
+    // Layer - Legend
+    interactiveLegend: false,
     // Theme - Label Styling (defaults from DEFAULT_GROUPED_BAR_LAYER_THEME)
     labelColor: '',
     labelFontSize: 11,
@@ -204,5 +213,19 @@ export const Interaction: Story = {
     tooltipHeight: 65,
     tooltipPosition: 'follow-mouse',
     tooltipWidth: 150,
+  },
+};
+
+/**
+ * Renders the standalone interactive `<nge-chart-legend>` above the chart with
+ * the chart's internal legend suppressed. Clicking a group toggles it in/out of
+ * the grouped bars — every category cluster drops (or restores) that group's bar
+ * and the survivors re-lay-out, while the group stays listed in the legend but
+ * dimmed (opacity 0.4) so it can be toggled back on.
+ */
+export const InteractiveLegend: Story = {
+  args: {
+    ...Interaction.args,
+    interactiveLegend: true,
   },
 };

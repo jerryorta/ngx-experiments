@@ -1,0 +1,123 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Area Chart - Theming Examples</h2>
+
+    <!-- Default Theme -->
+    <section class="story-section">
+      <h4>Default Theme</h4>
+      <p class="story-description">
+        No overrides — the three stacked series pull their colors from the theme's
+        <code>area.fill.colors</code> palette (which resolves to
+        <code>var(--chart-*)</code> tokens).
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <!-- Line Emphasis -->
+    <section class="story-section">
+      <h4>Top-Edge Stroke (showLine + theme.area.line.width)</h4>
+      <p class="story-description">
+        Enable <code>showLine</code> to stroke the top edge of each band, then thicken it via
+        <code>theme.area.line.width</code> for a bolder read.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="lineEmphasisConfig" />
+      </div>
+    </section>
+
+    <!-- Custom Axis Theme -->
+    <section class="story-section">
+      <h4>Custom Axis Theme</h4>
+      <p class="story-description">
+        Axis label, line, and tick colors via <code>theme.axis</code>.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="customAxisConfig" />
+      </div>
+    </section>
+
+    <!-- Grid Theme -->
+    <section class="story-section">
+      <h4>Grid Theme</h4>
+      <p class="story-description">
+        Custom gridline color, dash pattern, and width via <code>theme.grid</code> (with
+        <code>showXGrid</code> / <code>showYGrid</code> on).
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="gridThemedConfig" />
+      </div>
+    </section>
+
+    <!-- Fill Opacity -->
+    <section class="story-section story-section--highlight">
+      <h4>Fill Opacity</h4>
+      <p class="story-description">
+        <code>fillOpacity</code> is the key legibility lever — low keeps stacked overlaps airy, high
+        makes each band read as a denser layer.
+      </p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>Subtle (0.1)</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="subtleFillConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Bold (0.55)</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="boldFillConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Palette Variations -->
+    <section class="story-section story-section--highlight">
+      <h4>Multiple Charts with Different Palettes</h4>
+      <p class="story-description">
+        The same stacked dataset rendered with three different <code>seriesColors</code> palettes.
+        Each chart is the same <code>&lt;nge-chart&gt;</code> component with a different config.
+      </p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>Ocean</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="oceanConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Warm</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="warmConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Forest</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="forestConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Branded via --chart-* token overrides (light + dark) -->
+    <section class="story-section story-section--highlight">
+      <h4>Branded via <code>--chart-*</code> Token Overrides (light + dark)</h4>
+      <p class="story-description">
+        The layer's default palette resolves to <code>var(--chart-primary)</code>,
+        <code>var(--chart-secondary)</code>, and <code>var(--chart-tertiary)</code>. Override those
+        tokens on an ancestor (never <code>--mat-sys-*</code>) and the fills follow — no
+        <code>seriesColors</code> in the config. The overrides below are defined for BOTH the light
+        and dark Storybook themes, so switch the toolbar theme to see each set.
+      </p>
+      <div class="chart-container branded-tokens">
+        <nge-chart [config]="brandedConfig" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

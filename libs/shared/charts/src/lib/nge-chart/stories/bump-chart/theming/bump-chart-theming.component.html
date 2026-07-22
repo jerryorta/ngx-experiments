@@ -1,0 +1,133 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Bump Chart - Theming Examples</h2>
+
+    <!-- Default Theme -->
+    <section class="story-section">
+      <h4>Default Theme</h4>
+      <p class="story-description">
+        No theme provided — rank lines cycle the built-in <code>--chart-*</code> token palette by
+        series index.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <!-- Custom Palette -->
+    <section class="story-section">
+      <h4>Custom Series Palette</h4>
+      <p class="story-description">
+        Pass <code>seriesColors</code> to color each rank line. Series are assigned colors in order
+        of first appearance (<code>colors[index % length]</code>).
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="customPaletteConfig" />
+      </div>
+    </section>
+
+    <!-- Thick / Dashed Lines -->
+    <section class="story-section">
+      <h4>Thicker, Dashed Rank Lines</h4>
+      <p class="story-description">
+        Line stroke width and dash pattern via
+        <code>config.theme.bump.line</code> (<code>width</code>, <code>dash</code>).
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="thickDashedLinesConfig" />
+      </div>
+    </section>
+
+    <!-- Large Points -->
+    <section class="story-section">
+      <h4>Larger Rank Points</h4>
+      <p class="story-description">
+        Per-rank circle radius, hover radius, and stroke width via
+        <code>config.theme.bump.point</code>.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="largePointsConfig" />
+      </div>
+    </section>
+
+    <!-- Bold Labels -->
+    <section class="story-section">
+      <h4>Bold End Labels</h4>
+      <p class="story-description">
+        End-of-line series label color, size, and weight via
+        <code>config.theme.bump.label</code>.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="boldLabelsConfig" />
+      </div>
+    </section>
+
+    <!-- Custom Axis -->
+    <section class="story-section">
+      <h4>Custom Axis Theme</h4>
+      <p class="story-description">
+        Axis line, tick, and label colors plus typography via <code>config.theme.axis</code>.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="customAxisConfig" />
+      </div>
+    </section>
+
+    <!-- Tooltip Positioning -->
+    <section class="story-section story-section--highlight">
+      <h4>Tooltip Positioning</h4>
+      <p class="story-description">
+        <strong>Hover over points to see tooltips.</strong> Position is set via
+        <code
+          >tooltip: &#123; enabled: true, position: 'above' | 'below' | 'follow-mouse' &#125;</code
+        >.
+      </p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>Position: Above</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="tooltipAboveConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Position: Below</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="tooltipBelowConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Position: Follow Mouse</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="tooltipFollowConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Multi-Chart Comparison -->
+    <section class="story-section story-section--highlight">
+      <h4>Multiple Charts with Different Palettes</h4>
+      <p class="story-description">
+        <strong>Same rankings, two palettes:</strong> the same
+        <code>&lt;nge-chart&gt;</code> component driven by different <code>seriesColors</code>.
+      </p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>Vibrant</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="vibrantPaletteConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Muted</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="mutedPaletteConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

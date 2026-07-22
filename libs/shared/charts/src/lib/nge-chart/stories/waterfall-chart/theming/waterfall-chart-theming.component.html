@@ -1,0 +1,110 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Waterfall Chart - Theming Examples</h2>
+
+    <!-- 1. Default -->
+    <section class="story-section">
+      <h4>Default Theme</h4>
+      <p class="story-description">
+        No overrides — rise / fall / total pull from the theme's <code>waterfall</code> slice
+        (semantic green rise, red fall, and a <code>var(--chart-primary)</code> total).
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <!-- 2. Muted palette -->
+    <section class="story-section">
+      <h4
+        >Muted Palette (<code>riseColor</code> / <code>fallColor</code> /
+        <code>totalColor</code>)</h4
+      >
+      <p class="story-description">
+        The idiomatic way to recolor a waterfall: pass the semantic color options straight to the
+        preset. Each colors the matching bar role.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="mutedConfig" />
+      </div>
+    </section>
+
+    <!-- 3. Bold palette -->
+    <section class="story-section">
+      <h4>Bold Palette</h4>
+      <p class="story-description">
+        The same three options with high-saturation colors for a punchier read.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="boldConfig" />
+      </div>
+    </section>
+
+    <!-- 4. Monochrome -->
+    <section class="story-section">
+      <h4>Monochrome</h4>
+      <p class="story-description">
+        One hue at three weights — rise / fall / total as light / mid / dark slate.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="monochromeConfig" />
+      </div>
+    </section>
+
+    <!-- 5. Cumulative with custom line color -->
+    <section class="story-section">
+      <h4>Cumulative Overlay (<code>cumulativeColor</code>)</h4>
+      <p class="story-description">
+        With <code>cumulative: true</code>, the running-total % line takes its color from
+        <code>cumulativeColor</code> and renders against the secondary (right) axis.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="cumulativeConfig" />
+      </div>
+    </section>
+
+    <!-- 6. theme.waterfall slice -->
+    <section class="story-section">
+      <h4>Full Control via <code>theme.waterfall</code></h4>
+      <p class="story-description">
+        Compose a theme object instead of passing options — the <code>waterfall</code> slice styles
+        the bar roles plus the step <code>connector</code> and value <code>label</code>.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="themeSliceConfig" />
+      </div>
+    </section>
+
+    <!-- 7. Palette variations side-by-side -->
+    <section class="story-section story-section--highlight">
+      <h4>Multiple Charts with Different Palettes</h4>
+      <p class="story-description">
+        The same revenue bridge rendered with three color options sets. Each is the same
+        <code>&lt;nge-chart&gt;</code> component with a different config.
+      </p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>Muted</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="mutedConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Bold</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="boldConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Monochrome</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="monochromeConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

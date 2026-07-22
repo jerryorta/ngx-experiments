@@ -1,3 +1,4 @@
+import type { NgeChartAnimationConfig } from '../core/animation';
 import type { NgeChartBaseConfig } from '../core/base-layout';
 import type {
   NgeChartConfig,
@@ -28,6 +29,12 @@ export interface GroupedBarChartTooltipOptions {
  * Options for creating a grouped bar chart config preset.
  */
 export interface GroupedBarChartPresetOptions {
+  /**
+   * Chart-wide enter/update/exit animation (per-phase durations + easing) applied to
+   * every layer. A layer's own `animationMs` shorthand still wins over it.
+   */
+  animation?: NgeChartAnimationConfig;
+
   /**
    * Enter/update/exit transition duration in ms. Default 300.
    * Set 0 for instant renders (used during zoom/pan gestures).
@@ -101,6 +108,7 @@ export function createGroupedBarChartConfig(
   options: GroupedBarChartPresetOptions
 ): NgeChartConfig {
   const {
+    animation,
     animationMs,
     barPadding,
     barRadius,
@@ -146,6 +154,7 @@ export function createGroupedBarChartConfig(
     : undefined;
 
   return {
+    animation,
     base: {
       margin,
       showXAxis,

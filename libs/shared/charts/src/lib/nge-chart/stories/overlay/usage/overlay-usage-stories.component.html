@@ -1,0 +1,217 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Overlay Layer - Usage Examples</h2>
+    <p class="intro-text">
+      The <code>overlay</code> layer draws an analytical annotation OVER a line / scatter host on
+      the host's shared scales. It is composed with <code>addOverlay()</code> (or by dropping
+      <code>createOverlayConfig()</code> into a <code>layers</code> array) and fans out across three
+      modes — <code>trendline</code>, <code>control</code>, and <code>fan</code>. Every host below
+      uses a numeric x so its scale is continuous (trendline and fan require an invertible x-scale).
+    </p>
+
+    <!-- EXAMPLE 1: Composing a trend line -->
+    <section class="story-section story-section--highlight">
+      <h4>1. Composing a Trend Line (addOverlay)</h4>
+      <p class="story-description">
+        <code>addOverlay()</code> appends the overlay as the last (front) layer of an existing
+        config. Here a least-squares <code>fit: 'linear'</code> trend line is drawn over the host
+        line, sharing its scales.
+      </p>
+      <div class="code-block">
+        <pre>
+const base = createLineChartConfig({{ "{" }}
+  data,
+  showPoints: true,
+  showXAxis: true,
+  showYAxis: true,
+{{ "}" }});
+
+const config = addOverlay(base, {{ "{" }}
+  data,          // the SAME x/y series the host draws
+  fit: 'linear',
+  mode: 'trendline',
+{{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="linearTrendConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Linear vs LOESS -->
+    <section class="story-section">
+      <h4>2. Trend Fit: Linear vs LOESS</h4>
+      <p class="story-description">
+        <code>fit: 'linear'</code> strokes a straight least-squares line; <code>fit: 'loess'</code>
+        strokes a smooth local-regression curve that follows local structure (tune it with
+        <code>loessBandwidth</code>).
+      </p>
+      <div class="comparison-grid">
+        <div class="comparison-item">
+          <h5>fit: 'linear'</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="comparisonLinearConfig" />
+          </div>
+        </div>
+        <div class="comparison-item">
+          <h5>fit: 'loess'</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="comparisonLoessConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Control chart -->
+    <section class="story-section story-section--highlight">
+      <h4>3. Control Chart (mean + ±3σ limits + band)</h4>
+      <p class="story-description">
+        <code>mode: 'control'</code> draws the series mean plus symmetric ±<code>sigma</code>·σ
+        control limits. Set <code>showControlBand: true</code> to shade the in-control zone between
+        the limits. Give the host a <code>yDomain</code> that contains the limits so nothing clips.
+      </p>
+      <div class="code-block">
+        <pre>
+const config = addOverlay(
+  createLineChartConfig({{ "{" }} data, showPoints: true, yDomain: [20, 80] {{ "}" }}),
+  {{ "{" }}
+    data,
+    mode: 'control',
+    showControlBand: true,
+    sigma: 3,
+  {{ "}" }},
+);</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="controlBandConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Control-limit width -->
+    <section class="story-section">
+      <h4>4. Control-Limit Width — 2σ vs 3σ</h4>
+      <p class="story-description">
+        <code>sigma</code> sets the limit half-width in standard deviations. A tighter 2σ envelope
+        flags more points as out-of-control than the classic 3σ chart.
+      </p>
+      <div class="comparison-grid">
+        <div class="comparison-item">
+          <h5>sigma: 2</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="control2SigmaConfig" />
+          </div>
+        </div>
+        <div class="comparison-item">
+          <h5>sigma: 3</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="control3SigmaConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Fan chart -->
+    <section class="story-section story-section--highlight">
+      <h4>5. Fan Chart (prediction intervals)</h4>
+      <p class="story-description">
+        <code>mode: 'fan'</code> draws one widening prediction-interval band per
+        <code>intervals</code> level. The bands fan out toward the forecast horizon — a higher level
+        yields a wider band. Fan mode needs a continuous (invertible) x.
+      </p>
+      <div class="code-block">
+        <pre>
+const config = addOverlay(
+  createLineChartConfig({{ "{" }} data, showPoints: true, yDomain: [0, 115] {{ "}" }}),
+  {{ "{" }}
+    data,
+    intervals: [0.5, 0.8, 0.95],
+    mode: 'fan',
+  {{ "}" }},
+);</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="fanConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Multi-series trend -->
+    <section class="story-section">
+      <h4>6. Multi-Series Trend (one fit per series)</h4>
+      <p class="story-description">
+        When the overlay <code>data</code> carries a <code>seriesId</code>, trendline mode fits and
+        strokes one reference line PER series. Here two store series each get their own linear
+        trend.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="multiTrendConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7: createOverlayConfig in a layers array -->
+    <section class="story-section">
+      <h4>7. createOverlayConfig in a Layers Array</h4>
+      <p class="story-description">
+        <code>addOverlay()</code> is a shorthand — under the hood the overlay is just another entry
+        in <code>layers</code>. Use <code>createOverlayConfig()</code> directly when you are
+        assembling a multi-layer config by hand.
+      </p>
+      <div class="code-block">
+        <pre>
+const base = createLineChartConfig({{ "{" }} data, showPoints: true {{ "}" }});
+
+const config = {{ "{" }}
+  ...base,
+  layers: [
+    ...base.layers,
+    createOverlayConfig({{ "{" }} data, fit: 'loess', mode: 'trendline' {{ "}" }}),
+  ],
+{{ "}" }};</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="layersApiConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 8: Dynamic data with signals -->
+    <section class="story-section story-section--highlight">
+      <h4>8. Dynamic Data with Signals</h4>
+      <p class="story-description">
+        <strong>Recommended pattern:</strong> hold the series in a <code>signal</code> and rebuild
+        the composed config in a <code>computed</code>. The host line and its trend overlay animate
+        together when the data changes.
+      </p>
+      <div class="code-block">
+        <pre>
+data = signal&lt;NgeLineDataPoint[]&gt;([...]);
+
+config = computed(() =>
+  addOverlay(
+    createLineChartConfig({{ "{" }} data: this.data(), showPoints: true {{ "}" }}),
+    {{ "{" }} data: this.data(), fit: 'linear', mode: 'trendline' {{ "}" }},
+  )
+);</pre
+        >
+      </div>
+      <div class="interaction-row">
+        <button
+          type="button"
+          class="action-button"
+          (click)="randomizeData()"
+        >
+          Randomize Data
+        </button>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

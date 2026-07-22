@@ -1,0 +1,153 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Waterfall Chart - Usage Examples</h2>
+    <p class="intro-text">
+      Practical patterns for <code>createWaterfallChartConfig()</code>. Each datum is one bar:
+      <code>{{ "{" }} label, value {{ "}" }}</code> deltas float on the running cumulative total
+      (rise / fall colored), and a <code>{{ "{" }} kind: 'total' {{ "}" }}</code> datum is a
+      subtotal / total column anchored at zero. Set <code>cumulative: true</code> for a Pareto-style
+      running-total % overlay.
+    </p>
+
+    <!-- EXAMPLE 1: Basic waterfall -->
+    <section class="story-section story-section--highlight">
+      <h4>1. Basic Waterfall</h4>
+      <p class="story-description">
+        Delta bars float from the prior running total to the new one — green for a gain, red for a
+        loss — with step connectors bridging the bars.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} label: 'Start',     value: 120 {{ "}" }},
+  {{ "{" }} label: 'Product A', value:  45 {{ "}" }},
+  {{ "{" }} label: 'Product B', value: -20 {{ "}" }},
+  // ...
+  {{ "{" }} label: 'Net', value: 0, kind: 'total' {{ "}" }},
+];
+
+config = createWaterfallChartConfig({{ "{" }} data {{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="basicConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Subtotal / total bars -->
+    <section class="story-section">
+      <h4>2. Subtotal / Total Bars</h4>
+      <p class="story-description">
+        A <code>kind: 'total'</code> datum renders an anchored-at-zero checkpoint column at the
+        current running total, without advancing it — e.g. a half-year (H1) and full-year total.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} label: 'Start', value: 120 {{ "}" }},
+  {{ "{" }} label: 'Q1',    value:  40 {{ "}" }},
+  {{ "{" }} label: 'Q2',    value:  30 {{ "}" }},
+  {{ "{" }} label: 'H1', value: 0, kind: 'total' {{ "}" }},
+  // ...
+];</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="totalsConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Click to inspect -->
+    <section class="story-section">
+      <h4>3. Click to Inspect a Bar</h4>
+      <p class="story-description">
+        Provide an <code>onClick</code> callback — each bar hands back its source datum
+        (<code>label</code>, <code>value</code>, <code>kind</code>).
+      </p>
+      <div class="code-block">
+        <pre>
+config = createWaterfallChartConfig({{ "{" }}
+  data,
+  onClick: (event) => inspect(event.data.label, event.data.value),
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="interaction-display"> <strong>Clicked:</strong> {{ lastClicked() }} </div>
+      <div class="chart-container">
+        <nge-chart [config]="clickConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Cumulative overlay -->
+    <section class="story-section story-section--highlight">
+      <h4>4. Cumulative Overlay (Pareto-style)</h4>
+      <p class="story-description">
+        <code>cumulative: true</code> overlays a running-total <strong>%</strong> line on a
+        secondary (right) axis, reusing the line layer. For a classic Pareto (individual bars,
+        sorted descending) reach for the dedicated <code>createParetoChartConfig()</code> preset
+        instead.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createWaterfallChartConfig({{ "{" }}
+  data,
+  cumulative: true, // adds the % line + right axis
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="cumulativeConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Dynamic data with signals -->
+    <section class="story-section">
+      <h4>5. Dynamic Data With Signals</h4>
+      <p class="story-description">
+        <strong>Recommended pattern:</strong> hold the data in a <code>signal()</code> and rebuild
+        the config inside a <code>computed()</code>. Re-rolling the movements recomputes the config
+        and the bars animate between states.
+      </p>
+      <div class="code-block">
+        <pre>
+liveData = signal&lt;NgeWaterfallDataPoint[]&gt;(buildData());
+
+config = computed(() => createWaterfallChartConfig({{ "{" }} data: liveData() {{ "}" }}));
+
+&lt;nge-chart [config]="config()" /&gt;</pre
+        >
+      </div>
+      <div class="interaction-row">
+        <button
+          class="action-button"
+          (click)="randomizeData()"
+        >
+          Randomize Data
+        </button>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Value labels -->
+    <section class="story-section">
+      <h4>6. Value Labels</h4>
+      <p class="story-description">
+        <code>showLabels</code> prints each bar's value in place — a delta shows its signed
+        movement, a total shows the running total.
+      </p>
+      <div class="code-block">
+        <pre>config = createWaterfallChartConfig({{ "{" }} data, showLabels: true {{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="labelsConfig" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

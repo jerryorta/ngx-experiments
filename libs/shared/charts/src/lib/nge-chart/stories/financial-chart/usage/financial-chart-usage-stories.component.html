@@ -1,0 +1,140 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Financial Chart - Usage Examples</h2>
+    <p class="intro-text">
+      Practical patterns for <code>createFinancialChartConfig()</code>. Feed OHLC sessions (<code
+        >{{ "{" }} date, open, high, low, close {{ "}" }}</code
+      >) and pick a <code>variant</code>: <code>'candlestick'</code> (default) draws a wick + body
+      per session, <code>'kagi'</code> folds the <code>close</code> series into a reversal-driven
+      zigzag, and <code>'renko'</code> walks it into a fixed-brick staircase. Axes default ON.
+    </p>
+
+    <!-- EXAMPLE 1: Basic candlestick -->
+    <section class="story-section story-section--highlight">
+      <h4>1. Basic Candlestick</h4>
+      <p class="story-description">
+        Simplest usage: pass the OHLC series and let the layer draw it. The body spans open→close
+        (green when <code>close ≥ open</code>, red otherwise) and the thin wick spans low→high.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} date: '2024-01-02', open: 100, high: 104, low: 99, close: 103 {{ "}" }},
+  {{ "{" }} date: '2024-01-03', open: 103, high: 108, low: 102, close: 107 {{ "}" }},
+  // ...
+];
+
+config = createFinancialChartConfig({{ "{" }} data {{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="basicConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Kagi -->
+    <section class="story-section">
+      <h4>2. Kagi</h4>
+      <p class="story-description">
+        <code>variant: 'kagi'</code> folds the <code>close</code> series into a reversal-driven
+        zigzag; the line flips <strong>yang</strong> (thick — broke the prior shoulder) ↔
+        <strong>yin</strong> (thin — broke the prior waist). Time is dropped — one slot per vertex.
+      </p>
+      <div class="code-block">
+        <pre>config = createFinancialChartConfig({{ "{" }} data, variant: 'kagi' {{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="kagiConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Renko -->
+    <section class="story-section">
+      <h4>3. Renko</h4>
+      <p class="story-description">
+        <code>variant: 'renko'</code> walks the <code>close</code> series emitting fixed-height
+        bricks — an ascending staircase that only reverses after a move of about
+        <code>2·brickSize</code> against the trend.
+      </p>
+      <div class="code-block">
+        <pre>config = createFinancialChartConfig({{ "{" }} data, variant: 'renko' {{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="renkoConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Candlestick with tooltip -->
+    <section class="story-section">
+      <h4>4. Candlestick With Tooltip</h4>
+      <p class="story-description">
+        <code>showTooltip: true</code> enables the hover tooltip (candlestick only); the default
+        formatter shows the session date and its closing price. Hover a candle to see it.
+      </p>
+      <div class="code-block">
+        <pre>config = createFinancialChartConfig({{ "{" }} data, showTooltip: true {{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="tooltipConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Click to inspect a candle -->
+    <section class="story-section">
+      <h4>5. Click to Inspect a Candle</h4>
+      <p class="story-description">
+        The <code>onClick</code> payload carries the whole candle (<code
+          >{{ "{" }} date, open, high, low, close {{ "}" }}</code
+        >), so you can drill into the clicked session. Kagi/renko are derived transforms with no 1:1
+        source candle, so clicks fire for <code>candlestick</code> only.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createFinancialChartConfig({{ "{" }}
+  data,
+  onClick: (event) => inspect(event.data),
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="interaction-display"> <strong>Clicked:</strong> {{ lastClicked() }} </div>
+      <div class="chart-container">
+        <nge-chart [config]="clickConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Dynamic data with signals -->
+    <section class="story-section">
+      <h4>6. Dynamic Data With Signals</h4>
+      <p class="story-description">
+        <strong>Recommended pattern:</strong> hold the OHLC series in a <code>signal()</code> and
+        rebuild the config inside a <code>computed()</code>. Randomize re-rolls a fresh, seeded
+        random-walk series.
+      </p>
+      <div class="code-block">
+        <pre>
+liveData = signal&lt;NgeFinancialDataPoint[]&gt;(makeWalk());
+
+config = computed(() => createFinancialChartConfig({{ "{" }} data: liveData() {{ "}" }}));
+
+&lt;nge-chart [config]="config()" /&gt;</pre
+        >
+      </div>
+      <div class="interaction-row">
+        <button
+          class="action-button"
+          (click)="randomizeData()"
+        >
+          Randomize Data
+        </button>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

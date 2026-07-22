@@ -1,0 +1,38 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="crosshair-container">
+    <p class="crosshair-hint">
+      Move the pointer across the plot — the dashed guide snaps to the nearest date, a focus dot
+      marks each series there, and (with <strong>sharedTooltip</strong>) the shared card lists every
+      series' value at that x. Use the Storybook controls to switch the <strong>host</strong> and
+      toggle the guides / shared tooltip.
+    </p>
+    <div class="chart-wrapper">
+      <nge-chart
+        [config]="config()"
+        [chromelessTooltip]="true"
+      >
+        <ng-template
+          #ngeChartTooltip
+          let-content
+        >
+          <div class="crosshair-tip">
+            <div class="crosshair-tip__header">{{ content?.label }}</div>
+            @for (row of rowsOf(content); track row.label) {
+              <div class="crosshair-tip__row">
+                <span
+                  class="crosshair-tip__swatch"
+                  [style.background]="row.color"
+                ></span>
+                <span class="crosshair-tip__label">{{ row.label }}</span>
+                <span class="crosshair-tip__value">{{ row.value }}</span>
+              </div>
+            }
+          </div>
+        </ng-template>
+      </nge-chart>
+    </div>
+  </div>
+</nge-storybook-review-container>

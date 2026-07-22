@@ -1,0 +1,142 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Sparkline Chart - Usage Examples</h2>
+    <p class="intro-text">
+      Compact, axis-less trend marks meant to sit inline next to a number. Every variant is a
+      <strong>thin preset over an existing layer</strong> — no new layer type: the line and
+      multi-series sparklines reuse the <code>line</code> layer (with the end dot composed from the
+      <code>scatter</code> layer), and the column and win-loss sparklines reuse the
+      <code>bar</code> layer. Small mock datasets are held in <code>signal()</code>s and read
+      through <code>&#64;let</code>.
+    </p>
+
+    <!-- EXAMPLE 1: Line sparkline -->
+    @let lineCfg = lineSparklineConfig();
+    <section class="story-section story-section--highlight">
+      <h4>1. Line Sparkline</h4>
+      <p class="story-description">
+        <code>createSparklineChartConfig()</code> applies tight margins, a 1px stroke, points off,
+        and a last-value dot (on by default) that marks where the series ends. Hover any point for a
+        tooltip (<code>tooltip: {{ "{" }} enabled: true {{ "}" }}</code
+        >).
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} x: 0, y: 42 {{ "}" }}, {{ "{" }} x: 1, y: 45 {{ "}" }}, /* … */ {{
+            "{"
+          }} x: 11, y: 68 {{ "}" }},
+];
+
+config = createSparklineChartConfig({{ "{" }} data {{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre
+        >
+      </div>
+      <div class="chart-container chart-container--sparkline">
+        <nge-chart [config]="lineCfg" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Column sparkline -->
+    @let columnCfg = columnSparklineConfig();
+    <section class="story-section">
+      <h4>2. Column Sparkline</h4>
+      <p class="story-description">
+        <code>createColumnSparklineChartConfig()</code> reuses the <code>bar</code> layer with tight
+        margins, no value labels, and a small inter-column gap — a dense mini-histogram.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} label: 'W1', value: 120 {{ "}" }}, {{ "{" }} label: 'W2', value: 165 {{ "}" }}, /* … */
+];
+
+config = createColumnSparklineChartConfig({{ "{" }} data {{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container chart-container--sparkline">
+        <nge-chart [config]="columnCfg" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Win-loss sparkline -->
+    @let winLossCfg = winLossSparklineConfig();
+    <section class="story-section">
+      <h4>3. Win-Loss Sparkline</h4>
+      <p class="story-description">
+        <code>createWinLossSparklineChartConfig()</code> normalises each result to an equal-height
+        mark by <strong>sign only</strong> — win, loss, or tie — coloured from the
+        <code>--chart-*</code> tokens. Marks diverge from a central zero line: wins rise above it,
+        losses drop below, ties collapse to nothing. A custom <code>tooltip.formatContent</code>
+        maps each mark back to Win / Loss / Tie on hover.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} label: 'G1', value: 1 {{ "}" }},   // win
+  {{ "{" }} label: 'G3', value: -1 {{ "}" }},  // loss
+  {{ "{" }} label: 'G5', value: 0 {{ "}" }},   // tie
+];
+
+config = createWinLossSparklineChartConfig({{ "{" }} data {{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container chart-container--winloss">
+        <nge-chart [config]="winLossCfg" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Multi-series line sparkline -->
+    @let multiCfg = multiSeriesSparklineConfig();
+    <section class="story-section story-section--highlight">
+      <h4>4. Multi-Series Line Sparkline</h4>
+      <p class="story-description">
+        Two metrics in one cell via <code>seriesId</code>. Each series' end dot inherits that line's
+        colour, so both endpoints stay distinguishable.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} seriesId: 'Revenue', x: 0, y: 42 {{ "}" }}, /* … */
+  {{ "{" }} seriesId: 'Cost', x: 0, y: 30 {{ "}" }}, /* … */
+];
+
+config = createSparklineChartConfig({{ "{" }}
+  data,
+  seriesColors: ['#1976D2', '#E53935'],
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container chart-container--sparkline">
+        <nge-chart [config]="multiCfg" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Column sparkline with an opt-in zero line -->
+    @let columnZeroCfg = columnZeroLineConfig();
+    <section class="story-section">
+      <h4>5. Column Sparkline with Zero Line</h4>
+      <p class="story-description">
+        Columns support an <strong>opt-in</strong> zero baseline (default off — unlike win-loss).
+        Pass <code>showZeroLine: true</code> to frame up vs down once values go negative — weekly
+        net change here, with down weeks dropping below the baseline.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} label: 'W1', value: 8 {{ "}" }}, {{ "{" }} label: 'W3', value: -6 {{ "}" }}, /* … */
+];
+
+config = createColumnSparklineChartConfig({{ "{" }} data, showZeroLine: true {{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container chart-container--sparkline">
+        <nge-chart [config]="columnZeroCfg" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>
