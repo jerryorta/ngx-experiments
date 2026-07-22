@@ -1,0 +1,48 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Financial Chart - Interactive Controls</h2>
+    <p class="intro-text">
+      Use the Storybook controls panel to adjust the chart in real-time. Switch
+      <strong>variant</strong> between candlestick, kagi and renko, tune the
+      <strong>candleWidth</strong> / <strong>reversalThreshold</strong> /
+      <strong>brickSize</strong> geometry, toggle the <strong>axes</strong> and the
+      <strong>tooltip</strong>, and restyle the up / down / wick / kagi theme slots. Press Randomize
+      to re-roll a fresh OHLC walk.
+    </p>
+
+    <div class="interaction-row">
+      <button
+        type="button"
+        class="interaction-btn interaction-btn--primary"
+        (click)="randomizeData()"
+      >
+        Randomize Data
+      </button>
+    </div>
+
+    <div class="chart-container">
+      <nge-chart [config]="config()" />
+    </div>
+
+    <div class="controls-info">
+      <h4>Available Controls</h4>
+      <ul>
+        <li><strong>Margins:</strong> chart margins</li>
+        <li><strong>Layout:</strong> variant (candlestick / kagi / renko) and candle width</li>
+        <li
+          ><strong>Financial:</strong> kagi reversal threshold (absolute or % of range) and renko
+          brick size — <code>0</code> uses the auto default (3% / 5% of the close range)</li
+        >
+        <li><strong>Visibility:</strong> X and Y axis visibility</li>
+        <li><strong>Tooltip:</strong> enable / disable the hover tooltip and its position</li>
+        <li
+          ><strong>Financial Styling:</strong> up / down body colors, wick color, and the kagi yang
+          / yin line colors</li
+        >
+      </ul>
+    </div>
+  </div>
+</nge-storybook-review-container>

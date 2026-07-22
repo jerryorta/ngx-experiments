@@ -2,9 +2,10 @@ import type { ScaleLinear } from 'd3-scale';
 import type { Selection } from 'd3-selection';
 
 import { select } from 'd3-selection';
-import { area, curveLinear, curveMonotoneX, curveStep, line } from 'd3-shape';
+import { area, curveBasis, curveLinear, curveMonotoneX, curveStep, line } from 'd3-shape';
 import 'd3-transition';
 
+import type { ResolvedNgeChartAnimation } from '../../core/animation';
 import type { NgeLineDataPoint, NgeLineLayerConfig } from '../../core/config';
 import type { NgeChartLayerContext } from '../../core/layer';
 import type { NgeLineLayerTheme, ResolvedNgeLineLayerTheme } from '../../core/theme';
@@ -47,6 +48,7 @@ export function renderLineLayer(
   >
 ): void {
   const {
+    animation,
     bounds,
     config,
     data,
@@ -76,6 +78,7 @@ export function renderLineLayer(
 
   // Render each series
   renderSeries(bounds, seriesArray, {
+    animation,
     config,
     curveFactory,
     dimensions,
@@ -139,8 +142,10 @@ function groupBySeries(
 /**
  * Get the D3 curve factory for the specified curve type
  */
-function getCurveFactory(curveType?: 'linear' | 'monotone' | 'step') {
+function getCurveFactory(curveType?: 'basis' | 'linear' | 'monotone' | 'step') {
   switch (curveType) {
+    case 'basis':
+      return curveBasis;
     case 'monotone':
       return curveMonotoneX;
     case 'step':
@@ -152,6 +157,7 @@ function getCurveFactory(curveType?: 'linear' | 'monotone' | 'step') {
 }
 
 interface RenderSeriesParams {
+  animation: ResolvedNgeChartAnimation;
   config: NgeLineLayerConfig;
   curveFactory: typeof curveLinear;
   dimensions: NgeChartLayerContext<any, any, any>['dimensions'];
@@ -172,7 +178,7 @@ function renderSeries(
   seriesArray: LineSeries[],
   params: RenderSeriesParams
 ): void {
-  const { config } = params;
+  const { animation, config } = params;
 
   // D3 join pattern for series groups
   const seriesGroups = bounds
@@ -184,7 +190,15 @@ function renderSeries(
     .enter()
     .append('g')
     .attr('class', 'nge-line-series')
-    .attr('data-series-id', d => d.id);
+    .attr('data-series-id', d => d.id)
+    .style('opacity', 0);
+
+  // Fade the entering series in (geometry is applied synchronously).
+  enterGroups
+    .transition('opacity-fade')
+    .duration(animation.enterMs)
+    .ease(animation.easing)
+    .style('opacity', 1);
 
   // Render area, line, and points for each entering group
   enterGroups.each(function (this: SVGGElement, series) {
@@ -230,7 +244,8 @@ function renderSeries(
   seriesGroups
     .exit()
     .transition()
-    .duration(config.animationMs ?? 200)
+    .duration(animation.exitMs)
+    .ease(animation.easing)
     .style('opacity', 0)
     .remove();
 }
@@ -243,7 +258,8 @@ function renderArea(
   series: LineSeries,
   params: RenderSeriesParams
 ): void {
-  const { config, curveFactory, dimensions, mergedTheme, scales, useSecondaryAxis } = params;
+  const { animation, config, curveFactory, dimensions, mergedTheme, scales, useSecondaryAxis } =
+    params;
 
   const areaGenerator = area<NgeLineDataPoint>()
     .x(d => getXPosition(d, scales))
@@ -267,7 +283,8 @@ function renderArea(
     .style('fill', areaColor)
     .style('fill-opacity', areaOpacity)
     .transition()
-    .duration(config.animationMs ?? 300)
+    .duration(animation.updateMs)
+    .ease(animation.easing)
     .attr('d', areaGenerator(series.points));
 }
 
@@ -279,7 +296,7 @@ function renderLinePath(
   series: LineSeries,
   params: RenderSeriesParams
 ): void {
-  const { config, curveFactory, mergedTheme, scales, useSecondaryAxis } = params;
+  const { animation, config, curveFactory, mergedTheme, scales, useSecondaryAxis } = params;
 
   const lineGenerator = line<NgeLineDataPoint>()
     .x(d => getXPosition(d, scales))
@@ -303,7 +320,8 @@ function renderLinePath(
     .style('stroke-width', `${lineWidth}px`)
     .style('stroke-dasharray', mergedTheme.line.dash || 'none')
     .transition()
-    .duration(config.animationMs ?? 300)
+    .duration(animation.updateMs)
+    .ease(animation.easing)
     .attr('d', lineGenerator(series.points));
 }
 
@@ -315,8 +333,16 @@ function renderPoints(
   series: LineSeries,
   params: RenderSeriesParams
 ): void {
-  const { config, margins, mergedTheme, scales, tooltipConfig, tooltipHandlers, useSecondaryAxis } =
-    params;
+  const {
+    animation,
+    config,
+    margins,
+    mergedTheme,
+    scales,
+    tooltipConfig,
+    tooltipHandlers,
+    useSecondaryAxis,
+  } = params;
 
   const tooltipEnabled = tooltipConfig?.enabled && tooltipHandlers?.onTooltip;
   const pointRadius = config.pointRadius ?? mergedTheme.point.radius;
@@ -343,7 +369,8 @@ function renderPoints(
   // Animate enter
   enterPoints
     .transition()
-    .duration(config.animationMs ?? 300)
+    .duration(animation.enterMs)
+    .ease(animation.easing)
     .attr('r', pointRadius);
 
   // Update
@@ -352,7 +379,8 @@ function renderPoints(
     .style('stroke', series.color)
     .style('stroke-width', `${mergedTheme.point.strokeWidth}px`)
     .transition()
-    .duration(config.animationMs ?? 300)
+    .duration(animation.updateMs)
+    .ease(animation.easing)
     .attr('cx', d => getXPosition(d, scales))
     .attr('cy', d => getYPosition(d.y, scales, useSecondaryAxis))
     .attr('r', pointRadius);
@@ -361,7 +389,8 @@ function renderPoints(
   points
     .exit()
     .transition()
-    .duration(config.animationMs ?? 200)
+    .duration(animation.exitMs)
+    .ease(animation.easing)
     .attr('r', 0)
     .remove();
 

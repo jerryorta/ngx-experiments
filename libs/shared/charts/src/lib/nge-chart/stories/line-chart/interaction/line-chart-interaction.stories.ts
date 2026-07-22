@@ -28,7 +28,7 @@ const meta: Meta<LineChartInteractionStoriesComponent> = {
     curveType: {
       control: 'radio',
       description: 'Line curve interpolation',
-      options: ['linear', 'monotone', 'step'],
+      options: ['basis', 'linear', 'monotone', 'step'],
       table: { category: 'Layer - Line Style' },
     },
     // Interaction (ARCH-174)
@@ -42,6 +42,13 @@ const meta: Meta<LineChartInteractionStoriesComponent> = {
       control: 'boolean',
       description: 'Wheel-zoom / drag-pan / brush-zoom (double-click resets)',
       table: { category: 'Interaction' },
+    },
+    // Layer - Legend
+    interactiveLegend: {
+      control: 'boolean',
+      description:
+        'Suppress the internal legend and show the standalone interactive <nge-chart-legend> above a 3-series chart; click a series to toggle its line on/off.',
+      table: { category: 'Layer - Legend' },
     },
     // Theme - Line Styling
     lineColor: {
@@ -81,6 +88,22 @@ const meta: Meta<LineChartInteractionStoriesComponent> = {
       description: 'Data point radius',
       if: { arg: 'showPoints' },
       table: { category: 'Theme - Point Styling' },
+    },
+    // Theme - Series Palette (interactive-legend demo)
+    seriesColor1: {
+      control: 'color',
+      description: 'Series 1 stroke (Desktop)',
+      table: { category: 'Theme - Series Palette' },
+    },
+    seriesColor2: {
+      control: 'color',
+      description: 'Series 2 stroke (Mobile)',
+      table: { category: 'Theme - Series Palette' },
+    },
+    seriesColor3: {
+      control: 'color',
+      description: 'Series 3 stroke (Tablet)',
+      table: { category: 'Theme - Series Palette' },
     },
     // Layer - Visibility
     showArea: {
@@ -193,6 +216,8 @@ export const Interaction: Story = {
     // Interaction
     dataMode: 'categorical',
     enableGestures: true,
+    // Layer - Legend
+    interactiveLegend: false,
     // Theme - Line Styling
     lineColor: '',
     lineWidth: 2,
@@ -203,6 +228,10 @@ export const Interaction: Story = {
     marginTop: 20,
     // Theme - Point Styling
     pointRadius: 4,
+    // Theme - Series Palette
+    seriesColor1: '#1E88E5',
+    seriesColor2: '#43A047',
+    seriesColor3: '#FB8C00',
     // Layer - Visibility
     showArea: false,
     showPoints: true,
@@ -221,5 +250,21 @@ export const Interaction: Story = {
     // Layer - Axis Labels
     xAxisLabel: 'xAxisLabel',
     yAxisLabel: 'yAxisLabel',
+  },
+};
+
+/**
+ * Renders the standalone interactive `<nge-chart-legend>` above a 3-series line
+ * chart with the chart's internal legend suppressed. Clicking a series toggles
+ * its line in/out — the chart rebuilds without it (its color held stable via a
+ * fixed `seriesColors` palette) while the series stays listed in the legend but
+ * dimmed (opacity 0.4) so it can be toggled back on. Gestures are off so the
+ * demo stays focused on the legend.
+ */
+export const InteractiveLegend: Story = {
+  args: {
+    ...Interaction.args,
+    enableGestures: false,
+    interactiveLegend: true,
   },
 };

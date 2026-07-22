@@ -2,18 +2,18 @@ Work on a Jira ticket: read ticket details, create a feature branch, plan the im
 
 ## Prerequisites
 
-Before starting, load the required MCP tools using the ToolSearch tool:
+Ticket **content** (description / implementation plan / acceptance criteria) lives in the **gigasoftware-plans** repo as `<prefix>/<KEY>.md` (prefix = lowercased key prefix, e.g. `arch/ARCH-213.md`), **not** in Jira — the Atlassian MCP returns a ~5.5k-char fat envelope per issue and ignores field-narrowing. Jira keeps **status** (transitions, assignees, comments). Read descriptions + board-nav from the plans repo via `python3 ~/Dev/gigasoftware-plans/scripts/jira_to_md.py` (it self-authenticates); use the MCP only for the cloud ID, a scoped metadata/comment read, transitions, and comments. Canonical guide: `~/Dev/gigasoftware-plans/AGENTS.md`.
+
+This skill still makes MCP calls, so load the required MCP tools using the ToolSearch tool:
 
 1. `select:mcp__claude_ai_Atlassian__getAccessibleAtlassianResources`
 2. `select:mcp__claude_ai_Atlassian__getJiraIssue`
-3. `select:mcp__claude_ai_Atlassian__searchJiraIssuesUsingJql`
-4. `select:mcp__claude_ai_Atlassian__addCommentToJiraIssue`
-5. `select:mcp__claude_ai_Atlassian__editJiraIssue`
-6. `select:mcp__claude_ai_Atlassian__getTransitionsForJiraIssue`
-7. `select:mcp__claude_ai_Atlassian__transitionJiraIssue`
-8. `select:mcp__stitch__get_project`
-9. `select:mcp__stitch__list_screens`
-10. `select:mcp__stitch__get_screen`
+3. `select:mcp__claude_ai_Atlassian__addCommentToJiraIssue`
+4. `select:mcp__claude_ai_Atlassian__getTransitionsForJiraIssue`
+5. `select:mcp__claude_ai_Atlassian__transitionJiraIssue`
+6. `select:mcp__stitch__get_project`
+7. `select:mcp__stitch__list_screens`
+8. `select:mcp__stitch__get_screen`
 
 ## Phase 1: Read the Jira Ticket
 
@@ -28,10 +28,18 @@ Before starting, load the required MCP tools using the ToolSearch tool:
 
    Use the `id` field from the response as `cloudId` for all subsequent Jira calls.
 
-3. **Read the ticket:**
+3. **Read the ticket.** The **description / plan / acceptance criteria** live in the plans repo, not Jira. Print the local file path (migrating on-miss) and read it:
 
    ```
-   mcp__claude_ai_Atlassian__getJiraIssue(cloudId, issueIdOrKey, expand="renderedFields", fields=["summary","description","status","assignee","reporter","priority","issuetype","comment","created","updated","labels","components"])
+   path=$(python3 ~/Dev/gigasoftware-plans/scripts/jira_to_md.py ensure <KEY>)
+   ```
+
+   Then `Read $path`.
+
+   For the status metadata + comments the local file does not carry, make a **scoped** MCP read — description dropped (it comes from the file above), no `expand="renderedFields"`:
+
+   ```
+   mcp__claude_ai_Atlassian__getJiraIssue(cloudId, issueIdOrKey, fields=["summary","status","assignee","reporter","priority","issuetype","comment","created","updated","labels","components"])
    ```
 
 4. **Display a summary** to the user:
@@ -50,13 +58,15 @@ Before starting, load the required MCP tools using the ToolSearch tool:
 
 5. **Save the ticket details** (key, summary, description, current status) for later phases.
 
-6. **Fetch the ticket's sub-tasks.** A decomposed story carries its implementation detail in its sub-tasks, not its own description — so they MUST be pulled in:
+6. **Fetch the ticket's sub-tasks.** A decomposed story carries its implementation detail in its sub-tasks, not its own description — so they MUST be pulled in. Enumerate them via the board script (live status, not the MCP):
 
    ```
-   mcp__claude_ai_Atlassian__searchJiraIssuesUsingJql(cloudId, jql="parent = <KEY> ORDER BY created ASC", fields=["summary","description","status"], responseContentFormat="markdown")
+   python3 ~/Dev/gigasoftware-plans/scripts/jira_to_md.py board --jql 'parent = <KEY> ORDER BY created ASC'
    ```
 
-   - **If sub-tasks are returned:** treat **each sub-task's description as a required slice of this story's implementation** (the build checklist — not optional). Add them to the Phase 1 summary as `Sub-tasks: <count>` followed by each `<KEY> — <summary> [<status>]`, and carry every sub-task description into planning (Phase 3).
+   Returns JSON `[{key,status,category,type,priority,parent,summary}]` — the sub-task keys + summaries + live status, but **not** their descriptions (content lives in the plans repo, one file per key).
+
+   - **If sub-tasks are returned:** for each sub-task, read its description from its own local file — `path=$(python3 ~/Dev/gigasoftware-plans/scripts/jira_to_md.py ensure <SUBTASK-KEY>)` then `Read $path` — and treat **each sub-task's description as a required slice of this story's implementation** (the build checklist — not optional). Add them to the Phase 1 summary as `Sub-tasks: <count>` followed by each `<KEY> — <summary> [<status>]`, and carry every sub-task description into planning (Phase 3).
    - **If none are returned:** this is a leaf ticket — continue normally (no-op).
 
 ## Phase 2: Use Current Branch
@@ -285,20 +295,11 @@ Parse the subagent output between `REVALIDATION_RESULT_START` / `REVALIDATION_RE
 
 ### 2.75d — Replace description + breadcrumb
 
-Replace the description verbatim:
-
-```
-mcp__claude_ai_Atlassian__editJiraIssue(
-  cloudId,
-  issueIdOrKey,
-  contentFormat="markdown",
-  fields={ "description": <revised description from subagent> }
-)
-```
+The description lives in the plans repo — replace it **there**, not in Jira (never `editJiraIssue(fields={description})`; Jira's description is only a stub). `Edit` the local plan file you read in Phase 1 (`$path`, i.e. `~/Dev/gigasoftware-plans/<prefix>/<KEY>.md`): replace its **body** (everything below the front matter) with the revised description verbatim, preserving the `jira/project/board/type/epic/summary` front-matter block. You already read this file in Phase 1, so you have its current body to match against.
 
 Then post a one-line breadcrumb comment so future readers know the description was re-validated (not modified by a human):
 
-> *Pre-implementation re-validation (`/jira`, <today's date>) — description revised against current code state. Original preserved in Jira history.*
+> *Pre-implementation re-validation (`/jira`, <today's date>) — description revised against current code state. Original preserved in the plans-repo git history.*
 
 Use `mcp__claude_ai_Atlassian__addCommentToJiraIssue` with a minimal ADF document containing just that one paragraph.
 

@@ -1,0 +1,87 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Overlay Layer - Theming Examples</h2>
+    <p class="intro-text">
+      Overlay marks are themed through <code>config.theme.overlay</code> — the <code>fitLine</code>,
+      <code>band</code>, <code>meanLine</code>, and <code>limitLine</code> slices (each backed by
+      <code>--chart-*</code> tokens). Override them to recolour the annotation independently of the
+      host line's <code>theme.line</code>.
+    </p>
+
+    <!-- Default overlay theme -->
+    <section class="story-section">
+      <h4>Default Theme (tokens)</h4>
+      <p class="story-description">
+        No overlay theme provided — the fit line uses the <code>--chart-secondary</code> token (a
+        reference line distinct from the primary host series).
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="defaultTrendConfig" />
+      </div>
+    </section>
+
+    <!-- Trend line theming -->
+    <section class="story-section">
+      <h4>Recoloured Trend Line</h4>
+      <p class="story-description">
+        <code>theme.overlay.fitLine</code> restyles the trend line — a bold dashed red reference
+        over a muted grey host line (<code>theme.line</code>).
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="themedTrendConfig" />
+      </div>
+    </section>
+
+    <!-- Control theming -->
+    <section class="story-section">
+      <h4>Control Chart Theming</h4>
+      <p class="story-description">
+        <code>theme.overlay.meanLine</code>, <code>limitLine</code>, and <code>band</code> recolour
+        the mean rule, the ±σ limit rules, and the shaded in-control zone together — teal centre
+        with red breach limits.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="themedControlConfig" />
+      </div>
+    </section>
+
+    <!-- Fan theming -->
+    <section class="story-section">
+      <h4>Fan Chart Theming</h4>
+      <p class="story-description">
+        <code>theme.overlay.band</code> (<code>fillColor</code> + <code>fillOpacity</code>)
+        recolours the prediction-interval bands — the overlapping translucent fills darken toward
+        the centre.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="themedFanConfig" />
+      </div>
+    </section>
+
+    <!-- Comparison highlight -->
+    <section class="story-section story-section--highlight">
+      <h4>Theme Override Path — Default vs Custom</h4>
+      <p class="story-description">
+        The same trend overlay rendered with the default token fit line and with a custom amber
+        solid fit line via <code>theme.overlay.fitLine</code>.
+      </p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>Default (token)</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="comparisonDefaultConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Custom (amber)</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="comparisonCustomConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

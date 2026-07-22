@@ -1,6 +1,7 @@
 <div
   class="nge-chart-legend-list"
   [class.nge-chart-legend-list--vertical]="orientation() === 'vertical'"
+  [class.nge-chart-legend-list--grid]="layout() === 'grid' && orientation() !== 'vertical'"
 >
   @for (item of items(); track item.id ?? item.label) {
     @if (interactive()) {

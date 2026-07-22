@@ -75,6 +75,22 @@ export interface NgeTooltipConfig<TData = unknown> {
 }
 
 /**
+ * One row of a SHARED / multi-series tooltip: a colour swatch, a series label,
+ * and that series' value at the shared x. Populated on {@link NgeTooltipContent.rows}
+ * (e.g. by the crosshair, which lists every series' value at the snapped x).
+ */
+export interface NgeTooltipRow {
+  /** Swatch colour — matches the series' line/area colour. */
+  color: string;
+
+  /** Series label (e.g. the `seriesId`). */
+  label: string;
+
+  /** The series' value at the shared x. */
+  value: number | string;
+}
+
+/**
  * Tooltip content - what gets displayed
  */
 export interface NgeTooltipContent {
@@ -87,6 +103,14 @@ export interface NgeTooltipContent {
    * Primary label (e.g., category name)
    */
   label: string;
+
+  /**
+   * Optional multi-series rows for a SHARED tooltip (e.g. the crosshair). When
+   * present, a custom `#ngeChartTooltip` template renders one row per series
+   * (swatch + label + value); single-series tooltips omit it and use
+   * `label`/`value` as before.
+   */
+  rows?: NgeTooltipRow[];
 
   /**
    * Primary value (e.g., data value)

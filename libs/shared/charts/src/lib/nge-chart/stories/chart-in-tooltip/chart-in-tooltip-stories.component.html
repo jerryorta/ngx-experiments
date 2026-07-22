@@ -1,0 +1,38 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  @let isStacked = variant() === "stacked";
+
+  <div class="chart-in-tooltip-demo">
+    <p class="hint">
+      Hover a bar column — the tooltip is a <strong>nested</strong>
+      <code>&lt;nge-chart&gt;</code> projected through the chromeless
+      <code>#ngeChartTooltip</code> slot (ARCH-213). The hovered
+      <strong>{{ isStacked ? "stacked column" : "group" }}</strong> renders as a
+      {{ isStacked ? "donut" : "pie" }} of its parts — composed entirely from existing presets, no
+      new chart type.
+    </p>
+
+    <div class="chart-wrapper">
+      <nge-chart
+        [config]="config()"
+        [chromelessTooltip]="true"
+      >
+        <ng-template
+          #ngeChartTooltip
+          let-content
+        >
+          @if (pieConfigFor(content); as pieCfg) {
+            <div class="nested-tooltip">
+              <span class="nested-tooltip__title">{{ content?.label }}</span>
+              <div class="nested-tooltip__chart">
+                <nge-chart [config]="pieCfg" />
+              </div>
+            </div>
+          }
+        </ng-template>
+      </nge-chart>
+    </div>
+  </div>
+</nge-storybook-review-container>

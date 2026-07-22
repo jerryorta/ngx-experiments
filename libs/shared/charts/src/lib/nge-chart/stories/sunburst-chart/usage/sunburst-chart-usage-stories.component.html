@@ -1,0 +1,182 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Sunburst Chart - Usage Examples</h2>
+    <p class="intro-text">
+      Practical examples for the sunburst / icicle layer. One hierarchical primitive partitions a
+      nested <code>{{ "{" }} label, value?, children? {{ "}" }}</code> tree three ways via config: a
+      full <strong>sunburst</strong> (<code>innerRadius: 0</code>), a
+      <strong>multi-level donut</strong> (<code>innerRadius</code> as a ratio 0–1 carves the center
+      hole), and an <strong>icicle</strong> (<code>layout: 'linear'</code> draws stacked columns).
+      Leaves carry a <code>value</code>; internal nodes omit it and are summed from their children.
+    </p>
+
+    <!-- EXAMPLE 1: Basic Sunburst -->
+    <section class="story-section">
+      <h4>1. Basic Sunburst</h4>
+      <p class="story-description">
+        Simplest way to create a sunburst using <code>createSunburstChartConfig()</code>. Provide a
+        nested array of <code>NgeHierarchyDatum</code> — one ring per depth level, one arc per
+        node, in input order.
+      </p>
+      <div class="code-block">
+        <pre>
+data: NgeHierarchyDatum[] = [
+  {{ "{" }}
+    label: 'Housing',
+    children: [
+      {{ "{" }} label: 'Rent', value: 1800 {{ "}" }},
+      {{ "{" }} label: 'Utilities', children: [ /* Electric, Water, Internet */ ] {{ "}" }},
+      {{ "{" }} label: 'Insurance', value: 150 {{ "}" }},
+    ],
+  {{ "}" }},
+  // Food, Transport ...
+];
+
+config = createSunburstChartConfig({{ "{" }} data: this.data {{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="basicConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Multi-level Donut -->
+    <section class="story-section">
+      <h4>2. Multi-level Donut</h4>
+      <p class="story-description">
+        <code>innerRadius</code> is a <strong>ratio</strong> (0–1) of the self-computed outer
+        radius, not pixels — so it stays resize-safe. <code>0.3</code> carves a center hole, pushing
+        the rings outward for a multi-level donut.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createSunburstChartConfig({{ "{" }}
+  data: this.data,
+  innerRadius: 0.3, // donut hole
+{{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="donutConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Icicle (linear layout) -->
+    <section class="story-section">
+      <h4>3. Icicle (Linear Layout)</h4>
+      <p class="story-description">
+        <code>layout: 'linear'</code> swaps the concentric rings for stacked rectangle columns — the
+        same partition, drawn as an <strong>icicle</strong>. Depth runs left-to-right; each column's
+        height is proportional to its summed value.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createSunburstChartConfig({{ "{" }}
+  data: this.data,
+  layout: 'linear', // icicle
+{{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="icicleConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Depth Cap -->
+    <section class="story-section">
+      <h4>4. Depth Cap</h4>
+      <p class="story-description">
+        <code>maxDepth</code> renders at most that many rings / columns — handy for a summary view
+        of a deep tree. Here <code>2</code> shows only the top two levels; the grandchildren are
+        folded into their parents.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createSunburstChartConfig({{ "{" }}
+  data: this.data,
+  innerRadius: 0.3,
+  maxDepth: 2, // top two levels only
+{{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="depthCappedConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Custom Branch Colors -->
+    <section class="story-section">
+      <h4>5. Custom Branch Colors</h4>
+      <p class="story-description">
+        Pass a <code>seriesColors</code> palette — the <strong>top-level branch</strong> index maps
+        to <code>colors[index % length]</code>, and every descendant inherits its branch color. A
+        per-node <code>color</code> on any datum wins over the palette for that node.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createSunburstChartConfig({{ "{" }}
+  data: this.data,
+  innerRadius: 0.3,
+  seriesColors: ['#1E88E5', '#43A047', '#FB8C00'],
+{{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="customColorsConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Click Handling -->
+    <section class="story-section">
+      <h4>6. Click Handling</h4>
+      <p class="story-description">
+        Provide an <code>onClick</code> callback in the config. The event carries the full data node
+        for the clicked arc — internal nodes omit <code>value</code> (it is summed by the renderer),
+        so guard for it.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createSunburstChartConfig({{ "{" }}
+  data: this.data,
+  onClick: (event) => {{ "{" }}
+    console.log('Clicked:', event.data.label, event.data.value);
+  {{ "}" }},
+{{ "}" }});</pre>
+      </div>
+      <div class="interaction-display"> <strong>Last clicked:</strong> {{ lastClicked() }} </div>
+      <div class="chart-container">
+        <nge-chart [config]="clickableConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7: Dynamic Data with Signals -->
+    <section class="story-section story-section--highlight">
+      <h4>7. Dynamic Data with Signals</h4>
+      <p class="story-description">
+        Drive the chart from a <code>signal</code> and rebuild the config with
+        <code>computed()</code>. Re-rolling every leaf's <code>value</code> re-runs the partition —
+        the internal-node sums and arc angles update together, animated.
+      </p>
+      <div class="code-block">
+        <pre>
+dynamicData = signal&lt;NgeHierarchyDatum[]&gt;(this.data);
+
+dynamicConfig = computed(() =>
+  createSunburstChartConfig({{ "{" }} data: this.dynamicData(), innerRadius: 0.3 {{ "}" }})
+);
+
+&lt;nge-chart [config]="dynamicConfig()" /&gt;</pre>
+      </div>
+      <div class="interaction-row">
+        <button
+          class="action-button"
+          (click)="randomizeData()"
+          >Randomize Data</button
+        >
+      </div>
+      <div class="chart-container chart-container--tall">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

@@ -1,0 +1,70 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Timeline Chart - Theming Examples</h2>
+
+    <!-- Default Theme -->
+    <section class="story-section">
+      <h4>Default Theme</h4>
+      <p class="story-description">No theme - uses the default --chart-* tokens.</p>
+      <div class="chart-container">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <!-- Green Theme -->
+    <section class="story-section">
+      <h4>Green Theme</h4>
+      <p class="story-description">Bar color + hover via config.theme.timeline.bar.</p>
+      <div class="chart-container">
+        <nge-chart [config]="greenConfig" />
+      </div>
+    </section>
+
+    <!-- Custom Milestone Color -->
+    <section class="story-section">
+      <h4>Custom Milestone Color</h4>
+      <p class="story-description">Diamond styling via config.theme.timeline.milestone.</p>
+      <div class="chart-container">
+        <nge-chart [config]="milestoneThemedConfig" />
+      </div>
+    </section>
+
+    <!-- Custom Label Styling -->
+    <section class="story-section">
+      <h4>Custom Label Styling</h4>
+      <p class="story-description">On-bar label styling via config.theme.timeline.label.</p>
+      <div class="chart-container">
+        <nge-chart [config]="labelStyledConfig" />
+      </div>
+    </section>
+
+    <!-- MAIN DEMO: Multiple Different Themes -->
+    <section class="story-section story-section--highlight">
+      <h4>Multiple Timelines with Different Themes</h4>
+      <p class="story-description">One component, a different timeline theme per team.</p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>Team A (Blue)</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="blueConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Team B (Green)</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="greenConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Team C (Red)</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="redConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

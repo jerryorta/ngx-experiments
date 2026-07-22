@@ -40,6 +40,30 @@
     }
   }
 
+  .external-legend-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    border: 1px dashed var(--chart-outline-variant, #e0e0e0);
+    border-radius: 8px;
+
+    // Give the legend a definite width so its `layout="grid"` resolves to a
+    // left-justified, column-aligned table (~2 columns for the 3 groups) rather
+    // than collapsing to a single column in the shrink-to-fit flex slot.
+    nge-chart-legend {
+      flex: 0 0 auto;
+      width: 300px;
+    }
+  }
+
+  .external-legend-caption {
+    font-size: 12px;
+    color: var(--chart-on-surface-variant, #666666);
+  }
+
   .chart-wrapper {
     height: 400px;
     border: 1px solid var(--chart-outline-variant, #e0e0e0);

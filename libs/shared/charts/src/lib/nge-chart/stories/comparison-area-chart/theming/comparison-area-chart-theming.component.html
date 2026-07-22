@@ -1,0 +1,108 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Comparison Area Chart - Theming Examples</h2>
+
+    <!-- Default Theme -->
+    <section class="story-section">
+      <h4>Default Theme</h4>
+      <p class="story-description">
+        No theme override — series colors come from the theme palette; the area fill uses the
+        preset's default 0.15 <code>areaOpacity</code>.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <!-- Emphasis Theme -->
+    <section class="story-section">
+      <h4>Emphasis (Thicker Lines + Denser Fill)</h4>
+      <p class="story-description">
+        Raise the preset's <code>areaOpacity</code> option and <code>theme.line.line.width</code>
+        together for a bolder read.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="emphasisConfig" />
+      </div>
+    </section>
+
+    <!-- Custom Axis Theme -->
+    <section class="story-section">
+      <h4>Custom Axis Theme</h4>
+      <p class="story-description">
+        Axis label, line, and tick colors via <code>theme.axis</code>.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="customAxisConfig" />
+      </div>
+    </section>
+
+    <!-- Grid Theme -->
+    <section class="story-section">
+      <h4>Grid Theme</h4>
+      <p class="story-description">
+        Custom gridline color, dash pattern, and width via <code>theme.grid</code>.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="gridThemedConfig" />
+      </div>
+    </section>
+
+    <!-- Area Fill Opacity -->
+    <section class="story-section story-section--highlight">
+      <h4>Area Fill Opacity</h4>
+      <p class="story-description">
+        <strong>The key lever for overlaid comparisons.</strong> The preset's
+        <code>areaOpacity</code> option controls how translucent each band is — low keeps overlaps
+        legible, high makes each scenario read as a denser band.
+      </p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>Subtle (0.08)</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="subtleFillConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Bold (0.4)</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="boldFillConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Palette Variations -->
+    <section class="story-section story-section--highlight">
+      <h4>Multiple Charts with Different Palettes</h4>
+      <p class="story-description">
+        <strong>The core feature:</strong> the same loan comparison rendered with three different
+        <code>seriesColors</code> palettes. Each chart is the same
+        <code>&lt;nge-chart&gt;</code> component with a different config.
+      </p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>Ocean</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="oceanConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Warm</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="warmConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Forest</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="forestConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

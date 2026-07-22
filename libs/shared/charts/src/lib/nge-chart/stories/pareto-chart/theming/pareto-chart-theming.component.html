@@ -1,0 +1,92 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Pareto Chart - Theming Examples</h2>
+    <p class="intro-text">
+      A Pareto chart reuses the <code>bar</code> and <code>line</code> layers, so it is themed
+      through the preset's <code>barColor</code> and <code>lineColor</code> options.
+    </p>
+
+    <!-- Default -->
+    <section class="story-section">
+      <h4>Default Theme (Material Design)</h4>
+      <p class="story-description"
+        >No color overrides — bars use the primary token, the line the secondary token.</p
+      >
+      <div class="chart-container">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <!-- Blue / Red -->
+    <section class="story-section">
+      <h4>Blue Bars / Red Line</h4>
+      <p class="story-description">A high-legibility default: cool bars, a warm cumulative line.</p>
+      <div class="chart-container">
+        <nge-chart [config]="blueRedConfig" />
+      </div>
+    </section>
+
+    <!-- Green / Amber -->
+    <section class="story-section">
+      <h4>Green Bars / Amber Line</h4>
+      <p class="story-description"
+        >Sequential warm/cool pairing via <code>barColor</code> + <code>lineColor</code>.</p
+      >
+      <div class="chart-container">
+        <nge-chart [config]="greenConfig" />
+      </div>
+    </section>
+
+    <!-- Monochrome -->
+    <section class="story-section">
+      <h4>Monochrome</h4>
+      <p class="story-description"
+        >Neutral grey bars with a dark cumulative line for print-friendly reports.</p
+      >
+      <div class="chart-container">
+        <nge-chart [config]="monochromeConfig" />
+      </div>
+    </section>
+
+    <!-- High Contrast -->
+    <section class="story-section">
+      <h4>High Contrast</h4>
+      <p class="story-description">Near-black bars and a vivid magenta line for accessibility.</p>
+      <div class="chart-container">
+        <nge-chart [config]="highContrastConfig" />
+      </div>
+    </section>
+
+    <!-- Comparison row -->
+    <section class="story-section story-section--highlight">
+      <h4>Multiple Palettes, Same Data</h4>
+      <p class="story-description">
+        The same Pareto rendered with three color pairings — swap <code>barColor</code> /
+        <code>lineColor</code> to match a brand.
+      </p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>Teal / Orange</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="tealConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Indigo / Yellow</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="indigoConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Crimson / Cyan</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="crimsonConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

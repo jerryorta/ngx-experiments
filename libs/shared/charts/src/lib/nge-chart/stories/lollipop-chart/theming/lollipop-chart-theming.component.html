@@ -1,0 +1,128 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Lollipop Chart - Theming Examples</h2>
+    <p class="intro-text">
+      Every color comes from the <code>theme.lollipop</code> slice — <code>marker</code>,
+      <code>stem</code>, and <code>label</code>. Override each with a literal color or a
+      <code>var(--chart-*)</code> token; the token path tracks the surrounding theme and adapts to
+      light / dark automatically.
+    </p>
+
+    <!-- 1. Default -->
+    <section class="story-section">
+      <h4>Default Theme</h4>
+      <p class="story-description">
+        No overrides — the stem is a muted <code>var(--chart-outline-variant)</code> and the marker
+        a <code>var(--chart-primary)</code>, both from the <code>lollipop</code> slice.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <!-- 2. Marker color -->
+    <section class="story-section">
+      <h4>Marker Color (<code>theme.lollipop.marker</code>)</h4>
+      <p class="story-description">
+        Recolor the single-series glyph and give it a contrasting outline via
+        <code>marker.color</code> + <code>marker.strokeColor</code>.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="markerColorConfig" />
+      </div>
+    </section>
+
+    <!-- 3. Stem styling -->
+    <section class="story-section">
+      <h4>Stem Styling (<code>theme.lollipop.stem</code>)</h4>
+      <p class="story-description">
+        Thicken and recolor the stem with <code>stem.color</code> + <code>stem.width</code> — handy
+        for making the stem a quiet backdrop to a bold marker.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="stemStyleConfig" />
+      </div>
+    </section>
+
+    <!-- 4. Value labels -->
+    <section class="story-section">
+      <h4>Value Labels (<code>theme.lollipop.label</code>)</h4>
+      <p class="story-description">
+        With <code>showLabels</code> on, style the printed values through <code>label.color</code> /
+        <code>label.fontSize</code> / <code>label.fontWeight</code>.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="labelStyleConfig" />
+      </div>
+    </section>
+
+    <!-- 5. Semantic tokens -->
+    <section class="story-section">
+      <h4>Semantic Tokens (<code>var(--chart-*)</code>)</h4>
+      <p class="story-description">
+        Point <code>marker.color</code> / <code>stem.color</code> at
+        <code>var(--chart-tertiary)</code> / <code>var(--chart-secondary)</code> so the chart tracks
+        the active theme — toggle Storybook's light / dark switch to watch it adapt.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="tokenConfig" />
+      </div>
+    </section>
+
+    <!-- 6. Multi-series palette -->
+    <section class="story-section">
+      <h4>Multi-Series Palette (<code>theme.lollipop.marker.colors</code>)</h4>
+      <p class="story-description">
+        For a slope chart, each <code>seriesId</code> maps to
+        <code>marker.colors[index % length]</code> — supply a palette to color the connected series.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="paletteConfig" />
+      </div>
+    </section>
+
+    <!-- 7. Full control -->
+    <section class="story-section">
+      <h4>Full Control via <code>theme.lollipop</code></h4>
+      <p class="story-description">
+        A dumbbell styled through the whole slice at once — <code>marker</code>, the span
+        <code>stem</code>, and the value <code>label</code>.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="fullControlConfig" />
+      </div>
+    </section>
+
+    <!-- 8. Palette variations side-by-side -->
+    <section class="story-section story-section--highlight">
+      <h4>Multiple Charts with Different Palettes</h4>
+      <p class="story-description">
+        The same city scores rendered with three <code>marker</code> / <code>stem</code> palettes.
+        Each is the same <code>&lt;nge-chart&gt;</code> component with a different config.
+      </p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>Green</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="greenConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Blue</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="blueConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Amber</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="amberConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

@@ -135,6 +135,13 @@ export class LineChartUsageStoriesComponent {
     showPoints: true,
   });
 
+  // Spline (B-spline) — the CHT-10 "Spline Graph" catalog type.
+  basisConfig = createLineChartConfig({
+    curveType: 'basis',
+    data: this.curveData,
+    showPoints: true,
+  });
+
   // ============================================
   // EXAMPLE 5: Click Handling
   // ============================================

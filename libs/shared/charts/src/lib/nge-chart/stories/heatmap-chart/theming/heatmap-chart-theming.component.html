@@ -1,0 +1,108 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Heatmap Chart - Theming Examples</h2>
+    <p class="intro-text">
+      The heatmap layer reads a <code>theme.heatmap</code> slice — <code>cell</code> (the sequential
+      color ramp <code>rampFrom</code> → <code>rampMid?</code> → <code>rampTo</code>, plus
+      <code>emptyColor</code>, <code>radius</code>, <code>stroke</code>,
+      <code>strokeWidth</code> and <code>opacity</code>), <code>bubble</code> for bubble mode, and
+      <code>label</code> for the per-cell value text. Every slot falls back to a
+      <code>--chart-*</code> token; a named <code>scheme</code> overrides the ramp entirely.
+    </p>
+
+    <!-- 1. Default -->
+    <section class="story-section">
+      <h4>Default Theme</h4>
+      <p class="story-description">
+        No overrides — the cell ramp runs <code>--chart-surface</code> →
+        <code>--chart-primary</code>, empty cells read
+        <code>--chart-surface-container-highest</code>, and the separators the surface token.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <!-- 2. Two-stop ramp -->
+    <section class="story-section">
+      <h4>Two-Stop Ramp (<code>cell.rampFrom</code> / <code>cell.rampTo</code>)</h4>
+      <p class="story-description">
+        Override the ramp endpoints for a straight two-stop gradient — here a light-to-dark blue
+        with matching value labels.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="twoStopRampConfig" />
+      </div>
+    </section>
+
+    <!-- 3. Three-stop ramp -->
+    <section class="story-section">
+      <h4>Three-Stop Ramp (<code>cell.rampMid</code>)</h4>
+      <p class="story-description">
+        Add a <code>rampMid</code> to insert a midpoint color — a cream → orange → dark-red heat
+        gradient, interpolated in HCL for a smooth transition.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="threeStopRampConfig" />
+      </div>
+    </section>
+
+    <!-- 4. Cell styling -->
+    <section class="story-section">
+      <h4>Cell Styling (<code>radius</code> / <code>stroke</code> / <code>emptyColor</code>)</h4>
+      <p class="story-description">
+        Round the cells with <code>cell.radius</code>, separate them with a thick white
+        <code>stroke</code>, and give empty (<code>null</code>) cells an explicit
+        <code>emptyColor</code>.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="cellStyleConfig" />
+      </div>
+    </section>
+
+    <!-- 5. Bubble mode theming -->
+    <section class="story-section">
+      <h4>Bubble Mode Theming (<code>theme.heatmap.bubble</code>)</h4>
+      <p class="story-description">
+        In <code>mark: 'bubble'</code> the circles take their fill / opacity / stroke from the
+        <code>bubble</code> slot — here a purple fill with a darker outline (radius still encodes
+        the value).
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="bubbleThemedConfig" />
+      </div>
+    </section>
+
+    <!-- 6. Named schemes side-by-side -->
+    <section class="story-section story-section--highlight">
+      <h4>Same Data, Three Named Schemes</h4>
+      <p class="story-description">
+        The identical grid rendered with three d3-scale-chromatic <code>scheme</code>s — one
+        <code>&lt;nge-chart&gt;</code> component, three sequential palettes.
+      </p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>viridis</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="compareViridisConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>ylOrRd</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="compareYlOrRdConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>blues</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="compareBluesConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

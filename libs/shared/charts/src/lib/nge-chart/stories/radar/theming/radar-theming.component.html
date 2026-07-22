@@ -1,0 +1,113 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Radar - Theming Examples</h2>
+    <p class="intro-text">
+      Series color resolves positionally — the series index maps to the theme
+      <code>radar.series.colors</code> palette (or the preset's <code>seriesColors</code>). Override
+      <code>theme.radar</code> to reskin each part: <code>series.colors</code> for the polygon
+      palette, <code>series.fillOpacity</code> / <code>series.lineWidth</code> /
+      <code>series.pointRadius</code> for the fill + outline + dots, and <code>axis</code> /
+      <code>grid</code> for the spoke + concentric-ring web. Light / dark is handled by the review
+      container.
+    </p>
+
+    <!-- Default Theme -->
+    <section class="story-section">
+      <h4>Default Theme</h4>
+      <p class="story-description">
+        No theme provided — uses the built-in <code>--chart-*</code> token palette, which adapts to
+        the surrounding light / dark surface.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <!-- Series Palette Overrides -->
+    <section class="story-section">
+      <h4>Series Palette Overrides</h4>
+      <p class="story-description">
+        Reskin the polygon palette with <code>theme.radar.series.colors</code>. The series index
+        maps to <code>colors[index % length]</code>, so the palette cycles for any series count.
+      </p>
+      <div class="themes-grid">
+        <div class="theme-item">
+          <span class="theme-label">Green</span>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="greenConfig" />
+          </div>
+        </div>
+        <div class="theme-item">
+          <span class="theme-label">Blue</span>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="blueConfig" />
+          </div>
+        </div>
+        <div class="theme-item">
+          <span class="theme-label">Red</span>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="redConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Web Styling -->
+    <section class="story-section">
+      <h4>Web Styling (spokes + grid rings)</h4>
+      <p class="story-description">
+        The <code>axis</code> and <code>grid</code> slices recolor the radial spokes and concentric
+        value rings independently of the data — tune the reference web so it recedes behind (or
+        frames) the series.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="webConfig" />
+      </div>
+    </section>
+
+    <!-- Area Emphasis -->
+    <section class="story-section">
+      <h4>Area Emphasis</h4>
+      <p class="story-description">
+        <code>series.fillOpacity</code>, <code>series.lineWidth</code> and
+        <code>series.pointRadius</code> tune the filled polygon — a denser fill, thicker outline,
+        and larger vertex dots emphasise each series boundary.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="areaConfig" />
+      </div>
+    </section>
+
+    <!-- Highlight: side-by-side comparison -->
+    <section class="story-section story-section--highlight">
+      <h4>Multiple Palettes Side by Side</h4>
+      <p class="story-description">
+        The same profile rendered with three palettes — swap
+        <code>theme.radar.series.colors</code> to rebrand without touching the data.
+      </p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>Green</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="comparisonGreen" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Blue</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="comparisonBlue" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Red</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="comparisonRed" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

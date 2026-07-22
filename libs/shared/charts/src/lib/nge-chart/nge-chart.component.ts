@@ -56,6 +56,13 @@ export class NgeChartComponent implements AfterViewInit, OnDestroy {
    */
   readonly chartGesture = output<NgeChartGestureEvent>();
 
+  /**
+   * When true, the default tooltip bubble chrome is dropped — a projected
+   * `#ngeChartTooltip` template becomes the ENTIRE tooltip (bring-your-own chrome).
+   * Defaults false (the built-in bubble renders as before).
+   */
+  readonly chromelessTooltip = input<boolean>(false);
+
   private readonly el = inject(ElementRef).nativeElement as HTMLElement;
   private readonly destroyRef = inject(DestroyRef);
 
@@ -228,7 +235,7 @@ export class NgeChartComponent implements AfterViewInit, OnDestroy {
       this.lastBubbleConfig.width !== bubbleConfig.width ||
       this.lastBubbleConfig.height !== bubbleConfig.height;
 
-    if (shapeChanged) {
+    if (!this.chromelessTooltip() && shapeChanged) {
       this.lastBubbleConfig = bubbleConfig;
 
       this.tooltipCalc.setConfig({

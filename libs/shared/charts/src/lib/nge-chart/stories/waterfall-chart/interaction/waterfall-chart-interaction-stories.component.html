@@ -1,0 +1,42 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Waterfall Chart - Interactive Controls</h2>
+    <p class="intro-text">
+      Use the Storybook controls panel to adjust the waterfall configuration in real-time. Toggle
+      <strong>cumulative</strong> for the running-total % overlay, <strong>connectors</strong> for
+      the step lines, and <strong>showTooltip</strong> for hover details. Press Randomize to re-roll
+      the movements.
+    </p>
+
+    <div class="interaction-row">
+      <button
+        type="button"
+        class="interaction-btn interaction-btn--primary"
+        (click)="randomizeData()"
+      >
+        Randomize Data
+      </button>
+    </div>
+
+    <div class="chart-container">
+      <nge-chart [config]="config()" />
+    </div>
+
+    <div class="controls-info">
+      <h4>Available Controls</h4>
+      <ul>
+        <li><strong>Margins:</strong> chart margins (leave room on the right for the % axis)</li>
+        <li><strong>Layout:</strong> bar padding and corner radius</li>
+        <li><strong>Visibility:</strong> value labels, step connectors, cumulative overlay</li>
+        <li><strong>Tooltip:</strong> enable / disable hover tooltips</li>
+        <li><strong>Axis Labels:</strong> X and Y axis titles</li>
+        <li
+          ><strong>Colors:</strong> rise / fall / total bar colors and the cumulative line color</li
+        >
+      </ul>
+    </div>
+  </div>
+</nge-storybook-review-container>

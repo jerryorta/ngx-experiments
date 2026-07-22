@@ -1,0 +1,126 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Stacked Bar Chart - Theming Examples</h2>
+
+    <!-- 1. Default Theme -->
+    <section class="story-section">
+      <h4>Default Theme</h4>
+      <p class="story-description">
+        No overrides — the four stack series pull their colors from the theme's
+        <code>stacked-bar.bar.colors</code> palette (which resolves to <code>var(--chart-*)</code>
+        tokens).
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <!-- 2. Ocean palette via seriesColors -->
+    <section class="story-section">
+      <h4>Custom Series Palette (seriesColors)</h4>
+      <p class="story-description">
+        The <code>seriesColors</code> preset option sets the per-series fill palette and colors the
+        legend swatches to match. Series index maps to <code>colors[index % length]</code>.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="oceanConfig" />
+      </div>
+    </section>
+
+    <!-- 3. Palette via theme slice -->
+    <section class="story-section">
+      <h4>Palette via <code>theme['stacked-bar'].bar.colors</code></h4>
+      <p class="story-description">
+        The same palette can be set on the theme slice instead of <code>seriesColors</code> — useful
+        when you compose a full theme object rather than passing options.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="paletteThemeConfig" />
+      </div>
+    </section>
+
+    <!-- 4. Segment separators -->
+    <section class="story-section">
+      <h4>Segment Separators + Radius</h4>
+      <p class="story-description">
+        <code>theme['stacked-bar'].bar.stroke</code> + <code>strokeWidth</code> carve a gap between
+        adjacent segments, and <code>radius</code> rounds their corners.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="separatorsConfig" />
+      </div>
+    </section>
+
+    <!-- 5. Label styling -->
+    <section class="story-section">
+      <h4>Value Label Styling</h4>
+      <p class="story-description">
+        Color, size, and weight of the per-segment value labels via
+        <code>theme['stacked-bar'].label</code> (with <code>showLabels</code> on).
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="labelStyledConfig" />
+      </div>
+    </section>
+
+    <!-- 6. Axis + grid -->
+    <section class="story-section">
+      <h4>Custom Axis + Gridlines</h4>
+      <p class="story-description">
+        Axis label / line / tick colors via <code>theme.axis</code> and gridline color / dash /
+        width via <code>theme.grid</code> (with <code>showYGrid</code> on).
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="axisGridConfig" />
+      </div>
+    </section>
+
+    <!-- 7. Palette variations side-by-side -->
+    <section class="story-section story-section--highlight">
+      <h4>Multiple Charts with Different Palettes</h4>
+      <p class="story-description">
+        The same stacked dataset rendered with three different <code>seriesColors</code> palettes.
+        Each chart is the same <code>&lt;nge-chart&gt;</code> component with a different config.
+      </p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>Ocean</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="oceanConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Warm</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="warmConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Forest</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="forestConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. Branded via --chart-* token overrides (light + dark) -->
+    <section class="story-section story-section--highlight">
+      <h4>Branded via <code>--chart-*</code> Token Overrides (light + dark)</h4>
+      <p class="story-description">
+        The layer's default palette resolves to <code>var(--chart-primary)</code>,
+        <code>var(--chart-secondary)</code>, <code>var(--chart-tertiary)</code>, and
+        <code>var(--chart-error)</code>. Override those tokens on an ancestor (never
+        <code>--mat-sys-*</code>) and the fills follow — no <code>seriesColors</code> in the config.
+        The overrides below are defined for BOTH the light and dark Storybook themes, so switch the
+        toolbar theme to see each set.
+      </p>
+      <div class="chart-container branded-tokens">
+        <nge-chart [config]="brandedConfig" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

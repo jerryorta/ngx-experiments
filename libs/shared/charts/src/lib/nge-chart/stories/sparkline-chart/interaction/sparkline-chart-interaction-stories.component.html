@@ -1,0 +1,35 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="interaction-container">
+    <p class="interaction-hint">
+      Drive every variant from the Storybook <strong>Controls</strong> panel — compact toggles, the
+      last-value dot, tooltips, and the win/loss/tie colours.
+    </p>
+
+    @let lineCfg = lineConfig();
+    <section class="variant">
+      <h5>Line Sparkline</h5>
+      <div class="chart-wrapper chart-wrapper--sparkline">
+        <nge-chart [config]="lineCfg" />
+      </div>
+    </section>
+
+    @let columnCfg = columnConfig();
+    <section class="variant">
+      <h5>Column Sparkline</h5>
+      <div class="chart-wrapper chart-wrapper--sparkline">
+        <nge-chart [config]="columnCfg" />
+      </div>
+    </section>
+
+    @let winLossCfg = winLossConfig();
+    <section class="variant">
+      <h5>Win-Loss Sparkline</h5>
+      <div class="chart-wrapper chart-wrapper--winloss">
+        <nge-chart [config]="winLossCfg" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

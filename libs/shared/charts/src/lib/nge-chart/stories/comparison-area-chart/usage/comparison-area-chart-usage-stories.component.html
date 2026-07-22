@@ -1,0 +1,137 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Comparison Area Chart - Usage Examples</h2>
+    <p class="intro-text">
+      Overlaid, area-filled scenarios for comparing 2–3 competing mortgage loans. Each loan is a
+      separate series (via <code>seriesId</code>); the low-opacity fills stay translucent so every
+      band is readable through the ones on top. Areas are <strong>overlaid, not stacked</strong> —
+      competing options don't sum to a whole.
+    </p>
+
+    <!-- EXAMPLE 1: Remaining balance over term -->
+    <section class="story-section story-section--highlight">
+      <h4>1. Remaining Balance Over Term</h4>
+      <p class="story-description">
+        Three loans on the same
+        <code>{{ comparisonPrincipal | currency: "USD" : "symbol" : "1.0-0" }}</code> principal.
+        <code>createComparisonAreaChartConfig()</code> defaults <code>showArea</code> on,
+        <code>curveType: 'monotone'</code>, points off, and the legend on. Pass
+        <code>seriesColors</code> to give each scenario a distinct band.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  ...amortize('30-yr @ 6.5%', 400000, 6.5, 30, 'balance'),
+  ...amortize('15-yr @ 5.75%', 400000, 5.75, 15, 'balance'),
+  ...amortize('30-yr refi @ 6.0%', 400000, 6.0, 30, 'balance'),
+];
+
+config = createComparisonAreaChartConfig({{ "{" }}
+  data,
+  seriesColors: ['#2196F3', '#4CAF50', '#FF9800'],
+  showXAxis: true,
+  showYAxis: true,
+  xAxisLabel: 'Year',
+  yAxisLabel: 'Remaining balance',
+{{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="balanceConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Cumulative interest paid -->
+    <section class="story-section">
+      <h4>2. Cumulative Interest Paid</h4>
+      <p class="story-description">
+        The <strong>same three loans</strong>, switched to cumulative interest. Remaining balance
+        and cumulative interest are the two complementary views of a loan comparison — expose
+        <strong>both</strong> so a borrower sees the trade-off: the 15-yr clears its balance soonest
+        <em>and</em> pays the least total interest, while the 30-yr options keep the monthly cost
+        low but cost more over the life of the loan.
+      </p>
+      <div class="code-block">
+        <pre>
+// Same loans, y = cumulative interest instead of remaining balance
+config = createComparisonAreaChartConfig({{ "{" }}
+  data: interestData,
+  seriesColors: ['#2196F3', '#4CAF50', '#FF9800'],
+  showXAxis: true,
+  showYAxis: true,
+  xAxisLabel: 'Year',
+  yAxisLabel: 'Cumulative interest',
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="interestConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Click to select -->
+    <section class="story-section">
+      <h4>3. Click to Select a Scenario</h4>
+      <p class="story-description">
+        Provide an <code>onClick</code> callback and enable <code>showPoints</code> so each yearly
+        point is clickable. Here it records which loan and year the borrower picked.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createComparisonAreaChartConfig({{ "{" }}
+  data,
+  showPoints: true,
+  onClick: (event) => {{ "{" }}
+    select(event.data.seriesId, event.data.x, event.data.y);
+  {{ "}" }},
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="interaction-display"> <strong>Selected:</strong> {{ lastSelected() }} </div>
+      <div class="chart-container">
+        <nge-chart [config]="clickConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Dynamic rates with signals -->
+    <section class="story-section story-section--highlight">
+      <h4>4. Dynamic Rates With Signals</h4>
+      <p class="story-description">
+        <strong>Recommended pattern:</strong> keep the loan terms in a signal and rebuild the config
+        inside a <code>computed()</code>. Re-rolling the rates recomputes each amortization schedule
+        and the chart animates between states. Here <code>seriesColors</code> is omitted, so the
+        series fall through to the theme palette.
+      </p>
+      <div class="code-block">
+        <pre>
+loans = signal([
+  {{ "{" }} label: '30-yr', rate: 6.5, termYears: 30 {{ "}" }},
+  {{ "{" }} label: '15-yr', rate: 5.75, termYears: 15 {{ "}" }},
+]);
+
+config = computed(() =>
+  createComparisonAreaChartConfig({{ "{" }}
+    data: loans().flatMap(l => amortize(l.label, 400000, l.rate, l.termYears, 'balance')),
+  {{ "}" }})
+);</pre
+        >
+      </div>
+      <div class="interaction-row">
+        <button
+          class="action-button"
+          (click)="randomizeRates()"
+        >
+          Randomize Rates
+        </button>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

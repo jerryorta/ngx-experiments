@@ -54,6 +54,14 @@ export class NgeChartLegendComponent {
    * 'line' for line series, 'square' for bars. Default: 'square'
    */
   readonly swatchShape = input<'circle' | 'line' | 'square'>('square');
+  /**
+   * Item arrangement. 'flow' (default) lays entries in a centered, wrapping row.
+   * 'grid' lays them in a left-justified tabular grid whose columns align across
+   * rows — preferable when the legend wraps into multiple rows (e.g. a 2×N block),
+   * where centered flow rows leave the columns misaligned. Ignored for
+   * `orientation: 'vertical'` (already a single left-aligned column).
+   */
+  readonly layout = input<'flow' | 'grid'>('flow');
 
   /** Emitted when an interactive legend entry is clicked */
   readonly itemClick = output<NgeLegendItem>();

@@ -1,0 +1,240 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Area Chart - Usage Examples</h2>
+    <p class="intro-text">
+      Practical patterns for <code>createAreaChartConfig()</code>. The fill is the primary mark: a
+      single series fills from a zero baseline, multiple series can overlay or stack, and points
+      carrying <code>y0</code> become range bands. One <code>stackOffset</code> option switches
+      between stacked, 100% stacked, streamgraph, and diverging layouts.
+    </p>
+
+    <!-- EXAMPLE 1: Plain area -->
+    <section class="story-section story-section--highlight">
+      <h4>1. Plain Area (single series)</h4>
+      <p class="story-description">
+        The simplest form — points with no <code>seriesId</code> form one series that fills from a
+        zero baseline <code>[0, y]</code>. <code>showLine</code> strokes the top edge.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} x: 'Jan', y: 24 {{ "}" }},
+  {{ "{" }} x: 'Feb', y: 31 {{ "}" }},
+  // ...
+];
+
+config = createAreaChartConfig({{ "{" }}
+  data,
+  fillOpacity: 0.3,
+  showLine: true,
+  showXAxis: true,
+  showYAxis: true,
+{{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="plainConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Overlaid multi-series -->
+    <section class="story-section">
+      <h4>2. Overlaid Multi-Series (non-summing)</h4>
+      <p class="story-description">
+        Two independent series (each has a <code>seriesId</code>) with NO <code>stackOffset</code> —
+        both rise from zero and overlap. Keep <code>fillOpacity</code> low so every band reads
+        through the ones on top. Use this when the series don't sum to a whole.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} seriesId: 'Desktop', x: 'Jan', y: 30 {{ "}" }},
+  {{ "{" }} seriesId: 'Mobile',  x: 'Jan', y: 12 {{ "}" }},
+  // ...
+];
+
+config = createAreaChartConfig({{ "{" }}
+  data,
+  fillOpacity: 0.25,
+  legend: {{ "{" }} enabled: true {{ "}" }},
+  seriesColors: ['#1E88E5', '#8E24AA'],
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="overlaidConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Stacked -->
+    <section class="story-section">
+      <h4>3. Stacked Area (stackOffset: 'none')</h4>
+      <p class="story-description">
+        With 2+ series and <code>stackOffset: 'none'</code>, series stack from a zero baseline so
+        the top edge is the running total. Ideal for parts that sum to a meaningful whole.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createAreaChartConfig({{ "{" }}
+  data: trafficData, // Organic + Paid + Referral
+  legend: {{ "{" }} enabled: true {{ "}" }},
+  stackOffset: 'none',
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="stackedConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: 100% stacked -->
+    <section class="story-section">
+      <h4>4. 100% Stacked (stackOffset: 'expand')</h4>
+      <p class="story-description">
+        <code>stackOffset: 'expand'</code> normalises every column to <code>[0, 1]</code> — each
+        band shows its share of the total over time, regardless of the absolute magnitude.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createAreaChartConfig({{ "{" }}
+  data: trafficData,
+  stackOffset: 'expand', // each column → 0…1
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="expandConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Stream graph -->
+    <section class="story-section">
+      <h4>5. Stream Graph (stackOffset: 'wiggle')</h4>
+      <p class="story-description">
+        <code>stackOffset: 'wiggle'</code> centres the stack around a free-floating baseline for an
+        organic streamgraph. The y axis is usually dropped since the baseline is no longer zero.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createAreaChartConfig({{ "{" }}
+  data: trafficData,
+  stackOffset: 'wiggle',
+  showXAxis: true, // y axis omitted
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="streamConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Diverging -->
+    <section class="story-section">
+      <h4>6. Diverging (stackOffset: 'diverging')</h4>
+      <p class="story-description">
+        <code>stackOffset: 'diverging'</code> stacks positive series up from zero and negative
+        series down — best with mixed-sign data such as inflows vs. outflows.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} seriesId: 'Inflows',  x: 'Jan', y:  40 {{ "}" }},
+  {{ "{" }} seriesId: 'Outflows', x: 'Jan', y: -28 {{ "}" }},
+  // ...
+];
+
+config = createAreaChartConfig({{ "{" }}
+  data,
+  stackOffset: 'diverging',
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="divergingConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7: Range band -->
+    <section class="story-section story-section--highlight">
+      <h4>7. Range Band (y0)</h4>
+      <p class="story-description">
+        When points carry <code>y0</code>, the band spans <code>[y0, y]</code> (range mode) instead
+        of rising from zero — perfect for min/max ranges or confidence intervals.
+        <code>showLine</code> traces the upper edge.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} x: 'Jan', y0: 2, y: 9 {{ "}" }},  // low → high
+  {{ "{" }} x: 'Feb', y0: 3, y: 11 {{ "}" }},
+  // ...
+];
+
+config = createAreaChartConfig({{ "{" }} data, showLine: true {{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="rangeConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 8: Click to inspect -->
+    <section class="story-section">
+      <h4>8. Click to Inspect a Point</h4>
+      <p class="story-description">
+        Provide an <code>onClick</code> callback — invisible per-vertex targets make each point
+        clickable and hand back the source datum (<code>seriesId</code>, <code>x</code>,
+        <code>y</code>).
+      </p>
+      <div class="code-block">
+        <pre>
+config = createAreaChartConfig({{ "{" }}
+  data: trafficData,
+  onClick: (event) => {{ "{" }}
+    inspect(event.data.seriesId, event.data.x, event.data.y);
+  {{ "}" }},
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="interaction-display"> <strong>Clicked:</strong> {{ lastClicked() }} </div>
+      <div class="chart-container">
+        <nge-chart [config]="clickConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 9: Dynamic data with signals -->
+    <section class="story-section story-section--highlight">
+      <h4>9. Dynamic Data With Signals</h4>
+      <p class="story-description">
+        <strong>Recommended pattern:</strong> hold the data in a <code>signal()</code> and rebuild
+        the config inside a <code>computed()</code>. Re-rolling the values recomputes the config and
+        the area animates between states.
+      </p>
+      <div class="code-block">
+        <pre>
+liveData = signal(buildData());
+
+config = computed(() =>
+  createAreaChartConfig({{ "{" }} data: liveData(), showLine: true {{ "}" }})
+);</pre
+        >
+      </div>
+      <div class="interaction-row">
+        <button
+          class="action-button"
+          (click)="randomizeData()"
+        >
+          Randomize Data
+        </button>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

@@ -1,0 +1,112 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Distribution Chart - Theming Examples</h2>
+    <p class="intro-text">
+      The distribution layer reads a rich <code>theme.distribution</code> slice — <code>box</code>,
+      <code>median</code>, <code>mean</code>, <code>outlier</code> and <code>whisker</code> for box
+      mode, <code>violin</code> for KDE mode, and <code>point</code> (with a per-category
+      <code>colors</code> palette) for point mode. Every group falls back to a
+      <code>--chart-*</code>
+      token; override any of them with an explicit color.
+    </p>
+
+    <!-- 1. Default -->
+    <section class="story-section">
+      <h4>Default Theme</h4>
+      <p class="story-description">
+        No overrides — the box fills a translucent <code>--chart-primary</code>, the median reads
+        <code>--chart-secondary</code>, the mean glyph <code>--chart-tertiary</code>, outliers
+        <code>--chart-error</code>, and whiskers the muted <code>--chart-on-surface-variant</code>.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <!-- 2. Box / median / whisker recolor -->
+    <section class="story-section">
+      <h4
+        >Box, Median &amp; Whisker (<code>theme.distribution.box</code> / <code>median</code> /
+        <code>whisker</code>)</h4
+      >
+      <p class="story-description">
+        Recolor the three box-mode slots together — an explicit green box body, a dark-green median
+        line, and a slate whisker — for a fully bespoke box-and-whisker.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="boxRecolorConfig" />
+      </div>
+    </section>
+
+    <!-- 3. Violin color scheme -->
+    <section class="story-section">
+      <h4>Violin Color Scheme (<code>theme.distribution.violin</code>)</h4>
+      <p class="story-description">
+        In <code>render: 'violin'</code> the KDE body takes its fill / opacity / stroke from the
+        <code>violin</code> slot; here a purple density with a light inner-box median that stays
+        legible against the fill.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="violinConfig" />
+      </div>
+    </section>
+
+    <!-- 4. Points color scheme -->
+    <section class="story-section">
+      <h4>Points Palette (<code>theme.distribution.point.colors</code>)</h4>
+      <p class="story-description">
+        A per-category <code>point.colors</code> palette gives each class's beeswarm its own hue —
+        the category index maps to <code>colors[index % length]</code>.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="pointsConfig" />
+      </div>
+    </section>
+
+    <!-- 5. Horizontal + themed -->
+    <section class="story-section">
+      <h4>Horizontal + Themed</h4>
+      <p class="story-description">
+        Theming is orientation-agnostic: a warm amber box laid out horizontally (<code
+          >orientation: 'horizontal'</code
+        >) with a bold median and matching mean glyph.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="horizontalThemedConfig" />
+      </div>
+    </section>
+
+    <!-- 6. Box vs violin vs points side-by-side -->
+    <section class="story-section story-section--highlight">
+      <h4>Same Data, Three Render Modes</h4>
+      <p class="story-description">
+        The identical four distributions rendered box vs violin vs points, each with a coordinated
+        teal <code>theme.distribution</code> slice — one <code>&lt;nge-chart&gt;</code> component,
+        three <code>render</code> modes.
+      </p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>Box</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="compareBoxConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Violin</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="compareViolinConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Points</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="comparePointsConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

@@ -1,0 +1,36 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="custom-tooltip-demo">
+    <p class="hint">
+      Hover a point — the tooltip is a custom Angular template projected via
+      <code>#ngeChartTooltip</code>, not the built-in one. Toggle <strong>chromeless</strong> to
+      drop the default bubble so the template becomes the entire tooltip (its own chrome).
+    </p>
+    <div class="chart-wrapper">
+      <nge-chart
+        [config]="config()"
+        [chromelessTooltip]="chromeless()"
+      >
+        <ng-template
+          #ngeChartTooltip
+          let-content
+        >
+          <div
+            class="my-tooltip"
+            [class.my-tooltip--chromeless]="chromeless()"
+          >
+            <span
+              class="my-tooltip__dot"
+              [style.background]="colorOf(content)"
+            ></span>
+            <span class="my-tooltip__label">{{ content?.label }}</span>
+            <span class="my-tooltip__x">{{ xOf(content) }}</span>
+            <span class="my-tooltip__value">{{ content?.value }}</span>
+          </div>
+        </ng-template>
+      </nge-chart>
+    </div>
+  </div>
+</nge-storybook-review-container>

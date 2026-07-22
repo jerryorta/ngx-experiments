@@ -1,0 +1,59 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Histogram Chart - Interactive Controls</h2>
+    <p class="intro-text">
+      Use the Storybook controls panel to adjust the histogram in real-time. Switch
+      <strong>mode</strong> between histogram and rootogram, tune <strong>binCount</strong> for
+      granularity, toggle <strong>showLabels</strong> and <strong>showTooltip</strong>, and restyle
+      the bar / curve / node / label theme slots. Press Randomize to re-roll the sample.
+    </p>
+
+    <div class="interaction-row">
+      <button
+        type="button"
+        class="interaction-btn interaction-btn--primary"
+        (click)="randomizeData()"
+      >
+        Randomize Data
+      </button>
+    </div>
+
+    <div class="chart-container">
+      <nge-chart [config]="config()" />
+    </div>
+
+    <div class="controls-info">
+      <h4>Available Controls</h4>
+      <ul>
+        <li><strong>Margins:</strong> chart margins</li>
+        <li><strong>Layout:</strong> bin count and inter-bar gap</li>
+        <li
+          ><strong>Mode:</strong> histogram (bars from the axis) vs rootogram (bars hung from the
+          fitted normal curve)</li
+        >
+        <li
+          ><strong>Visibility:</strong> per-bin count labels, and the y = 0 residual baseline
+          (rootogram mode)</li
+        >
+        <li><strong>Tooltip:</strong> enable / disable hover tooltips</li>
+        <li><strong>Axis Labels:</strong> X and Y axis titles</li>
+        <li><strong>Bar Styling:</strong> fill color, opacity, corner radius, separator stroke</li>
+        <li><strong>Curve Styling:</strong> rootogram curve color and width (rootogram mode)</li>
+        <li
+          ><strong>Node Styling:</strong> rootogram curve-node color and radius — 0 hides them
+          (rootogram mode)</li
+        >
+        <li
+          ><strong>Zero Line Styling:</strong> color of the y = 0 residual baseline (when shown)</li
+        >
+        <li
+          ><strong>Label Styling:</strong> count-label color and font size (when labels are
+          shown)</li
+        >
+      </ul>
+    </div>
+  </div>
+</nge-storybook-review-container>

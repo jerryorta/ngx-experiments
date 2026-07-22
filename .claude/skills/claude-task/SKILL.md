@@ -65,17 +65,30 @@ For each ticket to create:
 2. **Identify the parent epic:**
    - If the user specifies an epic, use it
    - Otherwise, check the current branch name for a ticket key (e.g., `feature/CON-306-...`)
-   - Look up that ticket's parent epic using `mcp__claude_ai_Atlassian__getJiraIssue`
+   - Look up that ticket's parent epic via the plans-repo board command: `python3 ~/Dev/gigasoftware-plans/scripts/jira_to_md.py board --jql 'key = <KEY>'` → one-row JSON `[{key,status,category,type,priority,parent,summary}]`; read the `parent` field (the epic key). No `cloudId` needed here — the script authenticates itself.
    - Ask the user to confirm the epic if uncertain
 
-3. **Create each ticket** with `mcp__claude_ai_Atlassian__createJiraIssue`:
+3. **Create each ticket (born split)** — the tracker row lives in Jira; the description content lives in the local plan file. Run the born-split sequence (§5 of `~/Dev/gigasoftware-plans/AGENTS.md`):
+
+   **3a. Mint the KEY** with `mcp__claude_ai_Atlassian__createJiraIssue`:
    - **Project**: `CON`
    - **Issue type**: `Story`
    - **Parent**: The identified epic key
    - **Summary**: Concise title (under 80 chars)
-   - **Description**: Use this template:
+   - **Description**: a short stub only (e.g. `See plan file.`) — the full content goes to the local plan file in 3b, and the stub pass in 3c repoints Jira's description at that file. Do **not** put the template below into Jira.
+
+   **3b. Write the content** to the local plan file `~/Dev/gigasoftware-plans/con/<KEY>.md` (board = lowercased key prefix, so `con/` for `CON-…`; the filename keeps the upper-case key). Front matter followed by the ticket body:
 
    ```markdown
+   ---
+   jira: <KEY>
+   project: CON
+   board: con
+   type: Story
+   epic: <EPIC-KEY>
+   summary: <the summary>
+   ---
+
    ## Summary
 
    <1-2 sentence description of what needs to be done and why>
@@ -96,6 +109,8 @@ For each ticket to create:
    - [ ] <Criterion 1>
    - [ ] <Criterion 2>
    ```
+
+   **3c. Stub Jira's description** so it points at the file: `python3 ~/Dev/gigasoftware-plans/scripts/jira_to_md.py stub <KEY>` (writes a one-line summary + GitHub-blob link into Jira's description; needs `write:jira-work`).
 
 4. **Add the `claude-task` label** to the ticket:
    ```
@@ -175,5 +190,5 @@ If the `jira-mcp` MCP server is not available or the API token is expired/invali
 - If no epic can be identified, ask the user which epic to use
 - If the `claude-task` label doesn't exist yet in Jira, it will be created automatically when first applied
 - If transition to "Selected for Development" fails, report but continue — the ticket is still created
-- Never create duplicate tickets — check existing tickets under the epic first if unsure
+- Never create duplicate tickets — check existing tickets under the epic first if unsure (via `python3 ~/Dev/gigasoftware-plans/scripts/jira_to_md.py board --jql 'parent = <EPIC-KEY>'`, not the Atlassian MCP)
 - If the Jira API token is missing or invalid, prompt the user to create one (see Jira API Credentials above)

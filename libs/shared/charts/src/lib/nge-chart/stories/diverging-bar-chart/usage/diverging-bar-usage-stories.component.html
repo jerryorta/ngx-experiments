@@ -1,0 +1,242 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Diverging Bar Chart - Usage Examples</h2>
+    <p class="intro-text">
+      Practical examples showing common usage patterns for the diverging bar chart. Diverging bars
+      show a single value that extends from a center (zero) point toward the positive (right) or
+      negative (left) side of a range - ideal for momentum, variance, sentiment, and "above / below
+      target" indicators.
+    </p>
+
+    <!-- EXAMPLE 1: Basic Usage -->
+    <section class="story-section">
+      <h4>1. Basic Usage</h4>
+      <p class="story-description">
+        Simplest way to create a diverging bar chart using
+        <code>createDivergingBarChartConfig()</code>. Provide <code>min</code>, <code>max</code>,
+        and <code>value</code>. A positive value extends right from the center; a negative value
+        extends left.
+      </p>
+      <div class="code-block">
+        <pre>
+data: NgeDivergingBarDataPoint = {{ "{" }}
+  min: -100,
+  max: 100,
+  value: 35,
+  units: ' pts',
+{{ "}" }};
+
+config = createDivergingBarChartConfig({{ "{" }}
+  data: this.data,
+{{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="basicConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: With Tooltip -->
+    <section class="story-section">
+      <h4>2. With Tooltip</h4>
+      <p class="story-description">
+        Enable tooltips to show the current value on hover. The default formatter prefixes positive
+        values with <code>+</code> and appends the data point's <code>units</code>.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createDivergingBarChartConfig({{ "{" }}
+  data: this.data,
+  tooltip: {{ "{" }} enabled: true {{ "}" }},
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="tooltipConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Positive vs Negative -->
+    <section class="story-section">
+      <h4>3. Positive vs Negative</h4>
+      <p class="story-description">
+        The bar direction and color follow the sign of <code>value</code>. Here the same range
+        models market momentum: a <strong>Seller's Market</strong> (positive), a near-<strong
+          >Balanced</strong
+        >
+        market, and a <strong>Buyer's Market</strong> (negative).
+      </p>
+      <div class="status-grid">
+        <div class="status-item">
+          <span class="status-label status-label--success">Seller's Market (+62)</span>
+          <div class="chart-container">
+            <nge-chart [config]="sellersMarketConfig" />
+          </div>
+        </div>
+        <div class="status-item">
+          <span class="status-label status-label--neutral">Balanced (+4)</span>
+          <div class="chart-container">
+            <nge-chart [config]="balancedMarketConfig" />
+          </div>
+        </div>
+        <div class="status-item">
+          <span class="status-label status-label--error">Buyer's Market (-58)</span>
+          <div class="chart-container">
+            <nge-chart [config]="buyersMarketConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Custom Colors -->
+    <section class="story-section">
+      <h4>4. Custom Colors</h4>
+      <p class="story-description">
+        Set <code>positiveColor</code> and <code>negativeColor</code> on the data point to override
+        the default green / red. Whichever color matches the value's sign is used for the bar and
+        value marker.
+      </p>
+      <div class="code-block">
+        <pre>
+data = {{ "{" }}
+  min: -100,
+  max: 100,
+  value: 28,
+  units: '%',
+  positiveColor: '#1E88E5', // blue for positive
+  negativeColor: '#EF6C00', // orange for negative
+{{ "}" }};</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="customColorsConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Click Handling -->
+    <section class="story-section">
+      <h4>5. Click Handling</h4>
+      <p class="story-description">
+        Handle clicks by providing an <code>onClick</code> callback in the config. The event carries
+        the full data point.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createDivergingBarChartConfig({{ "{" }}
+  data: this.data,
+  onClick: (event) => {{ "{" }}
+    console.log('Clicked:', event.data.value);
+  {{ "}" }},
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="interaction-display"> <strong>Last clicked:</strong> {{ lastClicked() }} </div>
+      <div class="chart-container">
+        <nge-chart [config]="clickableConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Dynamic Data with Signals -->
+    <section class="story-section story-section--highlight">
+      <h4>6. Dynamic Data with Signals</h4>
+      <p class="story-description">
+        <strong>Recommended pattern:</strong> use a computed signal to rebuild the config when data
+        changes. The bar animates smoothly and flips color as the value crosses the center.
+      </p>
+      <div class="code-block">
+        <pre>
+dynamicValue = signal(30);
+
+dynamicData = computed(() => ({{ "{" }}
+  min: -100,
+  max: 100,
+  value: this.dynamicValue(),
+  units: ' pts',
+{{ "}" }}));
+
+dynamicConfig = computed(() =>
+  createDivergingBarChartConfig({{ "{" }}
+    data: this.dynamicData(),
+    tooltip: {{ "{" }} enabled: true {{ "}" }},
+  {{ "}" }})
+);
+
+&lt;nge-chart [config]="dynamicConfig()" /&gt;</pre
+        >
+      </div>
+      <div class="interaction-row">
+        <button
+          class="action-button"
+          (click)="decrementValue()"
+          >- 20</button
+        >
+        <span class="value-display">{{ dynamicValue() }}</span>
+        <button
+          class="action-button"
+          (click)="incrementValue()"
+          >+ 20</button
+        >
+        <button
+          class="action-button action-button--secondary"
+          (click)="randomizeValue()"
+          >Random</button
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7: Custom Center Label -->
+    <section class="story-section">
+      <h4>7. Custom Center Label</h4>
+      <p class="story-description">
+        The bubble above the zero point defaults to <code>Balanced</code>. Override it with
+        <code>centerLabel</code> to match your domain (e.g. <code>Fair Value</code>,
+        <code>Neutral</code>, <code>On Target</code>).
+      </p>
+      <div class="code-block">
+        <pre>
+config = createDivergingBarChartConfig({{ "{" }}
+  data: {{ "{" }} min: -50, max: 50, value: -12, units: '%' {{ "}" }},
+  centerLabel: 'Fair Value',
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="centerLabelConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 8: Custom Dimensions -->
+    <section class="story-section">
+      <h4>8. Custom Dimensions</h4>
+      <p class="story-description">
+        Customize the height of the bar and the size of the value, center, and limit indicators for
+        different visual weights.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createDivergingBarChartConfig({{ "{" }}
+  data: this.data,
+  barHeight: 16,
+  valueIndicatorHeight: 46,
+  valueIndicatorWidth: 8,
+  centerIndicatorHeight: 46,
+  centerIndicatorWidth: 4,
+  limitIndicatorHeight: 40,
+  limitIndicatorWidth: 3,
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container chart-container--tall">
+        <nge-chart [config]="customDimensionsConfig" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

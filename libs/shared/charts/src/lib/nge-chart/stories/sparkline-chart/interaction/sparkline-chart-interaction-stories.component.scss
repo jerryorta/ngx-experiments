@@ -1,0 +1,39 @@
+.sparkline-chart-interaction-stories {
+  display: block;
+  padding: 20px;
+
+  .interaction-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .interaction-hint {
+    margin-bottom: 20px;
+    color: var(--chart-on-surface-variant, #666);
+    font-size: 14px;
+  }
+
+  .variant {
+    margin-bottom: 28px;
+
+    h5 {
+      margin-bottom: 8px;
+      color: var(--chart-on-surface, #333);
+    }
+  }
+
+  // Sparklines are short and wide — a fraction of a full chart's height.
+  .chart-wrapper {
+    height: 90px;
+    border: 1px solid var(--chart-outline-variant, #e0e0e0);
+    border-radius: 8px;
+    padding: 12px;
+    background: var(--chart-surface, #fff);
+    overflow: visible; // Allow the last-value dot to sit at the very edge
+
+    // The win-loss variant needs a touch more height for the up/down marks.
+    &--winloss {
+      height: 110px;
+    }
+  }
+}

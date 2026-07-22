@@ -1,0 +1,192 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Pie Chart - Usage Examples</h2>
+    <p class="intro-text">
+      Practical examples for the pie / donut / semi-circle layer. One radial primitive fans out
+      across three shapes via config: a full <strong>pie</strong> (<code>innerRadius: 0</code>), a
+      <strong>donut</strong> (<code>innerRadius</code> as a ratio 0–1 carves the center hole), and a
+      <strong>semi-circle / gauge</strong> (<code>startAngle</code> / <code>endAngle</code> sweep in
+      radians). Each datum's <code>value</code> maps to a proportional arc.
+    </p>
+
+    <!-- EXAMPLE 1: Basic Pie -->
+    <section class="story-section">
+      <h4>1. Basic Pie</h4>
+      <p class="story-description">
+        Simplest way to create a pie chart using <code>createPieChartConfig()</code>. Provide an
+        array of <code>{{ "{" }} label, value {{ "}" }}</code> data points — one slice per point, in
+        input order.
+      </p>
+      <div class="code-block">
+        <pre>
+data: NgePieDataPoint[] = [
+  {{ "{" }} label: 'Rent', value: 1800 {{ "}" }},
+  {{ "{" }} label: 'Food', value: 600 {{ "}" }},
+  {{ "{" }} label: 'Transit', value: 300 {{ "}" }},
+  {{ "{" }} label: 'Utilities', value: 250 {{ "}" }},
+  {{ "{" }} label: 'Savings', value: 450 {{ "}" }},
+];
+
+config = createPieChartConfig({{ "{" }} data: this.data {{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="basicConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Donut -->
+    <section class="story-section">
+      <h4>2. Donut</h4>
+      <p class="story-description">
+        <code>innerRadius</code> is a <strong>ratio</strong> (0–1) of the self-computed outer
+        radius, not pixels — so it stays resize-safe. <code>0.6</code> carves a center hole 60% of
+        the radius.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createPieChartConfig({{ "{" }}
+  data: this.data,
+  innerRadius: 0.6, // donut
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="donutConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Semi-circle Donut -->
+    <section class="story-section">
+      <h4>3. Semi-circle Donut (Gauge)</h4>
+      <p class="story-description">
+        <code>startAngle</code> and <code>endAngle</code> are in <strong>radians</strong>. Sweeping
+        less than a full turn produces a semi-circle / gauge. Here
+        <code>-&pi;/2 &rarr; &pi;/2</code> draws the top half.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createPieChartConfig({{ "{" }}
+  data: this.data,
+  innerRadius: 0.5,
+  startAngle: -Math.PI / 2,
+  endAngle: Math.PI / 2,
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="semiCircleConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Custom Slice Colors -->
+    <section class="story-section">
+      <h4>4. Custom Slice Colors</h4>
+      <p class="story-description">
+        Pass a <code>seriesColors</code> palette — slice input index maps to
+        <code>colors[index % length]</code>. A per-datum <code>color</code> on any data point wins
+        over the palette for that one slice.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createPieChartConfig({{ "{" }}
+  data: this.data,
+  seriesColors: ['#1E88E5', '#43A047', '#FB8C00', '#8E24AA', '#00ACC1'],
+{{ "}" }});
+
+// Or override a single slice on the datum:
+// {{ "{" }} label: 'Savings', value: 450, color: '#00ACC1' {{ "}" }}</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="customColorsConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Tooltip on Hover -->
+    <section class="story-section">
+      <h4>5. Tooltip on Hover</h4>
+      <p class="story-description">
+        Enable tooltips with <code>tooltip: {{ "{" }} enabled: true {{ "}" }}</code
+        >. The default formatter shows the slice <code>label</code> and raw <code>value</code>;
+        hover a slice to see it.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createPieChartConfig({{ "{" }}
+  data: this.data,
+  innerRadius: 0.5,
+  tooltip: {{ "{" }} enabled: true {{ "}" }},
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="tooltipConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Click Handling -->
+    <section class="story-section">
+      <h4>6. Click Handling</h4>
+      <p class="story-description">
+        Provide an <code>onClick</code> callback in the config. The event carries the full data
+        point for the clicked slice.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createPieChartConfig({{ "{" }}
+  data: this.data,
+  onClick: (event) => {{ "{" }}
+    console.log('Clicked:', event.data.label, event.data.value);
+  {{ "}" }},
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="interaction-display"> <strong>Last clicked:</strong> {{ lastClicked() }} </div>
+      <div class="chart-container">
+        <nge-chart [config]="clickableConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7: With a Legend -->
+    <section class="story-section story-section--highlight">
+      <h4>7. With a Legend</h4>
+      <p class="story-description">
+        The pie layer is inherently categorical — pair it with
+        <code>extractPieChartLegendItems(data)</code> to build a legend whose swatches match the
+        slices exactly. Combined here with a computed signal config so the legend + slices rebuild
+        together when the data changes.
+      </p>
+      <div class="code-block">
+        <pre>
+legendConfig = computed(() => ({{ "{" }}
+  ...createPieChartConfig({{ "{" }} data: this.data(), innerRadius: 0.55 {{ "}" }}),
+  legend: {{ "{" }}
+    enabled: true,
+    items: extractPieChartLegendItems(this.data()),
+    position: 'right',
+    swatchShape: 'square',
+  {{ "}" }},
+{{ "}" }}));
+
+&lt;nge-chart [config]="legendConfig()" /&gt;</pre
+        >
+      </div>
+      <div class="interaction-row">
+        <button
+          class="action-button"
+          (click)="randomizeLegendData()"
+          >Randomize Data</button
+        >
+      </div>
+      <div class="chart-container chart-container--tall">
+        <nge-chart [config]="legendConfig()" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

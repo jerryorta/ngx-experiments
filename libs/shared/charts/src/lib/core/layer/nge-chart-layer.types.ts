@@ -1,5 +1,6 @@
 import type { Selection } from 'd3-selection';
 
+import type { ResolvedNgeChartAnimation } from '../animation';
 import type { NgeChartScales } from '../base-layout/nge-chart-base-layout.models';
 import type { NgeChartDimensions } from '../chart.models';
 import type { NgeTooltipConfig, NgeTooltipHandlers } from '../tooltip';
@@ -9,6 +10,15 @@ import type { NgeTooltipConfig, NgeTooltipHandlers } from '../tooltip';
  * Generic types allow each layer to define its own data, config, and theme types.
  */
 export interface NgeChartLayerContext<TData, TConfig, TTheme> {
+  /**
+   * Resolved enter/update/exit animation for this layer — durations + easing, with
+   * the standard defaults already applied and any chart-wide `config.animation`,
+   * per-layer `animationMs` shorthand, and per-layer `animation` override merged in
+   * by the renderer. Read `animation.enterMs` / `.updateMs` / `.exitMs` / `.easing`;
+   * NEVER hardcode a transition duration. See `core/animation`.
+   */
+  animation: ResolvedNgeChartAnimation;
+
   /**
    * The SVG group element to render into
    */

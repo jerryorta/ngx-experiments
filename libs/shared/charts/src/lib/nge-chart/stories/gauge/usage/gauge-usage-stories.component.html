@@ -1,0 +1,193 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Gauge - Usage Examples</h2>
+    <p class="intro-text">
+      Practical examples for the gauge (single-value meter) layer. One primitive fans out across the
+      meter family via two options: <code>shape</code> picks the form (<code
+        >{{ "{" }} 'arc' | 'linear' {{ "}" }}</code
+      >) and, for an arc, <code>indicator</code> picks the readout (<code
+        >{{ "{" }} 'fill' | 'needle' {{ "}" }}</code
+      >). A gauge renders ONE datum against its own <code>[min, max]</code> range — geometry is
+      self-computed from the container, so the cartesian axes stay off.
+    </p>
+
+    <!-- EXAMPLE 1: Solid Gauge -->
+    <section class="story-section">
+      <h4>1. Solid Gauge (Arc + Fill)</h4>
+      <p class="story-description">
+        The default gauge — <code>shape: 'arc'</code> with <code>indicator: 'fill'</code> grows a
+        filled value arc over the 270° speedometer sweep. Just pass the single
+        <code>data</code> point.
+      </p>
+      <div class="code-block">
+        <pre>
+data = {{ "{" }} min: 0, max: 100, value: 72, units: '%' {{ "}" }};
+
+config = createGaugeChartConfig({{ "{" }} data {{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="solidConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Angular Gauge -->
+    <section class="story-section">
+      <h4>2. Angular Gauge (Arc + Needle)</h4>
+      <p class="story-description">
+        <code>indicator: 'needle'</code> swings a needle to the value instead of filling the arc —
+        the classic dial gauge. The track stays as the full-sweep background.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createGaugeChartConfig({{ "{" }}
+  data: this.data,
+  indicator: 'needle',
+{{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="needleConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Progress Bar -->
+    <section class="story-section">
+      <h4>3. Progress Bar (Linear)</h4>
+      <p class="story-description">
+        <code>shape: 'linear'</code> draws a horizontal progress bar instead of an arc — the same
+        value / range, laid out as a rail + fill. <code>indicator</code> is ignored for linear.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createGaugeChartConfig({{ "{" }}
+  data: this.data,
+  shape: 'linear',
+{{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="linearConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Threshold Bands -->
+    <section class="story-section">
+      <h4>4. Threshold Bands</h4>
+      <p class="story-description">
+        <code>thresholds</code> paint ascending colored zones along the track — each entry's
+        <code>value</code> is the band's upper bound (read low → high). The needle / fill reads over
+        the top so you can see which zone the value lands in.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createGaugeChartConfig({{ "{" }}
+  data: this.data,
+  indicator: 'needle',
+  thresholds: [{{ "{" }} value: 50 {{ "}" }}, {{ "{" }} value: 80 {{ "}" }}, {{ "{" }} value: 100 {{
+            "}"
+          }}],
+{{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="thresholdConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Custom Sweep -->
+    <section class="story-section">
+      <h4>5. Custom Sweep (Half Gauge)</h4>
+      <p class="story-description">
+        <code>startAngle</code> / <code>endAngle</code> (radians, 0 = 12 o'clock, clockwise) reshape
+        the arc — here a 180° half gauge. <code>innerRadius</code> is a <strong>ratio</strong> (0–1)
+        of the self-computed outer radius, so it stays resize-safe.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createGaugeChartConfig({{ "{" }}
+  data: this.data,
+  startAngle: -Math.PI / 2, // 9 o'clock
+  endAngle: Math.PI / 2, //   3 o'clock
+  innerRadius: 0.55,
+{{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="semicircleConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Tooltip -->
+    <section class="story-section">
+      <h4>6. Tooltip</h4>
+      <p class="story-description">
+        <code>tooltip: {{ "{" }} enabled: true {{ "}" }}</code> shows the label + value (with units)
+        on hover, placed above the gauge center. Provide <code>formatContent</code> for a custom
+        readout.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createGaugeChartConfig({{ "{" }}
+  data: this.data,
+  tooltip: {{ "{" }} enabled: true {{ "}" }},
+{{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="tooltipConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7: Click Handling -->
+    <section class="story-section">
+      <h4>7. Click Handling</h4>
+      <p class="story-description">
+        Provide an <code>onClick</code> callback in the config. The event carries the full gauge
+        data point, so you can react to a selection.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createGaugeChartConfig({{ "{" }}
+  data: this.data,
+  onClick: (event) => {{ "{" }}
+    console.log('Clicked:', event.data.value);
+  {{ "}" }},
+{{ "}" }});</pre>
+      </div>
+      <div class="interaction-display"> <strong>Last clicked:</strong> {{ lastClicked() }} </div>
+      <div class="chart-container">
+        <nge-chart [config]="clickableConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 8: Dynamic Data with Signals -->
+    <section class="story-section story-section--highlight">
+      <h4>8. Dynamic Data with Signals</h4>
+      <p class="story-description">
+        Drive the gauge from a <code>signal</code> and rebuild the config with
+        <code>computed()</code>. Re-rolling the <code>value</code> animates the needle swing / arc
+        growth to its new position.
+      </p>
+      <div class="code-block">
+        <pre>
+dynamicValue = signal&lt;NgeGaugeDataPoint&gt;(this.data);
+
+dynamicConfig = computed(() =>
+  createGaugeChartConfig({{ "{" }} data: this.dynamicValue(), indicator: 'needle' {{ "}" }})
+);
+
+&lt;nge-chart [config]="dynamicConfig()" /&gt;</pre>
+      </div>
+      <div class="interaction-row">
+        <button
+          class="action-button"
+          (click)="randomizeValue()"
+          >Randomize Value</button
+        >
+      </div>
+      <div class="chart-container chart-container--tall">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

@@ -1,0 +1,59 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Distribution Chart - Interactive Controls</h2>
+    <p class="intro-text">
+      Use the Storybook controls panel to adjust the distribution in real-time. Switch
+      <strong>render</strong> between box, violin and points, flip <strong>orientation</strong>,
+      pick a <strong>whiskerStat</strong>, toggle <strong>showBox</strong> /
+      <strong>showOutliers</strong> / <strong>showMean</strong> / <strong>showInnerBox</strong>,
+      tune the <strong>jitter</strong> strategy, and restyle the box / violin / point theme slots.
+      Press Randomize to re-roll every endpoint's samples.
+    </p>
+
+    <div class="interaction-row">
+      <button
+        type="button"
+        class="interaction-btn interaction-btn--primary"
+        (click)="randomizeData()"
+      >
+        Randomize Data
+      </button>
+    </div>
+
+    <div class="chart-container">
+      <nge-chart [config]="config()" />
+    </div>
+
+    <div class="controls-info">
+      <h4>Available Controls</h4>
+      <ul>
+        <li><strong>Margins:</strong> chart margins</li>
+        <li
+          ><strong>Layout:</strong> render mode (box / violin / points), orientation, and box
+          width</li
+        >
+        <li
+          ><strong>Box:</strong> whisker statistic (IQR / min–max / ±σ / ±SE), and box / outlier /
+          mean visibility (box mode)</li
+        >
+        <li><strong>Violin:</strong> inner box, KDE kernel and resolution (violin mode)</li>
+        <li
+          ><strong>Points:</strong> jitter strategy, jitter width and marker radius (points
+          mode)</li
+        >
+        <li><strong>Tooltip:</strong> enable / disable hover tooltips and their position</li>
+        <li><strong>Axis Labels:</strong> X and Y axis titles</li>
+        <li><strong>Box Styling:</strong> box fill color and opacity (box mode)</li>
+        <li
+          ><strong>Median / Whisker Styling:</strong> median line and whisker colors (box mode)</li
+        >
+        <li><strong>Violin Styling:</strong> violin fill color and opacity (violin mode)</li>
+        <li><strong>Point Styling:</strong> point fill color and opacity (points mode)</li>
+        <li><strong>Outlier Styling:</strong> outlier point color (box mode)</li>
+      </ul>
+    </div>
+  </div>
+</nge-storybook-review-container>

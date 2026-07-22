@@ -1,0 +1,182 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Heatmap Chart - Usage Examples</h2>
+    <p class="intro-text">
+      Practical patterns for <code>createHeatmapChartConfig()</code>. Feed one cell per
+      <code>{{ "{" }} row, col, value {{ "}" }}</code> pair — rows sit on the y band axis, columns
+      on the x band axis. The default <code>mark: 'cell'</code> draws a color-encoded grid;
+      <code>mark: 'bubble'</code> a size-encoded one. Color comes from a named
+      <code>scheme</code> or, unset, the theme token ramp. A <code>value: null</code> marks an empty
+      cell.
+    </p>
+
+    <!-- EXAMPLE 1: Basic cell heatmap -->
+    <section class="story-section story-section--highlight">
+      <h4>1. Basic Cell Heatmap</h4>
+      <p class="story-description">
+        Simplest usage: pass one cell per row × column pair. The default
+        <code>mark: 'cell'</code> fills each cell from the theme token ramp; the
+        <code>null</code> South·Q4 cell renders empty and is excluded from the color domain.
+      </p>
+      <div class="code-block">
+        <pre>
+// one cell per row (region) × col (quarter) pair
+data = [
+  {{ "{" }} col: 'Q1', row: 'North', value: 42 {{ "}" }},
+  {{ "{" }} col: 'Q4', row: 'South', value: null {{ "}" }}, // empty cell
+  // ...
+];
+
+config = createHeatmapChartConfig({{ "{" }} data {{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="basicConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Bubble heatmap -->
+    <section class="story-section story-section--highlight">
+      <h4>2. Bubble Heatmap</h4>
+      <p class="story-description">
+        <code>mark: 'bubble'</code> swaps the cell rectangles for circles whose radius is
+        sqrt-scaled to the value (double-encoded with the ramp color).
+      </p>
+      <div class="code-block">
+        <pre>config = createHeatmapChartConfig({{ "{" }} data, mark: 'bubble' {{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="bubbleConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Named color scheme -->
+    <section class="story-section">
+      <h4>3. Named Color Scheme</h4>
+      <p class="story-description">
+        A named <code>scheme</code> (d3-scale-chromatic) overrides the theme token ramp — here the
+        perceptually-uniform <code>'viridis'</code>.
+      </p>
+      <div class="code-block">
+        <pre>config = createHeatmapChartConfig({{ "{" }} data, scheme: 'viridis' {{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="schemeConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Show values -->
+    <section class="story-section">
+      <h4>4. Show Values &amp; Empty Cells</h4>
+      <p class="story-description">
+        <code>showValues: true</code> prints each cell's value in the cell; empty
+        (<code>null</code>) cells stay blank.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createHeatmapChartConfig({{ "{" }} data, scheme: 'blues', showValues: true {{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="valuesConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Custom color domain -->
+    <section class="story-section">
+      <h4>5. Custom Color Domain</h4>
+      <p class="story-description">
+        <code>domain: [min, max]</code> pins the color scale instead of the data's own extent — so
+        several heatmaps can share one scale. Here the ramp spans a fixed <code>0–100</code>.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createHeatmapChartConfig({{ "{" }}
+  data,
+  domain: [0, 100],
+  scheme: 'ylOrRd',
+  showValues: true,
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="domainConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Click to inspect a cell -->
+    <section class="story-section">
+      <h4>6. Click to Inspect a Cell</h4>
+      <p class="story-description">
+        The <code>onClick</code> payload carries the whole cell (<code
+          >{{ "{" }} row, col, value {{ "}" }}</code
+        >), so you can drill into the clicked intersection.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createHeatmapChartConfig({{ "{" }}
+  data,
+  onClick: (event) => inspect(event.data.row, event.data.col, event.data.value),
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="interaction-display"> <strong>Clicked:</strong> {{ lastClicked() }} </div>
+      <div class="chart-container">
+        <nge-chart [config]="clickConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7: Dynamic data with signals -->
+    <section class="story-section">
+      <h4>7. Dynamic Data With Signals</h4>
+      <p class="story-description">
+        <strong>Recommended pattern:</strong> hold the grid in a <code>signal()</code> and rebuild
+        the config inside a <code>computed()</code>. Re-rolling the grid recolors every cell against
+        the new value extent.
+      </p>
+      <div class="code-block">
+        <pre>
+liveData = signal&lt;NgeHeatmapDataPoint[]&gt;(makeSalesGrid());
+
+config = computed(() => createHeatmapChartConfig({{ "{" }} data: liveData(), showValues: true {{
+            "}"
+          }}));
+
+&lt;nge-chart [config]="config()" /&gt;</pre
+        >
+      </div>
+      <div class="interaction-row">
+        <button
+          class="action-button"
+          (click)="randomizeData()"
+        >
+          Randomize Data
+        </button>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 8: Tooltip on hover -->
+    <section class="story-section story-section--highlight">
+      <h4>8. Tooltip on Hover</h4>
+      <p class="story-description">
+        <code>showTooltip: true</code> shows a follow-mouse tooltip with the cell's
+        <code>row · col</code> and value on hover. Override the content with
+        <code>tooltip.formatContent</code>.
+      </p>
+      <div class="code-block">
+        <pre>config = createHeatmapChartConfig({{ "{" }} data, showTooltip: true {{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="tooltipConfig" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

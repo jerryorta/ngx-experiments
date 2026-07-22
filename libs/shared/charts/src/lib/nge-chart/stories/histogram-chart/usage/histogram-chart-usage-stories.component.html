@@ -1,0 +1,166 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Histogram Chart - Usage Examples</h2>
+    <p class="intro-text">
+      Practical patterns for <code>createHistogramChartConfig()</code>. Feed RAW observations (<code
+        >{{ "{" }} value {{ "}" }}[]</code
+      >) — the layer bins them itself via <code>d3-array</code>'s <code>bin()</code> and draws one
+      frequency bar per bin on a continuous value axis. Set <code>mode: 'rootogram'</code> for a
+      Tukey hanging rootogram with a fitted normal curve.
+    </p>
+
+    <!-- EXAMPLE 1: Basic histogram -->
+    <section class="story-section story-section--highlight">
+      <h4>1. Basic Histogram</h4>
+      <p class="story-description">
+        Simplest usage: pass raw values and let the layer bin them into a frequency distribution (10
+        uniform bins by default).
+      </p>
+      <div class="code-block">
+        <pre>
+// raw observations — NOT pre-aggregated counts
+data = [{{ "{" }} value: 42 {{ "}" }}, {{ "{" }} value: 55 {{ "}" }}, {{ "{" }} value: 51 {{
+            "}"
+          }}, /* ... */];
+
+config = createHistogramChartConfig({{ "{" }} data {{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="basicConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Rootogram mode -->
+    <section class="story-section story-section--highlight">
+      <h4>2. Rootogram Mode</h4>
+      <p class="story-description">
+        <code>mode: 'rootogram'</code> fits a normal curve from the sample mean/σ and hangs each bar
+        from that expected frequency — a bar's gap to the axis is the fit residual. The fitted
+        expected-frequency curve is drawn behind the bars.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createHistogramChartConfig({{ "{" }}
+  data,
+  mode: 'rootogram', // hang bars from the fitted normal curve
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="rootogramConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Bin count -->
+    <section class="story-section">
+      <h4>3. Bin Count (granularity)</h4>
+      <p class="story-description">
+        <code>binCount</code> controls how many uniform bins span the data extent — more bins give a
+        finer-grained distribution.
+      </p>
+      <div class="code-block">
+        <pre>config = createHistogramChartConfig({{ "{" }} data, binCount: 24 {{ "}" }});</pre>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="fineBinsConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Explicit domain -->
+    <section class="story-section">
+      <h4>4. Explicit Domain</h4>
+      <p class="story-description">
+        Pin the binning range with <code>domain: [min, max]</code> so several histograms share
+        identical bin edges regardless of their own data extent.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createHistogramChartConfig({{ "{" }}
+  data,
+  binCount: 10,
+  domain: [0, 100], // fixed edges, independent of the data
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="domainConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Per-bin labels -->
+    <section class="story-section">
+      <h4>5. Per-Bin Count Labels</h4>
+      <p class="story-description">
+        <code>showLabels: true</code> prints each bin's observation count centered above its bar.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createHistogramChartConfig({{ "{" }} data, binCount: 8, showLabels: true {{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="labelsConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Click to inspect a bin -->
+    <section class="story-section">
+      <h4>6. Click to Inspect a Bin</h4>
+      <p class="story-description">
+        The <code>onClick</code> payload carries the <strong>bin</strong> (<code
+          >{{ "{" }} x0, x1, count {{ "}" }}</code
+        >), not a single datum — the interaction unit for a histogram is a bin.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createHistogramChartConfig({{ "{" }}
+  data,
+  onClick: (event) => inspect(event.data.x0, event.data.x1, event.data.count),
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="interaction-display"> <strong>Clicked bin:</strong> {{ lastClicked() }} </div>
+      <div class="chart-container">
+        <nge-chart [config]="clickConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7: Dynamic data with signals -->
+    <section class="story-section">
+      <h4>7. Dynamic Data With Signals</h4>
+      <p class="story-description">
+        <strong>Recommended pattern:</strong> hold the raw observations in a
+        <code>signal()</code> and rebuild the config inside a <code>computed()</code>. Re-rolling
+        the sample re-bins and re-fits the rootogram curve.
+      </p>
+      <div class="code-block">
+        <pre>
+liveData = signal&lt;NgeHistogramDataPoint[]&gt;(makeSamples());
+
+config = computed(() => createHistogramChartConfig({{ "{" }} data: liveData(), mode: 'rootogram' {{
+            "}"
+          }}));
+
+&lt;nge-chart [config]="config()" /&gt;</pre
+        >
+      </div>
+      <div class="interaction-row">
+        <button
+          class="action-button"
+          (click)="randomizeData()"
+        >
+          Randomize Data
+        </button>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

@@ -34,3 +34,13 @@
     font-weight: var(--nge-charts-tooltip-font-weight);
   }
 }
+
+// Chromeless: no SVG bubble — the projected content IS the tooltip, so it must
+// flow (static) to give the host its size; an absolute child would collapse it.
+.nge-charts-tooltip--chromeless {
+  width: auto;
+
+  .nge-charts-tooltip-content {
+    position: static;
+  }
+}

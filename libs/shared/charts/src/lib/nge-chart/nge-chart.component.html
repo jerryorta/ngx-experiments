@@ -32,6 +32,7 @@
 <!-- Tooltip always in DOM, positioned/shown via D3 for performance -->
 <nge-charts-tooltip
   [calc]="tooltipCalc"
+  [chromeless]="chromelessTooltip()"
   style="display: none"
 >
   @if (customTooltipTemplate(); as template) {

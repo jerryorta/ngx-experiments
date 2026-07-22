@@ -5,6 +5,7 @@ import { Delaunay } from 'd3-delaunay';
 import { select } from 'd3-selection';
 import 'd3-transition';
 
+import type { ResolvedNgeChartAnimation } from '../../core/animation';
 import type { NgeScatterDataPoint, NgeScatterLayerConfig } from '../../core/config';
 import type { NgeChartLayerContext } from '../../core/layer';
 import type { NgeScatterLayerTheme, ResolvedNgeScatterLayerTheme } from '../../core/theme';
@@ -107,6 +108,7 @@ export function renderScatterLayer(
   >
 ): void {
   const {
+    animation,
     bounds,
     config,
     data,
@@ -153,6 +155,7 @@ export function renderScatterLayer(
   scatterGroup.selectAll('.nge-scatter-point').interrupt();
 
   const params: RenderScatterParams = {
+    animation,
     baseRadius,
     colorByPoint,
     config,
@@ -176,6 +179,7 @@ export function renderScatterLayer(
 }
 
 interface RenderScatterParams {
+  animation: ResolvedNgeChartAnimation;
   baseRadius: number;
   /** Resolved color per datum: `point.color ?? series.color`. */
   colorByPoint: Map<NgeScatterDataPoint, string>;
@@ -314,7 +318,7 @@ function renderSeries(
   seriesArray: ScatterSeries[],
   params: RenderScatterParams
 ): void {
-  const animationMs = params.config.animationMs ?? 300;
+  const { animation } = params;
 
   const seriesGroups = group
     .selectAll<SVGGElement, ScatterSeries>('.nge-scatter-series')
@@ -333,7 +337,13 @@ function renderSeries(
   });
 
   // Exit
-  seriesGroups.exit().transition().duration(animationMs).style('opacity', 0).remove();
+  seriesGroups
+    .exit()
+    .transition()
+    .duration(animation.exitMs)
+    .ease(animation.easing)
+    .style('opacity', 0)
+    .remove();
 }
 
 /**
@@ -347,13 +357,18 @@ function renderPoints(
   series: ScatterSeries,
   params: RenderScatterParams
 ): void {
-  const { baseRadius, colorByPoint, config, mergedTheme, scales, tooltipConfig, tooltipHandlers } =
-    params;
+  const {
+    animation,
+    baseRadius,
+    colorByPoint,
+    config,
+    mergedTheme,
+    scales,
+    tooltipConfig,
+    tooltipHandlers,
+  } = params;
 
   const tooltipEnabled = tooltipConfig?.enabled && tooltipHandlers?.onTooltip;
-
-  // 0 during zoom/pan gestures so per-frame re-renders don't smear
-  const animationMs = config.animationMs ?? 300;
 
   // Data join
   const points = group
@@ -361,7 +376,14 @@ function renderPoints(
     .data(series.points, (d, i) => `${d.x}-${d.y}-${i}`);
 
   // Exit
-  points.exit().transition().duration(animationMs).attr('r', 0).attr('opacity', 0).remove();
+  points
+    .exit()
+    .transition()
+    .duration(animation.exitMs)
+    .ease(animation.easing)
+    .attr('r', 0)
+    .attr('opacity', 0)
+    .remove();
 
   // Enter — fill/stroke set synchronously with .style() so var() palette resolves
   const pointsEnter = points
@@ -389,7 +411,8 @@ function renderPoints(
   allPoints.style('cursor', config.onClick || tooltipEnabled ? 'pointer' : 'default');
   allPoints
     .transition()
-    .duration(animationMs)
+    .duration(animation.updateMs)
+    .ease(animation.easing)
     .attr('cx', d => getXPosition(d.x, scales))
     .attr('cy', d => getYPosition(d.y, scales))
     .attr('r', d => d.size ?? baseRadius)

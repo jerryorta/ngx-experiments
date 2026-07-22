@@ -91,4 +91,32 @@ describe('NgeChartLegendComponent', () => {
       expect(clicked).toHaveBeenCalledWith(items[1]);
     });
   });
+
+  describe('grid layout', () => {
+    const list = (fixture: ComponentFixture<NgeChartLegendComponent>): HTMLElement => {
+      const found = fixture.nativeElement.querySelector<HTMLElement>('.nge-chart-legend-list');
+      if (!found) throw new Error('No legend list rendered');
+      return found;
+    };
+
+    it('defaults to flow (no grid class)', async () => {
+      const fixture = await setup({ items });
+      expect(list(fixture).classList.contains('nge-chart-legend-list--grid')).toBe(false);
+    });
+
+    it('applies the tabular grid class when layout is "grid"', async () => {
+      const fixture = await setup({ items });
+      fixture.componentRef.setInput('layout', 'grid');
+      fixture.detectChanges();
+      expect(list(fixture).classList.contains('nge-chart-legend-list--grid')).toBe(true);
+    });
+
+    it('suppresses the grid class for vertical orientation (already a single column)', async () => {
+      const fixture = await setup({ items });
+      fixture.componentRef.setInput('layout', 'grid');
+      fixture.componentRef.setInput('orientation', 'vertical');
+      fixture.detectChanges();
+      expect(list(fixture).classList.contains('nge-chart-legend-list--grid')).toBe(false);
+    });
+  });
 });

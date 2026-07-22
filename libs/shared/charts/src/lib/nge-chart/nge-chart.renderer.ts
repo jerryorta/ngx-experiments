@@ -9,6 +9,7 @@ import type { NgeChartConfig } from '../core/config';
 import type { NgeChartGestureHandlers, NgeChartGesturesConfig } from '../core/gesture';
 import type { NgeTooltipHandlers } from '../core/tooltip';
 
+import { attachCrosshair } from '../core/crosshair';
 import { attachRangeAxisBrush } from '../core/gesture';
 import { renderLayers } from '../layers/layer-registry';
 import { createBarChartScales } from './nge-chart.bar.helpers';
@@ -170,6 +171,7 @@ export function renderChart(context: RenderChartContext): null | RenderChartResu
   renderLayers(
     config.layers.flat(),
     {
+      animation: config.animation,
       bounds: layers,
       dimensions,
       margins,
@@ -203,6 +205,20 @@ export function renderChart(context: RenderChartContext): null | RenderChartResu
       config.base ?? {},
       gestureHandler
     );
+    // Shared crosshair + shared multi-series tooltip (ARCH-213) — another sibling
+    // of the plot gestures on the same svg (namespaced `.ngeCrosshair`, additive).
+    // Opt-in via `config.base.crosshair`; detaches itself when unset.
+    attachCrosshair({
+      bounds,
+      clipPath: layers.attr('clip-path'),
+      crosshair: config.base?.crosshair,
+      dimensions,
+      layers: config.layers.flat(),
+      margins,
+      scales,
+      svg: select(svgNode),
+      tooltipHandler,
+    });
   }
 
   return {

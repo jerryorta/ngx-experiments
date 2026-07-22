@@ -1,0 +1,98 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Financial Chart - Theming Examples</h2>
+    <p class="intro-text">
+      The financial layer reads a <code>theme.financial</code> slice: <code>up</code> /
+      <code>down</code> (candlestick bodies + renko bricks — <code>color</code>,
+      <code>fillOpacity</code>, <code>stroke</code>, <code>strokeWidth</code>),
+      <code>wick</code> (candlestick high–low line + kagi connector), and <code>kagi</code> (the
+      yang / yin line colors and widths). Up defaults to green, down to red; override any of them
+      explicitly.
+    </p>
+
+    <!-- 1. Default -->
+    <section class="story-section">
+      <h4>Default Theme</h4>
+      <p class="story-description">
+        No overrides — up candles fill green (<code>#4caf50</code>), down candles red
+        (<code>#f44336</code>), and the wick reads the muted
+        <code>--chart-on-surface-variant</code>.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <!-- 2. Custom up / down colors -->
+    <section class="story-section">
+      <h4>Custom Up / Down Colors (<code>theme.financial.up</code> / <code>down</code>)</h4>
+      <p class="story-description">
+        Recolor both bodies — a teal up candle and an amber down candle, each with a matching
+        outline and a slate wick — for a fully bespoke candlestick palette.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="customUpDownConfig" />
+      </div>
+    </section>
+
+    <!-- 3. Hollow candlestick -->
+    <section class="story-section">
+      <h4>Hollow Candlestick (<code>up.fillOpacity: 0</code>)</h4>
+      <p class="story-description">
+        The classic hollow look: up candles drop their fill (<code>fillOpacity: 0</code>, outline
+        only) while down candles stay solid, so a session's direction reads from whether its body is
+        filled.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="hollowCandleConfig" />
+      </div>
+    </section>
+
+    <!-- 4. Recolored kagi -->
+    <section class="story-section">
+      <h4>Recolored Kagi (<code>theme.financial.kagi</code>)</h4>
+      <p class="story-description">
+        In <code>variant: 'kagi'</code> the yang (thick) / yin (thin) segments take their color and
+        width from the <code>kagi</code> slot — here an indigo yang widened against a thin orange
+        yin.
+      </p>
+      <div class="chart-container">
+        <nge-chart [config]="recoloredKagiConfig" />
+      </div>
+    </section>
+
+    <!-- 5. Candlestick vs kagi vs renko side-by-side -->
+    <section class="story-section story-section--highlight">
+      <h4>Same Data, Three Variants</h4>
+      <p class="story-description">
+        The identical OHLC series rendered candlestick vs kagi vs renko, each with a coordinated
+        teal
+        <code>theme.financial</code> slice — one <code>&lt;nge-chart&gt;</code> component, three
+        <code>variant</code> values.
+      </p>
+      <div class="chart-row">
+        <div class="chart-column">
+          <h5>Candlestick</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="compareCandlestickConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Kagi</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="compareKagiConfig" />
+          </div>
+        </div>
+        <div class="chart-column">
+          <h5>Renko</h5>
+          <div class="chart-container chart-container--small">
+            <nge-chart [config]="compareRenkoConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

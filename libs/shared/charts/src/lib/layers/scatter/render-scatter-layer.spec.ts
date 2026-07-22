@@ -6,6 +6,7 @@ import type { NgeChartLayerContext } from '../../core/layer';
 import type { NgeScatterLayerTheme } from '../../core/theme';
 import type { NgeTooltipEvent } from '../../core/tooltip';
 
+import { resolveAnimation } from '../../core/animation';
 import { renderScatterLayer } from './render-scatter-layer';
 
 type ScatterContext = NgeChartLayerContext<
@@ -49,6 +50,7 @@ function createContext(
   };
 
   const context: ScatterContext = {
+    animation: resolveAnimation(undefined, undefined, options.animationMs),
     bounds: select(g),
     config,
     data,

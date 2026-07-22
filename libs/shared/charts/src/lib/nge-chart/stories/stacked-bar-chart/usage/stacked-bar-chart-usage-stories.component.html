@@ -1,0 +1,190 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>Stacked Bar Chart - Usage Examples</h2>
+    <p class="intro-text">
+      Practical patterns for <code>createStackedBarChartConfig()</code>. Data is long-format —
+      <code>{{ "{" }} category, seriesId, value {{ "}" }}</code> rows where points sharing a
+      <code>category</code> stack into one column and points sharing a <code>seriesId</code> form
+      one series. A single family delivers three catalog types: plain stacked, 100% stacked, and
+      Marimekko.
+    </p>
+
+    <!-- EXAMPLE 1: Stacked Bar -->
+    <section class="story-section story-section--highlight">
+      <h4>1. Stacked Bar (stackOffset: 'none')</h4>
+      <p class="story-description">
+        Segments stack from a zero baseline, so each column's height is the quarter total and every
+        band reads as an absolute contribution. This is the default — omit <code>stackOffset</code>
+        for the same result.
+      </p>
+      <div class="code-block">
+        <pre>
+data = [
+  {{ "{" }} category: 'Q1', seriesId: 'Cloud',    value: 120 {{ "}" }},
+  {{ "{" }} category: 'Q1', seriesId: 'Licenses', value:  90 {{ "}" }},
+  // ...one row per series × quarter
+];
+
+config = createStackedBarChartConfig({{ "{" }}
+  data,
+  legend: {{ "{" }} enabled: true {{ "}" }},
+  seriesColors: ['#1E88E5', '#43A047', '#FB8C00', '#8E24AA'],
+  showLabels: true,
+  stackOffset: 'none',
+{{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="stackedConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: 100% Stacked Bar -->
+    <section class="story-section">
+      <h4>2. 100% Stacked Bar (stackOffset: 'expand')</h4>
+      <p class="story-description">
+        <code>stackOffset: 'expand'</code> normalises every column to full height, so each band
+        shows its share of the quarter total regardless of the absolute magnitude.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createStackedBarChartConfig({{ "{" }}
+  data, // Cloud + Licenses + Services + Support
+  stackOffset: 'expand', // each column → 0…100%
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="expandConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Marimekko -->
+    <section class="story-section story-section--highlight">
+      <h4>3. Marimekko (bandWidthAccessor + expand)</h4>
+      <p class="story-description">
+        Supply a <code>bandWidthAccessor</code> to make each column's WIDTH proportional to its
+        group total, then pair it with <code>stackOffset: 'expand'</code> for the classic mosaic
+        where BOTH dimensions encode data. Marimekko is always laid out vertically.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createStackedBarChartConfig({{ "{" }}
+  data,
+  bandWidthAccessor: (_category, total) => total, // width ∝ total
+  stackOffset: 'expand',                          // height → share
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="marimekkoConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Horizontal -->
+    <section class="story-section">
+      <h4>4. Horizontal Stacked Bar</h4>
+      <p class="story-description">
+        <code>orientation: 'horizontal'</code> swaps the band and value axes — the stack grows
+        left-to-right. Available for the plain and 100% modes (not Marimekko).
+      </p>
+      <div class="code-block">
+        <pre>
+config = createStackedBarChartConfig({{ "{" }}
+  data,
+  orientation: 'horizontal',
+  stackOffset: 'none',
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container chart-container--horizontal">
+        <nge-chart [config]="horizontalConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Value Labels + Tooltip -->
+    <section class="story-section">
+      <h4>5. Value Labels + Tooltip</h4>
+      <p class="story-description">
+        <code>showLabels</code> prints each segment's value in place, and <code>tooltip</code>
+        surfaces the series + category + value on hover.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createStackedBarChartConfig({{ "{" }}
+  data,
+  showLabels: true,
+  tooltip: {{ "{" }}
+    enabled: true,
+    position: 'follow-mouse',
+    width: 160,
+  {{ "}" }},
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="tooltipConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Click to inspect -->
+    <section class="story-section">
+      <h4>6. Click to Inspect a Segment</h4>
+      <p class="story-description">
+        Provide an <code>onClick</code> callback — each segment hands back its source datum
+        (<code>category</code>, <code>seriesId</code>, <code>value</code>).
+      </p>
+      <div class="code-block">
+        <pre>
+config = createStackedBarChartConfig({{ "{" }}
+  data,
+  onClick: (event) => {{ "{" }}
+    inspect(event.data.seriesId, event.data.category, event.data.value);
+  {{ "}" }},
+{{ "}" }});</pre
+        >
+      </div>
+      <div class="interaction-display"> <strong>Clicked:</strong> {{ lastClicked() }} </div>
+      <div class="chart-container">
+        <nge-chart [config]="clickConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7: Dynamic data with signals -->
+    <section class="story-section story-section--highlight">
+      <h4>7. Dynamic Data With Signals</h4>
+      <p class="story-description">
+        <strong>Recommended pattern:</strong> hold the data in a <code>signal()</code> and rebuild
+        the config inside a <code>computed()</code>. Re-rolling the values recomputes the config and
+        the segments animate between states.
+      </p>
+      <div class="code-block">
+        <pre>
+liveData = signal&lt;NgeStackedBarDataPoint[]&gt;(buildData());
+
+config = computed(() =>
+  createStackedBarChartConfig({{ "{" }} data: liveData(), stackOffset: 'none' {{ "}" }})
+);
+
+&lt;nge-chart [config]="config()" /&gt;</pre
+        >
+      </div>
+      <div class="interaction-row">
+        <button
+          class="action-button"
+          (click)="randomizeData()"
+        >
+          Randomize Data
+        </button>
+      </div>
+      <div class="chart-container">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>
