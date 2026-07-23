@@ -322,7 +322,7 @@ When invoked from `/epic-next` or `/epic-pipeline` (i.e. no human is sitting at 
    - Affected app: `apps/<app>/app/AGENTS.md`
    - UI library for the domain: `libs/<domain>/ui/AGENTS.md`
    - Store library: `libs/<domain>/store/AGENTS.md`
-   - Shared design library: `libs/shared/ui-design-library-deprecated/AGENTS.md`
+   - Shared design library: `libs/shared/ui-design-library/AGENTS.md` (also `libs/shared/ui-design-library-deprecated/AGENTS.md`, but only when the ticket touches a legacy app that still consumes it)
    - Domain-specific design library (if present): `libs/<domain>/design-library/AGENTS.md`
    - Theme library: `libs/<domain>/themes/AGENTS.md`
 
@@ -332,7 +332,7 @@ When invoked from `/epic-next` or `/epic-pipeline` (i.e. no human is sitting at 
 
 3. **During plan mode**, use the ticket description, comments, **every sub-task description from Phase 1** (each sub-task is a required slice of this story — the plan must cover all of them), acceptance criteria, **design comp summary from Phase 2.5**, and **AGENTS.md context** as requirements. Explore the codebase to understand:
    - Which files need to be created or modified
-   - Existing `dlc-*` or domain-prefixed design library components that can be reused (check `libs/shared/ui-design-library-deprecated` and domain design-library)
+   - Existing `dlc-*` or domain-prefixed design library components that can be reused (check `libs/shared/ui-design-library` and the domain design-library; `libs/shared/ui-design-library-deprecated` is legacy — read it for reference, never add to or reuse from it)
    - Existing patterns and conventions to follow (from AGENTS.md files)
    - Dependencies and related code
    - Testing approach
