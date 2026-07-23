@@ -1,0 +1,42 @@
+{
+  "_template": "Template only — NOT a board. `/epic-next`, `/epic-config`, `/epic-plan`, `/epic-pipeline` and `/epic-triage` glob `epic.*.json`, so this filename is deliberately outside that pattern. To create a board: copy to `epic.<board>.json` (e.g. `epic.nge.json`), fill in the epic key + workspace paths, and delete this key. `/epic-plan <EPIC-KEY>` writes the same file automatically and should be preferred — hand-authoring is the fallback. Jira project for this repo is NGE ('Ngx Exp'). Ticket CONTENT lives in ~/Dev/gigasoftware-plans/nge/<KEY>.md; Jira holds status only.",
+  "_workspaceShapes": "Library/Storybook epic (the common case here): app=apps/storybook-app, libraries.ui=libs/shared/<lib>, buildCommand='npx nx run storybook-app:build-storybook'. Ledger demo-app epic: app=apps/ledger, libraries.ui=libs/ledger/ui, libraries.store=libs/ledger/store, libraries.designLibrary=libs/ledger/design-library, routingFiles=['apps/ledger/app/src/app/app.routes.ts'], buildCommand='npm run b.app.ledger'.",
+  "name": "<epic summary, e.g. GigaChart layer expansion>",
+  "epicKey": "NGE-<n>",
+  "jql": "parent = NGE-<n> AND status = \"To Do\"",
+  "storyOrdering": "epic-description",
+  "groupLabel": "Wave",
+  "completionMessage": "All NGE-<n> stories are complete!",
+  "hybridMode": false,
+  "crossActor": null,
+  "mergeMode": "pr",
+  "epicBranch": null,
+  "commitScope": "charts",
+  "buildCommand": "npx nx run storybook-app:build-storybook",
+  "app": "apps/storybook-app",
+  "libraries": {
+    "ui": "libs/shared/ui-design-library",
+    "store": null,
+    "designLibrary": "libs/shared/ui-design-library"
+  },
+  "routingFiles": [],
+  "conventions": [
+    "Angular control flow only — @if / @for / @switch, never *ngIf / *ngFor",
+    "DI via inject(); signal inputs/outputs via input() / output() — never constructor injection or @Input() / @Output()",
+    "Separate .ts / .html / .scss / .spec.ts files per component — never inline template or styles",
+    "Component-scoped @ngrx/signals SignalStore for internal reactive state, provided at the component and colocated with it; design-library primitives keep intrinsic widget mechanics (CVA internals)",
+    "Tailwind utility classes by default; SCSS + BEM only for complex layout/animation Tailwind cannot express",
+    "@angular/material is BANNED in this repo — own-namespace CSS-var tokens (--nge-* / --dlc-* / --chart-*) with literal defaults instead",
+    "Design-library components: ViewEncapsulation.None + host class, SCSS wrapped in .dlc-<component> (never :host), dlc- selector prefix",
+    "Jest only — never Jasmine",
+    "Verify with `npx nx run-many -t lint test` (and `nx run storybook-app:build-storybook` for UI work) — this repo has no npm lint/test scripts"
+  ],
+  "designReferences": null,
+  "domainMemoryIndex": null,
+  "epicEvolutionRules": [
+    "Capture architectural shifts in THIS epic. When a story surfaces a constraint, pivot, or gap, update the subsequent stories that depend on the decision; do not silently absorb the change in the current story, and do not split the work into a separate epic.",
+    "Update downstream discovery / research stories with upstream decisions before they are picked up — discovery work should not re-derive choices that have already been settled in earlier stories of this epic.",
+    "Add newly-discovered work as CHILD tickets of THIS epic — never as prose in the epic description. Create them 'To Do' if ready to be worked next (`/epic-next`'s JQL only picks up 'To Do' stories), or 'Backlog' if deferred / not-yet-ready. Reference each in the wave plan as a one-line `KEY — summary` entry.",
+    "The epic description holds ONLY: the overall description, the wave order (one line per story, `KEY — summary`), and — at most — a few high-level pivot / architectural-lock bullets. NEVER put per-story implementation detail, acceptance criteria, locked-invariant prose, or follow-up specs in the epic; that detail lives in the child ticket whose scope it is (or the linked design docs). Scope must be readable from the child ticket alone. Keep the wave plan and the actual story set in sync as scope evolves — never let them drift, and never let an entry grow past one line."
+  ]
+}
