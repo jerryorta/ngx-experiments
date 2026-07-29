@@ -1,11 +1,11 @@
 ---
 name: create-storybook
-description: Generate Storybook story files for an Angular component. Creates the 4-file story set (stories.ts, wrapper component .ts/.html/.scss) with GigaStorybookReviewContainerComponent, theme switching, and Storybook controls. Use when creating stories for new or existing components, or when the user says "add a story", "create storybook", or "write stories for".
+description: Generate Storybook story files for an Angular component. Creates the 4-file story set (stories.ts, wrapper component .ts/.html/.scss) with NgeStorybookReviewContainerComponent, theme switching, and Storybook controls. Use when creating stories for new or existing components, or when the user says "add a story", "create storybook", or "write stories for".
 ---
 
 # Create Storybook Story Files
 
-Generate a complete Storybook story set for an Angular component. Every story uses the `GigaStorybookReviewContainerComponent` wrapper which provides theme switching, review status badges, and GitHub source links.
+Generate a complete Storybook story set for an Angular component. Every story uses the `NgeStorybookReviewContainerComponent` wrapper which provides theme switching, review status badges, and GitHub source links.
 
 ## When to Use
 
@@ -59,9 +59,9 @@ The `<story-name>` is typically the component name without the prefix (e.g., `dl
 ```typescript
 import { Component, ViewEncapsulation } from '@angular/core';
 import {
-  GigaStorybookReviewContainerComponent,
+  NgeStorybookReviewContainerComponent,
   REVIEW_STATUS,
-} from '@gigasoftware/themes/storybook';
+} from '@nge/storybook';
 // Import the component under review
 import { TargetComponent } from '../../path-to-component';
 
@@ -71,7 +71,7 @@ import { TargetComponent } from '../../path-to-component';
     class: '<story-name>-stories',
   },
   imports: [
-    GigaStorybookReviewContainerComponent,
+    NgeStorybookReviewContainerComponent,
     TargetComponent,
     // Add any other required imports (CommonModule, Material modules, etc.)
   ],
@@ -102,7 +102,7 @@ export class <StoryName>StoriesComponent {
 ### File 2: Wrapper Component Template (`<story-name>-stories.component.html`)
 
 ```html
-<giga-storybook-review-container
+<nge-storybook-review-container
   [reviewStatus]="reviewStatus"
   [storybookFilePath]="storybookFilePath"
 >
@@ -113,11 +113,11 @@ export class <StoryName>StoriesComponent {
   <!-- Add more sections showing different configurations -->
   <h4>With Options</h4>
   <target-component [someInput]="someValue"></target-component>
-</giga-storybook-review-container>
+</nge-storybook-review-container>
 ```
 
 **Template guidelines:**
-- Always wrap in `<giga-storybook-review-container>`
+- Always wrap in `<nge-storybook-review-container>`
 - Pass `[reviewStatus]` and `[storybookFilePath]`
 - Use `<h4>` tags to label different examples/sections
 - Show multiple configurations of the component (default, with options, disabled, error state, etc.)
@@ -213,8 +213,8 @@ When unsure about conventions, read an existing story as a reference:
 
 | Component | Path |
 |-----------|------|
-| Input | `libs/shared/ui-design-library-deprecated/src/lib/components/input/stories/input/` |
-| Input Code | `libs/shared/ui-design-library-deprecated/src/lib/components/input/stories/input-code/` |
-| Button | `libs/shared/ui-design-library-deprecated/src/lib/components/button/stories/buttons/` |
-| Autocomplete | `libs/shared/ui-design-library-deprecated/src/lib/components/autocomplete/stories/` |
-| Charts | `libs/shared/charts/src/lib/giga-chart/stories/` |
+| Input | `libs/shared/ui-design-library/src/lib/dlc-input/stories/` |
+| Button | `libs/shared/ui-design-library/src/lib/dlc-button/stories/` |
+| Select | `libs/shared/ui-design-library/src/lib/dlc-select/stories/` |
+| Autocomplete | `libs/shared/ui-design-library/src/lib/dlc-address-autocomplete/stories/` |
+| Charts | `libs/shared/charts/src/lib/nge-chart/stories/` |

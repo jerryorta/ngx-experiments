@@ -1,6 +1,6 @@
 ---
 name: create-chart-storybook
-description: Generate the 3-subdirectory Storybook story set for a GigaChart chart type (usage, theming, interaction). Creates 12 files total with GigaStorybookReviewContainerComponent, factory-based configs, signal inputs for interaction controls, and code examples in usage stories. Use when creating chart stories, or when the user says "add chart stories", "create chart storybook", "write stories for [chart type]", or mentions stories for bar/line/bullet/grouped-bar/scatter/diverging-bar charts.
+description: Generate the 3-subdirectory Storybook story set for a NgeChart chart type (usage, theming, interaction). Creates 12 files total with NgeStorybookReviewContainerComponent, factory-based configs, signal inputs for interaction controls, and code examples in usage stories. Use when creating chart stories, or when the user says "add chart stories", "create chart storybook", "write stories for [chart type]", or mentions stories for bar/line/bullet/grouped-bar/scatter/diverging-bar charts.
 ---
 
 # Create Chart Storybook Stories
@@ -19,10 +19,10 @@ Parse `$ARGUMENTS` to determine the chart type. Common chart types:
 
 | Chart Type | Preset Factory | Data Point Type |
 |-----------|---------------|----------------|
-| `bar-chart` | `createBarChartConfig()` | `GigaBarDataPoint` |
-| `line-chart` | `createLineChartConfig()` | `GigaLineDataPoint` |
-| `bullet-chart` | `createBulletChartConfig()` | `GigaBulletDataPoint` |
-| `grouped-bar-chart` | `createGroupedBarChartConfig()` | `GigaGroupedBarDataPoint` |
+| `bar-chart` | `createBarChartConfig()` | `NgeBarDataPoint` |
+| `line-chart` | `createLineChartConfig()` | `NgeLineDataPoint` |
+| `bullet-chart` | `createBulletChartConfig()` | `NgeBulletDataPoint` |
+| `grouped-bar-chart` | `createGroupedBarChartConfig()` | `NgeGroupedBarDataPoint` |
 | `scatter-chart` | `createScatterChartConfig()` | (check preset) |
 | `diverging-bar-chart` | `createDivergingBarChartConfig()` | (check preset) |
 
@@ -42,7 +42,7 @@ Parse `$ARGUMENTS` to determine the chart type. Common chart types:
 
 3. **Check for existing stories**:
    ```
-   Glob pattern: "libs/shared/charts/src/lib/giga-chart/stories/<chart-type>/**/*"
+   Glob pattern: "libs/shared/charts/src/lib/nge-chart/stories/<chart-type>/**/*"
    ```
    If all 3 subdirectories already exist, inform the user.
 
@@ -50,7 +50,7 @@ Parse `$ARGUMENTS` to determine the chart type. Common chart types:
 
 Stories live at:
 ```
-libs/shared/charts/src/lib/giga-chart/stories/<chart-type>/
+libs/shared/charts/src/lib/nge-chart/stories/<chart-type>/
 ├── usage/
 │   ├── <chart-type>-usage-stories.component.ts
 │   ├── <chart-type>-usage-stories.component.html
@@ -72,10 +72,30 @@ libs/shared/charts/src/lib/giga-chart/stories/<chart-type>/
 - Usage and interaction wrapper components: `<chart-type>-<subdir>-stories.component.*`
 - Theming wrapper component: `<chart-type>-theming.component.*` (NO `-stories` suffix)
 - All `.stories.ts` files: `<chart-type>-<subdir>.stories.ts`
-- Class names follow the same pattern:
-  - Usage: `<ChartType>UsageStoriesComponent`
-  - Theming: `<ChartType>ThemingComponent` (NO "Stories" suffix)
-  - Interaction: `<ChartType>InteractionStoriesComponent`
+- Class names follow the same pattern, and are **always `Nge`-prefixed** — file names are not
+  (settled in ARCH-261; reasoning in `libs/shared/charts/AGENTS.md`):
+  - Usage: `Nge<ChartType>UsageStoriesComponent`
+  - Theming: `Nge<ChartType>ThemingComponent` (NO "Stories" suffix)
+  - Interaction: `Nge<ChartType>InteractionStoriesComponent`
+- Selectors and `host.class`: **always `nge-`prefixed** — `nge-<chart-type>-usage-stories`,
+  `nge-<chart-type>-theming`, `nge-<chart-type>-interaction-stories` (ARCH-256). File names
+  stay bare; only the selector, host class and TS class name carry the prefix.
+
+**Two namespaces, not one — the rule most easily got wrong (settled in ARCH-256):**
+
+| What | Namespace |
+| --- | --- |
+| Story selector / `host.class` / SCSS root wrapper | plain `nge-` — `nge-bar-chart-theming` |
+| Every class *inside* a story template | `nge-story-*` — `nge-story-chart-container` |
+| Anything the chart runtime emits | `nge-chart-*` / `nge-<layer>-*` — **never yours to write** |
+
+The charts library uses `ViewEncapsulation.None` in 90 components, so every class a story emits is
+global. A story class of `nge-chart-container` or `nge-chart-wrapper` would **collide with what
+the runtime already emits** (`nge-chart.component.scss`, `nge-chart-base-layout.ts`) and the
+story's `height: 300px; border` rule would then style the internals of every chart in Storybook.
+`nge-story-` keeps story scaffolding permanently disjoint from a runtime namespace that ARCH-175
+keeps growing. An existing `story-` / `stories-` prefix **collapses rather than stutters**:
+`stories-container` → `nge-story-container`, not `nge-story-stories-container`.
 
 ## Phase 3: Generate the 12 Files
 
@@ -87,27 +107,27 @@ libs/shared/charts/src/lib/giga-chart/stories/<chart-type>/
 
 ```typescript
 import { Component, computed, signal, ViewEncapsulation } from '@angular/core';
-import { GigaStorybookReviewContainerComponent, REVIEW_STATUS } from '@gigasoftware/themes/storybook';
+import { NgeStorybookReviewContainerComponent, REVIEW_STATUS } from '@nge/storybook';
 
 import type { <DataPointType> } from '../../../../core/config';
-import type { GigaChartLayerClickEvent } from '../../../../core/layer';
+import type { NgeChartLayerClickEvent } from '../../../../core/layer';
 import { <factoryFunction> } from '../../../../presets/<chart-type>.preset';
-import { GigaChartComponent } from '../../../giga-chart.component';
+import { NgeChartComponent } from '../../../nge-chart.component';
 
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: '<chart-type>-usage-stories',
+    class: 'nge-<chart-type>-usage-stories',
   },
-  imports: [GigaChartComponent, GigaStorybookReviewContainerComponent],
-  selector: '<chart-type>-usage-stories',
+  imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
+  selector: 'nge-<chart-type>-usage-stories',
   standalone: true,
   styleUrl: './<chart-type>-usage-stories.component.scss',
   templateUrl: './<chart-type>-usage-stories.component.html',
 })
-export class <ChartType>UsageStoriesComponent {
+export class Nge<ChartType>UsageStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
-  storybookFilePath = 'libs/shared/charts/src/lib/giga-chart/stories/<chart-type>/usage';
+  storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/<chart-type>/usage';
 
   // EXAMPLE 1: Basic Usage
   basicData: <DataPointType>[] = [/* sample data */];
@@ -120,7 +140,7 @@ export class <ChartType>UsageStoriesComponent {
   lastClicked = signal<string>('None');
   clickableConfig = <factoryFunction>({
     data: this.basicData,
-    onClick: (event: GigaChartLayerClickEvent<<DataPointType>>) => {
+    onClick: (event: NgeChartLayerClickEvent<<DataPointType>>) => {
       this.lastClicked.set(`${event.data.label}: ${event.data.value}`);
     },
     showLabels: true,
@@ -147,29 +167,29 @@ export class <ChartType>UsageStoriesComponent {
 - Include 5-9 numbered examples covering the chart's API surface
 - Always include: basic usage, click handling, dynamic signals, and chart-specific features
 - Use `signal()` and `computed()` for dynamic examples
-- Import `GigaChartLayerClickEvent` for click handling examples
+- Import `NgeChartLayerClickEvent` for click handling examples
 - Add additional Angular imports (CurrencyPipe, etc.) only when needed for formatting
 
 #### `<chart-type>-usage-stories.component.html`
 
 ```html
-<giga-storybook-review-container
+<nge-storybook-review-container
   [reviewStatus]="reviewStatus"
   [storybookFilePath]="storybookFilePath"
 >
-<div class="stories-container">
+<div class="nge-story-container">
   <h2><Chart Type> - Usage Examples</h2>
-  <p class="intro-text">
+  <p class="nge-story-intro-text">
     Practical examples showing common usage patterns for the <chart type>.
   </p>
 
   <!-- EXAMPLE 1: Basic Usage -->
-  <section class="story-section">
+  <section class="nge-story-section">
     <h4>1. Basic Usage</h4>
-    <p class="story-description">
+    <p class="nge-story-description">
       Simplest way to create a chart using <code><factoryFunction>()</code>
     </p>
-    <div class="code-block">
+    <div class="nge-story-code-block">
       <pre>
 data = [
   {{ '{' }} label: 'A', value: 30 {{ '}' }},
@@ -181,36 +201,39 @@ config = <factoryFunction>({{ '{' }}
   showLabels: true,
 {{ '}' }});
 
-&lt;giga-chart [config]="config" /&gt;</pre>
+&lt;nge-chart [config]="config" /&gt;</pre>
     </div>
-    <div class="chart-container">
-      <giga-chart [config]="basicConfig" />
+    <div class="nge-story-chart-container">
+      <nge-chart [config]="basicConfig" />
     </div>
   </section>
 
   <!-- More examples following the same section pattern -->
 </div>
-</giga-storybook-review-container>
+</nge-storybook-review-container>
 ```
 
 **Template rules:**
 - Use `{{ '{' }}` and `{{ '}' }}` for curly braces inside code blocks (Angular template escaping)
 - Use `&lt;` and `&gt;` for angle brackets in code blocks
-- Each section: `<h4>` numbered title, `<p class="story-description">`, optional `<div class="code-block">`, `<div class="chart-container">`
-- For dynamic examples, add `<div class="interaction-row">` with buttons
-- For click examples, add `<div class="interaction-display">` showing last clicked value
+- Each section: `<h4>` numbered title, `<p class="nge-story-description">`, optional `<div class="nge-story-code-block">`, `<div class="nge-story-chart-container">`
+- For dynamic examples, add `<div class="nge-story-interaction-row">` with buttons
+- For click examples, add `<div class="nge-story-interaction-display">` showing last clicked value
 
 #### `<chart-type>-usage-stories.component.scss`
 
-Copy the SCSS structure from an existing usage story. Key classes:
-- `.stories-container` — max-width container
-- `.story-section` — section with bottom border, `&--highlight` variant for recommended patterns
-- `.code-block` / `pre` — dark background code display
-- `.chart-container` — bordered chart area (height: 300px)
-- `.interaction-display` — click feedback area
-- `.interaction-row` / `.action-button` — button row for dynamic demos
+Copy the SCSS structure from an existing usage story. **Nest everything under the component's own
+root wrapper** — `.nge-<chart-type>-usage-stories { … }` — never `:host`; the library is
+`ViewEncapsulation.None`, so an unnested rule leaks into every other story in the Storybook bundle.
+Key classes:
+- `.nge-story-container` — max-width container
+- `.nge-story-section` — section with bottom border, `&--highlight` variant for recommended patterns
+- `.nge-story-code-block` / `pre` — dark background code display
+- `.nge-story-chart-container` — bordered chart area (height: 300px)
+- `.nge-story-interaction-display` — click feedback area
+- `.nge-story-interaction-row` / `.nge-story-action-button` — button row for dynamic demos
 
-**Reference:** Read `libs/shared/charts/src/lib/giga-chart/stories/bar-chart/usage/bar-chart-usage-stories.component.scss` and adapt.
+**Reference:** Read `libs/shared/charts/src/lib/nge-chart/stories/bar-chart/usage/bar-chart-usage-stories.component.scss` and adapt.
 
 #### `<chart-type>-usage.stories.ts`
 
@@ -219,27 +242,27 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { <ChartType>UsageStoriesComponent } from './<chart-type>-usage-stories.component';
+import { Nge<ChartType>UsageStoriesComponent } from './<chart-type>-usage-stories.component';
 
-const meta: Meta<<ChartType>UsageStoriesComponent> = {
-  component: <ChartType>UsageStoriesComponent,
+const meta: Meta<Nge<ChartType>UsageStoriesComponent> = {
+  component: Nge<ChartType>UsageStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
     }),
   ],
-  title: 'Charts/GigaChart/<Chart Type Title>/Usage',
+  title: 'Charts/NgeChart/<Chart Type Title>/Usage',
 };
 
 export default meta;
-type Story = StoryObj<<ChartType>UsageStoriesComponent>;
+type Story = StoryObj<Nge<ChartType>UsageStoriesComponent>;
 
 export const Usage: Story = {
   args: {},
 };
 ```
 
-**Title format:** `'Charts/GigaChart/<Chart Type Title>/Usage'` — use title case with spaces (e.g., `Bar Chart`, `Grouped Bar Chart`).
+**Title format:** `'Charts/NgeChart/<Chart Type Title>/Usage'` — use title case with spaces (e.g., `Bar Chart`, `Grouped Bar Chart`).
 
 ---
 
@@ -252,26 +275,26 @@ export const Usage: Story = {
 ```typescript
 import { CommonModule } from '@angular/common';
 import { Component, ViewEncapsulation } from '@angular/core';
-import { GigaStorybookReviewContainerComponent, REVIEW_STATUS } from '@gigasoftware/themes/storybook';
+import { NgeStorybookReviewContainerComponent, REVIEW_STATUS } from '@nge/storybook';
 
-import type { <DataPointType>, GigaChartConfig } from '../../../../core/config';
+import type { <DataPointType>, NgeChartConfig } from '../../../../core/config';
 import { <factoryFunction> } from '../../../../presets/<chart-type>.preset';
-import { GigaChartComponent } from '../../../giga-chart.component';
+import { NgeChartComponent } from '../../../nge-chart.component';
 
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: '<chart-type>-theming',
+    class: 'nge-<chart-type>-theming',
   },
-  imports: [CommonModule, GigaChartComponent, GigaStorybookReviewContainerComponent],
-  selector: '<chart-type>-theming',
+  imports: [CommonModule, NgeChartComponent, NgeStorybookReviewContainerComponent],
+  selector: 'nge-<chart-type>-theming',
   standalone: true,
   styleUrl: './<chart-type>-theming.component.scss',
   templateUrl: './<chart-type>-theming.component.html',
 })
-export class <ChartType>ThemingComponent {
+export class Nge<ChartType>ThemingComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
-  storybookFilePath = 'libs/shared/charts/src/lib/giga-chart/stories/<chart-type>/theming';
+  storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/<chart-type>/theming';
 
   sampleData: <DataPointType>[] = [/* sample data */];
 
@@ -282,7 +305,7 @@ export class <ChartType>ThemingComponent {
   });
 
   // Green theme
-  greenConfig: GigaChartConfig = {
+  greenConfig: NgeChartConfig = {
     ...<factoryFunction>({
       data: this.sampleData,
       showLabels: true,
@@ -299,9 +322,9 @@ export class <ChartType>ThemingComponent {
 ```
 
 **Key rules for theming:**
-- Class name: `<ChartType>ThemingComponent` (NO "Stories" suffix)
+- Class name: `Nge<ChartType>ThemingComponent` (NO "Stories" suffix)
 - Selector: `<chart-type>-theming` (NO `-stories` suffix)
-- Import `GigaChartConfig` type for explicit typing on themed configs
+- Import `NgeChartConfig` type for explicit typing on themed configs
 - Use spread operator: `{ ...<factoryFunction>({...}), theme: {...} }`
 - Include: default, green, blue, red, purple/horizontal, custom axis, typography, statistical lines, tooltip positioning, multi-chart comparison
 - The `theme` object structure varies by chart type — check the preset and config types
@@ -309,53 +332,53 @@ export class <ChartType>ThemingComponent {
 #### `<chart-type>-theming.component.html`
 
 ```html
-<giga-storybook-review-container
+<nge-storybook-review-container
   [reviewStatus]="reviewStatus"
   [storybookFilePath]="storybookFilePath"
 >
-<div class="stories-container">
+<div class="nge-story-container">
   <h2><Chart Type> - Theming Examples</h2>
 
-  <section class="story-section">
+  <section class="nge-story-section">
     <h4>Default Theme</h4>
-    <p class="story-description">No theme provided — renders on the chart's <code>--chart-*</code> token defaults</p>
-    <div class="chart-container">
-      <giga-chart [config]="defaultConfig" />
+    <p class="nge-story-description">No theme provided — renders on the chart's <code>--nge-chart-*</code> token defaults</p>
+    <div class="nge-story-chart-container">
+      <nge-chart [config]="defaultConfig" />
     </div>
   </section>
 
   <!-- More themed sections -->
 
   <!-- Highlight section: Multiple charts side by side -->
-  <section class="story-section story-section--highlight">
+  <section class="nge-story-section nge-story-section--highlight">
     <h4>Multiple Charts with Different Themes</h4>
-    <div class="chart-row">
-      <div class="chart-column">
+    <div class="nge-story-chart-row">
+      <div class="nge-story-chart-column">
         <h5>Revenue (Blue)</h5>
-        <div class="chart-container chart-container--small">
-          <giga-chart [config]="blueConfig" />
+        <div class="nge-story-chart-container nge-story-chart-container--small">
+          <nge-chart [config]="blueConfig" />
         </div>
       </div>
       <!-- more columns -->
     </div>
   </section>
 </div>
-</giga-storybook-review-container>
+</nge-storybook-review-container>
 ```
 
 **Template rules:**
 - Simpler sections than usage — no code blocks, just description + chart
-- Use `chart-row` / `chart-column` for side-by-side comparisons
-- Use `story-section--highlight` for the multi-chart comparison section
+- Use `nge-story-chart-row` / `nge-story-chart-column` for side-by-side comparisons
+- Use `nge-story-section--highlight` for the multi-chart comparison section
 
 #### `<chart-type>-theming.component.scss`
 
 Similar to usage SCSS but add:
-- `.chart-row` — flex row for side-by-side charts
-- `.chart-column` — flex column for individual charts
-- `.chart-container--small` — smaller height for comparison grids
+- `.nge-story-chart-row` — flex row for side-by-side charts
+- `.nge-story-chart-column` — flex column for individual charts
+- `.nge-story-chart-container--small` — smaller height for comparison grids
 
-**Reference:** Read `libs/shared/charts/src/lib/giga-chart/stories/bar-chart/theming/bar-chart-theming.component.scss` and adapt.
+**Reference:** Read `libs/shared/charts/src/lib/nge-chart/stories/bar-chart/theming/bar-chart-theming.component.scss` and adapt.
 
 #### `<chart-type>-theming.stories.ts`
 
@@ -364,20 +387,20 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { <ChartType>ThemingComponent } from './<chart-type>-theming.component';
+import { Nge<ChartType>ThemingComponent } from './<chart-type>-theming.component';
 
-const meta: Meta<<ChartType>ThemingComponent> = {
-  component: <ChartType>ThemingComponent,
+const meta: Meta<Nge<ChartType>ThemingComponent> = {
+  component: Nge<ChartType>ThemingComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
     }),
   ],
-  title: 'Charts/GigaChart/<Chart Type Title>/Theming',
+  title: 'Charts/NgeChart/<Chart Type Title>/Theming',
 };
 
 export default meta;
-type Story = StoryObj<<ChartType>ThemingComponent>;
+type Story = StoryObj<Nge<ChartType>ThemingComponent>;
 
 export const Theming: Story = {
   args: {},
@@ -397,26 +420,26 @@ Beyond the per-property controls, the interaction story ships two standard inter
 ```typescript
 import { CommonModule } from '@angular/common';
 import { Component, computed, input, signal, ViewEncapsulation } from '@angular/core';
-import { GigaStorybookReviewContainerComponent, REVIEW_STATUS } from '@gigasoftware/themes/storybook';
+import { NgeStorybookReviewContainerComponent, REVIEW_STATUS } from '@nge/storybook';
 
-import type { <DataPointType>, GigaChartConfig } from '../../../../core/config';
+import type { <DataPointType>, NgeChartConfig } from '../../../../core/config';
 import { <factoryFunction> } from '../../../../presets/<chart-type>.preset';
-import { GigaChartComponent } from '../../../giga-chart.component';
+import { NgeChartComponent } from '../../../nge-chart.component';
 
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: '<chart-type>-interaction-stories',
+    class: 'nge-<chart-type>-interaction-stories',
   },
-  imports: [CommonModule, GigaChartComponent, GigaStorybookReviewContainerComponent],
-  selector: '<chart-type>-interaction-stories',
+  imports: [CommonModule, NgeChartComponent, NgeStorybookReviewContainerComponent],
+  selector: 'nge-<chart-type>-interaction-stories',
   standalone: true,
   styleUrl: './<chart-type>-interaction-stories.component.scss',
   templateUrl: './<chart-type>-interaction-stories.component.html',
 })
-export class <ChartType>InteractionStoriesComponent {
+export class Nge<ChartType>InteractionStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
-  storybookFilePath = 'libs/shared/charts/src/lib/giga-chart/stories/<chart-type>/interaction';
+  storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/<chart-type>/interaction';
 
   // === Base config inputs ===
   marginTop = input<number>(20);
@@ -448,7 +471,7 @@ export class <ChartType>InteractionStoriesComponent {
   }
 
   // Computed config rebuilds when ANY input changes
-  config = computed<GigaChartConfig>(() => {
+  config = computed<NgeChartConfig>(() => {
     const baseConfig = <factoryFunction>({
       data: this.sampleData(),
       orientation: this.orientation(),
@@ -478,8 +501,8 @@ export class <ChartType>InteractionStoriesComponent {
 
 **Key rules for interaction:**
 - Every configurable property is an `input()` signal (NOT `@Input()`)
-- Use `computed()` to rebuild the full `GigaChartConfig` when any input changes
-- Use a **plain** `<button type="button" class="interaction-btn">` for the randomize button — **never** Angular Material (`MatButtonModule` / `mat-raised-button`). Angular Material is legacy-only and banned for new development (CLAUDE.md → "Angular Material: legacy only"); the pie / sunburst / area sibling stories all use a plain `.interaction-btn` styled in their SCSS
+- Use `computed()` to rebuild the full `NgeChartConfig` when any input changes
+- Use a **plain** `<button type="button" class="nge-story-interaction-btn">` for the randomize button — **never** Angular Material (`MatButtonModule` / `mat-raised-button`). Angular Material is legacy-only and banned for new development (CLAUDE.md → "Angular Material: legacy only"); the pie / sunburst / area sibling stories all use a plain `.nge-story-interaction-btn` styled in their SCSS
 - Empty string `''` for color inputs means "use default" — check with `|| undefined`
 - Group inputs by concern: base margins, layer layout, layer visibility, layer tooltip, theme bar/line/bullet styling, theme label, theme axis, theme statistical
 - **Standard interactive examples:** always ship the **tooltip** example (`showTooltip` + `tooltipPosition`); for **multi-series / stackable charts** (area, line, grouped-bar, scatter, stacked-bar) ALSO ship the **interactive-legend** example (see "Interactive legend (multi-series charts only)" below). Single-series charts (bar, bullet, diverging-bar) skip the legend example.
@@ -487,28 +510,28 @@ export class <ChartType>InteractionStoriesComponent {
 #### `<chart-type>-interaction-stories.component.html`
 
 ```html
-<giga-storybook-review-container
+<nge-storybook-review-container
   [reviewStatus]="reviewStatus"
   [storybookFilePath]="storybookFilePath"
 >
-  <div class="interaction-container">
-    <div class="interaction-row">
-      <button type="button" class="interaction-btn" (click)="randomizeData()">
+  <div class="nge-story-interaction-container">
+    <div class="nge-story-interaction-row">
+      <button type="button" class="nge-story-interaction-btn" (click)="randomizeData()">
         Randomize Data
       </button>
     </div>
-    <div class="chart-wrapper">
-      <giga-chart [config]="config()" />
+    <div class="nge-story-chart-wrapper">
+      <nge-chart [config]="config()" />
     </div>
   </div>
-</giga-storybook-review-container>
+</nge-storybook-review-container>
 ```
 
 The interaction template is intentionally minimal — all configuration comes from Storybook controls, not the template.
 
 #### `<chart-type>-interaction-stories.component.scss`
 
-Minimal — just layout for the container, button row, and chart wrapper (simple flex). Style the `.interaction-btn` randomize button here as a **plain** button (padding, border-radius, a neutral/`--chart-*` background + hover state) — do NOT use Angular Material. Copy the `.interaction-btn` rule from a sibling chart's interaction SCSS (e.g. `pie-chart` / `sunburst-chart`).
+Minimal — just layout for the container, button row, and chart wrapper (simple flex). Style the `.nge-story-interaction-btn` randomize button here as a **plain** button (padding, border-radius, a neutral/`--nge-chart-*` background + hover state) — do NOT use Angular Material. Copy the `.nge-story-interaction-btn` rule from a sibling chart's interaction SCSS (e.g. `pie-chart` / `sunburst-chart`).
 
 #### `<chart-type>-interaction.stories.ts`
 
@@ -517,9 +540,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { <ChartType>InteractionStoriesComponent } from './<chart-type>-interaction-stories.component';
+import { Nge<ChartType>InteractionStoriesComponent } from './<chart-type>-interaction-stories.component';
 
-const meta: Meta<<ChartType>InteractionStoriesComponent> = {
+const meta: Meta<Nge<ChartType>InteractionStoriesComponent> = {
   argTypes: {
     // === Base - Margins ===
     marginTop: {
@@ -582,17 +605,17 @@ const meta: Meta<<ChartType>InteractionStoriesComponent> = {
     },
     // ... more theme controls
   },
-  component: <ChartType>InteractionStoriesComponent,
+  component: Nge<ChartType>InteractionStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
     }),
   ],
-  title: 'Charts/GigaChart/<Chart Type Title>/Interaction',
+  title: 'Charts/NgeChart/<Chart Type Title>/Interaction',
 };
 
 export default meta;
-type Story = StoryObj<<ChartType>InteractionStoriesComponent>;
+type Story = StoryObj<Nge<ChartType>InteractionStoriesComponent>;
 
 export const Interaction: Story = {
   args: {
@@ -623,12 +646,12 @@ export const Interaction: Story = {
 
 **Gate:** ship this ONLY for charts whose data carries a `seriesId` / `groupId` dimension or stacks multiple series — **area, line, grouped-bar, scatter, stacked-bar**. Single-series charts (**bar, bullet, diverging-bar**) have nothing to toggle — **SKIP this entire subsection** for them.
 
-Alongside the tooltip example, multi-series interaction stories ship an `interactiveLegend` control that **suppresses the chart's internal legend** and renders a **standalone `<giga-chart-legend>` above the chart**. Clicking a series toggles it in/out of the chart; the toggled-off series stays listed but **dimmed** (opacity 0.4) so it can be toggled back on.
+Alongside the tooltip example, multi-series interaction stories ship an `interactiveLegend` control that **suppresses the chart's internal legend** and renders a **standalone `<nge-chart-legend>` above the chart**. Clicking a series toggles it in/out of the chart; the toggled-off series stays listed but **dimmed** (opacity 0.4) so it can be toggled back on.
 
 **Exemplar to mirror** (read all four files, then adapt — the sketches below are the shape, NOT a copy):
-`libs/shared/charts/src/lib/giga-chart/stories/stacked-bar-chart/interaction/stacked-bar-chart-interaction-stories.component.{ts,html,scss}` + `stacked-bar-chart-interaction.stories.ts`.
+`libs/shared/charts/src/lib/nge-chart/stories/stacked-bar-chart/interaction/stacked-bar-chart-interaction-stories.component.{ts,html,scss}` + `stacked-bar-chart-interaction.stories.ts`.
 
-**Imports to add** to the interaction component: the `GigaLegendItem` type from `'../../../../core/legend'`, and `GigaChartLegendComponent` from `'../../../../giga-chart-legend/giga-chart-legend.component'` (also add it to the component `imports` array).
+**Imports to add** to the interaction component: the `NgeLegendItem` type from `'../../../../core/legend'`, and `NgeChartLegendComponent` from `'../../../../nge-chart-legend/nge-chart-legend.component'` (also add it to the component `imports` array).
 
 **The stable-color rule (READ FIRST — the one thing that's easy to get wrong).** Toggling a series off must **NEVER recolor the survivors**. Build ONE stable `seriesId → color` map over the **full** series order, then keep colors stable in the way your layer's renderer demands — **check which mechanism your renderer uses**:
 
@@ -652,12 +675,12 @@ private readonly seriesColorById = computed<Map<string, string>>(() => {
     ? this.palette()
     : (DEFAULT_<LAYER>_THEME.<mark>.colors ?? []);
   return new Map(
-    SERIES_IDS.map((id, i) => [id, colors[i % colors.length] ?? 'var(--chart-primary)'])
+    SERIES_IDS.map((id, i) => [id, colors[i % colors.length] ?? 'var(--nge-chart-primary)'])
   );
 });
 
 // One legend entry per series (FULL order). Hidden → opacity 0.4 + selected:false, id set.
-readonly legendItems = computed<GigaLegendItem[]>(() =>
+readonly legendItems = computed<NgeLegendItem[]>(() =>
   SERIES_IDS.map(id => {
     const isHidden = this.hiddenSeries().has(id);
     return {
@@ -683,7 +706,7 @@ readonly chartData = computed(() => {
 });
 
 // Toggle a series (immutable Set so the signal fires).
-onLegendItemClick(item: GigaLegendItem): void {
+onLegendItemClick(item: NgeLegendItem): void {
   const key = item.id ?? item.label;
   this.hiddenSeries.update(prev => {
     const next = new Set(prev);
@@ -710,7 +733,7 @@ legend: this.interactiveLegend()
 ```html
 @if (interactiveLegend()) {
   <div class="external-legend-row">
-    <giga-chart-legend
+    <nge-chart-legend
       [items]="legendItems()"
       [interactive]="true"
       swatchShape="square"
@@ -719,13 +742,13 @@ legend: this.interactiveLegend()
     />
   </div>
 }
-<div class="chart-wrapper">
-  <giga-chart [config]="config()" />
+<div class="nge-story-chart-wrapper">
+  <nge-chart [config]="config()" />
 </div>
 ```
 
 - **`swatchShape` MUST match the mark:** `square` for bars/areas, `line` for line charts, `circle` for scatter.
-- `layout="grid"` is an **opt-in** input on `GigaChartLegendComponent` (default `flow`); it only resolves to an aligned, column-tabular legend when the legend has a **definite width** — see the SCSS below.
+- `layout="grid"` is an **opt-in** input on `NgeChartLegendComponent` (default `flow`); it only resolves to an aligned, column-tabular legend when the legend has a **definite width** — see the SCSS below.
 
 **`.component.scss`** — give the row a definite width (~300px) so `layout="grid"` lays the swatches out as an aligned table instead of collapsing to one column in the shrink-to-fit flex slot:
 
@@ -734,7 +757,7 @@ legend: this.interactiveLegend()
   display: flex;
   margin-bottom: 12px;
 
-  giga-chart-legend {
+  nge-chart-legend {
     flex: 0 0 auto;
     width: 300px;
   }
@@ -748,7 +771,7 @@ legend: this.interactiveLegend()
 interactiveLegend: {
   control: 'boolean',
   description:
-    'Suppress the internal legend and show the standalone interactive <giga-chart-legend> above the chart; click a series to toggle it in/out.',
+    'Suppress the internal legend and show the standalone interactive <nge-chart-legend> above the chart; click a series to toggle it in/out.',
   table: { category: 'Layer - Legend' },
 },
 
@@ -766,7 +789,7 @@ export const InteractiveLegend: Story = {
 
    The charts library should already be configured. See `docs/reference/storybook.md` if not.
 
-2. **Build check** — If Storybook is running, the new stories should appear under `Charts/GigaChart/<Chart Type Title>/` in the sidebar.
+2. **Build check** — If Storybook is running, the new stories should appear under `Charts/NgeChart/<Chart Type Title>/` in the sidebar.
 
 ## Reference: Existing Chart Stories
 
@@ -774,11 +797,11 @@ When unsure about conventions, read an existing chart story as a reference:
 
 | Chart Type | Path |
 |-----------|------|
-| Bar Chart | `libs/shared/charts/src/lib/giga-chart/stories/bar-chart/` |
-| Line Chart | `libs/shared/charts/src/lib/giga-chart/stories/line-chart/` |
-| Bullet Chart | `libs/shared/charts/src/lib/giga-chart/stories/bullet-chart/` |
-| Grouped Bar Chart | `libs/shared/charts/src/lib/giga-chart/stories/grouped-bar-chart/` |
-| Composite (flat) | `libs/shared/charts/src/lib/giga-chart/stories/composite/` |
+| Bar Chart | `libs/shared/charts/src/lib/nge-chart/stories/bar-chart/` |
+| Line Chart | `libs/shared/charts/src/lib/nge-chart/stories/line-chart/` |
+| Bullet Chart | `libs/shared/charts/src/lib/nge-chart/stories/bullet-chart/` |
+| Grouped Bar Chart | `libs/shared/charts/src/lib/nge-chart/stories/grouped-bar-chart/` |
+| Composite (flat) | `libs/shared/charts/src/lib/nge-chart/stories/composite/` |
 
 **Presets:** `libs/shared/charts/src/lib/presets/`
 **Config types:** `libs/shared/charts/src/lib/core/config.ts`
