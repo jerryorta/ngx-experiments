@@ -131,6 +131,18 @@
   // band content reads `--nge-table-row-detail-height` directly instead
   // (`stories/row-detail-content/`).
   .chart-cell {
+    // The trend line's own colour — a warm accent, deliberately NOT the persona's
+    // `--nge-chart-primary`. A sparkline is SINGLE-series, so an accent here cannot
+    // collide with series 2 or 3 the way re-pointing the chart primary would: amber and
+    // terracotta are already `--dlc-secondary` in two of the three personas, and a
+    // cashflow chart's two lines would become hard to tell apart.
+    //
+    // ⚠️ A mode-aware PAIR, because no single orange clears both grounds. Orange is
+    // mid-luminance: a bright one reads ~7.9:1 on a dark surface and ~2.3:1 on a light
+    // one, which would just move the invisible-line bug into light mode. Burnt orange
+    // here, bright below — both clear WCAG 1.4.11's 3:1 for a graphical object on every
+    // persona surface and on this shell.
+    --nge-trend-accent: #c2410c;
     flex: 1 1 auto;
     align-self: stretch;
     min-width: 0;
@@ -170,5 +182,16 @@
       color: var(--nge-table-on-surface, #1d1b20);
       background: var(--nge-table-surface, #ffffff);
     }
+  }
+}
+
+// The dark half of the trend accent's mode-aware pair — see `.chart-cell` above. Scoped
+// by the story root as well as the persona so it cannot leak into another story in the
+// shared Storybook bundle (this library is `ViewEncapsulation.None`).
+.dlc-home-dark,
+.dlc-professional-dark,
+.dlc-service-provider-dark {
+  .nge-table-chart-cells-interaction-stories .chart-cell {
+    --nge-trend-accent: #fb8c00;
   }
 }

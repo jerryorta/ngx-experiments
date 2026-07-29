@@ -12,6 +12,16 @@
 // --dlc-primary              Main brand color (navy, sage, steel per persona)
 // --dlc-primary-container    Subtle tinted surface for primary content
 // --dlc-on-primary           Text/icon color on primary-colored surfaces
+// --dlc-primary-graphic      DARK PERSONAS ONLY. The brand hue lifted for use as a
+//                            GRAPHIC — a chart series, a sparkline, any thin stroke or
+//                            small fill on the persona's own dark ground. It exists
+//                            because --dlc-primary is mode-invariant: identical in
+//                            light and dark, ideal on a near-white surface and around
+//                            1.3-1.9:1 on a dark one, where WCAG 1.4.11 asks 3:1 of a
+//                            graphical object. Light personas do not define it and do
+//                            not need it — they bridge --dlc-primary directly.
+//                            NOT interchangeable with --dlc-on-primary, which is the
+//                            foreground for content drawn INSIDE a primary-filled shape.
 
 // --- Color: Accent ---
 // --dlc-secondary               Sharp CTA / highlight color (gold, terracotta, teal per persona)
