@@ -1,0 +1,141 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Showcase (Theming)</h2>
+    <p class="intro-text">
+      The same <code>--nge-table-*</code> contract <code>core/theming</code> demonstrates on the
+      plain fixture, proved instead on the fully-loaded table: a wrapper class has to reach a pinned
+      lane, a stripe, the selection accent, a highlight tint, a range outline, an editor panel, and
+      a chart-bearing detail band all at once, or the comparison proves nothing.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. Light vs dark — every surface restated</h4>
+      <p class="story-description">
+        Expand a row in each table to compare the detail band's chart too. ⚠️ Every pinned surface
+        is restated rather than inherited in the dark theme, the pinned ones especially — they are
+        <code>position: sticky</code> and opaque by requirement, so one left on the light default is
+        a pale rectangle punched through a dark table.
+      </p>
+      <div class="theme-row">
+        <div class="theme-column theme-light">
+          <h5>.theme-light — the library's literal defaults</h5>
+          <div class="table-container">
+            <nge-table-showcase-demo
+              [enableVirtualization]="false"
+              [maxHeight]="360"
+              [(rows)]="lightRows"
+              [(state)]="lightState"
+            />
+          </div>
+        </div>
+        <div class="theme-column theme-dark">
+          <h5>.theme-dark</h5>
+          <div class="table-container">
+            <nge-table-showcase-demo
+              [enableVirtualization]="false"
+              [maxHeight]="360"
+              [(rows)]="darkRows"
+              [(state)]="darkState"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. Pinning & lane tokens, forced to scroll</h4>
+      <p class="story-description">
+        Eleven columns (nine of the showcase's own, plus the injected expansion and selection leads)
+        comfortably overflow this narrowed box. Scroll horizontally: the pinned-left
+        <strong>Name</strong> and pinned-right <strong>Created</strong> lanes stay put, their shadow
+        and opaque surface reading as sitting above the columns sliding beneath them.
+      </p>
+      <div class="table-container table-container--narrow theme-pinned">
+        <nge-table-showcase-demo
+          [enableVirtualization]="false"
+          [maxHeight]="320"
+          [(rows)]="pinnedRows"
+          [(state)]="pinnedState"
+        />
+      </div>
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. A brand accent — interaction tokens under a gesture</h4>
+      <p class="story-description">
+        ⚠️ Several of these tokens are only visible while you are doing something, and a screenshot
+        of the table at rest proves nothing about them. Select a row to see the selection accent on
+        the leading pill; hover a header's trailing edge for the resize grip's hover colour (it is
+        <code>transparent</code> at rest by design) and drag it for the active colour; tab into a
+        header for the focus ring.
+      </p>
+      <div class="table-container theme-brand">
+        <nge-table-showcase-demo
+          [maxHeight]="360"
+          [(rows)]="brandRows"
+          [(state)]="brandState"
+        />
+      </div>
+    </section>
+
+    <!-- 4 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>4. Editor panel tokens</h4>
+      <p class="story-description">
+        Activate the <strong>Status</strong> select or the <strong>Description</strong> textarea —
+        both open a body-level CDK overlay, positioned outside this wrapper class entirely. The
+        panel still picks up the theme: <code>applyNgeEditorPanelTokens</code> resolves
+        <code>NGE_EDITOR_PANEL_TOKENS</code> through <code>getComputedStyle</code> at the trigger
+        and copies them onto the pane, which is what lets a body-level panel inherit a scoped theme
+        a plain CSS cascade could never reach on its own.
+      </p>
+      <div class="table-container theme-editor">
+        <nge-table-showcase-demo
+          [enableVirtualization]="false"
+          [maxHeight]="300"
+          [(rows)]="editorRows"
+          [(state)]="editorState"
+        />
+      </div>
+    </section>
+
+    <!-- 5 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>5. What a wrapper class cannot reach on THIS table</h4>
+      <ul class="token-notes">
+        <li>
+          <strong>Read from CSS</strong> — surfaces, content, borders, the header band, pinning,
+          typography, cell padding, the resize grip, the focus ring, slot chrome, the selected row
+          and its accent, the alternate row, and the editor colour family. Every section above
+          demonstrates one of these.
+        </li>
+        <li>
+          <strong>Overwritten inline, and NOT reachable here at all</strong> —
+          <code>--nge-table-row-height</code>, <code>--nge-table-header-height</code> and
+          <code>--nge-table-row-detail-height</code>. <code>core/theming</code> demonstrates these
+          by hand-authoring a config that omits them; this table cannot, because
+          <code>rowHeight: 96</code> is fixed in <code>NgeTableShowcaseDemoComponent</code>'s own
+          config — it is what gives the <code>series</code> sparkline room to draw at all, so it is
+          never a preference this composed table can hand back to a theme.
+        </li>
+        <li>
+          <strong>Mirrored in TypeScript</strong> — the column-width family and
+          <code>--nge-table-selection-column-width</code>. The resize clamp and the injected
+          columns' <code>size</code> read <code>NGE_TABLE_DEFAULTS</code>; the knob is
+          <code>NgeTableConfig</code>, not a wrapper class.
+        </li>
+        <li>
+          <strong>Never a theme's business</strong> — the <code>--nge-table-internal-*</code>
+          family. It carries live lane geometry the component measures for itself; setting one would
+          break layout rather than restyle it.
+        </li>
+      </ul>
+    </section>
+  </div>
+</nge-storybook-review-container>

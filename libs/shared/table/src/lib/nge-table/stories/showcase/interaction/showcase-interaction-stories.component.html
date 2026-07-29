@@ -1,0 +1,69 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Showcase (Interaction)</h2>
+    <p class="intro-text">
+      Every shipped feature, on one table: 10,000 virtualized rows, columns pinned on both edges
+      with drag-to-resize, sorting and zebra striping, row selection behind a swappable control,
+      cell-range selection with column selection and the fill handle, cell highlighting with CSV
+      export of everything or of the marked cells alone, a chart behind the scroll-settle gate, all
+      four inline editors, and row expansion into a detail band holding a second chart that animates
+      open. The Controls panel below flips the six config-gated CAPABILITIES; cell highlighting and
+      cell range are always present — they are construction-time providers, not a runtime toggle.
+    </p>
+
+    <div class="table-container">
+      <nge-table-showcase-demo
+        [enableColumnResizing]="enableColumnResizing()"
+        [enablePinning]="enablePinning()"
+        [enableRowExpansion]="enableRowExpansion()"
+        [enableRowSelection]="enableRowSelection()"
+        [enableStriping]="enableStriping()"
+        [enableVirtualization]="enableVirtualization()"
+        [maxHeight]="700"
+        [(rows)]="rows"
+        [(state)]="state"
+      />
+    </div>
+
+    <section class="story-section">
+      <h4>Driving state from OUTSIDE the table</h4>
+      <p class="story-description">
+        A gesture is only half of the controlled-state contract. These buttons write
+        <code>state</code> the way a saved view would be restored — and host-pushed state is
+        deliberately <strong>silent</strong>: it emits no <code>NgeTableEvent</code>, so none of
+        these clicks appear in the demo's own event log above.
+      </p>
+      <div class="controls">
+        <button
+          type="button"
+          (click)="openFarRowFromHost()"
+          >Open row 6001 (off-screen) from the host</button
+        >
+        <button
+          type="button"
+          (click)="selectFirstThreeFromHost()"
+          >Select the first three rows from the host</button
+        >
+        <button
+          type="button"
+          (click)="resetState()"
+          >Reset to the initial pinning</button
+        >
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>The whole controlled-state contract</h4>
+      <p class="story-description">
+        Every gesture above — sort, pin, resize, select, range, fill, edit, expand — lands here.
+        This is what a host would persist to restore the user's exact view.
+      </p>
+      <div class="state-readout">
+        <pre>{{ stateJson() }}</pre>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

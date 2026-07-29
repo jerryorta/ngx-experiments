@@ -391,6 +391,90 @@ export function startNgeColumnRange(state: NgeRangeState, columnId: string): Nge
 }
 
 /**
+ * The plain header-strip click, which SELECTS a column or clears it when that
+ * column is already the whole selection.
+ *
+ * ⚠️ **Distinct from {@link toggleNgeColumnRange}, and the difference is what
+ * happens to everything else.** The cmd/ctrl path toggles one column in or out of a
+ * multi-block selection and leaves the rest alone. This one replaces — a plain
+ * click has always meant "just this", so clicking a *second* column drops the first
+ * rather than adding to it, and only the already-alone case has anywhere left to go
+ * but empty.
+ *
+ * Returns the same reference when it replaces nothing, so `applyTableState`'s
+ * identity short-circuit still suppresses a no-op write.
+ */
+export function selectOrClearNgeColumnRange(
+  state: NgeRangeState,
+  columnId: string
+): NgeRangeState {
+  const range = ngeWholeColumnRange(columnId);
+
+  if (state.ranges.length === 1 && isSameNgeCellRange(state.ranges[0], range)) {
+    return { ...state, ranges: [] };
+  }
+
+  return setNgeRange(state, range);
+}
+
+/**
+ * Clear the selection when it is exactly this one cell — the plain click that lands
+ * on a lone selected cell without becoming a drag.
+ *
+ * ⚠️ **A no-op in every other case, and deliberately so.** With a block selected,
+ * a plain click on a cell inside it already collapses the block to that cell
+ * (`startNgeRange` replaces), which is the "start over" half of the gesture; only
+ * the already-alone cell has anywhere further to go. Widening this to clear any
+ * covered cell would make a click inside a block ambiguous between re-anchoring and
+ * clearing.
+ *
+ * ⚠️ **The caller must resolve this INSIDE `writeNgeRange`'s updater**, never from
+ * a pre-read off the raw engine instance — that instance's `options.state` refreshes
+ * only when the adapter's proxy is read, and a guard decided from a stale read is
+ * the silently-swallowed write ARCH-269 records.
+ */
+export function clearNgeCellIfSole(
+  state: NgeRangeState,
+  rowId: string,
+  columnId: string
+): NgeRangeState {
+  if (isNgeCellSoleSelection(state, rowId, columnId)) {
+    return { ...state, ranges: [] };
+  }
+
+  return state;
+}
+
+/**
+ * Whether the selection is exactly this one cell and nothing else.
+ *
+ * ⚠️ **The gesture layer reads this BEFORE a press, to tell "click the cell that was
+ * already alone" from "click a fresh cell".** By release the two are
+ * indistinguishable — `startNgeRange` has made the pressed cell the sole selection
+ * either way — so a release-time test alone would clear on a first click and select
+ * nothing. `nge-cell-range.spec.ts`'s entry-point agreement specs catch exactly
+ * that, and did.
+ *
+ * A stale answer here is safe in one direction only, which is why it is allowed to
+ * be a read: {@link clearNgeCellIfSole} re-decides inside its own updater, so a
+ * false positive costs a no-op write and never a wrong clear.
+ */
+export function isNgeCellSoleSelection(
+  state: NgeRangeState,
+  rowId: string,
+  columnId: string
+): boolean {
+  const range: NgeCellRange = {
+    anchorColumnId: columnId,
+    anchorRowId: rowId,
+    focusColumnId: columnId,
+    focusRowId: rowId,
+  };
+
+  return state.ranges.length === 1 && isSameNgeCellRange(state.ranges[0], range);
+}
+
+/**
  * Take the contiguous span of columns from the active anchor out to one column —
  * the `shift`-click on a header strip.
  *

@@ -223,7 +223,7 @@ onTableEvent(event: NgeTableEvent&lt;Row&gt;): void {{ "{" }}
       <div class="code-block">
         <pre>
 &lt;ng-template ngeTableSlot="expand-cell" [ngeTableSlotOf]="rows" let-expand&gt;
-  &lt;cg-icon-button
+  &lt;dlc-button
     [disabled]="!expand.canExpand"
     (click)="$event.stopPropagation(); expand.toggle()"
   /&gt;

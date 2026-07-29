@@ -9,7 +9,7 @@
 // properties inside their theme class selectors.
 //
 // ORDER MATTERS, specificity does not: `:root` is a pseudo-class, so it scores
-// (0,1,0) — exactly the same as a single class like `.cg-professional-dark`. A
+// (0,1,0) — exactly the same as a single class like `.dlc-professional-dark`. A
 // tie is broken by source order, so a host MUST load this file BEFORE its theme
 // mixins or the defaults here override the theme instead of the other way
 // round. `apps/storybook-app/src/styles.scss` does this for both the table and

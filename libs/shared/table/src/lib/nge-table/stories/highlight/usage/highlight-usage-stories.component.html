@@ -36,11 +36,17 @@
         a column has none of its own. The overlay renders nothing — it carries a class, and the
         addon's stylesheet paints the cell around it.
       </p>
+      <p class="story-description">
+        ⚠️ Bind the <strong>whole state</strong>, not the <code>ngeHighlight</code> slice. Which
+        rows lie between a block's endpoints resolves against the current sort order, and a sort
+        leaves the slice untouched — so a slice-shaped binding gives the overlay nothing to react to
+        and the paint freezes as it stood when the marks were made.
+      </p>
       <div class="code-block">
         <pre>
 &lt;nge-table [config]="config" [(state)]="state"&gt;
   &lt;ng-template ngeTableSlot="cell-overlay" [ngeTableSlotOf]="rows" let-cell&gt;
-    &lt;nge-highlight-overlay [cell]="cell" [highlight]="state().ngeHighlight" /&gt;
+    &lt;nge-highlight-overlay [cell]="cell" [state]="state()" /&gt;
   &lt;/ng-template&gt;
 &lt;/nge-table&gt;</pre>
       </div>

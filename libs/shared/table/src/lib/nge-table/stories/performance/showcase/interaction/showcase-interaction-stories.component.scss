@@ -1,0 +1,353 @@
+// The story panel takes its surface from the same `--nge-table-surface` /
+// `--nge-table-on-surface` the tables read, matching every sibling performance
+// story, so prose and tables always move together. Every token is paired with a
+// literal fallback: the partial guarantees the token exists once imported, the
+// fallback guarantees the panel still renders if a host forgets to import it.
+.nge-table-showcase-interaction-stories {
+  display: block;
+  padding: 20px;
+  color: var(--nge-table-on-surface, #1d1b20);
+  background: var(--nge-table-surface, #ffffff);
+
+  .stories-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    margin-bottom: 8px;
+  }
+
+  .intro-text {
+    margin-bottom: 16px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 16px;
+  }
+
+  .story-section {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+
+    h4 {
+      margin-bottom: 8px;
+      color: var(--nge-table-on-surface, #1d1b20);
+    }
+
+    .story-description {
+      margin-bottom: 16px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 14px;
+    }
+  }
+
+  // Bulleted list of the twelve active features — a `<ul>` says "these are
+  // distinct things switched on together" structurally, rather than via
+  // punctuation in a run-on sentence.
+  .story-description-list {
+    margin: 0 0 16px 20px;
+    padding: 0;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 14px;
+
+    li {
+      margin-bottom: 4px;
+    }
+  }
+
+  .benchmark-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 16px;
+
+    button {
+      padding: 6px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      background: var(--nge-table-surface, #ffffff);
+      border: 1px solid var(--nge-table-border-color, #e0e0e0);
+      border-radius: 4px;
+
+      &:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+      }
+    }
+  }
+
+  .benchmark-meta {
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 12px;
+  }
+
+  // The height belongs on `nge-table` itself, not on this wrapper: the host is a
+  // flex column whose scroller shrinks to fit, whereas a max-height here is simply
+  // overflowed — the scroller grows to every row, nothing scrolls, and the
+  // virtualizer has no window to compute. 576px is six of this story's 96px rows,
+  // the same figure `Performance/Chart Cells` uses — enough to watch a few rows
+  // cross the settle boundary, expand, and pin without shrinking the panel.
+  //
+  // The wrapper itself carries no height — only the `mousedown` listener that
+  // captures the highlight gesture's shift modifier before `cell-click` fires.
+  .table-container {
+    margin-bottom: 16px;
+
+    nge-table {
+      max-height: 576px;
+    }
+  }
+
+  // The cell content for the `series` column when a chart is showing. Identical
+  // to `Performance/Chart Cells`' own `.chart-cell` — same inset token, same
+  // `align-self: stretch` — so a chart and a shell sit at the same visual height
+  // when the settle gate flips between them.
+  .chart-cell {
+    display: flex;
+    flex: 1 1 auto;
+    align-self: stretch;
+    // Flex items floor at their content size without this; `<nge-chart>` has none
+    // of its own before its shadow root attaches, so it would refuse to shrink
+    // with the column otherwise.
+    min-width: 0;
+    margin: var(--nge-table-shell-inset, 6px) 0;
+
+    // ⚠️ The shell's own surface, underneath the chart. `<nge-chart>` debounces
+    // its render by 16ms, so nothing paints in the frame it mounts — without this
+    // the settle reads shell → empty box → chart, a flash rather than content
+    // arriving in place. Same token and same fallback chain as
+    // `nge-cell-shell.component.scss`.
+    background: var(--nge-table-shell-surface, var(--nge-table-surface-variant, #f5f5f5));
+    border-radius: var(--nge-table-shell-radius, 4px);
+
+    // ⚠️ `<nge-chart>` attaches a shadow root and its internal stylesheet sets
+    // `:host, svg { width: 100%; height: 100% }`, which only resolves once ITS OWN
+    // box has a definite size. `.chart-cell` supplies that box via flex stretch;
+    // this hands the whole of it to the chart.
+    nge-chart {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  // The row-detail band's own content. The band itself, its height arithmetic and
+  // its animation are core concerns (ARCH-298 / ARCH-300) — this only styles what
+  // this story projects inside it.
+  .detail-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 16px;
+    color: var(--nge-table-on-surface, #1d1b20);
+
+    p {
+      margin: 0;
+      overflow-wrap: break-word;
+    }
+
+    span {
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 13px;
+    }
+
+    button {
+      align-self: flex-start;
+      padding: 4px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      background: var(--nge-table-surface, #ffffff);
+      border: 1px solid var(--nge-table-border-color, #e0e0e0);
+      border-radius: 4px;
+    }
+  }
+
+  .benchmark-readout {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin: 0 0 16px;
+  }
+
+  .benchmark-metric {
+    padding: 10px 12px;
+    background: var(--nge-table-row-surface-alt, #f7f7f8);
+    border: 1px solid var(--nge-table-border-color, #e0e0e0);
+    border-radius: 4px;
+
+    dt {
+      margin-bottom: 4px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    dd {
+      margin: 0;
+      font-size: 20px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    small {
+      font-size: 12px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+    }
+
+    // A metric past its budget is the whole point of the readout, so it is called
+    // out rather than left for the reader to compare by eye.
+    &--over dd {
+      color: #b3261e;
+    }
+  }
+
+  // A refused run has to say why. Its most common cause — a hidden tab, where the
+  // browser suspends requestAnimationFrame — otherwise looks exactly like the
+  // table having hung.
+  .benchmark-failure {
+    margin-bottom: 16px;
+    padding: 10px 12px;
+    color: #b3261e;
+    font-size: 13px;
+    background: var(--nge-table-row-surface-alt, #f7f7f8);
+    border: 1px solid #b3261e;
+    border-radius: 4px;
+  }
+
+  // The paste-ready block is rendered rather than hidden behind the button on
+  // purpose: a blocked clipboard API would otherwise leave no way to get the
+  // numbers out, and these numbers exist to be pasted into a ticket.
+  .benchmark-copy {
+    margin-top: 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--nge-table-border-color, #e0e0e0);
+    border-radius: 4px;
+    overflow: hidden;
+
+    &__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 10px;
+      background: var(--nge-table-row-surface-alt, #f7f7f8);
+      border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+    }
+
+    &__label {
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    &__button {
+      padding: 4px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      background: var(--nge-table-surface, #ffffff);
+      border: 1px solid var(--nge-table-border-color, #e0e0e0);
+      border-radius: 4px;
+    }
+
+    &__text {
+      margin: 0;
+      padding: 10px 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      white-space: pre;
+      overflow-x: auto;
+      color: var(--nge-table-on-surface, #1d1b20);
+      background: var(--nge-table-surface, #ffffff);
+    }
+
+    &__note {
+      margin: 0;
+      padding: 8px 12px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 12px;
+      border-top: 1px solid var(--nge-table-border-color, #e0e0e0);
+    }
+  }
+
+  // Two rows here are checked live and three are pointers to a sibling story
+  // rather than a stored figure, so the table says which is which in its own
+  // last column rather than relying on the prose above.
+  .benchmark-compare {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 12px;
+    font-size: 13px;
+
+    th,
+    td {
+      padding: 7px 8px;
+      text-align: left;
+      border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+    }
+
+    th {
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    td:nth-child(2) {
+      font-variant-numeric: tabular-nums;
+    }
+
+    td:last-child {
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 12px;
+    }
+
+    &__row--bad td {
+      color: #b3261e;
+    }
+  }
+
+  .benchmark-reference-note {
+    padding: 10px 12px;
+    background: var(--nge-table-row-surface-alt, #f7f7f8);
+    border-left: 3px solid var(--nge-table-border-color, #e0e0e0);
+    border-radius: 3px;
+  }
+
+  .benchmark-empty {
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 13px;
+    font-style: italic;
+  }
+
+  .benchmark-drift {
+    font-size: 14px;
+
+    &--wide {
+      color: #b3261e;
+    }
+  }
+
+  .benchmark-history {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+
+    th,
+    td {
+      padding: 6px 8px;
+      text-align: left;
+      border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+    }
+
+    th {
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+  }
+}

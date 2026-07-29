@@ -227,7 +227,7 @@
       <p class="story-description">
         The native checkbox is the <strong>default</strong>, not the only option. Projecting
         <code>selection-cell</code> and <code>selection-header</code> replaces it with whatever the
-        consuming domain ships — <code>cg-checkbox</code>, <code>gy-checkbox</code> — bound to a
+        consuming domain ships — <code>dlc-checkbox</code>, <code>dlc-checkbox</code> — bound to a
         context carrying <code>isSelected</code>, <code>canSelect</code>, and a
         <code>toggle</code> callback. Drive it: the pills below write the same
         <code>state.rowSelection</code> the native checkbox would.
@@ -245,7 +245,7 @@
         <pre>
 &lt;nge-table [config]="config" [(state)]="state"&gt;
   &lt;ng-template ngeTableSlot="selection-cell" [ngeTableSlotOf]="rows" let-selection&gt;
-    &lt;cg-checkbox
+    &lt;dlc-checkbox
       [checked]="selection.isSelected"
       [disabled]="!selection.canSelect"
       (click)="$event.stopPropagation(); selection.toggle($event)" /&gt;

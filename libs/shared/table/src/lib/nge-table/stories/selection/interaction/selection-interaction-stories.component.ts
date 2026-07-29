@@ -227,7 +227,7 @@ export class NgeTableSelectionInteractionStoriesComponent {
   //
   // The native checkbox is the DEFAULT, not the only option. Projecting
   // `selection-cell` / `selection-header` replaces it with whatever the consuming
-  // domain ships — `cg-checkbox`, `gy-checkbox` — bound to a context carrying
+  // domain ships — `dlc-checkbox`, `dlc-checkbox` — bound to a context carrying
   // `isSelected`, `canSelect`, and a `toggle` callback.
   //
   // ⚠️ The control below is a local stand-in, NOT a real design-library import,

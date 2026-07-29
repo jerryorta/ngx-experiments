@@ -1,8 +1,8 @@
 // The story panel takes its surface from the same `--nge-table-surface` /
 // `--nge-table-on-surface` the table reads, matching `core/` and `highlight/`,
-// so prose and table always move together: under one of the ten domain themes
+// so prose and table always move together: under one of the six persona themes
 // that bridge `--nge-table-*` (ARCH-277) both follow the toolbar, and under a
-// theme that does not bridge them (`nge-*`, `gy-*`) both fall back to the
+// theme that does not bridge them (i.e. no persona class) both fall back to the
 // library's light-mode defaults.
 .nge-table-export-theming {
   display: block;

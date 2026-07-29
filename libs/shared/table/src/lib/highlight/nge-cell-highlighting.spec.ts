@@ -1,9 +1,13 @@
+import type { ComponentFixture } from '@angular/core/testing';
 import type { Cell } from '@tanstack/angular-table';
 
+import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import type { NgeTableFixtureRow } from '../../testing';
+import type { NgeTableEvent } from '../events';
 import type { NgeTableConfig } from '../nge-table-config';
+import type { NgeTableState } from '../nge-table-state';
 
 import {
   createNgeTableFixture,
@@ -11,11 +15,14 @@ import {
   NGE_TABLE_FIXTURE_SIZES,
 } from '../../testing';
 import { provideNgeTableFeatures } from '../features';
+import { NgeTableComponent } from '../nge-table';
 import { createNgeTableConfig } from '../nge-table-config';
 import { createNgeTableState } from '../nge-table-state';
 import { NgeTableStore } from '../nge-table/store';
+import { NgeTableSlotDirective } from '../slots';
 import { ngeCellHighlighting } from './nge-cell-highlighting';
 import { NgeHighlightBridge } from './nge-highlight-bridge';
+import { NgeHighlightOverlayComponent } from './nge-highlight-overlay.component';
 import { provideNgeCellHighlighting } from './provide-nge-cell-highlighting';
 
 const rows = createNgeTableFixture({ rows: 12 });
@@ -448,5 +455,332 @@ describe('NgeHighlightBridge — clear all', () => {
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
 
     expect(store.tableState().ngeHighlight?.cells).toEqual(marked);
+  });
+});
+
+/**
+ * The identity the specs below assert on, stamped by the HOST template rather than
+ * by the overlay.
+ *
+ * ⚠️ **Test-harness markup, deliberately not production DOM.** The range overlay
+ * publishes an equivalent attribute of its own, but it does so because its drag
+ * gesture hit-tests on one — this overlay renders nothing and needs nothing, so
+ * adding a stamp to it to make a spec easier would be shipping DOM for a test's
+ * benefit. A consumer's own template is exactly where such a thing belongs, and a
+ * consumer template is what a spec host is.
+ *
+ * It is bound from the slot context, so it moves with the row: the row `@for` tracks
+ * `row.id` and Angular relocates the whole subtree, which makes document order of
+ * these elements the table's CURRENT view order without asking the engine anything.
+ */
+const SPEC_CELL_ATTRIBUTE = 'data-spec-cell';
+
+describe('NgeHighlightOverlayComponent — in a real table', () => {
+  /**
+   * A consumer, in miniature — the same three moving parts
+   * `stories/highlight/highlight-demo-table.component.ts` has, and nothing else.
+   */
+  @Component({
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [NgeHighlightOverlayComponent, NgeTableComponent, NgeTableSlotDirective],
+    providers: [provideNgeCellHighlighting()],
+    selector: 'nge-highlight-host',
+    standalone: true,
+    template: `
+      <div (mousedown)="captureModifier($event)">
+        <nge-table
+          [config]="config()"
+          [state]="tableState()"
+          (ngeTableEvent)="onNgeTableEvent($event)"
+          (stateChange)="onStateChange($event)"
+        >
+          <ng-template ngeTableSlot="cell-overlay" [ngeTableSlotOf]="rows" let-cell>
+            <nge-highlight-overlay
+              [attr.data-spec-cell]="cell.rowId + '::' + cell.columnId"
+              [cell]="cell"
+              [state]="tableState()"
+            />
+          </ng-template>
+        </nge-table>
+      </div>
+    `,
+  })
+  class HighlightHostComponent {
+    private readonly bridge = inject(NgeHighlightBridge);
+
+    /** Whether `shift` was down when the gesture started — see the demo component. */
+    private shiftHeld = false;
+
+    readonly config = input.required<NgeTableConfig<NgeTableFixtureRow>>();
+
+    /** Type carrier for the slot context; never read at runtime. */
+    readonly rows = rows;
+
+    readonly tableState = signal(createNgeTableState());
+
+    captureModifier(event: MouseEvent): void {
+      this.shiftHeld = event.shiftKey;
+    }
+
+    onNgeTableEvent(event: NgeTableEvent<NgeTableFixtureRow>): void {
+      if (event.kind !== 'cell-click') {
+        return;
+      }
+
+      const { columnId, rowId } = event.cell;
+
+      if (this.shiftHeld) {
+        this.bridge.extendTo(rowId, columnId);
+      } else {
+        this.bridge.toggle(rowId, columnId);
+      }
+    }
+
+    onStateChange(state: NgeTableState): void {
+      this.tableState.set(state);
+    }
+  }
+
+  async function createHost(): Promise<ComponentFixture<HighlightHostComponent>> {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ imports: [HighlightHostComponent] });
+
+    const fixture = TestBed.createComponent(HighlightHostComponent);
+    fixture.componentRef.setInput(
+      'config',
+      createNgeTableConfig<NgeTableFixtureRow>({
+        columns: NGE_TABLE_FIXTURE_COLUMNS,
+        data: rows,
+        getRowId: row => row.id,
+      })
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    return fixture;
+  }
+
+  /**
+   * Every stamped overlay of one column, in the order the DOM holds them.
+   *
+   * ⚠️ Read from the DOM rather than from the row model on purpose. Touching
+   * `store.table` is a read of the adapter's **proxy**, which re-applies options to
+   * the raw instance — so a helper that consults the table between an action and an
+   * assertion refreshes the very thing under test and can turn a real staleness
+   * defect green. The rendered attributes are the user's own view order and owe
+   * nothing to the engine.
+   */
+  function overlaysInColumn(
+    fixture: ComponentFixture<HighlightHostComponent>,
+    columnId: string
+  ): Element[] {
+    const overlays: Element[] = Array.from(
+      (fixture.nativeElement as Element).querySelectorAll(`[${SPEC_CELL_ATTRIBUTE}]`)
+    );
+
+    return overlays.filter(overlay =>
+      (overlay.getAttribute(SPEC_CELL_ATTRIBUTE) ?? '').endsWith(`::${columnId}`)
+    );
+  }
+
+  function rowIdOf(overlay: Element): string {
+    return (overlay.getAttribute(SPEC_CELL_ATTRIBUTE) ?? '').split('::')[0];
+  }
+
+  /** Row ids in the order the table currently shows them, taken from the DOM. */
+  function viewOrderInDom(
+    fixture: ComponentFixture<HighlightHostComponent>,
+    columnId: string
+  ): string[] {
+    return overlaysInColumn(fixture, columnId).map(rowIdOf);
+  }
+
+  /** Row ids the overlay is actually PAINTING — what a user sees highlighted. */
+  function paintedRowIds(
+    fixture: ComponentFixture<HighlightHostComponent>,
+    columnId: string
+  ): string[] {
+    return overlaysInColumn(fixture, columnId)
+      .filter(overlay => overlay.classList.contains('nge-highlight-overlay--on'))
+      .map(rowIdOf);
+  }
+
+  /** The contiguous span between two ids in a view order, either way round. */
+  function spanBetween(view: string[], from: string, to: string): string[] {
+    const start = view.indexOf(from);
+    const end = view.indexOf(to);
+
+    return view.slice(Math.min(start, end), Math.max(start, end) + 1);
+  }
+
+  /** The cell element enclosing one stamped overlay — what a user clicks. */
+  function cellElement(
+    fixture: ComponentFixture<HighlightHostComponent>,
+    rowId: string,
+    columnId: string
+  ): Element {
+    const selector = `[${SPEC_CELL_ATTRIBUTE}="${rowId}::${columnId}"]`;
+    const cell = (fixture.nativeElement as Element)
+      .querySelector(selector)
+      ?.closest('.nge-table__cell');
+
+    if (!cell) {
+      throw new Error(`no rendered cell for ${selector}`);
+    }
+
+    return cell;
+  }
+
+  /**
+   * Mark one cell exactly as a user does: `mousedown` first (which is where the
+   * modifier is read), then the `click` the table turns into a `cell-click`.
+   */
+  function markCell(
+    fixture: ComponentFixture<HighlightHostComponent>,
+    rowId: string,
+    columnId: string,
+    shiftKey = false
+  ): void {
+    const cell = cellElement(fixture, rowId, columnId);
+
+    cell.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, shiftKey }));
+    cell.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    fixture.detectChanges();
+  }
+
+  /** Anchor, then shift-extend — the whole block gesture. */
+  function markBlock(
+    fixture: ComponentFixture<HighlightHostComponent>,
+    anchor: { columnId: string; rowId: string },
+    focus: { columnId: string; rowId: string }
+  ): void {
+    markCell(fixture, anchor.rowId, anchor.columnId);
+    markCell(fixture, focus.rowId, focus.columnId, true);
+  }
+
+  // The harness itself, asserted before anything is asked of it: the stamp reaches
+  // every cell, and marking one paints exactly that one.
+  it('stamps every rendered cell, and paints the one that is marked', async () => {
+    const fixture = await createHost();
+
+    expect(fixture.nativeElement.querySelectorAll(`[${SPEC_CELL_ATTRIBUTE}]`).length).toBe(
+      rows.length * NGE_TABLE_FIXTURE_COLUMNS.length
+    );
+
+    markCell(fixture, rows[1].id, 'name');
+    await fixture.whenStable();
+
+    expect(paintedRowIds(fixture, 'name')).toEqual([rows[1].id]);
+  });
+
+  it('paints the contiguous block a shift-click extends to', async () => {
+    const fixture = await createHost();
+
+    markBlock(
+      fixture,
+      { columnId: 'name', rowId: rows[0].id },
+      { columnId: 'name', rowId: rows[3].id }
+    );
+    await fixture.whenStable();
+
+    expect(paintedRowIds(fixture, 'name')).toEqual(
+      spanBetween(viewOrderInDom(fixture, 'name'), rows[0].id, rows[3].id)
+    );
+  });
+
+  // ⚠️ THE CLAIM THE WHOLE STORY RESTS ON, asserted where a user actually sees it.
+  //
+  // Every spec above this block answers through `isNgeCellHighlighted` or through
+  // the feature's cell API — both of which re-derive on every call and are genuinely
+  // correct. What a user looks at is the OVERLAY's `computed`, and a computed re-runs
+  // only when one of its inputs changes identity. A sort changes neither:
+  //
+  // - `state.ngeHighlight` is untouched by sorting, so an input bound to the slice
+  //   alone holds the same object;
+  // - `getSortedRowModel` REORDERS the same `Row` instances rather than rebuilding
+  //   them, `getAllCells` is memoised per row, and the slot context is memoised per
+  //   `Cell` — so `[cell]` holds the same object too;
+  // - the row `@for` tracks `row.id` and the cell `@for` tracks `cell.id`, so Angular
+  //   moves the existing DOM nodes instead of recreating them;
+  // - `bridge.rowOrder()` is read inside the computed but is not a signal, so it
+  //   registers no dependency.
+  //
+  // Everything therefore holds still while the view order moves underneath, and the
+  // painted block silently becomes an enumeration of whatever was marked at click
+  // time. This spec fails against a slice-shaped input and passes against the
+  // state-shaped one; it asserts on painted DOM only, and never reads `store.table`
+  // between the sort and the assertion.
+  //
+  // ⚠️ **Only the ROW axis discriminates.** `getAllLeafColumns` is memoised on
+  // `[getAllColumns(), _getOrderColumnsFn()]` (`core/table.ts:499-506`) and
+  // `_getOrderColumnsFn` depends on `columnOrder`, so a reorder yields new leaf
+  // columns → new `Cell`s → a new context → the computed re-runs *incidentally*.
+  // ARCH-269 wrote the column version of this expecting red and got green; there is
+  // deliberately no column-reorder or pinning case here.
+  it('re-shapes the PAINTED block when the rows are re-sorted', async () => {
+    const fixture = await createHost();
+    const host = fixture.componentInstance;
+
+    markBlock(
+      fixture,
+      { columnId: 'name', rowId: rows[0].id },
+      { columnId: 'name', rowId: rows[3].id }
+    );
+    await fixture.whenStable();
+
+    const painted = paintedRowIds(fixture, 'name');
+    expect(painted).toEqual(spanBetween(viewOrderInDom(fixture, 'name'), rows[0].id, rows[3].id));
+
+    host.tableState.set({ ...host.tableState(), sorting: [{ desc: false, id: 'name' }] });
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    // The endpoints follow their records; which rows lie between them follows the
+    // view. A block that stayed the same four records would be an enumeration.
+    const expected = spanBetween(viewOrderInDom(fixture, 'name'), rows[0].id, rows[3].id);
+
+    // ⚠️ Self-check, so this can never pass vacuously: if a future fixture happened
+    // to sort those four records into the same span, the assertion below would hold
+    // for both a working overlay and a broken one.
+    expect(expected).not.toEqual(painted);
+    expect(paintedRowIds(fixture, 'name')).toEqual(expected);
+  });
+
+  it('keeps both endpoints painted across the sort', async () => {
+    const fixture = await createHost();
+    const host = fixture.componentInstance;
+
+    markBlock(
+      fixture,
+      { columnId: 'name', rowId: rows[0].id },
+      { columnId: 'name', rowId: rows[3].id }
+    );
+    await fixture.whenStable();
+
+    host.tableState.set({ ...host.tableState(), sorting: [{ desc: false, id: 'name' }] });
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(paintedRowIds(fixture, 'name')).toContain(rows[0].id);
+    expect(paintedRowIds(fixture, 'name')).toContain(rows[3].id);
+  });
+
+  // The other half of the reading, and NOT a regression case: individually-picked
+  // cells are enumerated by id, so they follow their records and hold still whether
+  // the overlay re-derives or not. It is here to pin the contrast a user sees beside
+  // a re-shaping block, not to discriminate the defect above.
+  it('leaves individually-picked cells on their own records across a sort', async () => {
+    const fixture = await createHost();
+    const host = fixture.componentInstance;
+
+    markCell(fixture, rows[2].id, 'name');
+    markCell(fixture, rows[7].id, 'name');
+    await fixture.whenStable();
+
+    host.tableState.set({ ...host.tableState(), sorting: [{ desc: true, id: 'amount' }] });
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(paintedRowIds(fixture, 'name').sort()).toEqual([rows[2].id, rows[7].id].sort());
   });
 });

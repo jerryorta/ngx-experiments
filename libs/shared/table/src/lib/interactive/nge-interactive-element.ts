@@ -4,7 +4,7 @@
  * A cell is an arbitrary Angular render target, so the controls a table has to
  * step aside for are not only the native tags. A div-based slider, select or
  * toggle carrying the matching `role` is what a design-library control actually
- * looks like — `cg-select`, `gy-checkbox`, and the table's own editors all render
+ * looks like — `dlc-select`, `dlc-checkbox`, and the table's own editors all render
  * as composed elements rather than as an `<input>`.
  *
  * ⚠️ **Roles rather than component names, and that is load-bearing.** Naming our

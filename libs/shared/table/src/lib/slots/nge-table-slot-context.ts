@@ -280,7 +280,7 @@ export interface NgeExpandHeaderContext {
  *
  * The library ships a native `<input type="checkbox">` and a consumer replaces it
  * by projecting this slot, so a table dropped into a domain wears that domain's
- * control (`cg-checkbox`, `gy-checkbox`) rather than a browser default sitting
+ * control (`dlc-checkbox`, `dlc-checkbox`) rather than a browser default sitting
  * next to it.
  *
  * ⚠️ **`toggle` is a callback on the context, not a service to inject.** A

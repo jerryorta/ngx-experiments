@@ -26,7 +26,7 @@ function seed(): NgeTableFixtureRow[] {
  *
  * ⚠️ **This story adds no tokens of its own, and that is the point.** ARCH-292 ships no
  * editor, so there is nothing here for a `--nge-table-editor-*` namespace to describe
- * yet; declaring one now would leave it inert across ten domain themes, which is the
+ * yet; declaring one now would leave it inert across six persona themes, which is the
  * mistake ARCH-277 had to undo and ARCH-286 had to finish. The controls below read the
  * tokens the table already publishes — surface, border, focus ring — and the sections
  * demonstrate that an activated cell follows a theme without needing its own vocabulary.

@@ -2,6 +2,7 @@ import type { NgeCellRange, NgeRangeColumnOrder, NgeRangeRowOrder } from './nge-
 
 import {
   activeNgeCellRange,
+  clearNgeCellIfSole,
   clearNgeRange,
   createNgeRangeState,
   extendNgeColumnRangeTo,
@@ -15,6 +16,7 @@ import {
   isSameNgeCellRange,
   normalizeNgeRangeState,
   parseNgeRangeCellKey,
+  selectOrClearNgeColumnRange,
   setNgeRange,
   startNgeColumnRange,
   startNgeRange,
@@ -565,6 +567,86 @@ describe('startNgeColumnRange', () => {
     const state = createNgeRangeState({ ranges: [wholeStatus] });
 
     expect(startNgeColumnRange(state, 'status')).toBe(state);
+  });
+});
+
+describe('selectOrClearNgeColumnRange', () => {
+  it('replaces the selection with one whole column', () => {
+    const state = selectOrClearNgeColumnRange(createNgeRangeState({ ranges: [block] }), 'status');
+
+    expect(state.ranges).toEqual([wholeStatus]);
+  });
+
+  // The plain-click deselect. `startNgeColumnRange` returns the same state here,
+  // so a second click on a selected column used to be invisible.
+  it('clears when that column is already the whole selection', () => {
+    const state = selectOrClearNgeColumnRange(
+      createNgeRangeState({ ranges: [wholeStatus] }),
+      'status'
+    );
+
+    expect(state.ranges).toEqual([]);
+  });
+
+  // Only the already-alone case clears. A plain click has always meant "just this",
+  // so a column selected *alongside* other blocks is selected, not cleared.
+  it('replaces rather than clears when other ranges are also selected', () => {
+    const state = selectOrClearNgeColumnRange(
+      createNgeRangeState({ ranges: [wholeStatus, block] }),
+      'status'
+    );
+
+    expect(state.ranges).toEqual([wholeStatus]);
+  });
+
+  it('replaces when a DIFFERENT column is the whole selection', () => {
+    const state = selectOrClearNgeColumnRange(
+      createNgeRangeState({ ranges: [wholeStatus] }),
+      'name'
+    );
+
+    expect(state.ranges).toEqual([ngeWholeColumnRange('name')]);
+  });
+});
+
+describe('clearNgeCellIfSole', () => {
+  it('clears when that one cell is the whole selection', () => {
+    const sole = startNgeRange(createNgeRangeState(), 'row-2', 'status');
+
+    expect(clearNgeCellIfSole(sole, 'row-2', 'status').ranges).toEqual([]);
+  });
+
+  // ⚠️ The identity short-circuit is what keeps a no-op click from patching the
+  // host's state — `applyTableState` compares by reference.
+  it('returns the same reference for a cell that is not selected', () => {
+    const sole = startNgeRange(createNgeRangeState(), 'row-2', 'status');
+
+    expect(clearNgeCellIfSole(sole, 'row-3', 'status')).toBe(sole);
+  });
+
+  // A block collapses to the clicked cell through `startNgeRange` instead; widening
+  // the clear to any covered cell would make a click inside a block ambiguous.
+  it('leaves a multi-cell block alone even when the cell falls inside it', () => {
+    const state = createNgeRangeState({ ranges: [block] });
+
+    expect(clearNgeCellIfSole(state, 'row-2', 'status')).toBe(state);
+  });
+
+  it('leaves a lone cell alone when other ranges are also selected', () => {
+    const one = { ...ngeWholeColumnRange('name') };
+    const state = createNgeRangeState({
+      ranges: [
+        one,
+        {
+          anchorColumnId: 'status',
+          anchorRowId: 'row-2',
+          focusColumnId: 'status',
+          focusRowId: 'row-2',
+        },
+      ],
+    });
+
+    expect(clearNgeCellIfSole(state, 'row-2', 'status')).toBe(state);
   });
 });
 

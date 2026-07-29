@@ -269,6 +269,28 @@ type-check.
   gives up **with no error anywhere**. Boolean and number controls have nothing to look up, so they
   keep working and hide the mistake. It survived lint, tests, type-check and a clean Storybook
   compile, and surfaced only when a human opened the panel.
+- **A workflow doc's own central claim, falsified by actually trying to falsify it (ARCH-304).** Two
+  docs in this repo said Storybook's compile is the only `ngtsc` pass over story templates, and that
+  it is what catches a projected template missing its `[ngeCellOf]` type carrier. Testing both
+  directions on the same `npm run storybook` log: an injected `.ts` source error (`TS2322`) reported
+  in ~4 seconds — `ERROR in <file>:103:7` plus `preview compiled with 1 error`. An injected
+  **template** error — a `strictTemplates` violation on a `let-` binding — stayed silent across
+  **482** incremental rebuilds, a full `nx reset` cold boot, and a direct request that came back
+  **200**. A prior session's log corroborated it independently: 31 error verdicts, every single one
+  naming a `.ts` file and a `TS####` code, not one a template. The documented "wait until the log
+  says compiled" loop has exactly the right polarity for the error it was built to catch, and is
+  structurally blind to the one this workflow actually needed it for.
+- **A theming demo's own comparison silently proved its opposite (ARCH-304).** A light-vs-dark
+  section declared every token on the dark side and nothing on the light side, on the assumption
+  that declaring nothing yields the library's own defaults. It does not, once a global toolbar is in
+  the picture: Storybook's theme switcher puts a domain class on `<body>`, and that domain bridges
+  the library's tokens, so the "undeclared" column quietly inherited the toolbar's dark values too.
+  Both halves rendered dark, under a heading reading "Default (light)", with nothing logged. The
+  library's own docs had already recorded this exact trap for a *different* token family and called
+  it a quirk of that family — it is not; it is a property of the toolbar plus any bridged family, and
+  this one had been bridged since an earlier wave without anyone updating the warning to say so.
+  Caught by reading the computed style, not by looking at the page — both columns looked plausibly
+  themed.
 - **A hidden browser tab suspends `requestAnimationFrame`**, so zoneless change detection never
   flushes and *nothing re-renders*. Measured: a scripted 2880 px scroll moved `scrollTop` while the
   virtualization window did not slide and no rAF callback fired in 300 ms. ⚠️ This makes browser
@@ -876,3 +898,219 @@ while the arithmetic has *already made room* and dangerous when it has already t
 Any windowed collapse, drag-out, or remove animation hits this, and the shape of the fix is the same:
 animate into space, never out of it — or hold the geometry back, which is a much larger change than
 it looks and belongs to its own ticket.
+
+## The same bug twice, in two addons nobody wrote together (ARCH-281)
+
+Two overlays paint a mark on a cell — one for a selected range, one for a highlighted block. They
+were written by different stories, months apart, and they arrived at the same defect independently:
+the `computed` that decides whether a cell is painted took the addon's own state slice as an input,
+and **a sort does not touch the addon's own state slice**.
+
+Everything else holds still too, which is what makes it survive review. `getSortedRowModel` reorders
+the *same* `Row` instances rather than rebuilding them; `getAllCells` is memoised per row on the leaf
+columns, which a sort does not change; the slot context is memoised per `Cell`; and both `@for`s
+track by id, so Angular *moves* the DOM instead of recreating it. Every input to the computed is the
+same object it was before the sort, so the computed never re-runs, and the block goes on painting the
+cells it covered when the user marked it. A descriptor stored as an anchor, a focus and a column list
+— chosen precisely so a block would *not* be an enumeration of cells — renders as an enumeration of
+cells anyway.
+
+Three things about this are worth keeping.
+
+**A rendering assertion is not a reactivity assertion.** Every unit spec passed, in both addons, the
+whole time. The membership predicate re-derives correctly on every call and always did; the defect
+lives one layer up, in what causes that call to happen. This is the second time this epic has been
+caught by the same distinction — the first was the extensibility gate, where an addon rendered,
+toggled and survived a scroll while the host's state never moved at all.
+
+**The test that catches it has an axis.** The obvious regression case is a column reorder, and it is
+useless: `columnOrder` invalidates the engine's leaf-column memo, so the cells rebuild, the context
+changes, and the computed re-runs *by accident*. The column version of this spec was written
+expecting red and came back green. Only the row axis discriminates, and only when the assertion reads
+painted DOM and nothing consults the table between the sort and the check — touching the adapter's
+proxy re-applies options to the raw instance and refreshes the very staleness under test.
+
+**Two sightings make it a rule rather than an anecdote.** The fix is one word in a binding, but the
+finding is that the *intuitive* binding is the wrong one: an addon's slice is the one piece of state a
+sort is guaranteed to leave alone, so binding it is binding the only thing that cannot tell you the
+view moved. The library's rule is now stated positively — an overlay's `computed` must depend on
+something a sort actually changes, which in practice means the whole `NgeTableState` — and it is
+recorded where the next addon author will hit it rather than in the story that found it.
+
+## Declining a feature, and being able to show why (ARCH-302)
+
+ARCH-300 left the detail band animating in one direction inside a virtualized window: open, yes;
+closed, suppressed by a single `transition: none`. That suppression is the kind of line a later reader
+is entitled to be suspicious of, because nothing in it distinguishes a considered limit from an
+oversight someone never got back to. ARCH-302 exists to answer that question, and the answer turned
+out to be no — which is worth writing up precisely because "no" is the outcome that usually goes
+unrecorded.
+
+### The claim, as a number instead of a paragraph
+
+The existing note said a closing band would paint through the row that had already moved over it.
+True, but asserted. Collapsing the row and then sweeping the band through the heights a closing
+transition passes turns it into a table, with the un-virtualized regime as the control:
+
+| band height | overlap, virtualized | overlap, normal flow |
+| --- | --- | --- |
+| 140px | 141px | 0px |
+| 105px | 106px | 0px |
+| 70px | 71px | 0px |
+| 35px | 36px | 0px |
+| 0px | 1px | 0px |
+
+Overlap is the band's height plus the row's 1px border, exactly, at every step — and zero at every
+step in flow, where the rows beneath simply reflow. The two columns are the same gesture in the two
+regimes, and the difference between them is the whole feature.
+
+### The finding: an accessibility escape removes the event that would end the hold
+
+Making the close animate means holding the row's declared size until the band has finished
+collapsing, and the interesting question is not how to start that hold but how to end it. The only
+DOM-native answer is `transitionend`. And a suppressed transition is never *created*, so it never
+fires:
+
+| `transition` | transitions created |
+| --- | --- |
+| `height 1s ease` | 1 |
+| `height 0s ease` | 0 |
+| `height 0ms ease` | 0 |
+| `none` | 0 |
+
+Both of the escapes this library already ships land in that zero row. `prefers-reduced-motion:
+reduce` applies `transition: none`; the consumer-facing `--nge-table-row-detail-duration: 0ms` is
+the `0ms` case. So the hold would never drain for exactly the users who asked for no motion, and the
+row would stay budgeted one band taller than it renders — permanently, silently, and looking like
+success.
+
+That is the generalisable line, and it is not about tables. **A hold keyed to an animation's end
+inherits every switch that can suppress the animation**, and the two most common switches are ones a
+user or a theme owns rather than the code. The escape hatch and the completion signal are the same
+mechanism seen from two sides, so honouring the first destroys the second. Any implementation that
+survives this has to let the engine read the CSS back — `matchMedia` plus `getComputedStyle` — which
+is the layering inversion the feature was trying to avoid in the first place.
+
+### Why "won't do" was worth a ticket
+
+The work product here is four paragraphs and a pointer, and it would have been cheaper to leave the
+`transition: none` alone. What that would have cost is legibility: the next person to notice the
+asymmetry would have re-derived the geometry, probably built the collapsing set, and found the
+`transitionend` problem somewhere around the reduced-motion acceptance criterion — which is late.
+A declined story is a real deliverable when the reasoning is the expensive part, and the test of
+whether it was recorded properly is whether it says what would change the answer. This one does: a
+virtualizer that accepts a transient per-row size override with its own lifetime would leave the
+library nothing to hold, and the decision would be worth reopening.
+
+## When `@supports` is the wrong answer, and what a blocked story is for (ARCH-303)
+
+ARCH-300 bought the detail band's animation with a **definite height**, and the price was an
+affordance: off virtualization a band used to grow to whatever its content needed, and afterwards it
+scrolls like a windowed one does. ARCH-303 was filed to take that back once the platform allowed, and
+the platform is the whole of its timing — `interpolate-size: allow-keywords` makes `height: auto`
+interpolable, which is exactly the missing endpoint. The story's first acceptance criterion is
+therefore not a piece of work but a **check**, with two outcomes: start, or close as still-blocked.
+
+It closed as still-blocked. `interpolate-size` is Baseline **limited** — Chromium only, with Firefox
+and Safari not having shipped it at all — and since *widely available* means thirty months **after**
+the last core engine ships, the earliest this can open is around 2029. That part is unremarkable. The
+two things worth writing down are what the story refused, and why it was worth taking at all.
+
+### The refusal: a layout contract is not a decoration
+
+The obvious move with a feature at this support level is `@supports` — ship the enhancement where it
+works, fall back elsewhere. It is such a reflex that the alternative barely gets considered, and for
+most CSS it is right: a smoother gradient or a nicer focus ring degrading on an older engine costs
+nobody anything.
+
+This is not that. Whether a band **grows or scrolls** is not a finish applied to a layout, it is the
+layout — it decides how much of a consumer's content is visible without a gesture. Behind an
+`@supports` fork, the same table with the same data reads one way in Chrome and another in Safari.
+
+And the reason that is specifically bad here is that the library had *just* finished paying to remove
+a split of exactly this kind. ARCH-300's convergence was expensive: it reversed an ARCH-298 decision
+and gave up the growth affordance, and the compensation was that the virtualized and un-virtualized
+regimes finally agree about what a band's height means. Trading that for a **browser** split is not a
+partial win, it is the same defect on a worse axis — because a consumer *chooses* whether to
+virtualize and can reason about it, while nobody chooses which engine a reader arrives with. The rule
+the story landed on: **ship it unconditionally or not at all.**
+
+The generalisation is a question worth asking before reaching for `@supports`. Does the feature change
+how something *looks*, or does it change what a consumer's content *does*? Progressive enhancement is
+for the first. For the second it manufactures a contract that varies per engine, and the fact that it
+varies is invisible in the source — the fork looks like caution rather than like a decision to let the
+platform fragment the API.
+
+### Why a story that ships no code was still worth taking
+
+Nothing about this outcome required a ticket to *discover*; ten minutes on caniuse would have told
+anyone the same thing. What the ticket produced is a **dated** claim in place of an undated one.
+
+Before it, two files carried the sentence "is not portable enough for a shared library yet". That is
+true, unfalsifiable, and rots invisibly — a reader has no way to tell whether it was checked last week
+or eighteen months ago, so the only safe response is to check again, which means the note saved
+nothing. After it, the same place carries the Baseline status, the date it was read, the two vendor
+bug numbers, and the arithmetic that turns a bug closing into a date. The next check is a link-click.
+
+That is the difference between a note and a record, and it is worth a ticket for the same reason
+ARCH-302 was: **the expensive part is the reasoning, not the diff.** The two stories are a matched
+pair and the epic keeps them adjacent deliberately, because they end in outcomes that look identical
+from the Jira board and are not. ARCH-302 is a *decision* — it will not be done, and only a different
+virtualizer reopens it. ARCH-303 is a *date* — it will be done, and only the calendar is in the way.
+Filing both as "closed, no code" and leaving it there would lose that distinction, which is precisely
+the thing a future reader needs. So one of them says *what would change the answer*, and the other
+says *when to look again*.
+
+The corollary is a small piece of process rather than architecture: a story blocked for three years
+should not stay open for three years. It closes with the record, and the epic's "later — not yet
+ticketed" list carries one line so the work is re-minted when the gate opens. An open ticket nobody
+can act on is indistinguishable from an open ticket nobody got to.
+
+## Theme 11 — What composing everything finds that composing two cannot (ARCH-304)
+
+Every feature in this epic had been proven in isolation, and the extensibility gate (Theme 5) had
+already proven that two addons compose without touching core. What nobody had done — until the
+showcase put all of it on one table — was combine features that never had a reason to know about
+each other in the first place, because neither one is an addon reaching into the other's territory.
+They are two separate axes of the same core, each individually correct, each individually tested,
+and each blind to the other's existence.
+
+### The defect: two axes resolved in the wrong order, and neither one is wrong alone
+
+Injecting a leading control column (a selection checkbox, an expansion chevron) puts it at the front
+of the table's **column order**. Column **pinning** is a separate axis, resolved afterwards, with no
+idea that the column it is told to freeze might be one of the two the other feature just placed at
+the front. Pin any data column to the left edge — the single most ordinary thing a real consumer
+does with pinning — and the row's own chevron and checkbox land in the **scrolling** centre lane
+while the data column stays sticky. Backwards, and silent: the table renders exactly as configured,
+every control is present and works, and the only symptom is that a user has to scroll back left to
+find their own checkbox.
+
+Nothing about this is a bug in either feature read on its own. Column ordering is correct: the
+injected controls come first. Pinning is correct: whichever columns a host names are frozen. The
+defect exists only in a table using **both at once**, and no number of specs for either feature in
+isolation would ever produce it, because each suite configures the feature it is testing and leaves
+the other off — which is exactly how both were tested, for waves, without anyone seeing this.
+
+### The fix cost no core edit — the finding is that a host has to know it is needed
+
+The two column-id constants a host needs were already exported through the public barrel, so the
+actual fix is one line: name them in `columnPinning.left` ahead of the data columns. That is a real
+mitigation, and also the uncomfortable part — it works only because the *consumer* has to know two
+internal-looking column ids exist and has to remember to pin them every time selection or expansion
+is combined with pinning. A library asking a host to recite its own implementation detail to avoid a
+backwards-reading table is a seam worth revisiting, even though fixing it was explicitly not this
+story's to do.
+
+### The generalisable line
+
+**A feature that composes correctly with an addon has told you nothing about whether it composes
+correctly with a sibling feature**, because an addon and a core feature interact through a seam
+built and tested for exactly that purpose, while two core features interact through nothing more
+than the accident of both writing to the same table. The extensibility gate answers "does a *new*
+thing plug into the *existing* whole cleanly" — a question about one relationship. A showcase
+answers a harder one: "does the *whole* still make sense when every relationship is live at once" —
+and the only way to find out is to build the whole and look, because the combination that fails is
+rarely the one anyone would have thought to write a pairwise test for. Eight waves of correct,
+independently-shipped features had never once shared a table before this story put them there, and
+the very first time they did, one of the eight silently made two others unusable.

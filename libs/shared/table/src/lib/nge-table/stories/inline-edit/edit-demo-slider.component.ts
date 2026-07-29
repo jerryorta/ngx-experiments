@@ -14,7 +14,7 @@ import {
  *
  * ⚠️ **Deliberately NOT `<input type="range">`.** A native range input was already
  * matched by the old tag-list guard, so it would demonstrate nothing. What a design
- * library actually ships — `cg-select`, a composed slider, and the table's own future
+ * library actually ships — `dlc-select`, a composed slider, and the table's own future
  * editors — is a composed element carrying an ARIA role, and *that* is what the guard
  * had to learn to recognise. Drag this thumb: the range addon must leave the gesture
  * alone and select no cells.

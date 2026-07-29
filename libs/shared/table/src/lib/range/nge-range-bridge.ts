@@ -199,6 +199,17 @@ export class NgeRangeBridge {
    */
   private dragMode: NgeRangeDragMode = 'range';
 
+  /**
+   * The cell a plain press landed on, held until release so a click can be told
+   * from a drag. Non-null only between `pointerdown` and `pointerup`, and withdrawn
+   * by `onPointerMove` the moment the gesture reaches a different cell.
+   *
+   * ⚠️ **Scratch state on the bridge, never a slice.** It records where a gesture
+   * is, not what the table is — the same call ARCH-269 makes for the gesture anchor,
+   * and a restored view carrying one would clear a cell the user never pressed.
+   */
+  private pendingClear: null | { columnId: string; rowId: string } = null;
+
   private pointerX = 0;
 
   private pointerY = 0;
@@ -577,6 +588,25 @@ export class NgeRangeBridge {
       return;
     }
 
+    const plain = !pointer.shiftKey && !pointer.metaKey && !pointer.ctrlKey;
+
+    // ⚠️ Armed from the state BEFORE the press, and that ordering is the whole of
+    // it. `start()` below makes the pressed cell the sole selection whatever it was
+    // a moment ago, so asking the same question at release cannot tell "clicked the
+    // cell that was already alone" from "clicked a fresh cell" — and a first click
+    // would select, then immediately clear itself. The entry-point agreement specs
+    // in `nge-cell-range.spec.ts` catch that, and did.
+    //
+    // The clear still happens on RELEASE, not here: this press may be the opening
+    // frame of a drag, and clearing now would leave that drag nothing to extend, so
+    // `extendTo` would silently re-anchor at whichever cell the pointer reached
+    // first. `onPointerMove` withdraws the candidate once the gesture leaves the
+    // cell it began on.
+    this.pendingClear =
+      plain && this.cellAt(cell.rowId, cell.columnId)?.isNgeSoleSelection() === true
+        ? { columnId: cell.columnId, rowId: cell.rowId }
+        : null;
+
     if (pointer.shiftKey) {
       this.extendTo(cell.rowId, cell.columnId);
     } else {
@@ -597,6 +627,24 @@ export class NgeRangeBridge {
     this.pointerX = pointer.clientX;
     this.pointerY = pointer.clientY;
 
+    // The press became a drag the moment it resolved to a different cell, so it is
+    // no longer a click and cannot clear. Compared by cell rather than by pixels:
+    // a few pixels of tremor inside the cell that was pressed is still a click, and
+    // a pixel threshold would need a magic number this has no way to justify.
+    if (this.pendingClear !== null) {
+      const cell = this.cellKeyAt(
+        this.document?.elementFromPoint(this.pointerX, this.pointerY) ?? null
+      );
+
+      if (
+        cell === null ||
+        cell.rowId !== this.pendingClear.rowId ||
+        cell.columnId !== this.pendingClear.columnId
+      ) {
+        this.pendingClear = null;
+      }
+    }
+
     this.extendToPoint(this.pointerX, this.pointerY);
     this.scheduleAutoScroll();
   };
@@ -615,6 +663,15 @@ export class NgeRangeBridge {
     if (this.dragMode === 'fill') {
       this.table()?.commitNgeFill();
     }
+
+    // A plain press that never left its cell is a click, and on the cell that was
+    // the whole selection it clears. `clearNgeRangeIfSole` decides that inside its
+    // own updater, so this stays a gesture question and never reads state back.
+    if (this.dragMode === 'range' && this.pendingClear !== null) {
+      this.cellAt(this.pendingClear.rowId, this.pendingClear.columnId)?.clearNgeRangeIfSole();
+    }
+
+    this.pendingClear = null;
 
     this.releasePointer(pointer);
     this.endDrag();

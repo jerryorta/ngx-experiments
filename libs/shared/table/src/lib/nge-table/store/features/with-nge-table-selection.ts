@@ -41,7 +41,7 @@ interface NgeTableSelectionDeps extends NgeTableBaseStore {
  *
  * The two `…SlotContext` builders are what a consuming app's projected
  * `selection-cell` / `selection-header` templates receive, so a table dropped into
- * a domain wears that domain's checkbox — `cg-checkbox`, `gy-checkbox`. The
+ * a domain wears that domain's checkbox — `dlc-checkbox`, `dlc-checkbox`. The
  * callbacks they carry are what make the seam work at all: a projected
  * `ng-template` is instantiated with its **declaration** injector — the
  * consumer's — so it cannot inject this store. ARCH-250's overlay needed a whole
