@@ -10,7 +10,7 @@ interface TokenSwatch {
   value: string;
 }
 
-interface UpcomingView {
+interface CalendarView {
   name: string;
   story: string;
 }
@@ -18,15 +18,12 @@ interface UpcomingView {
 /**
  * Overview / smoke story for the shared calendar library.
  *
- * ARCH-72 (S3b) stands up the Storybook harness EARLY — before the
- * `<nge-calendar>` shell (S5 / ARCH-65) and views (S6+) exist. This story
- * therefore renders a static token-preview placeholder, NOT a real calendar. It:
- *   1. proves the harness composes (a "Calendar" section appears in Storybook),
- *   2. demonstrates the `--nge-calendar-*` → literal theming bridge swapping
- *      live with the theme toolbar, and
- *   3. is the copy-template for the per-view story sets
- *      (`nge-calendar/stories/<view>/{usage,theming,interaction}/`) authored in
- *      S6-S10 on top of this harness.
+ * It renders the token swatches rather than a calendar, on purpose: this is the
+ * page that shows the `--nge-calendar-*` → literal theming bridge in isolation,
+ * swapping live with the theme toolbar, with no view's layout in the way. The
+ * running calendars live in the per-view story sets
+ * (`nge-calendar/stories/<view>/{usage,theming,interaction}/`), which are
+ * authored on this same harness.
  */
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -45,9 +42,9 @@ export class CalendarOverviewStoriesComponent {
   readonly storybookFilePath = 'libs/shared/calendar/src/lib/nge-calendar/stories/overview';
 
   /**
-   * Core tokens previewed in the swatch grid. Each `value` is the chained
-   * fallback the real components will use, so the swatch renders un-themed and
-   * upgrades live under a host theme. The complete token contract ships in S5.
+   * Core tokens previewed in the swatch grid. Each `value` is the same chained
+   * fallback the views use, so a swatch renders un-themed and upgrades live under
+   * a host theme. The full contract is this library's `theme/`.
    */
   readonly tokenSwatches: readonly TokenSwatch[] = [
     {
@@ -77,11 +74,14 @@ export class CalendarOverviewStoriesComponent {
     },
   ];
 
-  /** Views that land in later ARCH-60 stories — shown as "coming soon" chips. */
-  readonly upcomingViews: readonly UpcomingView[] = [
-    { name: 'Month', story: 'S6 · ARCH-66' },
-    { name: 'Week', story: 'S7 · ARCH-67' },
-    { name: 'Day', story: 'S7 · ARCH-67' },
-    { name: 'Year', story: 'S8 · ARCH-68' },
+  /**
+   * The four views the shell hosts, each chip naming where that view's stories
+   * sit in the Storybook sidebar so a reader can go straight to a running one.
+   */
+  readonly views: readonly CalendarView[] = [
+    { name: 'Month', story: 'Views / Month' },
+    { name: 'Week', story: 'Views / Week' },
+    { name: 'Day', story: 'Views / Day' },
+    { name: 'Year', story: 'Views / Year' },
   ];
 }
