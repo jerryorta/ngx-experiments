@@ -1,0 +1,66 @@
+.nge-parallel-coords-chart-interaction-stories {
+  display: block;
+  padding: 20px;
+
+  .nge-story-interaction-container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .nge-story-interaction-row {
+    margin-bottom: 12px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .nge-story-interaction-btn {
+    padding: 6px 14px;
+    border: 1px solid var(--nge-chart-outline-variant, #d0d0d0);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--nge-chart-on-surface, #1a1a1a);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(127, 127, 127, 0.12);
+    }
+  }
+
+  .nge-story-brush-readout {
+    margin-bottom: 12px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: var(--nge-chart-on-surface, #1a1a1a);
+  }
+
+  .nge-story-brush-count {
+    font-weight: 600;
+  }
+
+  .nge-story-brush-hint {
+    opacity: 0.7;
+  }
+
+  .nge-story-brush-chip {
+    padding: 2px 8px;
+    border: 1px solid var(--nge-chart-outline-variant, #d0d0d0);
+    border-radius: 999px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .nge-story-chart-wrapper {
+    height: 460px;
+    border: 1px solid var(--nge-chart-outline-variant, #e0e0e0);
+    border-radius: 8px;
+    padding: 16px;
+    background: var(--nge-chart-surface, #fff);
+    overflow: visible; // Allow tooltips to extend beyond the container
+  }
+}

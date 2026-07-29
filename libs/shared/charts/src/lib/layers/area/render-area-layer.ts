@@ -38,7 +38,7 @@ interface AreaVertex {
  * `none`/`expand`/`wiggle`/`diverging`), and range bands (points with `y0`).
  * The fill is the primary mark; `showLine` adds a stroke along the top edge and
  * tooltips/clicks are wired through invisible per-vertex targets. All colour and
- * opacity is applied via D3 `.style()` on `--chart-*` tokens.
+ * opacity is applied via D3 `.style()` on `--nge-chart-*` tokens.
  */
 export function renderAreaLayer(
   context: NgeChartLayerContext<

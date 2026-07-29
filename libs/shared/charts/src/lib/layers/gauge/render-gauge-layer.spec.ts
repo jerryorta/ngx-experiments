@@ -26,6 +26,7 @@ interface ContextOptions {
   innerRadius?: number;
   onClick?: jest.Mock;
   onTooltip?: jest.Mock;
+  radiusRatio?: number;
   shape?: NgeGaugeLayerConfig['shape'];
   showValueLabel?: boolean;
   startAngle?: number;
@@ -67,6 +68,7 @@ function createContext(
     indicator: options.indicator,
     innerRadius: options.innerRadius,
     onClick: options.onClick,
+    radiusRatio: options.radiusRatio,
     renderer: renderGaugeLayer,
     shape: options.shape,
     showValueLabel: options.showValueLabel,
@@ -142,6 +144,55 @@ function rotationDeg(el: Element): number {
 }
 
 describe('renderGaugeLayer', () => {
+  describe('radiusRatio', () => {
+    /**
+     * The largest magnitude in an arc's own path data is its outer radius — every coordinate
+     * and every `A rx,ry` on a centered arc is bounded by it. A blunt probe, but it needs no
+     * layout (jsdom has none) and it moves exactly with the radius.
+     */
+    const maxExtent = (g: SVGGElement, selector: string): number => {
+      const magnitudes = Array.from(g.querySelectorAll<SVGPathElement>(selector)).flatMap(
+        node =>
+          (node.getAttribute('d') ?? '').match(/-?\d+(\.\d+)?/g)?.map(n => Math.abs(Number(n))) ??
+          []
+      );
+      // Without this a mistyped selector yields `Math.max()` === -Infinity, and -Infinity/2
+      // is still -Infinity — so the ratio assertion below would pass while measuring nothing.
+      if (magnitudes.length === 0) {
+        throw new Error(`No marks matched "${selector}" — the probe would measure nothing`);
+      }
+      return Math.max(...magnitudes);
+    };
+
+    it('scales the mark down without distorting it', () => {
+      const full = createContext(GAUGE);
+      const small = createContext(GAUGE, { radiusRatio: 0.5 });
+
+      renderGaugeLayer(full.context);
+      renderGaugeLayer(small.context);
+
+      // Half the ratio, half the radius — and because `innerRadius` is a ratio OF the outer
+      // radius, the rings/hole scale with it rather than the shape warping.
+      expect(maxExtent(small.g, '.nge-gauge-track')).toBeCloseTo(
+        maxExtent(full.g, '.nge-gauge-track') / 2,
+        4
+      );
+    });
+
+    it('fills the plot when omitted', () => {
+      const omitted = createContext(GAUGE);
+      const explicit = createContext(GAUGE, { radiusRatio: 1 });
+
+      renderGaugeLayer(omitted.context);
+      renderGaugeLayer(explicit.context);
+
+      expect(maxExtent(omitted.g, '.nge-gauge-track')).toBeCloseTo(
+        maxExtent(explicit.g, '.nge-gauge-track'),
+        6
+      );
+    });
+  });
+
   afterEach(() => {
     document.body.innerHTML = '';
   });
@@ -537,9 +588,9 @@ describe('renderGaugeLayer', () => {
         styleOf(node, 'fill')
       );
       expect(fills).toEqual([
-        'var(--chart-primary)',
-        'var(--chart-tertiary)',
-        'var(--chart-error)',
+        'var(--nge-chart-primary)',
+        'var(--nge-chart-tertiary)',
+        'var(--nge-chart-error)',
       ]);
     });
 
@@ -637,7 +688,7 @@ describe('renderGaugeLayer', () => {
 
       renderGaugeLayer(context);
 
-      expect(styleOf(valuePath(g), 'fill')).toBe('var(--chart-primary)');
+      expect(styleOf(valuePath(g), 'fill')).toBe('var(--nge-chart-primary)');
     });
 
     it('honors a per-datum color override on the value arc', () => {
@@ -659,7 +710,7 @@ describe('renderGaugeLayer', () => {
       renderGaugeLayer(context);
 
       expect(styleOf(g.querySelector('.nge-gauge-track')!, 'fill')).toBe(
-        'var(--chart-surface-container-highest)'
+        'var(--nge-chart-surface-container-highest)'
       );
     });
   });

@@ -1,5 +1,8 @@
 import { Component, ViewEncapsulation } from '@angular/core';
-import { NgeStorybookReviewContainerComponent, REVIEW_STATUS } from '@nge/storybook';
+import {
+  NgeStorybookReviewContainerComponent,
+  REVIEW_STATUS,
+} from '@nge/storybook';
 import { scaleBand, scaleLinear } from 'd3-scale';
 
 import type { NgeChartScales } from '../../../core/base-layout';
@@ -32,7 +35,7 @@ interface LineSeriesValue {
   styleUrl: './composite-chart-stories.component.scss',
   templateUrl: './composite-chart-stories.component.html',
 })
-export class CompositeChartStoriesComponent {
+export class NgeCompositeChartStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/composite';
 

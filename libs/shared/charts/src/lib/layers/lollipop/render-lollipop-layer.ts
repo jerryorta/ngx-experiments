@@ -77,7 +77,7 @@ interface LollipopRenderParams {
  * (fade in at their final position — geometry stays synchronous so first paint is
  * testable / smear-free) / update (reposition) / exit (fade) via `context.animation`;
  * the connect (slope) lines and labels apply geometry synchronously. All colour is
- * applied via D3 `.style()` on `--chart-*` tokens.
+ * applied via D3 `.style()` on `--nge-chart-*` tokens.
  */
 export function renderLollipopLayer(
   context: NgeChartLayerContext<

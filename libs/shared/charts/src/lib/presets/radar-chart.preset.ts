@@ -90,6 +90,15 @@ export interface RadarChartPresetOptions {
   onClick?: NgeRadarLayerConfig['onClick'];
 
   /**
+   * Scale the self-computed outer radius by a RATIO (0–1): `1` (default) fills the plot,
+   * `0.75` draws it at three-quarters size. Applied AFTER the layer's own label reserves,
+   * and `innerRadius` scales with it, so the chart shrinks without distorting. The knob for
+   * "make the chart smaller in a box I do not control" — not `labelGutter`, which is
+   * measured off the arc and drags the labels inward with it.
+   */
+  radiusRatio?: number;
+
+  /**
    * Series shape: `'area'` filled polygon (default, Radar Diagram) or `'line'` stroked
    * outline only (Polar Chart).
    */
@@ -152,6 +161,7 @@ export function createRadarChartConfig(options: RadarChartPresetOptions): NgeCha
     levels,
     margin,
     onClick,
+    radiusRatio,
     render,
     seriesColors,
     startAngle,
@@ -188,6 +198,7 @@ export function createRadarChartConfig(options: RadarChartPresetOptions): NgeCha
         innerRadius,
         levels,
         onClick,
+        radiusRatio,
         render,
         renderer: renderRadarLayer,
         seriesColors,

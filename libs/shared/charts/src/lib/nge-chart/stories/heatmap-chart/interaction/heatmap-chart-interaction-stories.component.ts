@@ -29,15 +29,15 @@ function makeSalesGrid(): NgeHeatmapDataPoint[] {
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'heatmap-chart-interaction-stories',
+    class: 'nge-heatmap-chart-interaction-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'heatmap-chart-interaction-stories',
+  selector: 'nge-heatmap-chart-interaction-stories',
   standalone: true,
   styleUrl: './heatmap-chart-interaction-stories.component.scss',
   templateUrl: './heatmap-chart-interaction-stories.component.html',
 })
-export class HeatmapChartInteractionStoriesComponent {
+export class NgeHeatmapChartInteractionStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/heatmap-chart/interaction';
 

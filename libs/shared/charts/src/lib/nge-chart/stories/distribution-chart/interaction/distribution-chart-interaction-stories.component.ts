@@ -48,15 +48,15 @@ function makeEndpoints(seed: number): NgeDistributionDataPoint[] {
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'distribution-chart-interaction-stories',
+    class: 'nge-distribution-chart-interaction-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'distribution-chart-interaction-stories',
+  selector: 'nge-distribution-chart-interaction-stories',
   standalone: true,
   styleUrl: './distribution-chart-interaction-stories.component.scss',
   templateUrl: './distribution-chart-interaction-stories.component.html',
 })
-export class DistributionChartInteractionStoriesComponent {
+export class NgeDistributionChartInteractionStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath =
     'libs/shared/charts/src/lib/nge-chart/stories/distribution-chart/interaction';

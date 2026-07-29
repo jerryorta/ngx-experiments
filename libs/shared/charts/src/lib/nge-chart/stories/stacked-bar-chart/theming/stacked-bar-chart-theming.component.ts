@@ -20,15 +20,15 @@ function quarterlySeries(seriesId: string, values: number[]): NgeStackedBarDataP
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'stacked-bar-chart-theming',
+    class: 'nge-stacked-bar-chart-theming',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'stacked-bar-chart-theming',
+  selector: 'nge-stacked-bar-chart-theming',
   standalone: true,
   styleUrl: './stacked-bar-chart-theming.component.scss',
   templateUrl: './stacked-bar-chart-theming.component.html',
 })
-export class StackedBarChartThemingComponent {
+export class NgeStackedBarChartThemingComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/stacked-bar-chart/theming';
 
@@ -42,7 +42,7 @@ export class StackedBarChartThemingComponent {
   ];
 
   // 1. Default — palette comes from the theme's `stacked-bar.bar.colors`, which
-  // resolves to the domain-agnostic `var(--chart-*)` tokens.
+  // resolves to the domain-agnostic `var(--nge-chart-*)` tokens.
   defaultConfig = createStackedBarChartConfig({
     data: this.sampleData,
     legend: { enabled: true },
@@ -183,9 +183,9 @@ export class StackedBarChartThemingComponent {
     },
   };
 
-  // 8. Branded via `--chart-*` token overrides: NO seriesColors and NO theme
+  // 8. Branded via `--nge-chart-*` token overrides: NO seriesColors and NO theme
   // colors, so the fills fall through to the default palette
-  // (var(--chart-primary / -secondary / -tertiary / -error)). The SCSS overrides
+  // (var(--nge-chart-primary / -secondary / -tertiary / -error)). The SCSS overrides
   // those tokens for BOTH light and dark, so the CSS variables drive the colors.
   brandedConfig = createStackedBarChartConfig({
     data: this.sampleData,

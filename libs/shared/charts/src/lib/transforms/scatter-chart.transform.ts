@@ -30,7 +30,7 @@ export interface NgeScatterTransformOptions extends ScatterChartPresetOptions {
   /**
    * Opacity applied to NON-selected series' points while a series is selected.
    * Opacity (not color math) is the fade primitive because series colors may be
-   * unresolved `var(--chart-*)` strings.
+   * unresolved `var(--nge-chart-*)` strings.
    * @default 0.15
    */
   fadedPointOpacity?: number;
@@ -39,7 +39,7 @@ export interface NgeScatterTransformOptions extends ScatterChartPresetOptions {
 /**
  * Coordinates interaction state → scatter chart config.
  *
- * A plain class (no DI — same idiom as ChartsTooltipCalc) that owns the
+ * A plain class (no DI — same idiom as NgeChartTooltipCalc) that owns the
  * *semantics* of chart interactivity while the chart itself stays dumb:
  * every interaction produces a new `NgeChartConfig`, and `<nge-chart>`
  * re-renders it (D3 update-joins animate the change).

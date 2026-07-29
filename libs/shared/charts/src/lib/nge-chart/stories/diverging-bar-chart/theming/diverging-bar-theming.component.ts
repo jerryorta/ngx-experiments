@@ -14,15 +14,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'diverging-bar-theming',
+    class: 'nge-diverging-bar-theming',
   },
   imports: [CommonModule, NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'diverging-bar-theming',
+  selector: 'nge-diverging-bar-theming',
   standalone: true,
   styleUrl: './diverging-bar-theming.component.scss',
   templateUrl: './diverging-bar-theming.component.html',
 })
-export class DivergingBarThemingComponent {
+export class NgeDivergingBarThemingComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/diverging-bar-chart/theming';
 

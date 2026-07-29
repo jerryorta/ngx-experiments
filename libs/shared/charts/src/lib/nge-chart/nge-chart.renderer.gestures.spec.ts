@@ -380,7 +380,7 @@ describe('attachGestureListeners + attachRangeAxisBrush coexistence', () => {
     };
     const events: NgeChartGestureEvent[] = [];
 
-    // Both handlers wired on the SAME svg, exactly as renderChart wires them.
+    // Both handlers wired on the SAME svg, exactly as renderNgeChart wires them.
     attachGestureListeners(
       select(svg),
       select(bounds),

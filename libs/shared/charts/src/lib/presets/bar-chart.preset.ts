@@ -67,6 +67,12 @@ export interface BarChartPresetOptions {
    * (category) axis windows by whole categories, the value axis auto-fits.
    */
   gestures?: NgeChartGesturesConfig;
+  /**
+   * Value-label colour for EVERY bar. A per-datum `labelColor` still wins over it. Bar
+   * value labels are drawn on the plot surface just outside the bar rather than on its
+   * fill, so this layer has no derived on-fill contrast rung.
+   */
+  labelColor?: string;
   /** Format function for value labels displayed on bars */
   labelFormat?: (value: number) => string;
   /** Legend configuration. Set `enabled: true` to auto-generate legend from trend lines. */
@@ -136,6 +142,7 @@ export function createBarChartConfig(options: BarChartPresetOptions): NgeChartCo
     barRadius,
     data,
     gestures,
+    labelColor,
     labelFormat,
     legend,
     margin,
@@ -201,6 +208,7 @@ export function createBarChartConfig(options: BarChartPresetOptions): NgeChartCo
         barPadding,
         barRadius,
         data,
+        labelColor,
         labelFormat,
         onClick,
         orientation,

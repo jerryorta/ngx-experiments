@@ -13,15 +13,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'radial-bar-theming',
+    class: 'nge-radial-bar-theming',
   },
   imports: [CommonModule, NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'radial-bar-theming',
+  selector: 'nge-radial-bar-theming',
   standalone: true,
   styleUrl: './radial-bar-theming.component.scss',
   templateUrl: './radial-bar-theming.component.html',
 })
-export class RadialBarThemingComponent {
+export class NgeRadialBarThemingComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/radial-bar/theming';
 
@@ -60,7 +60,7 @@ export class RadialBarThemingComponent {
     { band: 'PM', label: 'Fri', value: 45 },
   ];
 
-  // Default theme — no overrides. Uses the built-in `--chart-*` token palette,
+  // Default theme — no overrides. Uses the built-in `--nge-chart-*` token palette,
   // which adapts to the container's light / dark surface.
   defaultConfig = createRadialBarChartConfig({
     data: this.sampleData,
@@ -127,6 +127,41 @@ export class RadialBarThemingComponent {
           fillOpacity: 0.5,
           lineWidth: 3,
         },
+      },
+    },
+  };
+
+  // On-bar label theme — `label` is the ABSOLUTE black/white contrast pair the renderer
+  // picks between per bar, so overriding it with one flat `color` opts the whole theme out
+  // of contrast derivation. Here only the typography moves; the pair stays intact.
+  labelInsideConfig: NgeChartConfig = {
+    ...createRadialBarChartConfig({
+      data: this.sampleData,
+      innerRadius: 0.15,
+      padAngle: 0.02,
+      showLabels: true,
+    }),
+    theme: {
+      'radial-bar': {
+        bar: { colors: ['#1565C0', '#F9A825', '#2E7D32', '#EF9A9A', '#4527A0'] },
+        label: { fontSize: 11, fontWeight: 700 },
+      },
+    },
+  };
+
+  // Outside label theme — outside text sits on the plot surface, so it reads the SEPARATE
+  // `labelOutside` slice. Overriding `label` here would silently do nothing.
+  labelOutsideConfig: NgeChartConfig = {
+    ...createRadialBarChartConfig({
+      data: this.sampleData,
+      labelPosition: 'outside',
+      padAngle: 0,
+      showLabels: true,
+    }),
+    theme: {
+      'radial-bar': {
+        bar: { colors: ['#1565C0', '#1E88E5', '#42A5F5', '#64B5F6', '#90CAF9'] },
+        labelOutside: { fontSize: 12, fontWeight: 500 },
       },
     },
   };

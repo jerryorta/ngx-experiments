@@ -64,15 +64,15 @@ function rerollLeaves(nodes: NgeHierarchyDatum[]): NgeHierarchyDatum[] {
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'sunburst-chart-interaction-stories',
+    class: 'nge-sunburst-chart-interaction-stories',
   },
   imports: [NgeChartComponent, NgeChartLegendComponent, NgeStorybookReviewContainerComponent],
-  selector: 'sunburst-chart-interaction-stories',
+  selector: 'nge-sunburst-chart-interaction-stories',
   standalone: true,
   styleUrl: './sunburst-chart-interaction-stories.component.scss',
   templateUrl: './sunburst-chart-interaction-stories.component.html',
 })
-export class SunburstChartInteractionStoriesComponent {
+export class NgeSunburstChartInteractionStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/sunburst-chart/interaction';
 
@@ -91,6 +91,12 @@ export class SunburstChartInteractionStoriesComponent {
   readonly endAngle = input<number>(6.28);
   readonly padAngle = input<number>(0);
   readonly maxDepth = input<number>(0);
+
+  // Layer - Labels
+  readonly showLabels = input<boolean>(false);
+  readonly minLabelAngle = input<number>(0.15);
+  readonly minLabelSize = input<number>(12);
+  readonly maxLabelDepth = input<number>(0);
 
   // Layer - Legend
   readonly showLegend = input<boolean>(true);
@@ -117,6 +123,12 @@ export class SunburstChartInteractionStoriesComponent {
   readonly segmentStroke = input<string>('');
   readonly segmentStrokeWidth = input<number>(1);
   readonly segmentOpacity = input<number>(1);
+
+  // Theme - Label Styling
+  readonly labelFontSize = input<number>(10);
+  readonly labelFontWeight = input<number>(600);
+  /** Flat label colour — empty keeps the automatic on-fill contrast derivation. */
+  readonly labelColor = input<string>('');
 
   // Sample data as a signal so the button can re-roll its leaf values.
   readonly sampleData = signal<NgeHierarchyDatum[]>(BUDGET_HIERARCHY);
@@ -201,10 +213,15 @@ export class SunburstChartInteractionStoriesComponent {
       data: this.chartData(),
       endAngle: this.endAngle(),
       innerRadius: this.innerRadius(),
+      labelColor: this.labelColor() || undefined,
       layout: this.layout(),
       maxDepth: this.maxDepth() || undefined,
+      maxLabelDepth: this.maxLabelDepth() || undefined,
+      minLabelAngle: this.minLabelAngle(),
+      minLabelSize: this.minLabelSize(),
       padAngle: this.padAngle(),
       seriesColors: palette.length ? palette : undefined,
+      showLabels: this.showLabels(),
       startAngle: this.startAngle(),
       tooltip: this.showTooltip()
         ? {
@@ -245,6 +262,10 @@ export class SunburstChartInteractionStoriesComponent {
           : undefined,
       theme: {
         sunburst: {
+          label: {
+            fontSize: this.labelFontSize(),
+            fontWeight: this.labelFontWeight(),
+          },
           segment: {
             opacity: this.segmentOpacity(),
             stroke: this.segmentStroke() || undefined,

@@ -2,9 +2,9 @@
   [reviewStatus]="reviewStatus"
   [storybookFilePath]="storybookFilePath"
 >
-  <div class="stories-container">
+  <div class="nge-story-container">
     <h2>Radial Bar - Theming Examples</h2>
-    <p class="intro-text">
+    <p class="nge-story-intro-text">
       Fill colors resolve per-datum <code>color</code> &rarr; the preset's
       <code>seriesColors</code> palette &rarr; the theme <code>bar.colors</code> palette. Override
       <code>theme['radial-bar']</code> to reskin each mark: <code>bar.colors</code> for the arc
@@ -14,40 +14,40 @@
     </p>
 
     <!-- Default Theme -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>Default Theme</h4>
-      <p class="story-description">
-        No theme provided — uses the built-in <code>--chart-*</code> token palette, which adapts to
-        the surrounding light / dark surface.
+      <p class="nge-story-description">
+        No theme provided — uses the built-in <code>--nge-chart-*</code> token palette, which
+        adapts to the surrounding light / dark surface.
       </p>
-      <div class="chart-container">
+      <div class="nge-story-chart-container">
         <nge-chart [config]="defaultConfig" />
       </div>
     </section>
 
     <!-- Bar Palette Overrides -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>Bar Palette Overrides</h4>
-      <p class="story-description">
+      <p class="nge-story-description">
         Reskin the arc palette with <code>theme['radial-bar'].bar.colors</code>. The datum index
         maps to <code>colors[index % length]</code>, so the palette cycles for any category count.
       </p>
-      <div class="themes-grid">
-        <div class="theme-item">
-          <span class="theme-label">Green</span>
-          <div class="chart-container chart-container--small">
+      <div class="nge-story-themes-grid">
+        <div class="nge-story-theme-item">
+          <span class="nge-story-theme-label">Green</span>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
             <nge-chart [config]="greenConfig" />
           </div>
         </div>
-        <div class="theme-item">
-          <span class="theme-label">Blue</span>
-          <div class="chart-container chart-container--small">
+        <div class="nge-story-theme-item">
+          <span class="nge-story-theme-label">Blue</span>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
             <nge-chart [config]="blueConfig" />
           </div>
         </div>
-        <div class="theme-item">
-          <span class="theme-label">Red</span>
-          <div class="chart-container chart-container--small">
+        <div class="nge-story-theme-item">
+          <span class="nge-story-theme-label">Red</span>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
             <nge-chart [config]="redConfig" />
           </div>
         </div>
@@ -55,54 +55,80 @@
     </section>
 
     <!-- Cell Intensity -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>Cell Intensity (Circular Heat Map)</h4>
-      <p class="story-description">
+      <p class="nge-story-description">
         The <code>cell</code> mark encodes value as fill <strong>opacity</strong> of a single base
         color. Set <code>cell.color</code> for the hue and raise <code>cell.minOpacity</code> to
         keep the faintest cells legible.
       </p>
-      <div class="chart-container">
+      <div class="nge-story-chart-container">
         <nge-chart [config]="cellConfig" />
       </div>
     </section>
 
     <!-- Area Styling -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>Area Styling</h4>
-      <p class="story-description">
+      <p class="nge-story-description">
         The <code>area</code> mark tunes the radial area fill + outline: a denser
         <code>area.fillOpacity</code> and a thicker <code>area.lineWidth</code> emphasise the series
         boundary. Series colors still come from the shared <code>bar</code> palette by series index.
       </p>
-      <div class="chart-container">
+      <div class="nge-story-chart-container">
         <nge-chart [config]="areaConfig" />
       </div>
     </section>
 
+    <!-- Label Styling: two slices, opposite colour rules -->
+    <section class="nge-story-section">
+      <h4>Label Styling — Two Slices, Opposite Colour Rules</h4>
+      <p class="nge-story-description">
+        A label drawn <strong>on</strong> a bar and one drawn <strong>beside</strong> it have
+        different backdrops, so they read different theme slices. <code>label</code> styles on-bar
+        text: its <code>color</code> / <code>colorOnDark</code> are the ABSOLUTE black / white pair
+        the renderer picks between per bar, because the backdrop is a palette fill — a range. Note
+        the yellow and the pale red bars below take dark text while the deep blue and purple take
+        light.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="labelInsideConfig" />
+      </div>
+      <p class="nge-story-description">
+        <code>labelOutside</code> styles the perimeter ring. It tracks
+        <code>--nge-chart-on-surface</code> and deliberately declares
+        <strong>no <code>colorOnDark</code></strong> — that missing pair is what stops outside text
+        deriving from a fill it is not drawn on. Restyling outside labels therefore means overriding
+        <code>labelOutside</code>; overriding <code>label</code> silently does nothing here.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="labelOutsideConfig" />
+      </div>
+    </section>
+
     <!-- Highlight: side-by-side comparison -->
-    <section class="story-section story-section--highlight">
+    <section class="nge-story-section nge-story-section--highlight">
       <h4>Multiple Palettes Side by Side</h4>
-      <p class="story-description">
+      <p class="nge-story-description">
         The same weekday data rendered with three palettes — swap
         <code>theme['radial-bar'].bar.colors</code> to rebrand without touching the data.
       </p>
-      <div class="chart-row">
-        <div class="chart-column">
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
           <h5>Green</h5>
-          <div class="chart-container chart-container--small">
+          <div class="nge-story-chart-container nge-story-chart-container--small">
             <nge-chart [config]="comparisonGreen" />
           </div>
         </div>
-        <div class="chart-column">
+        <div class="nge-story-chart-column">
           <h5>Blue</h5>
-          <div class="chart-container chart-container--small">
+          <div class="nge-story-chart-container nge-story-chart-container--small">
             <nge-chart [config]="comparisonBlue" />
           </div>
         </div>
-        <div class="chart-column">
+        <div class="nge-story-chart-column">
           <h5>Red</h5>
-          <div class="chart-container chart-container--small">
+          <div class="nge-story-chart-container nge-story-chart-container--small">
             <nge-chart [config]="comparisonRed" />
           </div>
         </div>

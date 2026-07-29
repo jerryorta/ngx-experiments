@@ -14,15 +14,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'scatter-chart-usage-stories',
+    class: 'nge-scatter-chart-usage-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'scatter-chart-usage-stories',
+  selector: 'nge-scatter-chart-usage-stories',
   standalone: true,
   styleUrl: './scatter-chart-usage-stories.component.scss',
   templateUrl: './scatter-chart-usage-stories.component.html',
 })
-export class ScatterChartUsageStoriesComponent {
+export class NgeScatterChartUsageStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/scatter-chart/usage';
 

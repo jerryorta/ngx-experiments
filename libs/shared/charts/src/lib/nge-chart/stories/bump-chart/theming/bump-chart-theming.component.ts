@@ -35,21 +35,21 @@ function buildBumpData(table: Record<string, number[]>): NgeBumpDataPoint[] {
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'bump-chart-theming',
+    class: 'nge-bump-chart-theming',
   },
   imports: [CommonModule, NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'bump-chart-theming',
+  selector: 'nge-bump-chart-theming',
   standalone: true,
   styleUrl: './bump-chart-theming.component.scss',
   templateUrl: './bump-chart-theming.component.html',
 })
-export class BumpChartThemingComponent {
+export class NgeBumpChartThemingComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/bump-chart/theming';
 
   sampleData: NgeBumpDataPoint[] = buildBumpData(SUBSCRIBERS);
 
-  // Default theme (no overrides) — rank lines cycle the --chart-* token palette.
+  // Default theme (no overrides) — rank lines cycle the --nge-chart-* token palette.
   defaultConfig = createBumpChartConfig({
     data: this.sampleData,
     xAxisLabel: 'Year',

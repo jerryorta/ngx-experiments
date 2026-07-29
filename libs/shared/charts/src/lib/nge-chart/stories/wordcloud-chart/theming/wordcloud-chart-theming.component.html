@@ -1,0 +1,107 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-story-container">
+    <h2>Word Cloud Chart - Theming Examples</h2>
+    <p class="nge-story-intro-text">
+      The layer declares ONE theme slice, <code>wordcloud.word</code>. The text <em>is</em> the mark
+      here, so its colour comes straight from the categorical palette — there is no separate label
+      slice and no on-fill contrast derivation to configure.
+    </p>
+
+    <section class="nge-story-section">
+      <h4>Default Theme</h4>
+      <p class="nge-story-description">
+        No theme provided — renders on the chart's <code>--nge-chart-*</code> token defaults.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Green Palette</h4>
+      <p class="nge-story-description">
+        <code>word.colors</code> is cycled across the words by placement order.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="greenConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Blue Palette</h4>
+      <p class="nge-story-description">
+        A four-entry palette repeats every fourth word, which groups the cloud visually without
+        implying a category.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="blueConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Monochrome</h4>
+      <p class="nge-story-description">
+        A single colour at graded opacity leaves <strong>size alone</strong> to carry the frequency
+        — the most honest reading of a word cloud, since colour here encodes nothing.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="monochromeConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Typography</h4>
+      <p class="nge-story-description">
+        <code>word.fontFamily</code> and <code>word.fontWeight</code> are used to
+        <strong>measure</strong> as well as to draw, so the layout adapts to the face rather than
+        colliding with it. Set <code>fontFamily</code> on the layer config to override the theme for
+        one chart.
+      </p>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5>Serif, weight 400</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="serifConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>Monospace, weight 700</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="monospaceConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="nge-story-section nge-story-section--highlight">
+      <h4>Weight and Opacity Side by Side</h4>
+      <p class="nge-story-description">
+        The default weight is 600 — heavy enough that the smallest words stay legible. Lighten it
+        when the cloud leads a page; drop the opacity when it sits behind other content.
+      </p>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5>Weight 300</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="lightWeightConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>Opacity 0.45</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="fadedConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>Red palette</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="redConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

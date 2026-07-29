@@ -14,7 +14,7 @@ import type {
   StackedBarSegment,
 } from '../../nge-chart/nge-chart.stacked-bar.helpers';
 
-import { mergeStackedBarLayerTheme } from '../../core/theme';
+import { mergeStackedBarLayerTheme, resolveLabelColor, toCssFontSize } from '../../core/theme';
 import {
   buildStackedBarSeries,
   computeMarimekkoColumns,
@@ -39,6 +39,8 @@ interface StackedBarRenderParams {
   isVertical: boolean;
   margins: { bottom: number; left: number; right: number; top: number };
   mergedTheme: ResolvedNgeStackedBarLayerTheme;
+  /** An element in the chart tree — reads `var(--nge-chart-*)` tokens off the cascade. */
+  node: Element | null;
   /** seriesId → its palette index (for the modulo colour cycle). */
   seriesIndexById: Map<string, number>;
   showLabels: boolean;
@@ -55,7 +57,7 @@ interface StackedBarRenderParams {
  * scale or — when `config.bandWidthAccessor` is set — a self-computed
  * variable-width Marimekko layout (vertical-only). Each column is a keyed `<g>`
  * translated to its band start; segments are keyed rects positioned along the
- * value axis. All colour is applied via D3 `.style()` on `--chart-*` tokens.
+ * value axis. All colour is applied via D3 `.style()` on `--nge-chart-*` tokens.
  */
 export function renderStackedBarLayer(
   context: NgeChartLayerContext<
@@ -127,6 +129,7 @@ export function renderStackedBarLayer(
     isVertical,
     margins,
     mergedTheme,
+    node: bounds.node(),
     seriesIndexById,
     showLabels,
     tooltipConfig,
@@ -276,9 +279,21 @@ function renderSegmentLabels(
   size: number,
   params: StackedBarRenderParams
 ): void {
-  const { isVertical, mergedTheme, showLabels, valueScale } = params;
+  const { config, datumLookup, isVertical, mergedTheme, node, showLabels, valueScale } = params;
 
   const labelData = showLabels ? column.segments.filter(segment => segment.value !== 0) : [];
+
+  // A value label sits ON its segment's fill, which comes from the series palette — a
+  // RANGE — so one flat colour cannot read on every segment. Resolve per segment:
+  // per-datum → layer config → derived from the segment fill → theme default.
+  const labelFillFor = (segment: StackedBarSegment): string =>
+    resolveLabelColor({
+      configColor: config.labelColor,
+      datumColor: datumLookup.get(column.category)?.get(segment.seriesId)?.labelColor,
+      fill: resolveSegmentFill(column.category, segment, params),
+      node,
+      theme: mergedTheme.label,
+    });
 
   const labels = groupG
     .selectAll<SVGTextElement, StackedBarSegment>('.nge-stacked-bar-label')
@@ -294,8 +309,8 @@ function renderSegmentLabels(
     .attr('dominant-baseline', 'middle')
     .style('pointer-events', 'none')
     .merge(labels)
-    .attr('fill', mergedTheme.label.color)
-    .attr('font-size', mergedTheme.label.fontSize)
+    .attr('fill', labelFillFor)
+    .attr('font-size', toCssFontSize(mergedTheme.label.fontSize))
     .attr('font-weight', mergedTheme.label.fontWeight)
     .text(d => String(d.value));
 

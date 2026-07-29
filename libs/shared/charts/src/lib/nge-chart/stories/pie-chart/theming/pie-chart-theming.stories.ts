@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { PieChartThemingComponent } from './pie-chart-theming.component';
+import { NgePieChartThemingComponent } from './pie-chart-theming.component';
 
-const meta: Meta<PieChartThemingComponent> = {
-  component: PieChartThemingComponent,
+const meta: Meta<NgePieChartThemingComponent> = {
+  component: NgePieChartThemingComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<PieChartThemingComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<PieChartThemingComponent>;
+type Story = StoryObj<NgePieChartThemingComponent>;
 
 export const Theming: Story = {
   args: {},

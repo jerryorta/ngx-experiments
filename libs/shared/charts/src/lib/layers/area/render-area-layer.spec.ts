@@ -296,13 +296,13 @@ describe('renderAreaLayer', () => {
       expect(styleOf(fills[2], 'fill')).toBe('var(--c0)');
     });
 
-    it('defaults a single series to the theme palette head (var(--chart-primary))', () => {
+    it('defaults a single series to the theme palette head (var(--nge-chart-primary))', () => {
       const { context, g } = createContext([{ x: 0, y: 10 }]);
 
       renderAreaLayer(context);
 
       expect(styleOf(fillPath(g.querySelector('.nge-area-series')!), 'fill')).toBe(
-        'var(--chart-primary)'
+        'var(--nge-chart-primary)'
       );
     });
 

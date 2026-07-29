@@ -37,14 +37,14 @@ describe('createWinLossSparklineChartConfig', () => {
     expect(barLayer(config).data.map(d => d.value)).toEqual([1, -1, 0, 1]);
   });
 
-  it('colours each mark by sign using the default --chart-* tokens', () => {
+  it('colours each mark by sign using the default --nge-chart-* tokens', () => {
     const config = createWinLossSparklineChartConfig({ data: outcomes });
 
     expect(barLayer(config).data.map(d => d.color)).toEqual([
-      'var(--chart-primary)', // win
-      'var(--chart-error)', // loss
-      'var(--chart-on-surface-variant)', // tie
-      'var(--chart-primary)', // win
+      'var(--nge-chart-primary)', // win
+      'var(--nge-chart-error)', // loss
+      'var(--nge-chart-on-surface-variant)', // tie
+      'var(--nge-chart-primary)', // win
     ]);
   });
 

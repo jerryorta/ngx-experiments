@@ -45,7 +45,7 @@ function buildBumpData(): NgeBumpDataPoint[] {
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'bump-chart-interaction-stories',
+    class: 'nge-bump-chart-interaction-stories',
   },
   imports: [
     CommonModule,
@@ -53,12 +53,12 @@ function buildBumpData(): NgeBumpDataPoint[] {
     NgeChartLegendComponent,
     NgeStorybookReviewContainerComponent,
   ],
-  selector: 'bump-chart-interaction-stories',
+  selector: 'nge-bump-chart-interaction-stories',
   standalone: true,
   styleUrl: './bump-chart-interaction-stories.component.scss',
   templateUrl: './bump-chart-interaction-stories.component.html',
 })
-export class BumpChartInteractionStoriesComponent {
+export class NgeBumpChartInteractionStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/bump-chart/interaction';
 
@@ -159,7 +159,7 @@ export class BumpChartInteractionStoriesComponent {
     return new Map(
       SERIES_IDS.map((seriesId, i) => [
         seriesId,
-        colors[i % colors.length] ?? 'var(--chart-primary)',
+        colors[i % colors.length] ?? 'var(--nge-chart-primary)',
       ])
     );
   });
@@ -172,7 +172,7 @@ export class BumpChartInteractionStoriesComponent {
     return SERIES_IDS.map(seriesId => {
       const isHidden = hidden.has(seriesId);
       return {
-        color: colorById.get(seriesId) ?? 'var(--chart-primary)',
+        color: colorById.get(seriesId) ?? 'var(--nge-chart-primary)',
         id: seriesId,
         label: seriesId,
         opacity: isHidden ? 0.4 : 1,
@@ -198,7 +198,9 @@ export class BumpChartInteractionStoriesComponent {
   // line is handed back exactly its full-order color.
   readonly interactiveSeriesColors = computed<string[]>(() => {
     const colorById = this.seriesColorById();
-    return this.visibleSeries().map(seriesId => colorById.get(seriesId) ?? 'var(--chart-primary)');
+    return this.visibleSeries().map(
+      seriesId => colorById.get(seriesId) ?? 'var(--nge-chart-primary)'
+    );
   });
 
   // Toggle a series' rank line in/out (immutable Set so the signal fires).

@@ -1,0 +1,138 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-story-container">
+    <h2>Network Chart - Theming Examples</h2>
+
+    <section class="nge-story-section">
+      <h4>Default Theme</h4>
+      <p class="nge-story-description">
+        No theme provided — renders on the chart's <code>--nge-chart-*</code> token defaults.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Green Palette</h4>
+      <p class="nge-story-description">
+        Override <code>theme.network.node.colors</code>. Nodes take a palette entry by index, and a
+        link with no colour of its own inherits its <em>source</em> node's — so recolouring the
+        nodes recolours the edges with them.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="greenConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Blue Palette</h4>
+      <p class="nge-story-description">
+        <code>node.stroke</code> matters more here than in a seated layout: a force solve routinely
+        settles two nodes into contact, and the outline is what keeps them separate.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="blueConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Warm Palette</h4>
+      <p class="nge-story-description">
+        A five-entry palette cycles by node index — <code>colors[index % length]</code>.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="warmConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Link Opacity — the load-bearing knob</h4>
+      <p class="nge-story-description">
+        A network's edges cross far more often, and at more angles, than a flow diagram's. At full
+        opacity the interior mats into one block of colour and the structure — which is the whole
+        finding — disappears. Compare a heavy treatment against a light one.
+      </p>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5>Heavy (opacity 0.9, width 3)</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="denseLinksConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>Light (opacity 0.18, width 1)</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="sparseLinksConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Label Typography</h4>
+      <p class="nge-story-description">
+        <code>theme.network.label</code> is theme-relative and deliberately carries no
+        <code>colorOnDark</code>: a network label always sits <em>beside</em> its node, never on it,
+        so there is no mark fill to derive contrast against.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="labelTypographyConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Hive Axis Chrome</h4>
+      <p class="nge-story-description">
+        <code>theme.network.axis</code> styles the spokes the hive layout draws itself. It is the
+        one slice with no counterpart in the force layouts, which draw no axes at all.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="hiveAxisConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Node Sizing is Config, not Theme</h4>
+      <p class="nge-story-description">
+        <code>minNodeRadius</code> / <code>maxNodeRadius</code> live on the layer config rather than
+        the theme, because they map <em>magnitude</em> to radius — a data concern, not a palette
+        one. A node with no <code>value</code> is sized by its degree.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="largeNodesConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section nge-story-section--highlight">
+      <h4>The Three Layouts, Side by Side</h4>
+      <p class="nge-story-description">
+        One graph, three geometries. <code>force</code> discovers position by relaxation;
+        <code>cluster</code> adds a per-group anchor; <code>hive</code> assigns position by a rule
+        and runs no simulation at all.
+      </p>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5>Force</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="forceComparisonConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>Cluster</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="clusterComparisonConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>Hive</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="hiveComparisonConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

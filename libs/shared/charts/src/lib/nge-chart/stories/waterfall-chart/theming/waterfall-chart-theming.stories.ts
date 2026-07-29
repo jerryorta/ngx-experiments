@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { WaterfallChartThemingComponent } from './waterfall-chart-theming.component';
+import { NgeWaterfallChartThemingComponent } from './waterfall-chart-theming.component';
 
-const meta: Meta<WaterfallChartThemingComponent> = {
-  component: WaterfallChartThemingComponent,
+const meta: Meta<NgeWaterfallChartThemingComponent> = {
+  component: NgeWaterfallChartThemingComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<WaterfallChartThemingComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<WaterfallChartThemingComponent>;
+type Story = StoryObj<NgeWaterfallChartThemingComponent>;
 
 export const Theming: Story = {
   args: {},

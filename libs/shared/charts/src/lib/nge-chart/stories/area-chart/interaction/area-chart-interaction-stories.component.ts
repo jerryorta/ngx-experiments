@@ -24,15 +24,15 @@ type StackControl = 'diverging' | 'expand' | 'none' | 'overlaid' | 'wiggle';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'area-chart-interaction-stories',
+    class: 'nge-area-chart-interaction-stories',
   },
   imports: [NgeChartComponent, NgeChartLegendComponent, NgeStorybookReviewContainerComponent],
-  selector: 'area-chart-interaction-stories',
+  selector: 'nge-area-chart-interaction-stories',
   standalone: true,
   styleUrl: './area-chart-interaction-stories.component.scss',
   templateUrl: './area-chart-interaction-stories.component.html',
 })
-export class AreaChartInteractionStoriesComponent {
+export class NgeAreaChartInteractionStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/area-chart/interaction';
 
@@ -90,7 +90,7 @@ export class AreaChartInteractionStoriesComponent {
     return new Map(
       SERIES_IDS.map((seriesId, i) => [
         seriesId,
-        colors[i % colors.length] ?? 'var(--chart-primary)',
+        colors[i % colors.length] ?? 'var(--nge-chart-primary)',
       ])
     );
   });
@@ -103,7 +103,7 @@ export class AreaChartInteractionStoriesComponent {
     return SERIES_IDS.map(seriesId => {
       const isHidden = hidden.has(seriesId);
       return {
-        color: colorById.get(seriesId) ?? 'var(--chart-primary)',
+        color: colorById.get(seriesId) ?? 'var(--nge-chart-primary)',
         id: seriesId,
         label: seriesId,
         opacity: isHidden ? 0.4 : 1,
@@ -135,7 +135,7 @@ export class AreaChartInteractionStoriesComponent {
     const colorById = this.seriesColorById();
     const hidden = this.hiddenSeries();
     return SERIES_IDS.filter(seriesId => !hidden.has(seriesId)).map(
-      seriesId => colorById.get(seriesId) ?? 'var(--chart-primary)'
+      seriesId => colorById.get(seriesId) ?? 'var(--nge-chart-primary)'
     );
   });
 

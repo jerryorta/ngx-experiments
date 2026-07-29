@@ -24,8 +24,17 @@ export interface NgeChartMargin {
  * (ARCH-213). Opt-in — omit it (or leave every flag off) and the chart behaves
  * exactly as before. When enabled, moving the pointer over the plot snaps a
  * vertical guide to the nearest datum x and (with `shared`) shows one tooltip
- * listing every series' value at that x. Prototype scope: continuous-x LINE +
- * AREA hosts (snap via a d3 bisector over the merged datum x-positions).
+ * listing every series' value at that x.
+ *
+ * Host scope: LINE + AREA (snap via a d3 bisector over the merged datum
+ * x-positions), or SCATTER, which resolves the anchor as the nearest point in 2-D
+ * so both guides land on it (ARCH-221). The 2-D reading applies only when scatter
+ * is the sole host; mixing it with line/area keeps the 1-D x reading.
+ *
+ * ⚠️ On a scatter host, disable the scatter layer's OWN tooltip
+ * (`tooltip: { enabled: false }`) whenever {@link NgeCrosshairConfig.shared} is on
+ * — the layer's Voronoi overlay writes to the same tooltip host, so leaving both
+ * enabled makes the two fight over it.
  */
 export interface NgeCrosshairConfig {
   /**
@@ -37,9 +46,22 @@ export interface NgeCrosshairConfig {
   shared?: boolean;
 
   /**
-   * How the vertical guide snaps to data. `'datum'` (default) snaps to the
-   * nearest real data x; `'tick'` is reserved for snap-to-axis-tick (not yet
-   * implemented in the prototype — treated as `'datum'`).
+   * How the vertical guide snaps as the pointer moves.
+   *
+   * - `'datum'` (default) — the guide lands on the nearest real data x.
+   * - `'tick'` — the guide lands on the nearest X-axis tick, using the same tick
+   *   geometry the axis and gridlines are drawn from (honouring
+   *   {@link NgeChartBaseConfig.xAxisTicks}), so it overlays a gridline exactly.
+   *
+   * Under `'tick'` the focus dots and tooltip rows still describe the nearest
+   * *datum* to the snapped tick — the dots stay on the series, and the tooltip
+   * header names the datum's x, not the tick's. When a tick coincides with a
+   * datum (the common case: integer ticks over integer data, month ticks over
+   * daily data, and every band/point axis) the two are the same point. Where they
+   * do not coincide the dots sit beside the guide, on the real data.
+   *
+   * Ignored on a scatter host: a tick is an x, and that anchor is a point.
+   *
    * @default 'datum'
    */
   snap?: 'datum' | 'tick';
@@ -174,7 +196,7 @@ export interface NgeChartBaseConfig {
 
   /**
    * Custom color for the secondary Y axis label.
-   * Use CSS color value (e.g., 'var(--chart-tertiary)').
+   * Use CSS color value (e.g., 'var(--nge-chart-tertiary)').
    * @default '' (uses theme default)
    */
   y2AxisLabelColor?: string;
@@ -291,10 +313,7 @@ export const DEFAULT_BASE_LAYOUT_CONFIG: ResolvedNgeChartBaseConfig = {
  * Scale types used by the chart system
  */
 export type NgeChartXScale =
-  | ScaleBand<string>
-  | ScaleLinear<number, number>
-  | ScalePoint<string>
-  | ScaleTime<number, number>;
+  ScaleBand<string> | ScaleLinear<number, number> | ScalePoint<string> | ScaleTime<number, number>;
 export type NgeChartYScale = ScaleBand<string> | ScaleLinear<number, number>;
 
 /**

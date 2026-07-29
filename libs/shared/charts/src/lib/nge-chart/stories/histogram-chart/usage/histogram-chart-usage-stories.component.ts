@@ -38,15 +38,15 @@ function makeSamples(
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'histogram-chart-usage-stories',
+    class: 'nge-histogram-chart-usage-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'histogram-chart-usage-stories',
+  selector: 'nge-histogram-chart-usage-stories',
   standalone: true,
   styleUrl: './histogram-chart-usage-stories.component.scss',
   templateUrl: './histogram-chart-usage-stories.component.html',
 })
-export class HistogramChartUsageStoriesComponent {
+export class NgeHistogramChartUsageStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/histogram-chart/usage';
 

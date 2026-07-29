@@ -13,15 +13,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'radar-usage-stories',
+    class: 'nge-radar-usage-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'radar-usage-stories',
+  selector: 'nge-radar-usage-stories',
   standalone: true,
   styleUrl: './radar-usage-stories.component.scss',
   templateUrl: './radar-usage-stories.component.html',
 })
-export class RadarUsageStoriesComponent {
+export class NgeRadarUsageStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/radar/usage';
 

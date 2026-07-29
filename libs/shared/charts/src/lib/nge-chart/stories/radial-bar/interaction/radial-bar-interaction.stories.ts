@@ -2,9 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { RadialBarInteractionStoriesComponent } from './radial-bar-interaction-stories.component';
+import { NgeRadialBarInteractionStoriesComponent } from './radial-bar-interaction-stories.component';
 
-const meta: Meta<RadialBarInteractionStoriesComponent> = {
+const meta: Meta<NgeRadialBarInteractionStoriesComponent> = {
   argTypes: {
     // Theme - Area Styling
     areaFillOpacity: {
@@ -46,6 +46,42 @@ const meta: Meta<RadialBarInteractionStoriesComponent> = {
         'Suppress the internal legend and show the standalone interactive <nge-chart-legend> above the chart; click a series to toggle it in/out of the radial area (mark: area).',
       table: { category: 'Layer - Legend' },
     },
+    // Theme - Label Styling
+    labelColor: {
+      control: 'color',
+      description:
+        'Flat label colour for EVERY bar. Leave empty to keep the automatic on-fill contrast (black on light bars, white on dark ones). Ignored outside the mark, where the label always tracks the plot surface.',
+      if: { arg: 'showLabels' },
+      table: { category: 'Theme - Label Styling' },
+    },
+    labelFontSize: {
+      control: { max: 24, min: 6, step: 1, type: 'range' },
+      description: 'Label font size (px)',
+      if: { arg: 'showLabels' },
+      table: { category: 'Theme - Label Styling' },
+    },
+    labelFontWeight: {
+      control: { max: 900, min: 100, step: 100, type: 'range' },
+      description: 'Label font weight',
+      if: { arg: 'showLabels' },
+      table: { category: 'Theme - Label Styling' },
+    },
+    // Layer - Labels
+    labelGutter: {
+      control: { max: 120, min: 0, step: 4, type: 'range' },
+      description:
+        'Pixels reserved around the chart for outside labels — the outer radius shrinks by this much so the ring stays inside the clipped plot area. Outside placement only.',
+      if: { arg: 'labelPosition', eq: 'outside' },
+      table: { category: 'Layer - Labels' },
+    },
+    labelPosition: {
+      control: 'radio',
+      description:
+        'inside = on the bar, running along its radius with automatic on-fill contrast; outside = a horizontal category ring just past the perimeter, on the plot surface.',
+      if: { arg: 'showLabels' },
+      options: ['inside', 'outside'],
+      table: { category: 'Layer - Labels' },
+    },
     marginBottom: {
       control: { max: 60, min: 0, step: 5, type: 'range' },
       description: 'Bottom margin',
@@ -73,6 +109,20 @@ const meta: Meta<RadialBarInteractionStoriesComponent> = {
       options: ['bar', 'area', 'cell'],
       table: { category: 'Layer - Layout' },
     },
+    minLabelAngle: {
+      control: { max: 1, min: 0, step: 0.01, type: 'range' },
+      description:
+        'Smallest bar sweep (radians) that still gets a label. A zero-sweep bar is never labelled whatever the threshold.',
+      if: { arg: 'showLabels' },
+      table: { category: 'Layer - Labels' },
+    },
+    minLabelSize: {
+      control: { max: 80, min: 0, step: 2, type: 'range' },
+      description:
+        "Smallest extent (px) that still gets a label, in whichever direction the text runs: the bar's own length (inside) plus the arc at the label's radius. Catches a bar that holds a wide angle but is too short to seat a line.",
+      if: { arg: 'showLabels' },
+      table: { category: 'Layer - Labels' },
+    },
     padAngle: {
       control: { max: 0.1, min: 0, step: 0.005, type: 'range' },
       description: 'Angular gap between adjacent bars in radians (mark: bar)',
@@ -93,6 +143,12 @@ const meta: Meta<RadialBarInteractionStoriesComponent> = {
       control: 'color',
       description: 'Palette color 3',
       table: { category: 'Theme - Bar Styling' },
+    },
+    showLabels: {
+      control: 'boolean',
+      description:
+        "Draw a label on each bar (mark: bar only — an area has no per-datum mark, and a cell encodes value as fill opacity, which the on-fill contrast derivation can't read).",
+      table: { category: 'Layer - Labels' },
     },
     // Layer - Tooltip
     showTooltip: {
@@ -154,7 +210,7 @@ const meta: Meta<RadialBarInteractionStoriesComponent> = {
       table: { category: 'Layer - Layout' },
     },
   },
-  component: RadialBarInteractionStoriesComponent,
+  component: NgeRadialBarInteractionStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -164,7 +220,7 @@ const meta: Meta<RadialBarInteractionStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<RadialBarInteractionStoriesComponent>;
+type Story = StoryObj<NgeRadialBarInteractionStoriesComponent>;
 
 export const Interaction: Story = {
   args: {
@@ -175,15 +231,23 @@ export const Interaction: Story = {
     endAngle: 6.28,
     innerRadius: 0.1,
     interactiveLegend: false,
+    labelColor: '',
+    labelFontSize: 10,
+    labelFontWeight: 600,
+    labelGutter: 48,
+    labelPosition: 'inside',
     marginBottom: 10,
     marginLeft: 10,
     marginRight: 10,
     marginTop: 10,
     mark: 'bar',
+    minLabelAngle: 0.15,
+    minLabelSize: 12,
     padAngle: 0.02,
     seriesColor1: '#1E88E5',
     seriesColor2: '#43A047',
     seriesColor3: '#FB8C00',
+    showLabels: false,
     showTooltip: true,
     startAngle: 0,
     tooltipBackgroundColor: '',

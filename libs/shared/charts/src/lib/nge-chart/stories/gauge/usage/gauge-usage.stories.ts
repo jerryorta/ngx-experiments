@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { GaugeUsageStoriesComponent } from './gauge-usage-stories.component';
+import { NgeGaugeUsageStoriesComponent } from './gauge-usage-stories.component';
 
-const meta: Meta<GaugeUsageStoriesComponent> = {
-  component: GaugeUsageStoriesComponent,
+const meta: Meta<NgeGaugeUsageStoriesComponent> = {
+  component: NgeGaugeUsageStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<GaugeUsageStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<GaugeUsageStoriesComponent>;
+type Story = StoryObj<NgeGaugeUsageStoriesComponent>;
 
 export const Usage: Story = {
   args: {},

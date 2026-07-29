@@ -10,7 +10,12 @@ import type { NgeChartGestureHandlers, NgeChartGesturesConfig } from '../core/ge
 import type { NgeTooltipHandlers } from '../core/tooltip';
 
 import { attachCrosshair } from '../core/crosshair';
-import { attachRangeAxisBrush } from '../core/gesture';
+import {
+  attachRangeAxisBrush,
+  clearGestureDragState,
+  getGestureDragState,
+  setGestureDragState,
+} from '../core/gesture';
 import { renderLayers } from '../layers/layer-registry';
 import { createBarChartScales } from './nge-chart.bar.helpers';
 
@@ -18,7 +23,7 @@ import { createBarChartScales } from './nge-chart.bar.helpers';
  * Context required to render a chart.
  * Framework-agnostic - can be used with Angular, React, Vue, or vanilla JS.
  */
-export interface RenderChartContext {
+export interface NgeChartRenderContext {
   /**
    * The chart configuration including layers, theme, and base settings.
    */
@@ -57,7 +62,7 @@ export interface RenderChartContext {
  * Result returned from a successful chart render.
  * Contains computed state that may be useful for interactions or debugging.
  */
-export interface RenderChartResult {
+export interface NgeChartRenderResult {
   /**
    * The D3 selection for the bounded chart area.
    */
@@ -99,7 +104,7 @@ export interface RenderChartResult {
  * const layout = createBaseLayout(container);
  * const config: NgeChartConfig = { layers: [...] };
  *
- * const result = renderChart({ container, config, layout });
+ * const result = renderNgeChart({ container, config, layout });
  * if (result) {
  *   console.log('Rendered at dimensions:', result.dimensions);
  * }
@@ -110,7 +115,7 @@ export interface RenderChartResult {
  * // React usage (in useEffect)
  * useEffect(() => {
  *   if (!containerRef.current || !layoutRef.current) return;
- *   renderChart({
+ *   renderNgeChart({
  *     container: containerRef.current,
  *     config,
  *     layout: layoutRef.current
@@ -118,7 +123,7 @@ export interface RenderChartResult {
  * }, [config]);
  * ```
  */
-export function renderChart(context: RenderChartContext): null | RenderChartResult {
+export function renderNgeChart(context: NgeChartRenderContext): NgeChartRenderResult | null {
   const { config, container, gestureHandler, layout, tooltipElement, tooltipHandler } = context;
 
   const rect = container.getBoundingClientRect();
@@ -218,6 +223,7 @@ export function renderChart(context: RenderChartContext): null | RenderChartResu
       scales,
       svg: select(svgNode),
       tooltipHandler,
+      xAxisTicks: config.base?.xAxisTicks,
     });
   }
 
@@ -228,21 +234,6 @@ export function renderChart(context: RenderChartContext): null | RenderChartResu
     size,
   };
 }
-
-/** Per-svg drag state — persists across re-renders (listeners are re-attached per render). */
-interface GestureDragState {
-  /** Sub-step pixel accumulator for band-axis pan — emits whole-category steps. */
-  bandAccumPx: number;
-  lastPoint: [number, number];
-  /** 'pan' shifts domains per move; 'brush' draws a zoom-to rectangle */
-  mode: 'brush' | 'pan';
-  /** True once the drag passed the movement threshold */
-  moved: boolean;
-  pointerId: number;
-  startPoint: [number, number];
-}
-
-const dragStateBySvg = new WeakMap<SVGSVGElement, GestureDragState>();
 
 /** Pixel movement required before a drag is treated as a pan/brush (protects point clicks). */
 const PAN_THRESHOLD_PX = 3;
@@ -295,7 +286,7 @@ export function attachGestureListeners(
       .style('user-select', null)
       .style('-webkit-user-select', null);
     bounds.select('.nge-chart-brush-rect').remove();
-    dragStateBySvg.delete(svgNode);
+    clearGestureDragState(svgNode);
     return;
   }
 
@@ -399,7 +390,7 @@ export function attachGestureListeners(
     } catch {
       // jsdom / detached nodes — capture is a nicety, not a requirement
     }
-    dragStateBySvg.set(svgNode, {
+    setGestureDragState(svgNode, {
       bandAccumPx: 0,
       lastPoint: point,
       // Shift+drag brushes when pan is also on; brush-only charts brush on plain drag
@@ -412,7 +403,7 @@ export function attachGestureListeners(
 
   svg.on('pointermove.ngeGesture', (event: PointerEvent) => {
     if (!dragEnabled) return;
-    const state = dragStateBySvg.get(svgNode);
+    const state = getGestureDragState(svgNode);
     if (!state || state.pointerId !== event.pointerId) return;
 
     const point = toBoundsPoint(event);
@@ -433,9 +424,9 @@ export function attachGestureListeners(
         rect = bounds
           .append('rect')
           .attr('class', 'nge-chart-brush-rect')
-          .style('fill', 'var(--chart-primary)')
+          .style('fill', 'var(--nge-chart-primary)')
           .style('fill-opacity', 0.08)
-          .style('stroke', 'var(--chart-primary)')
+          .style('stroke', 'var(--nge-chart-primary)')
           .style('stroke-width', 1)
           .style('stroke-dasharray', '4 3')
           .style('pointer-events', 'none');
@@ -485,9 +476,9 @@ export function attachGestureListeners(
 
   const endDrag = (event: PointerEvent): void => {
     if (!dragEnabled) return;
-    const state = dragStateBySvg.get(svgNode);
+    const state = getGestureDragState(svgNode);
     if (!state || state.pointerId !== event.pointerId) return;
-    dragStateBySvg.delete(svgNode);
+    clearGestureDragState(svgNode);
     try {
       if (svgNode.hasPointerCapture?.(event.pointerId)) {
         svgNode.releasePointerCapture(event.pointerId);

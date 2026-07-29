@@ -1,6 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, ViewEncapsulation } from '@angular/core';
-import { NgeStorybookReviewContainerComponent, REVIEW_STATUS } from '@nge/storybook';
+import {
+  NgeStorybookReviewContainerComponent,
+  REVIEW_STATUS,
+} from '@nge/storybook';
 
 import type { NgeBulletDataPoint, NgeChartConfig } from '../../../../core/config';
 
@@ -10,15 +13,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'bullet-chart-theming',
+    class: 'nge-bullet-chart-theming',
   },
   imports: [CommonModule, NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'bullet-chart-theming',
+  selector: 'nge-bullet-chart-theming',
   standalone: true,
   styleUrl: './bullet-chart-theming.component.scss',
   templateUrl: './bullet-chart-theming.component.html',
 })
-export class BulletChartThemingComponent {
+export class NgeBulletChartThemingComponent {
   reviewStatus = REVIEW_STATUS.FINAL;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/bullet-chart/theming';
 

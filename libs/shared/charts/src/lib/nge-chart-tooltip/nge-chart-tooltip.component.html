@@ -1,0 +1,31 @@
+@if (!chromeless()) {
+  <svg
+    class="nge-chart-tooltip-bubble"
+    [attr.width]="chartTooltipState().svgWidth"
+    [attr.height]="chartTooltipState().svgHeight"
+    [attr.viewBox]="chartTooltipState().viewBox"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      class="nge-chart-tooltip-bubble-path"
+      [attr.d]="chartTooltipState().bubblePath"
+      [style.fill]="chartTooltipState().backgroundColor"
+      [style.stroke]="chartTooltipState().borderColor"
+      [style.stroke-width.px]="chartTooltipState().borderWidth"
+    />
+  </svg>
+}
+<div
+  class="nge-chart-tooltip-content"
+  [style.height.px]="chromeless() ? null : chartTooltipState().bubbleHeight"
+  [style.top.px]="
+    chromeless()
+      ? null
+      : chartTooltipState().divotPosition === 'top'
+        ? chartTooltipState().divotHeight
+        : 0
+  "
+>
+  <ng-content />
+</div>

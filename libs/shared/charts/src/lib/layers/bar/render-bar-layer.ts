@@ -67,6 +67,7 @@ export function renderBarLayer(
     data,
     dimensions,
     isVertical,
+    labelColor: config.labelColor,
     labelFormat,
     margins,
     showLabels,
@@ -82,6 +83,7 @@ export function renderBarLayer(
     categoryScale,
     dimensions,
     isVertical,
+    labelColor: config.labelColor,
     labelFormat,
     showLabels,
     theme: mergedTheme,
@@ -121,7 +123,7 @@ export function renderBarLayer(
   if (showLabels) {
     bounds
       .selectAll<SVGTextElement, NgeBarDataPoint>('.nge-bar-label')
-      .attr('fill', d => d.labelColor ?? mergedTheme.label.color)
+      .attr('fill', d => d.labelColor ?? config.labelColor ?? mergedTheme.label.color)
       .attr('font-size', mergedTheme.label.fontSize)
       .attr('font-weight', mergedTheme.label.fontWeight);
   }
@@ -189,6 +191,13 @@ interface BarRenderParams {
   data?: NgeBarDataPoint[];
   dimensions: NgeChartLayerContext<any, any, any>['dimensions'];
   isVertical: boolean;
+  /**
+   * Layer-config value-label colour — rung 2 of the label-colour chain (per-datum →
+   * layer config → `theme.label.color`). Threaded separately from `config` because the
+   * update path deliberately omits the whole config object. Bar value labels sit on the
+   * plot surface just outside the bar, so there is no derived on-fill contrast rung.
+   */
+  labelColor?: string;
   labelFormat?: (value: number) => string;
   margins?: { bottom: number; left: number; right: number; top: number };
   showLabels: boolean;
@@ -209,6 +218,7 @@ function enterBars(
     data,
     dimensions,
     isVertical,
+    labelColor,
     labelFormat,
     margins: marginsParam,
     showLabels,
@@ -424,7 +434,7 @@ function enterBars(
           d.value >= 0 ? valueScale(d.value) - 6 : valueScale(d.value) + theme.label.fontSize + 2
         )
         .attr('text-anchor', 'middle')
-        .attr('fill', d => d.labelColor ?? theme.label.color)
+        .attr('fill', d => d.labelColor ?? labelColor ?? theme.label.color)
         .attr('font-size', theme.label.fontSize)
         .attr('font-weight', theme.label.fontWeight)
         .style('pointer-events', 'none')
@@ -436,7 +446,7 @@ function enterBars(
         .attr('x', d => valueScale(d.value) + 6)
         .attr('y', d => (categoryScale(d.label) ?? 0) + categoryScale.bandwidth() / 2)
         .attr('dominant-baseline', 'middle')
-        .attr('fill', d => d.labelColor ?? theme.label.color)
+        .attr('fill', d => d.labelColor ?? labelColor ?? theme.label.color)
         .attr('font-size', theme.label.fontSize)
         .attr('font-weight', theme.label.fontWeight)
         .style('pointer-events', 'none')
@@ -451,8 +461,16 @@ function updateBars(
   update: Selection<SVGGElement, NgeBarDataPoint, SVGGElement, unknown>,
   params: Omit<BarRenderParams, 'config' | 'data'>
 ): Selection<SVGGElement, NgeBarDataPoint, SVGGElement, unknown> {
-  const { animation, categoryScale, isVertical, labelFormat, showLabels, theme, valueScale } =
-    params;
+  const {
+    animation,
+    categoryScale,
+    isVertical,
+    labelColor,
+    labelFormat,
+    showLabels,
+    theme,
+    valueScale,
+  } = params;
 
   // Update all position attributes regardless of orientation to handle orientation changes
   if (isVertical) {
@@ -493,7 +511,7 @@ function updateBars(
     if (isVertical) {
       update
         .select('.nge-bar-label')
-        .attr('fill', d => d.labelColor ?? theme.label.color)
+        .attr('fill', d => d.labelColor ?? labelColor ?? theme.label.color)
         .attr('font-size', theme.label.fontSize)
         .attr('font-weight', theme.label.fontWeight)
         .attr('text-anchor', 'middle')
@@ -509,7 +527,7 @@ function updateBars(
     } else {
       update
         .select('.nge-bar-label')
-        .attr('fill', d => d.labelColor ?? theme.label.color)
+        .attr('fill', d => d.labelColor ?? labelColor ?? theme.label.color)
         .attr('font-size', theme.label.fontSize)
         .attr('font-weight', theme.label.fontWeight)
         .attr('text-anchor', null)

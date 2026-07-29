@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { LineChartUsageStoriesComponent } from './line-chart-usage-stories.component';
+import { NgeLineChartUsageStoriesComponent } from './line-chart-usage-stories.component';
 
-const meta: Meta<LineChartUsageStoriesComponent> = {
-  component: LineChartUsageStoriesComponent,
+const meta: Meta<NgeLineChartUsageStoriesComponent> = {
+  component: NgeLineChartUsageStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<LineChartUsageStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<LineChartUsageStoriesComponent>;
+type Story = StoryObj<NgeLineChartUsageStoriesComponent>;
 
 export const Usage: Story = {
   args: {},

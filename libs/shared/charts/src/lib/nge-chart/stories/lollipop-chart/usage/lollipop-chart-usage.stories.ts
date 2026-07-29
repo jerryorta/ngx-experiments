@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { LollipopChartUsageStoriesComponent } from './lollipop-chart-usage-stories.component';
+import { NgeLollipopChartUsageStoriesComponent } from './lollipop-chart-usage-stories.component';
 
-const meta: Meta<LollipopChartUsageStoriesComponent> = {
-  component: LollipopChartUsageStoriesComponent,
+const meta: Meta<NgeLollipopChartUsageStoriesComponent> = {
+  component: NgeLollipopChartUsageStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<LollipopChartUsageStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<LollipopChartUsageStoriesComponent>;
+type Story = StoryObj<NgeLollipopChartUsageStoriesComponent>;
 
 export const Usage: Story = {
   args: {},

@@ -77,6 +77,37 @@ describe('createRadialBarChartConfig', () => {
     expect(layer.wedge).toBeUndefined();
   });
 
+  it('flows the label options through to the layer', () => {
+    const formatLabel = (d: NgeRadialBarDataPoint): string => String(d.value);
+    const layer = radialBarLayerOf(
+      createRadialBarChartConfig({
+        data: DATA,
+        formatLabel,
+        labelColor: '#123456',
+        labelGutter: 64,
+        labelPosition: 'outside',
+        minLabelAngle: 0.2,
+        minLabelSize: 16,
+        showLabels: true,
+      })
+    );
+
+    expect(layer.showLabels).toBe(true);
+    expect(layer.labelPosition).toBe('outside');
+    expect(layer.labelColor).toBe('#123456');
+    expect(layer.labelGutter).toBe(64);
+    expect(layer.minLabelAngle).toBe(0.2);
+    expect(layer.minLabelSize).toBe(16);
+    expect(layer.formatLabel).toBe(formatLabel);
+  });
+
+  it('leaves labels off by default', () => {
+    const layer = radialBarLayerOf(createRadialBarChartConfig({ data: DATA }));
+
+    expect(layer.showLabels).toBeUndefined();
+    expect(layer.labelPosition).toBeUndefined();
+  });
+
   it('builds a tooltip config with a default formatter when enabled', () => {
     const layer = radialBarLayerOf(
       createRadialBarChartConfig({ data: DATA, tooltip: { enabled: true } })

@@ -93,14 +93,14 @@ function buildGroupedConfig(): NgeChartConfig {
  */
 @Component({
   encapsulation: ViewEncapsulation.None,
-  host: { class: 'chart-in-tooltip-stories' },
+  host: { class: 'nge-chart-in-tooltip-stories' },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'chart-in-tooltip-stories',
+  selector: 'nge-chart-in-tooltip-stories',
   standalone: true,
   styleUrl: './chart-in-tooltip-stories.component.scss',
   templateUrl: './chart-in-tooltip-stories.component.html',
 })
-export class ChartInTooltipStoriesComponent {
+export class NgeChartInTooltipStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/chart-in-tooltip';
 

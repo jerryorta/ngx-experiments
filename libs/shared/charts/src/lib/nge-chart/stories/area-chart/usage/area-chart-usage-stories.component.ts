@@ -21,15 +21,15 @@ function monthlySeries(seriesId: string, values: number[]): NgeAreaDataPoint[] {
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'area-chart-usage-stories',
+    class: 'nge-area-chart-usage-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'area-chart-usage-stories',
+  selector: 'nge-area-chart-usage-stories',
   standalone: true,
   styleUrl: './area-chart-usage-stories.component.scss',
   templateUrl: './area-chart-usage-stories.component.html',
 })
-export class AreaChartUsageStoriesComponent {
+export class NgeAreaChartUsageStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/area-chart/usage';
 

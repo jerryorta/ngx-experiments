@@ -1,0 +1,204 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-story-container">
+    <h2>Treemap Chart - Usage Examples</h2>
+    <p class="nge-story-intro-text">
+      A treemap partitions the plot into nested cells whose <strong>area</strong> is proportional to
+      value. It reuses the shared <code>NgeHierarchyDatum</code> tree — leaves carry a
+      <code>value</code>, branches have theirs summed from their children.
+    </p>
+
+    <!-- EXAMPLE 1 -->
+    <section class="nge-story-section">
+      <h4>1. Basic Treemap</h4>
+      <p class="nge-story-description">
+        The simplest form. <code>tiling</code> defaults to <code>'squarify'</code>, which drives
+        cell aspect ratios toward 1 so areas stay comparable by eye.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+data = [
+  {{ "{" }}
+    label: 'Compute',
+    children: [
+      {{ "{" }} label: 'EC2', value: 4200 {{ "}" }},
+      {{ "{" }} label: 'Lambda', value: 860 {{ "}" }},
+    ],
+  {{ "}" }},
+  // ...
+];
+
+config = createTreemapChartConfig({{ "{" }} data: this.data {{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="basicConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2 -->
+    <section class="nge-story-section">
+      <h4>2. Labelled Cells</h4>
+      <p class="nge-story-description">
+        <code>showLabels</code> draws a label inside each cell, coloured for contrast against the
+        cell's own fill. Cell areas span orders of magnitude, so <code>minLabelSize</code> drops the
+        ones too small to seat text on either axis rather than letting it spill.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createTreemapChartConfig({{ "{" }}
+  data: this.data,
+  showLabels: true,
+  minLabelSize: 44,
+  formatLabel: d =&gt; `${{ "{" }}d.label{{ "}" }} · $${{ "{" }}d.value{{ "}" }}`,
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="labelledConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3 -->
+    <section class="nge-story-section">
+      <h4>3. Nested Proportional Area</h4>
+      <p class="nge-story-description">
+        <code>paddingOuter</code> insets children from their parent's edge so the parent stays
+        visible as a container, and <code>paddingTop</code> reserves a strip at the top for the
+        parent's own label. Pair it with <code>maxLabelDepth: 1</code> to label the branches only.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createTreemapChartConfig({{ "{" }}
+  data: this.data,
+  padding: 2,
+  paddingOuter: 4,
+  paddingTop: 18,
+  showLabels: true,
+  maxLabelDepth: 1,
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="nestedConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4 -->
+    <section class="nge-story-section">
+      <h4>4. Tiling Variants</h4>
+      <p class="nge-story-description">
+        Six rectangular tilings cut the same data differently. <code>'squarify'</code> optimises
+        aspect ratio, <code>'binary'</code> preserves sibling order better, and
+        <code>'slice-dice'</code> alternates direction by depth. Prefer
+        <code>'resquarify'</code> over <code>'squarify'</code> for live data — it keeps cells in
+        place across value updates instead of reshuffling.
+      </p>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5>squarify</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="squarifyConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>binary</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="binaryConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>slice-dice</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="sliceDiceConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5 -->
+    <section class="nge-story-section nge-story-section--highlight">
+      <h4>5. Convex Treemap (Voronoi)</h4>
+      <p class="nge-story-description">
+        <code>tiling: 'voronoi'</code> swaps the rectangles for a weighted-Voronoi partition of
+        straight-edged convex polygons — the reading shifts from strict nesting toward grouping and
+        adjacency. It is an iterative solve rather than a closed-form layout, so it starts from
+        randomly-placed sites: <code>seed</code> fixes the arrangement so the same data always draws
+        the same picture. Change the seed to shop for a nicer one.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createTreemapChartConfig({{ "{" }}
+  data: this.data,
+  tiling: 'voronoi',
+  seed: 7,
+  showLabels: true,
+  maxLabelDepth: 1,
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="voronoiConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6 -->
+    <section class="nge-story-section">
+      <h4>6. Tooltips</h4>
+      <p class="nge-story-description">
+        Hover a cell for its label and value. A branch reports its SUMMED aggregate, so the
+        formatter never sees an <code>undefined</code> value on an internal node.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createTreemapChartConfig({{ "{" }}
+  data: this.data,
+  tooltip: {{ "{" }}
+    enabled: true,
+    formatContent: d =&gt; ({{ "{" }} label: d.label, value: `$${{ "{" }}d.value{{ "}" }}` {{
+            "}"
+          }}),
+  {{ "}" }},
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="tooltipConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7 -->
+    <section class="nge-story-section">
+      <h4>7. Click Handling</h4>
+      <p class="nge-story-description">
+        <code>onClick</code> receives the cell's datum, the DOM event and its drawn index.
+      </p>
+      <div class="nge-story-interaction-display">
+        Last clicked: <strong>{{ lastClicked() }}</strong>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="clickableConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 8 -->
+    <section class="nge-story-section">
+      <h4>8. Dynamic Data with Signals</h4>
+      <p class="nge-story-description">
+        Wrap the factory in a <code>computed()</code> over a data signal — cells animate to their
+        new areas rather than snapping, because survivors keep their identity across the join.
+      </p>
+      <div class="nge-story-interaction-row">
+        <button
+          type="button"
+          class="nge-story-action-button"
+          (click)="randomizeData()"
+        >
+          Randomize Data
+        </button>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

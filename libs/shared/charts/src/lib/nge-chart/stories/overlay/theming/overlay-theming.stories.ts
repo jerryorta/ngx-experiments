@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { OverlayThemingComponent } from './overlay-theming.component';
+import { NgeOverlayThemingComponent } from './overlay-theming.component';
 
-const meta: Meta<OverlayThemingComponent> = {
-  component: OverlayThemingComponent,
+const meta: Meta<NgeOverlayThemingComponent> = {
+  component: NgeOverlayThemingComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<OverlayThemingComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<OverlayThemingComponent>;
+type Story = StoryObj<NgeOverlayThemingComponent>;
 
 export const Theming: Story = {
   args: {},

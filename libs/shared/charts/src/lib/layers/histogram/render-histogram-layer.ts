@@ -54,7 +54,7 @@ interface HistogramRenderParams {
  * fitted curve, nodes, zero line and labels all animate on enter / update / exit
  * via `context.animation` — every mark takes its final geometry synchronously
  * (birth, for a testable / smear-free first paint), fades in on enter, and morphs
- * on data update. All color is applied via D3 `.style()` on `--chart-*` tokens.
+ * on data update. All color is applied via D3 `.style()` on `--nge-chart-*` tokens.
  */
 export function renderHistogramLayer(
   context: NgeChartLayerContext<

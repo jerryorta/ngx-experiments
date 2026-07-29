@@ -16,6 +16,13 @@ export interface NgeLegendItem {
   opacity?: number;
   /** Whether this entry is currently selected (drives aria-pressed + styling) */
   selected?: boolean;
+  /**
+   * The magnitude this entry stands for, when the source data has one per entry (a pie
+   * slice does; a multi-point line series does not). Populated as DATA — the legend only
+   * renders it when told to via `showValues`, so adding it here never changes an existing
+   * legend's appearance.
+   */
+  value?: number;
 }
 
 /**
@@ -34,6 +41,17 @@ export interface NgeChartLegendConfig {
   items: NgeLegendItem[];
   /** Position relative to the chart. Default: 'bottom' */
   position?: 'bottom' | 'left' | 'right' | 'top';
+  /**
+   * Append a button that clears the caller's selection, emitting `legendClearAction`.
+   * Only meaningful alongside `interactive`. Default: false.
+   */
+  showClearAction?: boolean;
+  /**
+   * Render each entry's `value` beside its label, turning the legend into the chart's
+   * data table. The pairing this exists for: a pie with `showLabels: false`, where the
+   * numbers have nowhere else to live. Default: false.
+   */
+  showValues?: boolean;
   /**
    * Swatch shape matching the layer's mark ('circle' scatter points,
    * 'line' line series, 'square' bars). Presets default this per chart type.

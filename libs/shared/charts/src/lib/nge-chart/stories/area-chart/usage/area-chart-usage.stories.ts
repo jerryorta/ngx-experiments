@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { AreaChartUsageStoriesComponent } from './area-chart-usage-stories.component';
+import { NgeAreaChartUsageStoriesComponent } from './area-chart-usage-stories.component';
 
-const meta: Meta<AreaChartUsageStoriesComponent> = {
-  component: AreaChartUsageStoriesComponent,
+const meta: Meta<NgeAreaChartUsageStoriesComponent> = {
+  component: NgeAreaChartUsageStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<AreaChartUsageStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<AreaChartUsageStoriesComponent>;
+type Story = StoryObj<NgeAreaChartUsageStoriesComponent>;
 
 export const Usage: Story = {
   args: {},

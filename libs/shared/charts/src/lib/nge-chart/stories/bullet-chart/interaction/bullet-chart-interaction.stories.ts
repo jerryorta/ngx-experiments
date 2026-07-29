@@ -2,9 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { BulletChartInteractionStoriesComponent } from './bullet-chart-interaction-stories.component';
+import { NgeBulletChartInteractionStoriesComponent } from './bullet-chart-interaction-stories.component';
 
-const meta: Meta<BulletChartInteractionStoriesComponent> = {
+const meta: Meta<NgeBulletChartInteractionStoriesComponent> = {
   argTypes: {
     // Theme - Background Bar
     backgroundBarColor: {
@@ -152,7 +152,7 @@ const meta: Meta<BulletChartInteractionStoriesComponent> = {
       table: { category: 'Layer - Tooltip' },
     },
   },
-  component: BulletChartInteractionStoriesComponent,
+  component: NgeBulletChartInteractionStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -162,7 +162,7 @@ const meta: Meta<BulletChartInteractionStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<BulletChartInteractionStoriesComponent>;
+type Story = StoryObj<NgeBulletChartInteractionStoriesComponent>;
 
 export const Interaction: Story = {
   args: {

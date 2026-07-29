@@ -13,15 +13,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'sunburst-chart-theming',
+    class: 'nge-sunburst-chart-theming',
   },
   imports: [CommonModule, NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'sunburst-chart-theming',
+  selector: 'nge-sunburst-chart-theming',
   standalone: true,
   styleUrl: './sunburst-chart-theming.component.scss',
   templateUrl: './sunburst-chart-theming.component.html',
 })
-export class SunburstChartThemingComponent {
+export class NgeSunburstChartThemingComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/sunburst-chart/theming';
 
@@ -67,7 +67,7 @@ export class SunburstChartThemingComponent {
     },
   ];
 
-  // Default theme — no overrides. Uses the built-in `--chart-*` token palette,
+  // Default theme — no overrides. Uses the built-in `--nge-chart-*` token palette,
   // which is theme-aware (adapts to the container's light / dark surface).
   defaultConfig = createSunburstChartConfig({
     data: this.sampleData,
@@ -165,6 +165,49 @@ export class SunburstChartThemingComponent {
           colors: ['#1E88E5', '#43A047', '#FB8C00'],
           opacity: 0.7,
         },
+      },
+    },
+  };
+
+  // Automatic on-fill contrast — the default `theme.sunburst.label` is an ABSOLUTE
+  // black / white pair, and the renderer picks the endpoint that reads on each node's own
+  // fill. The palette here deliberately mixes a very dark and a very light branch so the
+  // per-node decision is visible.
+  labelContrastConfig = createSunburstChartConfig({
+    data: this.sampleData,
+    innerRadius: 0.25,
+    maxLabelDepth: 2,
+    minLabelSize: 24,
+    seriesColors: ['#0D47A1', '#FFEB3B', '#8E24AA'],
+    showLabels: true,
+  });
+
+  // The same chart with a flat `labelColor` — the escape hatch. Setting it disables the
+  // derivation, so the dark branch and the light one both take this one colour.
+  labelFlatConfig = createSunburstChartConfig({
+    data: this.sampleData,
+    innerRadius: 0.25,
+    labelColor: '#ffffff',
+    maxLabelDepth: 2,
+    minLabelSize: 24,
+    seriesColors: ['#0D47A1', '#FFEB3B', '#8E24AA'],
+    showLabels: true,
+  });
+
+  // Label typography via theme.sunburst.label — size and weight are theme / layer-config
+  // knobs only, never per-datum (they do not co-vary with a node's fill).
+  labelTypographyConfig: NgeChartConfig = {
+    ...createSunburstChartConfig({
+      data: this.sampleData,
+      innerRadius: 0.25,
+      maxLabelDepth: 2,
+      minLabelSize: 30,
+      showLabels: true,
+    }),
+    theme: {
+      sunburst: {
+        label: { fontSize: 14, fontWeight: 800 },
+        segment: { colors: ['#1E88E5', '#43A047', '#FB8C00'] },
       },
     },
   };

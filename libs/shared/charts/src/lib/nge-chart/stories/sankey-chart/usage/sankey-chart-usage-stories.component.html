@@ -1,0 +1,149 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-story-container">
+    <h2>Sankey Chart - Usage Examples</h2>
+    <p class="nge-story-intro-text">
+      Weighted flow between staged nodes. One layer covers three catalog readings — the curved
+      <strong>Sankey</strong>, the staged <strong>Alluvial</strong>, and the straight-sided
+      <strong>Parallel Sets</strong> — via <code>linkShape</code> and the data's own staging. Data
+      is a single <code>NgeGraph</code> object (<code>{{ "{" }} links, nodes? {{ "}" }}</code
+      >), not an array.
+    </p>
+
+    <!-- EXAMPLE 1: Basic Usage -->
+    <section class="nge-story-section">
+      <h4>1. Basic Sankey</h4>
+      <p class="nge-story-description">
+        Links alone are enough — the node set is derived from the endpoints in first-seen order.
+        Ribbon thickness is the link's <code>value</code>; each node's height is its larger side.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+graph = {{ "{" }}
+  links: [
+    {{ "{" }} source: 'Salary', target: 'Net Income', value: 4800 {{ "}" }},
+    {{ "{" }} source: 'Net Income', target: 'Housing', value: 2100 {{ "}" }},
+    // ...
+  ],
+{{ "}" }};
+
+config = createSankeyChartConfig({{ "{" }}
+  data: this.graph,
+  showLabels: true,
+{{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="basicConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Parallel Sets -->
+    <section class="nge-story-section">
+      <h4>2. Parallel Sets</h4>
+      <p class="nge-story-description">
+        <code>linkShape: 'parallelogram'</code> swaps the cubic ribbons for straight-sided bands.
+        With categorical stages on parallel axes that is the Parallel Sets reading — boxes for the
+        categories, parallelograms for the relations between them.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createSankeyChartConfig({{ "{" }}
+  data: survey,
+  linkShape: 'parallelogram',
+  nodeAlign: 'left',
+  showLabels: true,
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="parallelSetsConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Alluvial -->
+    <section class="nge-story-section">
+      <h4>3. Alluvial</h4>
+      <p class="nge-story-description">
+        No separate mode — an alluvial diagram is the base form with stages named for successive
+        periods, so the ribbons read as cohorts moving between tiers. <code>nodeAlign: 'left'</code>
+        keeps each period in its own column even when a tier has no onward flow.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="alluvialConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Explicit nodes -->
+    <section class="nge-story-section">
+      <h4>4. Explicit Nodes — order, colour and display labels</h4>
+      <p class="nge-story-description">
+        Supply <code>nodes</code> to control ORDER (which drives palette assignment), to give a node
+        its own <code>color</code>, or to show a <code>label</code> that differs from its
+        <code>id</code>. A link with no colour of its own inherits its SOURCE node's, so a flow
+        stays readable as coming from somewhere.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+data = {{ "{" }}
+  links: budgetLinks,
+  nodes: [
+    {{ "{" }} id: 'Net Income', label: 'Take-home', color: '#455a64' {{ "}" }},
+    {{ "{" }} id: 'Housing', color: '#c62828' {{ "}" }},
+    // ...
+  ],
+{{ "}" }};</pre>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="explicitNodesConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Tooltips -->
+    <section class="nge-story-section">
+      <h4>5. Tooltips</h4>
+      <p class="nge-story-description">
+        Hover a node rect. The default formatter reports the node's laid-out throughput, so a node
+        the caller gave no <code>value</code> still shows the total the layout summed for it.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="tooltipConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Click handling -->
+    <section class="nge-story-section">
+      <h4>6. Click Handling</h4>
+      <p class="nge-story-description">
+        <code>onClick</code> receives the node datum plus its index among the drawn nodes.
+      </p>
+      <div class="nge-story-interaction-display">Last clicked: {{ lastClicked() }}</div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="clickableConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7: Dynamic data -->
+    <section class="nge-story-section nge-story-section--highlight">
+      <h4>7. Dynamic Data with Signals</h4>
+      <p class="nge-story-description">
+        Hold the graph in a <code>signal()</code> and derive the config with
+        <code>computed()</code> — the layer re-lays out and the marks animate to their new geometry.
+      </p>
+      <div class="nge-story-interaction-row">
+        <button
+          type="button"
+          class="nge-story-action-button"
+          (click)="randomizeData()"
+        >
+          Randomize Flows
+        </button>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

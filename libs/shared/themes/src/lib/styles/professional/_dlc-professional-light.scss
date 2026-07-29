@@ -80,26 +80,26 @@
     --dlc-transition-duration: 160ms;
 
     // --- Chart token bridge ---
-    // Maps --chart-* contract tokens (libs/shared/charts) to CG theme values.
+    // Maps --nge-chart-* contract tokens (libs/shared/charts) to CG theme values.
     // Tokens without a direct CG equivalent use the closest semantic match.
-    --chart-surface: var(--dlc-surface);
-    --chart-surface-variant: var(--dlc-surface-container-high);
-    --chart-surface-container: var(--dlc-surface-container);
-    --chart-surface-container-low: var(--dlc-surface-container-low);
-    --chart-surface-container-highest: var(--dlc-surface-container-high);
-    --chart-inverse-surface: var(--dlc-on-surface);
-    --chart-inverse-on-surface: var(--dlc-surface);
-    --chart-on-surface: var(--dlc-on-surface);
-    --chart-on-surface-variant: var(--dlc-on-surface-variant);
-    --chart-outline: var(--dlc-outline);
-    --chart-outline-variant: var(--dlc-outline-variant);
-    --chart-primary: var(--dlc-primary);
-    --chart-primary-container: var(--dlc-primary-container);
-    --chart-on-primary: var(--dlc-on-primary);
-    --chart-secondary: var(--dlc-secondary);
-    --chart-secondary-container: var(--dlc-secondary-container);
-    --chart-tertiary: var(--dlc-warning);
-    --chart-error: var(--dlc-error);
+    --nge-chart-surface: var(--dlc-surface);
+    --nge-chart-surface-variant: var(--dlc-surface-container-high);
+    --nge-chart-surface-container: var(--dlc-surface-container);
+    --nge-chart-surface-container-low: var(--dlc-surface-container-low);
+    --nge-chart-surface-container-highest: var(--dlc-surface-container-high);
+    --nge-chart-inverse-surface: var(--dlc-on-surface);
+    --nge-chart-inverse-on-surface: var(--dlc-surface);
+    --nge-chart-on-surface: var(--dlc-on-surface);
+    --nge-chart-on-surface-variant: var(--dlc-on-surface-variant);
+    --nge-chart-outline: var(--dlc-outline);
+    --nge-chart-outline-variant: var(--dlc-outline-variant);
+    --nge-chart-primary: var(--dlc-primary);
+    --nge-chart-primary-container: var(--dlc-primary-container);
+    --nge-chart-on-primary: var(--dlc-on-primary);
+    --nge-chart-secondary: var(--dlc-secondary);
+    --nge-chart-secondary-container: var(--dlc-secondary-container);
+    --nge-chart-tertiary: var(--dlc-warning);
+    --nge-chart-error: var(--dlc-error);
 
     // --- Storybook review token bridge ---
     // Maps --sb-review-* contract tokens (libs/shared/storybook) to CG professional light values.

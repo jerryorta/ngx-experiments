@@ -1,0 +1,201 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-story-container">
+    <h2>Tree Chart - Usage Examples</h2>
+    <p class="nge-story-intro-text">
+      A hierarchy drawn as a <em>link diagram</em> — the only reading that draws the parent-child
+      relationship itself, where the sunburst nests it as angle and the treemap as area. Two
+      orthogonal options cover four catalog entries: <code>alignLeaves</code> gives the Dendrogram,
+      <code>layout</code> gives the Radial Convergence, and <code>orientation</code> +
+      <code>linkShape</code> give the Organisational Chart and the Mind Map.
+    </p>
+
+    <!-- EXAMPLE 1: Mind Map (the defaults) -->
+    <section class="nge-story-section">
+      <h4>1. Mind Map (default)</h4>
+      <p class="nge-story-description">
+        A tidy tree growing left to right with curved edges. Each node sits at its own depth, so
+        position reads as distance from the root.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+data = [
+  {{ "{" }}
+    label: 'Drinks',
+    children: [
+      {{ "{" }} label: 'Coffee', children: [/* … */] {{ "}" }},
+      {{ "{" }} label: 'Water', value: 2 {{ "}" }},
+    ],
+  {{ "}" }},
+];
+
+config = createTreeChartConfig({{ "{" }}
+  data: this.data,
+  showLabels: true,
+{{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="basicConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Dendrogram -->
+    <section class="nge-story-section">
+      <h4>2. Dendrogram — <code>alignLeaves</code></h4>
+      <p class="nge-story-description">
+        The same data with every leaf pushed onto the outer edge regardless of its depth, so the
+        leaf set reads as a scannable list. The trade is real: alignment buys the list and gives up
+        showing depth by position — compare <code>Espresso</code> here against example 1.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createTreeChartConfig({{ "{" }}
+  data: this.taxonomy,
+  alignLeaves: true,
+  showLabels: true,
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="dendrogramConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Organisational Chart -->
+    <section class="nge-story-section">
+      <h4>3. Organisational Chart — <code>orientation</code> + <code>linkShape: 'elbow'</code></h4>
+      <p class="nge-story-description">
+        Not a layout of its own: the same tidy tree drawn top-down with right-angle edges, which is
+        what makes a connection read as a <em>reporting line</em> rather than a flow. Every edge at
+        one level turns on the same line, so siblings read as a bracket.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createTreeChartConfig({{ "{" }}
+  data: this.org,
+  orientation: 'top-bottom',
+  linkShape: 'elbow',
+  showLabels: true,
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="orgChartConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Radial Convergence -->
+    <section class="nge-story-section">
+      <h4>4. Radial Convergence — <code>layout: 'radial'</code></h4>
+      <p class="nge-story-description">
+        The root moves to the centre and depth grows outward, which buys room: a radial tree seats
+        the same leaf count in a circle rather than a strip, so a wide hierarchy stops running out
+        of breadth. <code>radiusRatio</code> scales the whole diagram inside its plot.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createTreeChartConfig({{ "{" }}
+  data: this.org,
+  layout: 'radial',
+  alignLeaves: true,
+  showLabels: true,
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="radialConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Depth cap -->
+    <section class="nge-story-section">
+      <h4>5. Capping depth — <code>maxDepth</code></h4>
+      <p class="nge-story-description">
+        Draw only the top levels of a deep hierarchy. The remaining levels spread across the whole
+        plot rather than leaving a gap where the pruned depth was, and a node whose children are
+        hidden still reports its <strong>full</strong> subtree total to <code>formatLabel</code> and
+        the tooltip.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createTreeChartConfig({{ "{" }}
+  data: this.org,
+  maxDepth: 1,
+  showLabels: true,
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="cappedConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Click Handling -->
+    <section class="nge-story-section">
+      <h4>6. Click Handling</h4>
+      <p class="nge-story-description">
+        <code>onClick</code> receives the node datum carrying its summed subtree value, so an
+        internal node reports its aggregate rather than <code>undefined</code>.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createTreeChartConfig({{ "{" }}
+  data: this.org,
+  onClick: (event) =&gt; this.lastClicked.set(`${{ "{" }}event.data.label{{ "}" }}`),
+  showLabels: true,
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-interaction-display">Last clicked: {{ lastClicked() }}</div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="clickableConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7: Tooltips -->
+    <section class="nge-story-section">
+      <h4>7. Tooltips</h4>
+      <p class="nge-story-description">
+        Hover a node for a bubble anchored above its circle. Useful precisely when
+        <code>showLabels</code> is off — a dense tree is unreadable with every node named, and the
+        tooltip gives the detail back on demand.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createTreeChartConfig({{ "{" }}
+  data: this.org,
+  tooltip: {{ "{" }}
+    enabled: true,
+    formatContent: (d) =&gt; ({{ "{" }} label: d.label, value: `${{ "{" }}d.value{{
+            "}"
+          }} people` {{ "}" }}),
+  {{ "}" }},
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="tooltipConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 8: Dynamic Data -->
+    <section class="nge-story-section nge-story-section--highlight">
+      <h4>8. Dynamic Data with Signals</h4>
+      <p class="nge-story-description">
+        Wrap the factory in a <code>computed()</code> so the chart rebuilds whenever the data signal
+        changes. The join is keyed by each node's root-to-node path, so a branch that survives a
+        data change keeps its circle and animates to its new seat instead of being redrawn.
+      </p>
+      <div class="nge-story-interaction-row">
+        <button
+          type="button"
+          class="nge-story-action-button"
+          (click)="randomizeData()"
+        >
+          Randomize Hierarchy
+        </button>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

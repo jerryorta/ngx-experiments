@@ -1,0 +1,53 @@
+.nge-tree-chart-interaction-stories {
+  display: block;
+  padding: 20px;
+
+  .nge-story-interaction-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .nge-story-interaction-row {
+    margin-bottom: 12px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .nge-story-interaction-btn {
+    padding: 6px 14px;
+    border: 1px solid var(--nge-chart-outline-variant, #d0d0d0);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--nge-chart-on-surface, #1a1a1a);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(127, 127, 127, 0.12);
+    }
+  }
+
+  .nge-story-interaction-display {
+    margin-bottom: 12px;
+    padding: 12px 16px;
+    background: var(--nge-chart-surface-container-low, #f8f8f8);
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--nge-chart-on-surface, #333);
+  }
+
+  .nge-story-chart-wrapper {
+    // A tree spends its height on BREADTH — every leaf needs its own row — so a short box
+    // crowds the leaf labels into each other well before it runs out of depth. The
+    // `orientation` control also flips which axis carries depth, so the box has to suit both.
+    height: 460px;
+    border: 1px solid var(--nge-chart-outline-variant, #e0e0e0);
+    border-radius: 8px;
+    padding: 16px;
+    background: var(--nge-chart-surface, #fff);
+    overflow: visible; // Allow tooltips to extend beyond the container
+  }
+}

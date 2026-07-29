@@ -27,15 +27,15 @@ function quarterlySeries(seriesId: string, values: number[]): NgeStackedBarDataP
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'stacked-bar-chart-usage-stories',
+    class: 'nge-stacked-bar-chart-usage-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'stacked-bar-chart-usage-stories',
+  selector: 'nge-stacked-bar-chart-usage-stories',
   standalone: true,
   styleUrl: './stacked-bar-chart-usage-stories.component.scss',
   templateUrl: './stacked-bar-chart-usage-stories.component.html',
 })
-export class StackedBarChartUsageStoriesComponent {
+export class NgeStackedBarChartUsageStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/stacked-bar-chart/usage';
 

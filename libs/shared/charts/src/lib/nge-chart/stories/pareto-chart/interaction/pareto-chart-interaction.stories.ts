@@ -2,9 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { ParetoChartInteractionStoriesComponent } from './pareto-chart-interaction-stories.component';
+import { NgeParetoChartInteractionStoriesComponent } from './pareto-chart-interaction-stories.component';
 
-const meta: Meta<ParetoChartInteractionStoriesComponent> = {
+const meta: Meta<NgeParetoChartInteractionStoriesComponent> = {
   argTypes: {
     // Theme - Colors
     barColor: {
@@ -83,7 +83,7 @@ const meta: Meta<ParetoChartInteractionStoriesComponent> = {
       table: { category: 'Layer - Axis Labels' },
     },
   },
-  component: ParetoChartInteractionStoriesComponent,
+  component: NgeParetoChartInteractionStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -93,7 +93,7 @@ const meta: Meta<ParetoChartInteractionStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<ParetoChartInteractionStoriesComponent>;
+type Story = StoryObj<NgeParetoChartInteractionStoriesComponent>;
 
 export const Interaction: Story = {
   args: {

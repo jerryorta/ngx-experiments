@@ -2,14 +2,14 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { DistributionChartInteractionStoriesComponent } from './distribution-chart-interaction-stories.component';
+import { NgeDistributionChartInteractionStoriesComponent } from './distribution-chart-interaction-stories.component';
 
-const meta: Meta<DistributionChartInteractionStoriesComponent> = {
+const meta: Meta<NgeDistributionChartInteractionStoriesComponent> = {
   argTypes: {
     // Theme - Box Styling
     boxColor: {
       control: 'color',
-      description: 'Box fill color (--chart-primary slot; box mode)',
+      description: 'Box fill color (--nge-chart-primary slot; box mode)',
       if: { arg: 'render', eq: 'box' },
       table: { category: 'Theme - Box Styling' },
     },
@@ -77,7 +77,7 @@ const meta: Meta<DistributionChartInteractionStoriesComponent> = {
     // Theme - Median Styling
     medianColor: {
       control: 'color',
-      description: 'Median line color (--chart-secondary slot; box mode)',
+      description: 'Median line color (--nge-chart-secondary slot; box mode)',
       if: { arg: 'render', eq: 'box' },
       table: { category: 'Theme - Median Styling' },
     },
@@ -91,14 +91,14 @@ const meta: Meta<DistributionChartInteractionStoriesComponent> = {
     // Theme - Outlier Styling
     outlierColor: {
       control: 'color',
-      description: 'Outlier point color (--chart-error slot; box mode)',
+      description: 'Outlier point color (--nge-chart-error slot; box mode)',
       if: { arg: 'render', eq: 'box' },
       table: { category: 'Theme - Outlier Styling' },
     },
     // Theme - Point Styling
     pointColor: {
       control: 'color',
-      description: 'Point fill color (--chart-primary slot; points mode)',
+      description: 'Point fill color (--nge-chart-primary slot; points mode)',
       if: { arg: 'render', eq: 'points' },
       table: { category: 'Theme - Point Styling' },
     },
@@ -165,7 +165,7 @@ const meta: Meta<DistributionChartInteractionStoriesComponent> = {
     // Theme - Violin Styling
     violinColor: {
       control: 'color',
-      description: 'Violin fill color (--chart-primary slot; violin mode)',
+      description: 'Violin fill color (--nge-chart-primary slot; violin mode)',
       if: { arg: 'render', eq: 'violin' },
       table: { category: 'Theme - Violin Styling' },
     },
@@ -178,7 +178,7 @@ const meta: Meta<DistributionChartInteractionStoriesComponent> = {
     // Theme - Whisker Styling
     whiskerColor: {
       control: 'color',
-      description: 'Whisker stroke color (--chart-on-surface-variant slot; box mode)',
+      description: 'Whisker stroke color (--nge-chart-on-surface-variant slot; box mode)',
       if: { arg: 'render', eq: 'box' },
       table: { category: 'Theme - Whisker Styling' },
     },
@@ -202,7 +202,7 @@ const meta: Meta<DistributionChartInteractionStoriesComponent> = {
       table: { category: 'Layer - Axis Labels' },
     },
   },
-  component: DistributionChartInteractionStoriesComponent,
+  component: NgeDistributionChartInteractionStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -212,7 +212,7 @@ const meta: Meta<DistributionChartInteractionStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<DistributionChartInteractionStoriesComponent>;
+type Story = StoryObj<NgeDistributionChartInteractionStoriesComponent>;
 
 export const Interaction: Story = {
   args: {

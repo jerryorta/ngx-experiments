@@ -60,14 +60,14 @@ function withInsetPointX(cfg: NgeChartConfig): NgeChartConfig {
  */
 @Component({
   encapsulation: ViewEncapsulation.None,
-  host: { class: 'custom-tooltip-prototype-stories' },
+  host: { class: 'nge-custom-tooltip-prototype-stories' },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'custom-tooltip-prototype-stories',
+  selector: 'nge-custom-tooltip-prototype-stories',
   standalone: true,
   styleUrl: './custom-tooltip-prototype-stories.component.scss',
   templateUrl: './custom-tooltip-prototype-stories.component.html',
 })
-export class CustomTooltipPrototypeStoriesComponent {
+export class NgeCustomTooltipPrototypeStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/custom-tooltip';
 
@@ -90,7 +90,7 @@ export class CustomTooltipPrototypeStoriesComponent {
           enabled: true,
           formatContent: (d: NgeLineDataPoint): NgeTooltipContent => ({
             extra: {
-              color: COLOR_BY_SERIES[d.seriesId ?? ''] ?? 'var(--chart-primary)',
+              color: COLOR_BY_SERIES[d.seriesId ?? ''] ?? 'var(--nge-chart-primary)',
               x: String(d.x),
             },
             label: d.seriesId ?? 'Value',
@@ -106,7 +106,7 @@ export class CustomTooltipPrototypeStoriesComponent {
 
   /** Swatch colour carried on the tooltip content's `extra` bag. */
   colorOf(content: NgeTooltipContent | null): string {
-    return (content?.extra?.['color'] as string) ?? 'var(--chart-primary)';
+    return (content?.extra?.['color'] as string) ?? 'var(--nge-chart-primary)';
   }
 
   /** The x label carried on `extra`. */

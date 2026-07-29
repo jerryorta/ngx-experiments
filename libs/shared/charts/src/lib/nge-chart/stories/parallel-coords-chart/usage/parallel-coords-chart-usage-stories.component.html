@@ -1,0 +1,153 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-story-container">
+    <h2>Parallel Coordinates - Usage Examples</h2>
+    <p class="nge-story-intro-text">
+      One vertical axis per dimension, one polyline per record. Every axis carries its
+      <strong>own</strong> scale, which is what lets quantities with different units — a weight in
+      thousands beside a rating in tens — share a plot and each fill its own axis.
+    </p>
+
+    <!-- EXAMPLE 1 -->
+    <section class="nge-story-section">
+      <h4>1. Basic Usage</h4>
+      <p class="nge-story-description">
+        The data is <strong>long</strong>: one datum per record per dimension, tied together by
+        <code>seriesId</code>. The unique <code>label</code>s become the axes.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+data = [
+  {{ "{" }} label: 'MPG', seriesId: 'Corolla', value: 27 {{ "}" }},
+  {{ "{" }} label: 'Weight', seriesId: 'Corolla', value: 2130 {{ "}" }},
+  {{ "{" }} label: 'Origin', seriesId: 'Corolla', value: 'Japan' {{ "}" }},
+  // ...one group per record
+];
+
+config = createParallelCoordsChartConfig({{ "{" }}
+  data: this.data,
+{{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="basicConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2 -->
+    <section class="nge-story-section nge-story-section--highlight">
+      <h4>2. Colour by a Dimension</h4>
+      <p class="nge-story-description">
+        <code>colorBy</code> names the dimension whose value colours each line. Reach for it on any
+        real dataset: cycling the palette by record index encodes nothing once the record count
+        passes the palette size, whereas colouring by a dimension turns the chart into a readable
+        comparison — here the three origins separate cleanly on weight and MPG.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createParallelCoordsChartConfig({{ "{" }}
+  data: this.data,
+  colorBy: 'Origin',
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="colorByConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3 -->
+    <section class="nge-story-section">
+      <h4>3. Axis Order and Subset</h4>
+      <p class="nge-story-description">
+        <code>dimensions</code> sets both which axes are drawn and their order. Order is a reading
+        decision rather than cosmetics — a correlation between two dimensions is only visible when
+        their axes are <em>adjacent</em>. Weight beside horsepower beside MPG puts the whole
+        heavy-thirsty relationship in two hops.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createParallelCoordsChartConfig({{ "{" }}
+  data: this.data,
+  colorBy: 'Origin',
+  dimensions: ['Weight', 'Horsepower', 'MPG'],
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="orderedConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4 -->
+    <section class="nge-story-section">
+      <h4>4. Curved Variant</h4>
+      <p class="nge-story-description">
+        <code>curve: 'monotone'</code> draws the catalog's curved parallel-coordinates variant. The
+        vertices are unchanged — only the interpolation between axes differs, which makes individual
+        lines easier to follow at the cost of implying values between the axes.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="curvedConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5 -->
+    <section class="nge-story-section">
+      <h4>5. Mixed Numeric and Categorical Axes</h4>
+      <p class="nge-story-description">
+        A dimension whose values are all finite numbers gets a linear axis; any other gets a point
+        (ordinal) axis over its categories in first-seen order. No configuration selects this —
+        <code>Origin</code> is categorical, so it lands on a point axis beside its numeric
+        neighbours.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="mixedConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6 -->
+    <section class="nge-story-section">
+      <h4>6. Tooltip and Click Handling</h4>
+      <p class="nge-story-description">
+        Hovering a line traces it by dimming the others. Both the tooltip and the click payload
+        resolve to the datum on the axis <em>nearest the pointer</em>, so pointing at a line near
+        the weight axis reports its weight.
+      </p>
+      <div class="nge-story-interaction-display">Last clicked: {{ lastClicked() }}</div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="interactiveConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7 -->
+    <section class="nge-story-section">
+      <h4>7. Dynamic Data with Signals</h4>
+      <p class="nge-story-description">
+        The config is a <code>computed()</code> over a data signal, so the chart reconciles rather
+        than redraws — surviving records animate to their new positions. Each axis re-domains to the
+        data it now holds.
+      </p>
+      <div class="nge-story-interaction-row">
+        <button
+          type="button"
+          class="nge-story-action-button"
+          (click)="randomizeData()"
+        >
+          Randomize
+        </button>
+        <button
+          type="button"
+          class="nge-story-action-button"
+          (click)="resetData()"
+        >
+          Reset
+        </button>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

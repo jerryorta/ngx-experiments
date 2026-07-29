@@ -20,7 +20,7 @@ import { NgeChartComponent } from '../../../nge-chart.component';
   styleUrl: './grouped-bar-chart-usage-stories.component.scss',
   templateUrl: './grouped-bar-chart-usage-stories.component.html',
 })
-export class GroupedBarChartUsageStoriesComponent {
+export class NgeGroupedBarChartUsageStoriesComponent {
   reviewStatus = REVIEW_STATUS.FINAL;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/grouped-bar-chart/usage';
 

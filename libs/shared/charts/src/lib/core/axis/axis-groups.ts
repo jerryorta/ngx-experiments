@@ -19,6 +19,8 @@ import type {
   ResolvedBand,
 } from './nge-axis.models';
 
+import { measureLabelWidth } from '../theme/nge-chart-label-text.fns';
+
 type Scale = NgeChartXScale | NgeChartYScale;
 type CalendarInterval = 'day' | 'month' | 'quarter' | 'week' | 'year';
 
@@ -256,21 +258,6 @@ function fitLabel(node: SVGTextElement, label: string, available: number): void 
  */
 const PILL_VERTICAL_PADDING = 5;
 
-/**
- * Measures a label's rendered width, guarded for jsdom where `getComputedTextLength`
- * is absent (or returns 0 for an unlaid-out node). The fallback approximates an
- * average glyph as 0.6·fontSize so a pill still receives a sane width under test.
- */
-function measureText(node: SVGTextElement, text: string, fontSize: number): number {
-  if (typeof node.getComputedTextLength === 'function') {
-    const measured = node.getComputedTextLength();
-    if (measured > 0) {
-      return measured;
-    }
-  }
-  return text.length * fontSize * 0.6;
-}
-
 /** The outcome of fitting a pill label to its band: how wide to draw it, or hide it. */
 interface PillFit {
   /** Whether the band's label + pill are dropped (they cannot fit their band). */
@@ -290,7 +277,7 @@ interface PillFit {
  * neighbour; otherwise the full label is kept and the pill sizes to it.
  *
  * Always resets `display` before measuring so a band re-widened on zoom re-shows.
- * jsdom-safe via {@link measureText}.
+ * jsdom-safe via {@link measureLabelWidth}.
  */
 function fitPillLabel(
   node: SVGTextElement,
@@ -309,7 +296,7 @@ function fitPillLabel(
       node.style.display = 'none';
       return { hidden: true, textWidth: 0 };
     }
-    return { hidden: false, textWidth: measureText(node, label, fontSize) };
+    return { hidden: false, textWidth: measureLabelWidth(node, label, fontSize) };
   }
 
   const maxTextWidth = bandExtent - 2 * paddingX;
@@ -317,7 +304,7 @@ function fitPillLabel(
     node.style.display = 'none';
     return { hidden: true, textWidth: 0 };
   }
-  const fullWidth = measureText(node, label, fontSize);
+  const fullWidth = measureLabelWidth(node, label, fontSize);
   if (fullWidth <= maxTextWidth) {
     return { hidden: false, textWidth: fullWidth };
   }
@@ -325,7 +312,7 @@ function fitPillLabel(
   while (text.length > 0) {
     text = text.slice(0, -1);
     node.textContent = `${text}…`;
-    const width = measureText(node, node.textContent, fontSize);
+    const width = measureLabelWidth(node, node.textContent, fontSize);
     if (width <= maxTextWidth) {
       return { hidden: false, textWidth: width };
     }
@@ -362,11 +349,11 @@ function renderPillTier(
 
   const horizontal = orient === 'bottom';
   const thickness = tierHeight;
-  const stroke = groupTheme.separatorColor ?? 'var(--chart-outline-variant)';
+  const stroke = groupTheme.separatorColor ?? 'var(--nge-chart-outline-variant)';
   const strokeWidth = groupTheme.separatorWidth ?? 1;
-  const labelColor = groupTheme.labelColor ?? 'var(--chart-on-surface)';
+  const labelColor = groupTheme.labelColor ?? 'var(--nge-chart-on-surface)';
   const labelFontSize = groupTheme.labelFontSize ?? 11;
-  const pillBackground = groupTheme.pillBackground ?? 'var(--chart-surface)';
+  const pillBackground = groupTheme.pillBackground ?? 'var(--nge-chart-surface)';
   const pillPaddingX = groupTheme.pillPaddingX ?? 8;
 
   // A pill fits fully inside the row: height is the label plus a little padding,
@@ -560,7 +547,7 @@ function renderTierRow(
     .attr('x2', pos => (horizontal ? pos : thickness))
     .attr('y1', pos => (horizontal ? 0 : pos))
     .attr('y2', pos => (horizontal ? thickness : pos))
-    .attr('stroke', groupTheme.separatorColor ?? 'var(--chart-outline-variant)')
+    .attr('stroke', groupTheme.separatorColor ?? 'var(--nge-chart-outline-variant)')
     .attr('stroke-width', groupTheme.separatorWidth ?? 1);
 
   // Centered band labels.
@@ -578,7 +565,7 @@ function renderTierRow(
     .attr('y', band => (horizontal ? thickness / 2 : band.center))
     .attr('text-anchor', 'middle')
     .attr('dominant-baseline', 'central')
-    .style('fill', groupTheme.labelColor ?? 'var(--chart-on-surface)')
+    .style('fill', groupTheme.labelColor ?? 'var(--nge-chart-on-surface)')
     .style('font-size', `${groupTheme.labelFontSize ?? 11}px`)
     .style('font-family', 'sans-serif')
     .text(band => band.label);

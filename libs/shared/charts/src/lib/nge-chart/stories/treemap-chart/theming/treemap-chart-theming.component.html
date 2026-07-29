@@ -1,0 +1,139 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-story-container">
+    <h2>Treemap Chart - Theming Examples</h2>
+    <p class="nge-story-intro-text">
+      The treemap reads <code>theme.treemap.cell</code> for its marks and
+      <code>theme.treemap.label</code> for in-cell text. Every value resolves through
+      <code>--nge-chart-*</code> tokens, so a domain theme restyles the chart without touching the
+      config.
+    </p>
+
+    <section class="nge-story-section">
+      <h4>Default Theme</h4>
+      <p class="nge-story-description">
+        No theme provided — renders on the chart's <code>--nge-chart-*</code> token defaults.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Green Palette</h4>
+      <p class="nge-story-description">
+        <code>cell.colors</code> is assigned by top-level branch index, so every descendant of a
+        branch inherits its hue.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="greenConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Blue Palette</h4>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="blueConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Warm Palette</h4>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="warmConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section nge-story-section--highlight">
+      <h4>Depth Fade — Making Nesting Visible</h4>
+      <p class="nge-story-description">
+        <code>cell.depthFade</code> lightens each level of nesting by that many HCL luminance units.
+        All three charts below use a SINGLE palette colour and expose the parent band: without the
+        fade, a branch and its children read as one blob, because the hairline stroke alone cannot
+        carry the structure once cells get small. Note that a gapless treemap hides its parents
+        entirely behind their children, so the fade only shows where a parent is visible — or where
+        the tree's branches reach different depths. A node carrying its own <code>color</code> opts
+        out and is drawn exactly as named.
+      </p>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5>depthFade: 0 (off)</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="noFadeConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>depthFade: 6 (default)</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="subtleFadeConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>depthFade: 18</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="strongFadeConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Cell Separation</h4>
+      <p class="nge-story-description">
+        A treemap tiles its box with no gaps, so adjacent same-branch cells need a stroke to read as
+        separate. Both charts below use <code>padding: 0</code> — only the stroke differs.
+      </p>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5>1px hairline</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="hairlineConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>4px white separator</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="boldSeparatorConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Label Typography and Automatic Contrast</h4>
+      <p class="nge-story-description">
+        <code>label.color</code> and <code>label.colorOnDark</code> are the two endpoints the
+        renderer picks between per cell, measured against that cell's own fill — which is why they
+        default to the ABSOLUTE black / white tokens rather than theme-relative ones.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="labelTypographyConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Flat Label Colour</h4>
+      <p class="nge-story-description">
+        Setting <code>labelColor</code> on the layer deliberately disables the contrast derivation,
+        giving one flat colour on every cell. A per-datum <code>labelColor</code>
+        still wins over it.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="flatLabelConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Convex Variant, Same Theme</h4>
+      <p class="nge-story-description">
+        <code>tiling: 'voronoi'</code> changes the geometry, not the theming contract — the same
+        <code>cell</code> and <code>label</code> slices drive the polygons.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="voronoiThemedConfig" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

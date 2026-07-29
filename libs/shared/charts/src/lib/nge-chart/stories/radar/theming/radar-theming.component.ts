@@ -13,15 +13,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'radar-theming',
+    class: 'nge-radar-theming',
   },
   imports: [CommonModule, NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'radar-theming',
+  selector: 'nge-radar-theming',
   standalone: true,
   styleUrl: './radar-theming.component.scss',
   templateUrl: './radar-theming.component.html',
 })
-export class RadarThemingComponent {
+export class NgeRadarThemingComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/radar/theming';
 
@@ -49,7 +49,7 @@ export class RadarThemingComponent {
     { label: 'Defense', seriesId: 'Vortex', value: 78 },
   ];
 
-  // Default theme — no overrides. Uses the built-in `--chart-*` token palette,
+  // Default theme — no overrides. Uses the built-in `--nge-chart-*` token palette,
   // which adapts to the container's light / dark surface.
   defaultConfig = createRadarChartConfig({
     data: this.multiData,

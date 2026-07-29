@@ -2,9 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { WaterfallChartInteractionStoriesComponent } from './waterfall-chart-interaction-stories.component';
+import { NgeWaterfallChartInteractionStoriesComponent } from './waterfall-chart-interaction-stories.component';
 
-const meta: Meta<WaterfallChartInteractionStoriesComponent> = {
+const meta: Meta<NgeWaterfallChartInteractionStoriesComponent> = {
   argTypes: {
     // Layer - Layout
     barPadding: {
@@ -94,7 +94,7 @@ const meta: Meta<WaterfallChartInteractionStoriesComponent> = {
       table: { category: 'Layer - Axis Labels' },
     },
   },
-  component: WaterfallChartInteractionStoriesComponent,
+  component: NgeWaterfallChartInteractionStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -104,7 +104,7 @@ const meta: Meta<WaterfallChartInteractionStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<WaterfallChartInteractionStoriesComponent>;
+type Story = StoryObj<NgeWaterfallChartInteractionStoriesComponent>;
 
 export const Interaction: Story = {
   args: {

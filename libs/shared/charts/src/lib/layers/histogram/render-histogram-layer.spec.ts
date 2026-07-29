@@ -222,7 +222,7 @@ describe('renderHistogramLayer', () => {
 
       renderHistogramLayer(context);
 
-      expect(styleOf(barRect(g, 0), 'fill')).toBe('var(--chart-primary)');
+      expect(styleOf(barRect(g, 0), 'fill')).toBe('var(--nge-chart-primary)');
     });
 
     it('honours a theme bar color override', () => {

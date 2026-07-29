@@ -167,7 +167,7 @@ interface DistributionRenderParams {
  * horizontal); observations read the linear value axis. Every sub-mark is its own
  * FLAT keyed enter/update/exit join — marks take their final geometry synchronously
  * (smear-free first paint), fade in on enter, morph on update, and fade on exit via
- * `context.animation`. All colour is applied via D3 `.style()` on `--chart-*` tokens.
+ * `context.animation`. All colour is applied via D3 `.style()` on `--nge-chart-*` tokens.
  */
 export function renderDistributionLayer(
   context: NgeChartLayerContext<

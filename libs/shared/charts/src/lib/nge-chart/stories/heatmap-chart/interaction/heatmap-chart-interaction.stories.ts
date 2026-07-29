@@ -2,9 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { HeatmapChartInteractionStoriesComponent } from './heatmap-chart-interaction-stories.component';
+import { NgeHeatmapChartInteractionStoriesComponent } from './heatmap-chart-interaction-stories.component';
 
-const meta: Meta<HeatmapChartInteractionStoriesComponent> = {
+const meta: Meta<NgeHeatmapChartInteractionStoriesComponent> = {
   argTypes: {
     // Theme - Bubble
     bubbleColor: {
@@ -53,7 +53,7 @@ const meta: Meta<HeatmapChartInteractionStoriesComponent> = {
     },
     cellRampFrom: {
       control: 'color',
-      description: 'Ramp low-value endpoint color (blank ⇒ token ramp / --chart-surface)',
+      description: 'Ramp low-value endpoint color (blank ⇒ token ramp / --nge-chart-surface)',
       table: { category: 'Theme - Cell' },
     },
     cellRampMid: {
@@ -63,7 +63,7 @@ const meta: Meta<HeatmapChartInteractionStoriesComponent> = {
     },
     cellRampTo: {
       control: 'color',
-      description: 'Ramp high-value endpoint color (blank ⇒ token ramp / --chart-primary)',
+      description: 'Ramp high-value endpoint color (blank ⇒ token ramp / --nge-chart-primary)',
       table: { category: 'Theme - Cell' },
     },
     cellStrokeWidth: {
@@ -189,7 +189,7 @@ const meta: Meta<HeatmapChartInteractionStoriesComponent> = {
       table: { category: 'Layer - Tooltip' },
     },
   },
-  component: HeatmapChartInteractionStoriesComponent,
+  component: NgeHeatmapChartInteractionStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -199,7 +199,7 @@ const meta: Meta<HeatmapChartInteractionStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<HeatmapChartInteractionStoriesComponent>;
+type Story = StoryObj<NgeHeatmapChartInteractionStoriesComponent>;
 
 export const Interaction: Story = {
   args: {

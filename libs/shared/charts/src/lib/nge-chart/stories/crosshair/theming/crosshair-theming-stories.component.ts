@@ -18,22 +18,22 @@ import {
 /**
  * Theming examples for the shared crosshair (ARCH-213). The chart config is
  * identical across all three — only CSS changes: each `.chart-container` variant
- * recolours the GUIDE via the `--chart-crosshair-guide` token (falling back to
- * `--chart-on-surface`) and restyles the shared tooltip CARD via `--chart-*`
+ * recolours the GUIDE via the `--nge-chart-crosshair-guide` token (falling back to
+ * `--nge-chart-on-surface`) and restyles the shared tooltip CARD via `--nge-chart-*`
  * tokens and/or the template's own `crosshair-tip--*` classes.
  */
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'crosshair-theming-stories',
+    class: 'nge-crosshair-theming-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'crosshair-theming-stories',
+  selector: 'nge-crosshair-theming-stories',
   standalone: true,
   styleUrl: './crosshair-theming-stories.component.scss',
   templateUrl: './crosshair-theming-stories.component.html',
 })
-export class CrosshairThemingStoriesComponent {
+export class NgeCrosshairThemingStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/crosshair/theming';
 

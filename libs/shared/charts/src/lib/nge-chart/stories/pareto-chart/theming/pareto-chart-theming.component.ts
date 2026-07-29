@@ -13,15 +13,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'pareto-chart-theming',
+    class: 'nge-pareto-chart-theming',
   },
   imports: [CommonModule, NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'pareto-chart-theming',
+  selector: 'nge-pareto-chart-theming',
   standalone: true,
   styleUrl: './pareto-chart-theming.component.scss',
   templateUrl: './pareto-chart-theming.component.html',
 })
-export class ParetoChartThemingComponent {
+export class NgeParetoChartThemingComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/pareto-chart/theming';
 

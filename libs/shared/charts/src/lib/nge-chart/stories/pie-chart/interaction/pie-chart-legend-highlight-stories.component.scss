@@ -1,0 +1,53 @@
+.nge-pie-chart-legend-highlight-stories {
+  display: block;
+  padding: 20px;
+
+  .nge-story-highlight-container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .nge-story-highlight-caption {
+    margin: 0 0 16px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--nge-chart-on-surface-variant, #666);
+  }
+
+  .nge-story-highlight-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    // A vertical legend reads as a table, so it belongs BESIDE the chart rather than under
+    // it — 30 rows stacked below would push the pie off the top of the viewport.
+    &--side-by-side {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+  }
+
+  .nge-story-highlight-chart {
+    flex: 1 1 auto;
+    // The pie is self-scaling, so it needs a box with real height to size against.
+    min-width: 0;
+    height: 480px;
+  }
+
+  .nge-story-highlight-legend {
+    flex: 0 0 auto;
+
+    // Bound the ENTRY LIST, not the whole legend. The clear button is a sibling AFTER the
+    // list inside `<nge-chart-legend>`, so constraining the container instead would push it
+    // out of view at exactly the row counts where a clear-all is most useful.
+    //
+    // Capping the height is also what shapes the table: a vertical list is `flex-direction:
+    // column` and the base legend already sets `flex-wrap: wrap`, so a bounded height wraps
+    // 30 rows into two aligned columns rather than one strip taller than the pie. `overflow`
+    // is the safety net for counts that outgrow even that.
+    .nge-chart-legend-list {
+      max-height: 430px;
+      overflow: auto;
+    }
+  }
+}

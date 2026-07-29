@@ -1,0 +1,203 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-story-container">
+    <h2>Network Chart - Usage Examples</h2>
+    <p class="nge-story-intro-text">
+      A node-link graph drawn as a graph — the layer where a node's <em>position</em> carries the
+      meaning, rather than being prescribed by a ring or a column. One <code>layout</code> option
+      covers four catalog entries: Network Visualisation, Sociogram, Clustered Force Layout and Hive
+      Plot.
+    </p>
+
+    <!-- EXAMPLE 1: Basic Usage -->
+    <section class="nge-story-section">
+      <h4>1. Network Visualisation (default)</h4>
+      <p class="nge-story-description">
+        A <code>d3-force</code> simulation settles the graph so distance approximates relatedness.
+        The solve is seeded and run for a fixed number of steps, so the same data draws the same
+        picture on every render and reload.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+data = {{ "{" }}
+  links: [{{ "{" }} source: 'web', target: 'gateway', value: 8 {{ "}" }}, /* … */],
+  nodes: [{{ "{" }} id: 'web', label: 'Web' {{ "}" }}, /* … */],
+{{ "}" }};
+
+config = createNetworkChartConfig({{ "{" }}
+  data: this.data,
+  showLabels: true,
+{{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="basicConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Sociogram -->
+    <section class="nge-story-section">
+      <h4>2. Sociogram — <code>directed</code> + <code>showLabels</code></h4>
+      <p class="nge-story-description">
+        Not a layout of its own: a Sociogram is the same force layout drawn by the convention that
+        makes a social graph readable — every node named, every relationship arrowheaded so its
+        direction is visible.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createNetworkChartConfig({{ "{" }}
+  data: this.team,
+  directed: true,
+  showLabels: true,
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="sociogramConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Clustered Force Layout -->
+    <section class="nge-story-section">
+      <h4>3. Clustered Force Layout — <code>layout: 'cluster'</code></h4>
+      <p class="nge-story-description">
+        The same simulation with a per-<code>group</code> anchor layered on top, so nodes sharing a
+        group gather while each cluster's interior is still shaped by the graph's own links. Set
+        <code>group</code> on each node to use it.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+nodes = [
+  {{ "{" }} group: 'Client', id: 'web', label: 'Web' {{ "}" }},
+  {{ "{" }} group: 'Edge', id: 'gateway', label: 'Gateway' {{ "}" }},
+  // …
+];
+
+config = createNetworkChartConfig({{ "{" }}
+  data: {{ "{" }} links, nodes {{ "}" }},
+  layout: 'cluster',
+  showLabels: true,
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="clusteredConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Hive Plot -->
+    <section class="nge-story-section">
+      <h4>4. Hive Plot — <code>layout: 'hive'</code></h4>
+      <p class="nge-story-description">
+        A hive plot runs <strong>no simulation at all</strong>. Nodes are assigned to radial axes by
+        <code>group</code> (falling back to a degree rule when the graph names none) and ranked
+        along their axis by magnitude, with connections bowed between axes. Position is
+        <em>assigned</em> by a rule rather than <em>discovered</em> by relaxation — which is the
+        whole claim of the chart type.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createNetworkChartConfig({{ "{" }}
+  data: {{ "{" }} links, nodes {{ "}" }},
+  layout: 'hive',
+  axisCount: 4,
+  showLabels: true,
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="hiveConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Click Handling -->
+    <section class="nge-story-section">
+      <h4>5. Click Handling</h4>
+      <p class="nge-story-description">
+        <code>onClick</code> receives the node datum carrying its resolved magnitude, so a caller
+        who supplied no <code>value</code> still reads the node's degree rather than
+        <code>undefined</code>.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createNetworkChartConfig({{ "{" }}
+  data: this.data,
+  onClick: (event) =&gt; this.lastClicked.set(`${{ "{" }}event.data.label{{ "}" }}`),
+  showLabels: true,
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-interaction-display">Last clicked: {{ lastClicked() }}</div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="clickableConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Tooltips -->
+    <section class="nge-story-section">
+      <h4>6. Tooltips</h4>
+      <p class="nge-story-description">
+        Hover a node for a bubble anchored above its circle. The formatter receives the same
+        resolved magnitude the drawing encodes.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createNetworkChartConfig({{ "{" }}
+  data: this.data,
+  tooltip: {{ "{" }}
+    enabled: true,
+    formatContent: (d) =&gt; ({{ "{" }} label: d.label, value: `${{ "{" }}d.value{{
+            "}"
+          }} connections` {{ "}" }}),
+  {{ "}" }},
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="tooltipConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7: Seed -->
+    <section class="nge-story-section">
+      <h4>7. Re-rolling the arrangement — <code>seed</code></h4>
+      <p class="nge-story-description">
+        The layout is deterministic <em>per seed</em>. Change the seed to ask for a different
+        arrangement of the same data — useful when a particular solve happens to cross more edges
+        than it needs to.
+      </p>
+      <div class="nge-story-interaction-row">
+        <button
+          type="button"
+          class="nge-story-action-button"
+          (click)="nextSeed()"
+        >
+          Next seed
+        </button>
+        <span>seed: {{ seed() }}</span>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="seededConfig()" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 8: Dynamic Data -->
+    <section class="nge-story-section nge-story-section--highlight">
+      <h4>8. Dynamic Data with Signals</h4>
+      <p class="nge-story-description">
+        Wrap the factory in a <code>computed()</code> so the chart rebuilds whenever the graph
+        signal changes. Nodes and links animate in and out through the keyed join.
+      </p>
+      <div class="nge-story-interaction-row">
+        <button
+          type="button"
+          class="nge-story-action-button"
+          (click)="randomizeData()"
+        >
+          Randomize Graph
+        </button>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

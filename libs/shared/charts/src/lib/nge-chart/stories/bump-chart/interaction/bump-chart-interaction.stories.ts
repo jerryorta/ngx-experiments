@@ -2,9 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { BumpChartInteractionStoriesComponent } from './bump-chart-interaction-stories.component';
+import { NgeBumpChartInteractionStoriesComponent } from './bump-chart-interaction-stories.component';
 
-const meta: Meta<BumpChartInteractionStoriesComponent> = {
+const meta: Meta<NgeBumpChartInteractionStoriesComponent> = {
   argTypes: {
     // Theme - Axis Styling
     axisLabelFontSize: {
@@ -212,7 +212,7 @@ const meta: Meta<BumpChartInteractionStoriesComponent> = {
       table: { category: 'Layer - Axis Labels' },
     },
   },
-  component: BumpChartInteractionStoriesComponent,
+  component: NgeBumpChartInteractionStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -222,7 +222,7 @@ const meta: Meta<BumpChartInteractionStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<BumpChartInteractionStoriesComponent>;
+type Story = StoryObj<NgeBumpChartInteractionStoriesComponent>;
 
 export const Interaction: Story = {
   args: {

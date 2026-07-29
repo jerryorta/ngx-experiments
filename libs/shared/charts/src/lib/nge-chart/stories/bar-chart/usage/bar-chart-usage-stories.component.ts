@@ -14,15 +14,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'bar-chart-usage-stories',
+    class: 'nge-bar-chart-usage-stories',
   },
   imports: [CurrencyPipe, NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'bar-chart-usage-stories',
+  selector: 'nge-bar-chart-usage-stories',
   standalone: true,
   styleUrl: './bar-chart-usage-stories.component.scss',
   templateUrl: './bar-chart-usage-stories.component.html',
 })
-export class BarChartUsageStoriesComponent {
+export class NgeBarChartUsageStoriesComponent {
   reviewStatus = REVIEW_STATUS.FINAL;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/bar-chart/usage';
 

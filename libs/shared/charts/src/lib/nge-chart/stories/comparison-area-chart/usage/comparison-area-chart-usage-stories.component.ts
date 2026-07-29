@@ -14,15 +14,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'comparison-area-chart-usage-stories',
+    class: 'nge-comparison-area-chart-usage-stories',
   },
   imports: [CurrencyPipe, NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'comparison-area-chart-usage-stories',
+  selector: 'nge-comparison-area-chart-usage-stories',
   standalone: true,
   styleUrl: './comparison-area-chart-usage-stories.component.scss',
   templateUrl: './comparison-area-chart-usage-stories.component.html',
 })
-export class ComparisonAreaChartUsageStoriesComponent {
+export class NgeComparisonAreaChartUsageStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/comparison-area-chart/usage';
 

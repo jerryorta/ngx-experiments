@@ -253,12 +253,12 @@ describe('renderLineLayer', () => {
       expect(styleOf(paths[2], 'stroke')).toBe('var(--c0)');
     });
 
-    it('defaults a single series to the theme palette head (var(--chart-primary))', () => {
+    it('defaults a single series to the theme palette head (var(--nge-chart-primary))', () => {
       const { context, g } = createContext([{ x: 0, y: 10 }], { showPoints: false });
 
       renderLineLayer(context);
 
-      expect(styleOf(linePath(g), 'stroke')).toBe('var(--chart-primary)');
+      expect(styleOf(linePath(g), 'stroke')).toBe('var(--nge-chart-primary)');
       // Empty theme dash resolves to the literal 'none'.
       expect(styleOf(linePath(g), 'stroke-dasharray')).toBe('none');
     });
@@ -300,8 +300,8 @@ describe('renderLineLayer', () => {
       renderLineLayer(context);
 
       const point = pointForDatum(g, data[0]);
-      expect(styleOf(point, 'fill')).toBe('var(--chart-surface)');
-      expect(styleOf(point, 'stroke')).toBe('var(--chart-primary)');
+      expect(styleOf(point, 'fill')).toBe('var(--nge-chart-surface)');
+      expect(styleOf(point, 'stroke')).toBe('var(--nge-chart-primary)');
     });
   });
 

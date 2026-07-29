@@ -1,0 +1,265 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-story-container">
+    <h2>Funnel Chart - Usage Examples</h2>
+    <p class="nge-story-intro-text">
+      Practical examples for the funnel / pyramid layer. One trapezoid-stack primitive fans out
+      across two shapes via config: a <strong>Funnel</strong> (<code>direction: 'down'</code>,
+      widest at top, narrowing downward) and a <strong>Pyramid</strong> (<code
+        >direction: 'up'</code
+      >
+      + <code>neckRatio: 0</code>, widest at bottom, narrowing to a point). Each datum's
+      <code>value</code> maps to a proportional band width.
+    </p>
+
+    <!-- EXAMPLE 1: Basic Funnel -->
+    <section class="nge-story-section">
+      <h4>1. Basic Funnel</h4>
+      <p class="nge-story-description">
+        Simplest way to create a funnel using <code>createFunnelChartConfig()</code>. Provide an
+        array of <code>{{ "{" }} label, value {{ "}" }}</code> data points — one band per point, top
+        to bottom in input order.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+data: NgeFunnelDataPoint[] = [
+  {{ "{" }} label: 'Visitors', value: 10000 {{ "}" }},
+  {{ "{" }} label: 'Signups', value: 4200 {{ "}" }},
+  {{ "{" }} label: 'Trials', value: 1800 {{ "}" }},
+  {{ "{" }} label: 'Customers', value: 650 {{ "}" }},
+];
+
+config = createFunnelChartConfig({{ "{" }} data: this.data {{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="basicConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Pyramid -->
+    <section class="nge-story-section">
+      <h4>2. Pyramid</h4>
+      <p class="nge-story-description">
+        <code>direction: 'up'</code> stacks widest-at-bottom, narrowing upward.
+        <code>neckRatio: 0</code> collapses the last band to a point — the pyramid apex. Together
+        they turn the same primitive into an org-hierarchy / population-pyramid shape.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+data: NgeFunnelDataPoint[] = [
+  {{ "{" }} label: 'Individual Contributors', value: 400 {{ "}" }},
+  {{ "{" }} label: 'Managers', value: 80 {{ "}" }},
+  {{ "{" }} label: 'Directors', value: 20 {{ "}" }},
+  {{ "{" }} label: 'Executives', value: 5 {{ "}" }},
+];
+
+config = createFunnelChartConfig({{ "{" }}
+  data: this.data,
+  direction: 'up',
+  neckRatio: 0,
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="pyramidConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Labels with a Custom Formatter -->
+    <section class="nge-story-section">
+      <h4>3. Labels with a Custom Formatter</h4>
+      <p class="nge-story-description">
+        <code>showLabels: true</code> draws a label centered in each band.
+        <code>formatLabel</code> overrides the default (the datum's own <code>label</code>) — here
+        it appends the band's raw value.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createFunnelChartConfig({{ "{" }}
+  data: this.data,
+  showLabels: true,
+  formatLabel: (d) => `${{ "{" }}d.label{{ "}" }}: ${{ "{" }}d.value.toLocaleString(){{ "}" }}`,
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="labeledConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Gap — Discrete Stages -->
+    <section class="nge-story-section">
+      <h4>4. Gap — Discrete Stages</h4>
+      <p class="nge-story-description">
+        <code>gap</code> defaults to <code>0</code>, so bands are contiguous — a continuous funnel
+        silhouette. A <code>gap &gt; 0</code> carves vertical spacing between bands, separating them
+        into discrete stages.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+continuous = createFunnelChartConfig({{ "{" }} data: this.data {{ "}" }}); // gap: 0 (default)
+discrete = createFunnelChartConfig({{ "{" }} data: this.data, gap: 8 {{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5>Continuous (gap: 0)</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="continuousConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>Discrete (gap: 8)</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="discreteConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Left-aligned Bands -->
+    <section class="nge-story-section">
+      <h4>5. Left-aligned Bands</h4>
+      <p class="nge-story-description">
+        <code>align: 'left'</code> pins every band's left edge to x = 0 instead of centering it —
+        useful when the funnel sits beside other left-aligned content.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createFunnelChartConfig({{ "{" }}
+  data: this.data,
+  align: 'left',
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="leftAlignConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Click Handling -->
+    <section class="nge-story-section">
+      <h4>6. Click Handling</h4>
+      <p class="nge-story-description">
+        Provide an <code>onClick</code> callback in the config. The event carries the full data
+        point for the clicked band.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createFunnelChartConfig({{ "{" }}
+  data: this.data,
+  onClick: (event) => {{ "{" }}
+    console.log('Clicked:', event.data.label, event.data.value);
+  {{ "}" }},
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-interaction-display">
+        <strong>Last clicked:</strong> {{ lastClicked() }}
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="clickableConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7: Dynamic Data via Signals -->
+    <section class="nge-story-section">
+      <h4>7. Dynamic Data via Signals</h4>
+      <p class="nge-story-description">
+        Feed a <code>signal()</code> into a <code>computed()</code> config so the funnel rebuilds
+        whenever the underlying data changes.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+data = signal&lt;NgeFunnelDataPoint[]&gt;(this.conversionData);
+
+config = computed(() => createFunnelChartConfig({{ "{" }}
+  data: this.data(),
+  showLabels: true,
+{{ "}" }}));
+
+randomizeData() {{ "{" }}
+  this.data.set(/* re-rolled values */);
+{{ "}" }}</pre>
+      </div>
+      <div class="nge-story-interaction-row">
+        <button
+          class="nge-story-action-button"
+          (click)="randomizeData()"
+          >Randomize Data</button
+        >
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 8: Custom Series Colors -->
+    <section class="nge-story-section nge-story-section--highlight">
+      <h4>8. Custom Series Colors</h4>
+      <p class="nge-story-description">
+        Pass a <code>seriesColors</code> palette — band input index maps to
+        <code>colors[index % length]</code>. A per-datum <code>color</code> on any data point wins
+        over the palette for that one band.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createFunnelChartConfig({{ "{" }}
+  data: this.data,
+  seriesColors: ['#1E88E5', '#43A047', '#FB8C00', '#8E24AA'],
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="customColorsConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 9: Labels Beside the Chart -->
+    <section class="nge-story-section nge-story-section--highlight">
+      <h4>9. Labels Beside the Chart</h4>
+      <p class="nge-story-description">
+        Outside labels are the classic funnel annotation, and the only readable option once bands
+        taper toward the neck. <code>labelPosition: 'edge'</code> sets each label just outside its
+        <em>own</em> band's right edge, so the labels step inward as the funnel narrows.
+        <code>'right'</code> instead pins every label to one x for a straight, aligned column —
+        compare the two below. Either way the funnel is drawn into
+        <code>boundedWidth - labelGutter</code>: the strip has to come out of the plot area rather
+        than the margin, because the layers group is clipped to the plot rect and anything past
+        <code>boundedWidth</code> would be cut off. Pair with <code>neckRatio: 0</code> to close the
+        funnel to a point.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+data = [
+  {{ "{" }} label: 'A', value: 60 {{ "}" }},
+  {{ "{" }} label: 'B', value: 20 {{ "}" }},
+  {{ "{" }} label: 'C', value: 15 {{ "}" }},
+  {{ "{" }} label: 'D', value: 5 {{ "}" }},
+];
+
+config = createFunnelChartConfig({{ "{" }}
+  data: this.data,
+  showLabels: true,
+  labelPosition: 'edge',   // labels follow the taper; 'right' = aligned column
+  labelGutter: 110,
+  formatLabel: d =&gt; `${{ "{" }}d.label{{ "}" }}  ${{ "{" }}d.value{{ "}" }}%`,
+  neckRatio: 0,
+  seriesColors: ['#F9423A', '#DE2B27', '#26325B', '#BE2141'],
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5>labelPosition: 'edge' — follows the taper</h5>
+          <div class="nge-story-chart-container">
+            <nge-chart [config]="outsideLabelsConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>labelPosition: 'right' — aligned column</h5>
+          <div class="nge-story-chart-container">
+            <nge-chart [config]="outsideLabelsColumnConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

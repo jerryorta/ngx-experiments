@@ -28,15 +28,15 @@ function buildRadarData(): NgeRadarDataPoint[] {
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'radar-interaction-stories',
+    class: 'nge-radar-interaction-stories',
   },
   imports: [NgeChartComponent, NgeChartLegendComponent, NgeStorybookReviewContainerComponent],
-  selector: 'radar-interaction-stories',
+  selector: 'nge-radar-interaction-stories',
   standalone: true,
   styleUrl: './radar-interaction-stories.component.scss',
   templateUrl: './radar-interaction-stories.component.html',
 })
-export class RadarInteractionStoriesComponent {
+export class NgeRadarInteractionStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/radar/interaction';
 
@@ -108,7 +108,7 @@ export class RadarInteractionStoriesComponent {
     return new Map(
       SERIES_IDS.map((seriesId, i) => [
         seriesId,
-        colors[i % colors.length] ?? 'var(--chart-primary)',
+        colors[i % colors.length] ?? 'var(--nge-chart-primary)',
       ])
     );
   });
@@ -121,7 +121,7 @@ export class RadarInteractionStoriesComponent {
     return SERIES_IDS.map(seriesId => {
       const isHidden = hidden.has(seriesId);
       return {
-        color: colorById.get(seriesId) ?? 'var(--chart-primary)',
+        color: colorById.get(seriesId) ?? 'var(--nge-chart-primary)',
         id: seriesId,
         label: seriesId,
         opacity: isHidden ? 0.4 : 1,
@@ -138,7 +138,7 @@ export class RadarInteractionStoriesComponent {
     const colorById = this.seriesColorById();
     const hidden = this.hiddenSeries();
     return SERIES_IDS.filter(seriesId => !hidden.has(seriesId)).map(
-      seriesId => colorById.get(seriesId) ?? 'var(--chart-primary)'
+      seriesId => colorById.get(seriesId) ?? 'var(--nge-chart-primary)'
     );
   });
 

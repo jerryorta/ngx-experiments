@@ -14,15 +14,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'timeline-chart-usage-stories',
+    class: 'nge-timeline-chart-usage-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'timeline-chart-usage-stories',
+  selector: 'nge-timeline-chart-usage-stories',
   standalone: true,
   styleUrl: './timeline-chart-usage-stories.component.scss',
   templateUrl: './timeline-chart-usage-stories.component.html',
 })
-export class TimelineChartUsageStoriesComponent {
+export class NgeTimelineChartUsageStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/timeline-chart/usage';
 

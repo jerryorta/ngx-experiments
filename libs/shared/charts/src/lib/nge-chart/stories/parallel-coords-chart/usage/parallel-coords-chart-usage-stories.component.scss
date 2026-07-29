@@ -1,0 +1,152 @@
+.nge-parallel-coords-chart-usage-stories {
+  display: block;
+  padding: 20px;
+
+  .nge-story-container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    margin-bottom: 8px;
+  }
+
+  .nge-story-intro-text {
+    margin-bottom: 32px;
+    color: var(--nge-chart-on-surface-variant, #666);
+    font-size: 16px;
+    line-height: 1.5;
+
+    code {
+      background: var(--nge-chart-surface-container, #eee);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 13px;
+    }
+  }
+
+  .nge-story-section {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--nge-chart-outline-variant, #ccc);
+
+    &--highlight {
+      background: var(--nge-chart-surface-variant, #f5f5f5);
+      padding: 20px;
+      border-radius: 8px;
+      border: 2px solid var(--nge-chart-primary, #1976d2);
+    }
+
+    h4 {
+      margin-bottom: 8px;
+      color: var(--nge-chart-on-surface, #333);
+    }
+
+    h5 {
+      margin-bottom: 8px;
+      color: var(--nge-chart-on-surface-variant, #666);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .nge-story-description {
+      margin-bottom: 16px;
+      color: var(--nge-chart-on-surface-variant, #666);
+      font-size: 14px;
+      line-height: 1.5;
+
+      code {
+        background: var(--nge-chart-surface-container, #eee);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 13px;
+      }
+    }
+  }
+
+  .nge-story-code-block {
+    margin-bottom: 16px;
+    background: var(--nge-chart-inverse-surface, #313033);
+    border-radius: 8px;
+    overflow: hidden;
+
+    pre {
+      margin: 0;
+      padding: 16px;
+      color: var(--nge-chart-inverse-on-surface, #f4eff4);
+      font-family: "Fira Code", "Consolas", monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      overflow-x: auto;
+      white-space: pre;
+    }
+  }
+
+  // Taller than the shared 300px default: the layer reserves the top margin for dimension
+  // names and the side margins for tick labels, so the plot itself needs the extra height.
+  .nge-story-chart-container {
+    height: 360px;
+    border: 1px solid var(--nge-chart-outline-variant, #e0e0e0);
+    border-radius: 8px;
+    padding: 16px;
+    background: var(--nge-chart-surface, #fff);
+    overflow: visible;
+
+    &--small {
+      height: 260px;
+    }
+
+    &--tall {
+      height: 440px;
+    }
+  }
+
+  .nge-story-chart-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .nge-story-chart-column {
+    flex: 1 1 300px;
+    min-width: 0;
+  }
+
+  .nge-story-interaction-display {
+    margin-bottom: 12px;
+    padding: 12px 16px;
+    background: var(--nge-chart-surface-container-low, #f8f8f8);
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--nge-chart-on-surface, #333);
+  }
+
+  .nge-story-interaction-row {
+    margin-bottom: 12px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .nge-story-action-button {
+    padding: 8px 16px;
+    background: var(--nge-chart-primary, #1976d2);
+    color: var(--nge-chart-on-primary, #fff);
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: var(--nge-chart-primary-container, #1565c0);
+    }
+
+    &:active {
+      transform: translateY(1px);
+    }
+  }
+}

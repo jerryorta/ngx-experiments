@@ -26,6 +26,7 @@ type HeatmapContext = NgeChartLayerContext<
 interface ContextOptions {
   bubbleMaxRatio?: number;
   domain?: [number, number];
+  labelColor?: string;
   labelFormat?: (value: number) => string;
   mark?: HeatmapMark;
   onClick?: jest.Mock;
@@ -80,6 +81,7 @@ function createContext(
     bubbleMaxRatio: options.bubbleMaxRatio,
     data,
     domain: options.domain,
+    labelColor: options.labelColor,
     labelFormat: options.labelFormat,
     mark: options.mark,
     onClick: options.onClick,
@@ -246,7 +248,7 @@ describe('renderHeatmapLayer', () => {
 
       renderHeatmapLayer(context);
 
-      // var(--chart-surface-container-highest) → jsdom fallback #e0e0e0
+      // var(--nge-chart-surface-container-highest) → jsdom fallback #e0e0e0
       expect(styleOf(cell(g, 'X', 'C'), 'fill')).toBe('#e0e0e0');
     });
 
@@ -381,8 +383,55 @@ describe('renderHeatmapLayer', () => {
       const labels = Array.from(g.querySelectorAll<SVGTextElement>('.nge-heatmap-label'));
       const onLightCell = labels.find(node => node.textContent === '0')!;
       const onDarkCell = labels.find(node => node.textContent === '100')!;
-      expect(styleOf(onLightCell, 'fill')).toBe('var(--chart-on-surface)');
-      expect(styleOf(onDarkCell, 'fill')).toBe('var(--chart-on-primary)');
+      expect(styleOf(onLightCell, 'fill')).toBe('var(--nge-chart-on-surface)');
+      expect(styleOf(onDarkCell, 'fill')).toBe('var(--nge-chart-on-primary)');
+    });
+
+    describe('explicit label colour rungs (ARCH-266)', () => {
+      /** Two cells at opposite ends of the ramp — one dark fill, one light. */
+      const CONTRAST: NgeHeatmapDataPoint[] = [
+        { col: 'A', row: 'X', value: 0 },
+        { col: 'B', row: 'X', value: 100 },
+      ];
+
+      function labelWithText(g: SVGGElement, text: string): SVGTextElement {
+        const match = Array.from(g.querySelectorAll<SVGTextElement>('.nge-heatmap-label')).find(
+          node => node.textContent === text
+        );
+        if (!match) {
+          throw new Error(`No heatmap label with text "${text}"`);
+        }
+        return match;
+      }
+
+      it('rung 1 — a per-cell labelColor wins over config, derivation and theme', () => {
+        const data: NgeHeatmapDataPoint[] = [
+          { col: 'A', labelColor: '#ff0000', row: 'X', value: 100 },
+        ];
+        const { context, g } = createContext(data, {
+          domain: [0, 100],
+          labelColor: '#00ff00',
+          showValues: true,
+        });
+
+        renderHeatmapLayer(context);
+
+        expect(styleOf(labelWithText(g, '100'), 'fill')).toBe('#ff0000');
+      });
+
+      it('rung 2 — a layer-config labelColor forces one flat colour on every cell', () => {
+        const { context, g } = createContext(CONTRAST, {
+          domain: [0, 100],
+          labelColor: '#00ff00',
+          showValues: true,
+        });
+
+        renderHeatmapLayer(context);
+
+        // Both take the flat colour despite sitting on opposite ends of the ramp.
+        expect(styleOf(labelWithText(g, '0'), 'fill')).toBe('#00ff00');
+        expect(styleOf(labelWithText(g, '100'), 'fill')).toBe('#00ff00');
+      });
     });
   });
 

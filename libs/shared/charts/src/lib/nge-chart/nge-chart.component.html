@@ -9,7 +9,10 @@
         [orientation]="legendOrientation()"
         [interactive]="legend.interactive ?? false"
         [swatchShape]="legend.swatchShape ?? 'square'"
+        [showValues]="legend.showValues ?? false"
+        [showClearAction]="legend.showClearAction ?? false"
         (itemClick)="legendItemClick.emit($event)"
+        (clearAction)="legendClearAction.emit()"
       />
     }
   }
@@ -23,14 +26,17 @@
         [orientation]="legendOrientation()"
         [interactive]="legend.interactive ?? false"
         [swatchShape]="legend.swatchShape ?? 'square'"
+        [showValues]="legend.showValues ?? false"
+        [showClearAction]="legend.showClearAction ?? false"
         (itemClick)="legendItemClick.emit($event)"
+        (clearAction)="legendClearAction.emit()"
       />
     }
   }
 </div>
 
 <!-- Tooltip always in DOM, positioned/shown via D3 for performance -->
-<nge-charts-tooltip
+<nge-chart-tooltip
   [calc]="tooltipCalc"
   [chromeless]="chromelessTooltip()"
   style="display: none"
@@ -39,8 +45,8 @@
     <ng-container *ngTemplateOutlet="template; context: { $implicit: tooltipContent() }" />
   } @else if (tooltipContent()) {
     <div class="nge-chart-default-tooltip">
-      <div class="tooltip-label">{{ tooltipContent()?.label }}</div>
-      <div class="tooltip-value">{{ tooltipContent()?.value }}</div>
+      <div class="nge-chart-tooltip-label">{{ tooltipContent()?.label }}</div>
+      <div class="nge-chart-tooltip-value">{{ tooltipContent()?.value }}</div>
     </div>
   }
-</nge-charts-tooltip>
+</nge-chart-tooltip>

@@ -2,9 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { GroupedBarChartInteractionStoriesComponent } from './grouped-bar-chart-interaction-stories.component';
+import { NgeGroupedBarChartInteractionStoriesComponent } from './grouped-bar-chart-interaction-stories.component';
 
-const meta: Meta<GroupedBarChartInteractionStoriesComponent> = {
+const meta: Meta<NgeGroupedBarChartInteractionStoriesComponent> = {
   argTypes: {
     // Theme - Axis Styling
     axisLabelFontSize: {
@@ -163,7 +163,7 @@ const meta: Meta<GroupedBarChartInteractionStoriesComponent> = {
       table: { category: 'Layer - Tooltip' },
     },
   },
-  component: GroupedBarChartInteractionStoriesComponent,
+  component: NgeGroupedBarChartInteractionStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -173,11 +173,11 @@ const meta: Meta<GroupedBarChartInteractionStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<GroupedBarChartInteractionStoriesComponent>;
+type Story = StoryObj<NgeGroupedBarChartInteractionStoriesComponent>;
 
 export const Interaction: Story = {
   args: {
-    // Theme - Axis Styling (defaults from DEFAULT_CHART_BASE_THEME)
+    // Theme - Axis Styling (defaults from DEFAULT_NGE_CHART_BASE_THEME)
     axisLabelFontSize: 14,
     axisTickFontSize: 12,
     // Theme - Bar Styling (defaults from DEFAULT_GROUPED_BAR_LAYER_THEME)

@@ -15,15 +15,15 @@ const CITIES = ['Austin', 'Denver', 'Seattle', 'Portland', 'Miami', 'Chicago'] a
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'lollipop-chart-interaction-stories',
+    class: 'nge-lollipop-chart-interaction-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'lollipop-chart-interaction-stories',
+  selector: 'nge-lollipop-chart-interaction-stories',
   standalone: true,
   styleUrl: './lollipop-chart-interaction-stories.component.scss',
   templateUrl: './lollipop-chart-interaction-stories.component.html',
 })
-export class LollipopChartInteractionStoriesComponent {
+export class NgeLollipopChartInteractionStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/lollipop-chart/interaction';
 

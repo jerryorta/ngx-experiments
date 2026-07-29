@@ -28,15 +28,15 @@ const SERIES_IDS = ['Alpha', 'Beta', 'Gamma'];
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'overlay-interaction-stories',
+    class: 'nge-overlay-interaction-stories',
   },
   imports: [NgeChartComponent, NgeChartLegendComponent, NgeStorybookReviewContainerComponent],
-  selector: 'overlay-interaction-stories',
+  selector: 'nge-overlay-interaction-stories',
   standalone: true,
   styleUrl: './overlay-interaction-stories.component.scss',
   templateUrl: './overlay-interaction-stories.component.html',
 })
-export class OverlayInteractionStoriesComponent {
+export class NgeOverlayInteractionStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/overlay/interaction';
 
@@ -179,7 +179,7 @@ export class OverlayInteractionStoriesComponent {
     return new Map(
       SERIES_IDS.map((seriesId, i) => [
         seriesId,
-        colors[i % colors.length] ?? 'var(--chart-primary)',
+        colors[i % colors.length] ?? 'var(--nge-chart-primary)',
       ])
     );
   });
@@ -192,7 +192,7 @@ export class OverlayInteractionStoriesComponent {
     return SERIES_IDS.map(seriesId => {
       const isHidden = hidden.has(seriesId);
       return {
-        color: colorById.get(seriesId) ?? 'var(--chart-primary)',
+        color: colorById.get(seriesId) ?? 'var(--nge-chart-primary)',
         id: seriesId,
         label: seriesId,
         opacity: isHidden ? 0.4 : 1,
@@ -216,7 +216,9 @@ export class OverlayInteractionStoriesComponent {
   // its full-order color.
   readonly interactiveSeriesColors = computed<string[]>(() => {
     const colorById = this.seriesColorById();
-    return this.visibleSeries().map(seriesId => colorById.get(seriesId) ?? 'var(--chart-primary)');
+    return this.visibleSeries().map(
+      seriesId => colorById.get(seriesId) ?? 'var(--nge-chart-primary)'
+    );
   });
 
   // The composed config (line host + overlay) — rebuilds when any input changes.

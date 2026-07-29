@@ -26,6 +26,7 @@ interface ContextOptions {
   bandWidthAccessor?: (category: string, total: number) => number;
   barPadding?: number;
   barRadius?: number;
+  labelColor?: string;
   onClick?: jest.Mock;
   onTooltip?: jest.Mock;
   orientation?: 'horizontal' | 'vertical';
@@ -74,6 +75,7 @@ function createContext(
     barPadding: options.barPadding,
     barRadius: options.barRadius,
     data,
+    labelColor: options.labelColor,
     onClick: options.onClick,
     orientation: options.orientation,
     renderer: renderStackedBarLayer,
@@ -296,12 +298,12 @@ describe('renderStackedBarLayer', () => {
       expect(styleOf(segmentRect(g, 'C1', 'C'), 'fill')).toBe('var(--c0)');
     });
 
-    it('defaults the first series to the theme palette head (var(--chart-primary))', () => {
+    it('defaults the first series to the theme palette head (var(--nge-chart-primary))', () => {
       const { context, g } = createContext([{ category: 'C1', seriesId: 'A', value: 10 }]);
 
       renderStackedBarLayer(context);
 
-      expect(styleOf(segmentRect(g, 'C1', 'A'), 'fill')).toBe('var(--chart-primary)');
+      expect(styleOf(segmentRect(g, 'C1', 'A'), 'fill')).toBe('var(--nge-chart-primary)');
     });
 
     it('honours a per-datum color override', () => {
@@ -339,6 +341,74 @@ describe('renderStackedBarLayer', () => {
       renderStackedBarLayer(context);
 
       expect(g.querySelectorAll('.nge-stacked-bar-label')).toHaveLength(0);
+    });
+
+    describe('label colour resolution (ARCH-266)', () => {
+      const LIGHT = '#fff3c4';
+      const DARK = '#101820';
+
+      /** The value-label text node for a category + seriesId. */
+      function labelFor(g: SVGGElement, category: string, seriesId: string): SVGTextElement {
+        const labels = Array.from(
+          columnFor(g, category).querySelectorAll<SVGTextElement>('.nge-stacked-bar-label')
+        );
+        const match = labels.find(
+          node =>
+            (node as unknown as { __data__: { seriesId: string } }).__data__.seriesId === seriesId
+        );
+        if (!match) {
+          throw new Error(`No stacked-bar label for ${category} / ${seriesId}`);
+        }
+        return match;
+      }
+
+      /** One category, two segments sitting on opposite-luminance fills. */
+      const CONTRAST: NgeStackedBarDataPoint[] = [
+        { category: 'C1', color: DARK, seriesId: 'A', value: 10 },
+        { category: 'C1', color: LIGHT, seriesId: 'B', value: 10 },
+      ];
+
+      it('rung 1 — a per-datum labelColor wins over config, derivation and theme', () => {
+        const { context, g } = createContext(
+          [{ category: 'C1', color: DARK, labelColor: '#ff0000', seriesId: 'A', value: 10 }],
+          {
+            labelColor: '#00ff00',
+            showLabels: true,
+            stackOffset: 'none',
+            theme: { label: { color: '#0000ff', colorOnDark: '#0000ff' } },
+          }
+        );
+
+        renderStackedBarLayer(context);
+
+        expect(labelFor(g, 'C1', 'A').getAttribute('fill')).toBe('#ff0000');
+      });
+
+      it('rung 2 — a layer-config labelColor forces one flat colour on every segment', () => {
+        const { context, g } = createContext(CONTRAST, {
+          labelColor: '#00ff00',
+          showLabels: true,
+          stackOffset: 'none',
+        });
+
+        renderStackedBarLayer(context);
+
+        expect(labelFor(g, 'C1', 'A').getAttribute('fill')).toBe('#00ff00');
+        expect(labelFor(g, 'C1', 'B').getAttribute('fill')).toBe('#00ff00');
+      });
+
+      it('rung 3 — derives per segment from each segment OWN fill', () => {
+        const { context, g } = createContext(CONTRAST, {
+          showLabels: true,
+          stackOffset: 'none',
+          theme: { label: { color: '#000000', colorOnDark: '#ffffff' } },
+        });
+
+        renderStackedBarLayer(context);
+
+        expect(labelFor(g, 'C1', 'A').getAttribute('fill')).toBe('#ffffff');
+        expect(labelFor(g, 'C1', 'B').getAttribute('fill')).toBe('#000000');
+      });
     });
   });
 

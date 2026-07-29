@@ -305,8 +305,8 @@ describe('renderLollipopLayer', () => {
 
       renderLollipopLayer(context);
 
-      expect(styleOf(markerByCategory(g, 'A'), 'fill')).toBe('var(--chart-primary)');
-      expect(styleOf(markerByCategory(g, 'B'), 'fill')).toBe('var(--chart-secondary)');
+      expect(styleOf(markerByCategory(g, 'A'), 'fill')).toBe('var(--nge-chart-primary)');
+      expect(styleOf(markerByCategory(g, 'B'), 'fill')).toBe('var(--nge-chart-secondary)');
     });
 
     it('honors a per-point color override above the series color', () => {

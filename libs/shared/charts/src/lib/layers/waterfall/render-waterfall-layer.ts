@@ -35,7 +35,7 @@ interface WaterfallRenderParams {
  * (`[start, end]`, colored by rise / fall), `'total'` bars anchor at zero. Thin
  * step connectors bridge consecutive bars at the carried running-total level.
  * Geometry is applied synchronously (so gesture re-renders don't smear and tests
- * read final values); all colour is applied via D3 `.style()` on `--chart-*`
+ * read final values); all colour is applied via D3 `.style()` on `--nge-chart-*`
  * tokens (rise / fall default to literal semantic green / red).
  */
 export function renderWaterfallLayer(

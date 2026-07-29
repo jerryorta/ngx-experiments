@@ -2,9 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { ComparisonAreaChartInteractionStoriesComponent } from './comparison-area-chart-interaction-stories.component';
+import { NgeComparisonAreaChartInteractionStoriesComponent } from './comparison-area-chart-interaction-stories.component';
 
-const meta: Meta<ComparisonAreaChartInteractionStoriesComponent> = {
+const meta: Meta<NgeComparisonAreaChartInteractionStoriesComponent> = {
   argTypes: {
     // Layer
     areaOpacity: {
@@ -101,7 +101,7 @@ const meta: Meta<ComparisonAreaChartInteractionStoriesComponent> = {
       table: { category: 'Axis Labels' },
     },
   },
-  component: ComparisonAreaChartInteractionStoriesComponent,
+  component: NgeComparisonAreaChartInteractionStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -111,7 +111,7 @@ const meta: Meta<ComparisonAreaChartInteractionStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<ComparisonAreaChartInteractionStoriesComponent>;
+type Story = StoryObj<NgeComparisonAreaChartInteractionStoriesComponent>;
 
 export const Interaction: Story = {
   args: {

@@ -61,7 +61,7 @@ describe('renderLdgDonutLayer', () => {
     renderLdgDonutLayer(context);
     const paths = g.querySelectorAll<SVGPathElement>('path.ldg-donut__slice');
     expect(paths[0].style.fill).toBe('var(--ldg-category-1)');
-    expect(paths[1].style.fill).toContain('var(--chart-'); // theme fallback
+    expect(paths[1].style.fill).toContain('var(--nge-chart-'); // theme fallback
   });
 
   it('skips zero/negative-value segments', () => {

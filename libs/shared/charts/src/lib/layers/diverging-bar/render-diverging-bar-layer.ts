@@ -266,7 +266,7 @@ export function renderDivergingBarLayer(
       .append('text')
       .attr('font-size', labelFontSize)
       .attr('font-family', 'inherit')
-      .attr('fill', 'var(--chart-on-surface-variant)')
+      .attr('fill', 'var(--nge-chart-on-surface-variant)')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'middle')
       .text(labelText);
@@ -303,8 +303,8 @@ export function renderDivergingBarLayer(
       .classed('nge-diverging-bar-center-label-bubble', true)
       .attr('d', bubblePath)
       .attr('transform', `translate(${bubbleX}, ${bubbleY})`)
-      .style('fill', 'var(--chart-surface-container)')
-      .style('stroke', 'var(--chart-outline-variant)')
+      .style('fill', 'var(--nge-chart-surface-container)')
+      .style('stroke', 'var(--nge-chart-outline-variant)')
       .style('stroke-width', 1);
 
     // Position text in center of bubble

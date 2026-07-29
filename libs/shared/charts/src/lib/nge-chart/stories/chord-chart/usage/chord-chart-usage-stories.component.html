@@ -1,0 +1,220 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-story-container">
+    <h2>Chord Chart - Usage Examples</h2>
+    <p class="nge-story-intro-text">
+      A circular or linear diagram of weighted relationships between a fixed set of nodes. One layer
+      folds three catalog entries into one primitive via <code>layout</code> +
+      <code>linkMark</code> — the <strong>Chord Diagram</strong>, the
+      <strong>Non-ribbon Chord</strong>, and the <strong>Arc Diagram</strong>. Data is a single
+      <code>NgeGraph</code> object (<code>{{ "{" }} links, nodes? {{ "}" }}</code
+      >), not an array — the same shape the sankey layer uses.
+    </p>
+
+    <!-- EXAMPLE 1: Chord Diagram -->
+    <section class="nge-story-section">
+      <h4>1. Chord Diagram</h4>
+      <p class="nge-story-description">
+        The defaults — <code>layout: 'circular'</code>, <code>linkMark: 'ribbon'</code>. Every node
+        becomes a ring arc sized by its total flow; every connection is a filled ribbon between two
+        arcs. <code>link.opacity</code> defaults to 0.4 so crossings stay legible.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+graph = {{ "{" }}
+  links: [
+    {{ "{" }} source: 'Northeast', target: 'Southeast', value: 420 {{ "}" }},
+    {{ "{" }} source: 'Southeast', target: 'Northeast', value: 95 {{ "}" }},
+    // ...
+  ],
+{{ "}" }};
+
+config = createChordChartConfig({{ "{" }}
+  data: this.graph,
+  showLabels: true,
+{{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="basicConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Non-ribbon Chord -->
+    <section class="nge-story-section">
+      <h4>2. Non-ribbon Chord</h4>
+      <p class="nge-story-description">
+        <code>linkMark: 'edge'</code> keeps the same ring but strokes a thin curve tracing each
+        ribbon's centreline instead of filling it — trading the ribbon's volume for legibility of
+        exactly which nodes connect.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createChordChartConfig({{ "{" }}
+  data: graph,
+  linkMark: 'edge',
+  showLabels: true,
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="nonRibbonConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Arc Diagram -->
+    <section class="nge-story-section">
+      <h4>3. Arc Diagram</h4>
+      <p class="nge-story-description">
+        <code>layout: 'linear'</code> abandons the ring for a horizontal baseline: nodes become
+        circles sized by their total flow, connections become stroked semicircular arcs above the
+        baseline whose <code>stroke-width</code> is proportional to the link's own value.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createChordChartConfig({{ "{" }}
+  data: graph,
+  layout: 'linear',
+  showLabels: true,
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="arcDiagramConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Labels -->
+    <section class="nge-story-section">
+      <h4>4. Node Labels</h4>
+      <p class="nge-story-description">
+        <code>showLabels</code> draws a label off each node — past the ring in circular layout,
+        beneath the circle in linear layout. <code>labelPadding</code> is the gap between the mark
+        and its label.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="labelledConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Ring sizing -->
+    <section class="nge-story-section">
+      <h4>5. Ring Sizing</h4>
+      <p class="nge-story-description">
+        <code>innerRadius</code> (circular layout only) is a RATIO of the outer radius setting how
+        thick the arc band reads — 0.75 here leaves more room for the ribbons than the 0.9 default.
+        <code>radiusRatio</code> instead scales the WHOLE ring down, opening up space around it
+        without changing the band's proportions.
+      </p>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5>innerRadius: 0.75</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="thinRingConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>radiusRatio: 0.7</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="scaledDownConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Directed -->
+    <section class="nge-story-section">
+      <h4>6. Directed vs. Merged Ribbons</h4>
+      <p class="nge-story-description">
+        <code>directed: false</code> (default) merges <code>A→B</code> and <code>B→A</code> into ONE
+        ribbon with asymmetric ends; <code>directed: true</code> draws them as two distinct ribbons.
+        Compare Northeast ↔ Southeast (420 vs 95) in each — merged, it is one ribbon pinched narrow
+        at the Southeast end; directed, it is two separately-coloured ribbons.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createChordChartConfig({{ "{" }}
+  data: graph,
+  directed: true,
+  showLabels: true,
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5>directed: false (default)</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="mergedConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>directed: true</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="directedConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7: Sort subgroups -->
+    <section class="nge-story-section">
+      <h4>7. Sort Subgroups</h4>
+      <p class="nge-story-description">
+        <code>sortSubgroups</code> orders the ribbons WITHIN each node's arc by value instead of
+        leaving d3-chord's own order — <code>'ascending'</code> here walks each arc from its
+        smallest connection to its largest.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="sortedConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 8: Tooltips -->
+    <section class="nge-story-section">
+      <h4>8. Tooltips</h4>
+      <p class="nge-story-description">
+        Hover a node's arc or circle. The default formatter reports the node's laid-out flow total,
+        so a node the caller gave no <code>value</code> still shows the number the layout summed for
+        it.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="tooltipConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 9: Click handling -->
+    <section class="nge-story-section">
+      <h4>9. Click Handling</h4>
+      <p class="nge-story-description">
+        <code>onClick</code> receives the node datum — carrying its summed flow as
+        <code>value</code> — plus its index among the drawn nodes.
+      </p>
+      <div class="nge-story-interaction-display">Last clicked: {{ lastClicked() }}</div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="clickableConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 10: Dynamic data -->
+    <section class="nge-story-section nge-story-section--highlight">
+      <h4>10. Dynamic Data with Signals</h4>
+      <p class="nge-story-description">
+        Hold the graph in a <code>signal()</code> and derive the config with
+        <code>computed()</code> — the layer recomputes the matrix and every arc / ribbon tweens to
+        its new geometry.
+      </p>
+      <div class="nge-story-interaction-row">
+        <button
+          type="button"
+          class="nge-story-action-button"
+          (click)="randomizeData()"
+        >
+          Randomize Flows
+        </button>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

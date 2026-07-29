@@ -1,8 +1,8 @@
-.pie-chart-usage-stories {
+.nge-pie-chart-usage-stories {
   display: block;
   padding: 20px;
 
-  .stories-container {
+  .nge-story-container {
     max-width: 1000px;
     margin: 0 auto;
   }
@@ -11,14 +11,14 @@
     margin-bottom: 8px;
   }
 
-  .intro-text {
+  .nge-story-intro-text {
     margin-bottom: 32px;
-    color: var(--chart-on-surface-variant, #666);
+    color: var(--nge-chart-on-surface-variant, #666);
     font-size: 16px;
     line-height: 1.5;
 
     code {
-      background: var(--chart-surface-container, #eee);
+      background: var(--nge-chart-surface-container, #eee);
       padding: 2px 6px;
       border-radius: 4px;
       font-family: monospace;
@@ -26,31 +26,31 @@
     }
   }
 
-  .story-section {
+  .nge-story-section {
     margin-bottom: 48px;
     padding-bottom: 24px;
-    border-bottom: 1px solid var(--chart-outline-variant, #ccc);
+    border-bottom: 1px solid var(--nge-chart-outline-variant, #ccc);
 
     &--highlight {
-      background: var(--chart-surface-variant, #f5f5f5);
+      background: var(--nge-chart-surface-variant, #f5f5f5);
       padding: 20px;
       border-radius: 8px;
-      border: 2px solid var(--chart-primary, #1976d2);
+      border: 2px solid var(--nge-chart-primary, #1976d2);
     }
 
     h4 {
       margin-bottom: 8px;
-      color: var(--chart-on-surface, #333);
+      color: var(--nge-chart-on-surface, #333);
     }
 
-    .story-description {
+    .nge-story-description {
       margin-bottom: 16px;
-      color: var(--chart-on-surface-variant, #666);
+      color: var(--nge-chart-on-surface-variant, #666);
       font-size: 14px;
       line-height: 1.5;
 
       code {
-        background: var(--chart-surface-container, #eee);
+        background: var(--nge-chart-surface-container, #eee);
         padding: 2px 6px;
         border-radius: 4px;
         font-family: monospace;
@@ -59,16 +59,16 @@
     }
   }
 
-  .code-block {
+  .nge-story-code-block {
     margin-bottom: 16px;
-    background: var(--chart-inverse-surface, #313033);
+    background: var(--nge-chart-inverse-surface, #313033);
     border-radius: 8px;
     overflow: hidden;
 
     pre {
       margin: 0;
       padding: 16px;
-      color: var(--chart-inverse-on-surface, #f4eff4);
+      color: var(--nge-chart-inverse-on-surface, #f4eff4);
       font-family: "Fira Code", "Consolas", monospace;
       font-size: 13px;
       line-height: 1.5;
@@ -77,39 +77,50 @@
     }
   }
 
-  .chart-container {
+  .nge-story-chart-container {
     height: 300px;
-    border: 1px solid var(--chart-outline-variant, #e0e0e0);
+    border: 1px solid var(--nge-chart-outline-variant, #e0e0e0);
     border-radius: 8px;
     padding: 16px;
-    background: var(--chart-surface, #fff);
+    background: var(--nge-chart-surface, #fff);
     overflow: visible;
 
     &--tall {
       height: 360px;
     }
+
+    // Outside labels need room in BOTH axes: height to seat ~15 labels per side at the line
+    // height before the collision pass starts shoving them off their own bearing, and width
+    // for the gutter the label text sits in. Measured on the 30-category set, crossing leader
+    // lines fall 84 → 58 → 40 → 34 as the plot grows 506 → 620 → 760 → 900px tall, then flat.
+    // The negative inline margin breaks these charts out of the 1000px prose column — body
+    // text wants a readable measure, a 30-label pie does not.
+    &--outside-labels {
+      height: 900px;
+      margin-inline: -90px;
+    }
   }
 
-  .interaction-display {
+  .nge-story-interaction-display {
     margin-bottom: 12px;
     padding: 12px 16px;
-    background: var(--chart-surface-container-low, #f8f8f8);
+    background: var(--nge-chart-surface-container-low, #f8f8f8);
     border-radius: 6px;
     font-size: 14px;
-    color: var(--chart-on-surface, #333);
+    color: var(--nge-chart-on-surface, #333);
   }
 
-  .interaction-row {
+  .nge-story-interaction-row {
     margin-bottom: 12px;
     display: flex;
     gap: 12px;
     align-items: center;
   }
 
-  .action-button {
+  .nge-story-action-button {
     padding: 8px 16px;
-    background: var(--chart-primary, #1976d2);
-    color: var(--chart-on-primary, #fff);
+    background: var(--nge-chart-primary, #1976d2);
+    color: var(--nge-chart-on-primary, #fff);
     border: none;
     border-radius: 6px;
     font-size: 14px;
@@ -118,7 +129,7 @@
     transition: background 0.2s ease;
 
     &:hover {
-      background: var(--chart-primary-container, #1565c0);
+      background: var(--nge-chart-primary-container, #1565c0);
     }
 
     &:active {
@@ -126,10 +137,10 @@
     }
 
     &--secondary {
-      background: var(--chart-secondary, #625b71);
+      background: var(--nge-chart-secondary, #625b71);
 
       &:hover {
-        background: var(--chart-secondary-container, #4a4458);
+        background: var(--nge-chart-secondary-container, #4a4458);
       }
     }
   }

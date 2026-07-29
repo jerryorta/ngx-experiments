@@ -13,15 +13,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'bullet-chart-usage-stories',
+    class: 'nge-bullet-chart-usage-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'bullet-chart-usage-stories',
+  selector: 'nge-bullet-chart-usage-stories',
   standalone: true,
   styleUrl: './bullet-chart-usage-stories.component.scss',
   templateUrl: './bullet-chart-usage-stories.component.html',
 })
-export class BulletChartUsageStoriesComponent {
+export class NgeBulletChartUsageStoriesComponent {
   reviewStatus = REVIEW_STATUS.FINAL;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/bullet-chart/usage';
 

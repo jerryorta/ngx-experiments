@@ -2,52 +2,54 @@
   [reviewStatus]="reviewStatus"
   [storybookFilePath]="storybookFilePath"
 >
-  <div class="stories-container">
+  <div class="nge-story-container">
     <h2>Sunburst Chart - Theming Examples</h2>
-    <p class="intro-text">
+    <p class="nge-story-intro-text">
       Node colours resolve per-node <code>color</code> &rarr; the preset's
       <code>seriesColors</code> palette (by top-level branch index) &rarr; the theme
       <code>segment.colors</code> palette. Every descendant inherits its top-level branch colour
       unless it sets its own. Override <code>theme.sunburst.segment.colors</code> to reskin the
       whole cycle, or set <code>stroke</code> / <code>strokeWidth</code> / <code>opacity</code> for
-      separators and transparency. Light / dark is handled by the review container.
+      separators and transparency. Opt-in labels take their own <code>label</code> slice, whose
+      colour is an absolute contrast pair rather than a single value — see
+      <strong>Label Contrast</strong> below. Light / dark is handled by the review container.
     </p>
 
     <!-- Default Theme -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>Default Theme</h4>
-      <p class="story-description">
-        No theme provided — uses the built-in <code>--chart-*</code> token palette, which adapts to
-        the surrounding light / dark surface.
+      <p class="nge-story-description">
+        No theme provided — uses the built-in <code>--nge-chart-*</code> token palette, which
+        adapts to the surrounding light / dark surface.
       </p>
-      <div class="chart-container">
+      <div class="nge-story-chart-container">
         <nge-chart [config]="defaultConfig" />
       </div>
     </section>
 
     <!-- Palette Overrides Grid -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>Palette Overrides</h4>
-      <p class="story-description">
+      <p class="nge-story-description">
         Recolour the branch cycle two ways: pass <code>seriesColors</code> to the preset, or
         override <code>theme.sunburst.segment.colors</code>. Both map the top-level branch input
         index to <code>colors[index % length]</code>, so the palette cycles for any branch count.
       </p>
-      <div class="themes-grid">
-        <div class="theme-item">
-          <span class="theme-label">Warm (seriesColors)</span>
-          <div class="chart-container chart-container--small">
+      <div class="nge-story-themes-grid">
+        <div class="nge-story-theme-item">
+          <span class="nge-story-theme-label">Warm (seriesColors)</span>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
             <nge-chart [config]="warmConfig" />
           </div>
         </div>
-        <div class="theme-item">
-          <span class="theme-label">Cool (theme override)</span>
-          <div class="chart-container chart-container--small">
+        <div class="nge-story-theme-item">
+          <span class="nge-story-theme-label">Cool (theme override)</span>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
             <nge-chart [config]="coolConfig" />
           </div>
         </div>
       </div>
-      <div class="code-block">
+      <div class="nge-story-code-block">
         <pre>
 // Warm — via the preset's seriesColors option
 const warmConfig = createSunburstChartConfig({{ "{" }}
@@ -70,17 +72,17 @@ const coolConfig = {{ "{" }}
     </section>
 
     <!-- Per-node Colors -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>Per-node Colors</h4>
-      <p class="story-description">
+      <p class="nge-story-description">
         Set <code>color</code> on a node to assign it a semantic colour. Descendants inherit their
         branch colour, and a per-node <code>color</code> (here on <code>Rent</code>) wins over the
         inherited branch / palette colour for that node.
       </p>
-      <div class="chart-container">
+      <div class="nge-story-chart-container">
         <nge-chart [config]="perNodeConfig" />
       </div>
-      <div class="code-block">
+      <div class="nge-story-code-block">
         <pre>
 data = [
   {{ "{" }}
@@ -96,16 +98,16 @@ data = [
     </section>
 
     <!-- Stroke Separators -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>Stroke Separators</h4>
-      <p class="story-description">
+      <p class="nge-story-description">
         A thicker <code>segment.stroke</code> / <code>strokeWidth</code> cleanly separates adjacent
         arcs — useful on dense sunbursts or when neighbouring branches share similar hues.
       </p>
-      <div class="chart-container">
+      <div class="nge-story-chart-container">
         <nge-chart [config]="strokeConfig" />
       </div>
-      <div class="code-block">
+      <div class="nge-story-code-block">
         <pre>
 theme: {{ "{" }}
   sunburst: {{ "{" }} segment: {{ "{" }} stroke: '#ffffff', strokeWidth: 3 {{ "}" }} {{ "}" }},
@@ -114,15 +116,15 @@ theme: {{ "{" }}
     </section>
 
     <!-- Translucent Segments -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>Translucent Segments</h4>
-      <p class="story-description">
+      <p class="nge-story-description">
         Lower <code>segment.opacity</code> for a softer, layered look.
       </p>
-      <div class="chart-container">
+      <div class="nge-story-chart-container">
         <nge-chart [config]="translucentConfig" />
       </div>
-      <div class="code-block">
+      <div class="nge-story-code-block">
         <pre>
 theme: {{ "{" }}
   sunburst: {{ "{" }} segment: {{ "{" }} opacity: 0.7 {{ "}" }} {{ "}" }},
@@ -130,29 +132,95 @@ theme: {{ "{" }}
       </div>
     </section>
 
+    <!-- Label Contrast -->
+    <section class="nge-story-section">
+      <h4>Label Contrast</h4>
+      <p class="nge-story-description">
+        An on-arc label sits on the node's own fill, and that fill comes from the palette — a
+        <em>range</em>. So <code>theme.sunburst.label</code> is not one colour but an
+        <strong>absolute</strong> <code>--nge-chart-black</code> /
+        <code>--nge-chart-white</code> pair, and the renderer picks the endpoint that reads on each
+        node. Note the deep-blue branch and the yellow one below: same theme, opposite label
+        colours. Setting <code>labelColor</code> (per node or per layer) turns the derivation off
+        and pins one flat colour — legible on some branches, not on others.
+      </p>
+      <div class="nge-story-themes-grid">
+        <div class="nge-story-theme-item">
+          <span class="nge-story-theme-label">Derived per node (default)</span>
+          <div class="nge-story-chart-container">
+            <nge-chart [config]="labelContrastConfig" />
+          </div>
+        </div>
+        <div class="nge-story-theme-item">
+          <span class="nge-story-theme-label">Flat labelColor: '#ffffff'</span>
+          <div class="nge-story-chart-container">
+            <nge-chart [config]="labelFlatConfig" />
+          </div>
+        </div>
+      </div>
+      <div class="nge-story-code-block">
+        <pre>
+// Default — no theme override needed; the pair is the shipped default.
+theme: {{ "{" }}
+  sunburst: {{ "{" }}
+    label: {{ "{" }}
+      color: 'var(--nge-chart-black, #000000)',       // on a LIGHT node fill
+      colorOnDark: 'var(--nge-chart-white, #ffffff)', // on a DARK one
+    {{ "}" }},
+  {{ "}" }},
+{{ "}" }}
+
+// Opt out — one flat colour on every node.
+createSunburstChartConfig({{ "{" }} data, showLabels: true, labelColor: '#ffffff' {{ "}" }});</pre>
+      </div>
+    </section>
+
+    <!-- Label Typography -->
+    <section class="nge-story-section">
+      <h4>Label Typography</h4>
+      <p class="nge-story-description">
+        Size and weight read <code>theme.sunburst.label</code>, defaulting to the shared
+        <code>--nge-chart-label-font-size</code> /
+        <code>--nge-chart-label-font-weight</code> tokens. Both accept a <code>number</code> (px /
+        numeric weight) or a string passed to CSS verbatim. They are deliberately
+        <strong>not</strong> per-datum: unlike colour, they do not co-vary with a node's fill. Raise
+        the size and you generally want to raise <code>minLabelSize</code> with it — bigger text
+        needs more arc.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="labelTypographyConfig" />
+      </div>
+      <div class="nge-story-code-block">
+        <pre>
+theme: {{ "{" }}
+  sunburst: {{ "{" }} label: {{ "{" }} fontSize: 14, fontWeight: 800 {{ "}" }} {{ "}" }},
+{{ "}" }}</pre>
+      </div>
+    </section>
+
     <!-- Highlight: side-by-side comparison -->
-    <section class="story-section story-section--highlight">
+    <section class="nge-story-section nge-story-section--highlight">
       <h4>Multiple Palettes Side by Side</h4>
-      <p class="story-description">
+      <p class="nge-story-description">
         The same hierarchy rendered with three palettes — swap <code>seriesColors</code> or
         <code>theme.sunburst.segment.colors</code> to rebrand without touching the data.
       </p>
-      <div class="chart-row">
-        <div class="chart-column">
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
           <h5>Default</h5>
-          <div class="chart-container chart-container--small">
+          <div class="nge-story-chart-container nge-story-chart-container--small">
             <nge-chart [config]="comparisonDefault" />
           </div>
         </div>
-        <div class="chart-column">
+        <div class="nge-story-chart-column">
           <h5>Warm</h5>
-          <div class="chart-container chart-container--small">
+          <div class="nge-story-chart-container nge-story-chart-container--small">
             <nge-chart [config]="comparisonWarm" />
           </div>
         </div>
-        <div class="chart-column">
+        <div class="nge-story-chart-column">
           <h5>Cool</h5>
-          <div class="chart-container chart-container--small">
+          <div class="nge-story-chart-container nge-story-chart-container--small">
             <nge-chart [config]="comparisonCool" />
           </div>
         </div>

@@ -1,0 +1,130 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-story-container">
+    <h2>Tree Chart - Theming Examples</h2>
+    <p class="nge-story-intro-text">
+      The tree layer exposes three theme slices — <code>node</code>, <code>link</code> and
+      <code>label</code>. A node's colour comes from its <strong>top-level branch</strong>, so a
+      branch and everything under it share one hue and a legend over the branches serves the whole
+      diagram.
+    </p>
+
+    <section class="nge-story-section">
+      <h4>Default Theme</h4>
+      <p class="nge-story-description">
+        No theme provided — renders on the chart's <code>--nge-chart-*</code> token defaults.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Green Palette</h4>
+      <p class="nge-story-description">
+        <code>node.colors</code> is indexed by top-level branch, so Coffee, Tea and Water each take
+        one entry and their descendants inherit it.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="greenConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Blue Palette with Heavier Edges</h4>
+      <p class="nge-story-description">
+        <code>link.width</code> and <code>link.opacity</code> control how loudly the structure
+        itself reads. A tree's edges never cross, so full opacity costs nothing here — unlike a
+        force-directed network, where translucency is what keeps a dense interior legible.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="blueConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Quiet Edges</h4>
+      <p class="nge-story-description">
+        The inverse emphasis: faint, thin links and outlined nodes, for when the nodes are the
+        finding and the hierarchy is only context.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="quietEdgesConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Label Typography</h4>
+      <p class="nge-story-description">
+        A tree label always sits <em>beside</em> its node, never on it, so the
+        <code>label</code> slice is theme-relative and carries no on-fill contrast derivation — set
+        <code>color</code> and it is simply used.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="typographyConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Dendrogram</h4>
+      <p class="nge-story-description">
+        <code>alignLeaves</code> with a warm palette. Aligning the leaves puts every leaf label in
+        one column, which is what makes the list scannable.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="dendrogramConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Radial Convergence</h4>
+      <p class="nge-story-description">
+        The same theme slices apply unchanged in the radial layout — only the seating changes.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="radialConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Organisational Chart</h4>
+      <p class="nge-story-description">
+        A heavier <code>link.width</code> suits <code>linkShape: 'elbow'</code>: a right angle drawn
+        thinly reads as a stray hairline rather than a reporting line.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="orgChartConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section nge-story-section--highlight">
+      <h4>Multiple Charts with Different Themes</h4>
+      <p class="nge-story-description">
+        One hierarchy, three palettes — each chart carries its own <code>theme.tree</code>, so
+        panels on the same page can stay visually distinct.
+      </p>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5>Warm</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="warmConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>Cool</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="coolConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>Monochrome</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="monoConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

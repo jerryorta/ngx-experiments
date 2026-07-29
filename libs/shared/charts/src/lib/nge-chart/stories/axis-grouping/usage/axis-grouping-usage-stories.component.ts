@@ -86,7 +86,7 @@ function withYAxisRangeTiers(
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'axis-grouping-usage-stories',
+    class: 'nge-axis-grouping-usage-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
   selector: 'nge-axis-grouping-usage-stories',
@@ -94,7 +94,7 @@ function withYAxisRangeTiers(
   styleUrl: './axis-grouping-usage-stories.component.scss',
   templateUrl: './axis-grouping-usage-stories.component.html',
 })
-export class AxisGroupingUsageStoriesComponent {
+export class NgeAxisGroupingUsageStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/axis-grouping/usage';
 

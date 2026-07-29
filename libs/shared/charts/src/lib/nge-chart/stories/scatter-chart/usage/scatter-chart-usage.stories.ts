@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { ScatterChartUsageStoriesComponent } from './scatter-chart-usage-stories.component';
+import { NgeScatterChartUsageStoriesComponent } from './scatter-chart-usage-stories.component';
 
-const meta: Meta<ScatterChartUsageStoriesComponent> = {
-  component: ScatterChartUsageStoriesComponent,
+const meta: Meta<NgeScatterChartUsageStoriesComponent> = {
+  component: NgeScatterChartUsageStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<ScatterChartUsageStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<ScatterChartUsageStoriesComponent>;
+type Story = StoryObj<NgeScatterChartUsageStoriesComponent>;
 
 export const Usage: Story = {
   args: {},

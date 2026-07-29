@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { ScatterChartThemingComponent } from './scatter-chart-theming.component';
+import { NgeScatterChartThemingComponent } from './scatter-chart-theming.component';
 
-const meta: Meta<ScatterChartThemingComponent> = {
-  component: ScatterChartThemingComponent,
+const meta: Meta<NgeScatterChartThemingComponent> = {
+  component: NgeScatterChartThemingComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<ScatterChartThemingComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<ScatterChartThemingComponent>;
+type Story = StoryObj<NgeScatterChartThemingComponent>;
 
 export const Theming: Story = {
   args: {},

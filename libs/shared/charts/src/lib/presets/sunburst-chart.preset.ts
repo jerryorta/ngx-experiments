@@ -57,10 +57,23 @@ export interface SunburstChartPresetOptions {
   endAngle?: number;
 
   /**
+   * Format a node's label (when `showLabels` is set). Receives the node datum carrying its
+   * SUMMED value. Defaults to the datum's own `label`.
+   */
+  formatLabel?: NgeSunburstLayerConfig['formatLabel'];
+
+  /**
    * Inner radius as a RATIO (0–1) of the self-computed outer radius (radial layout):
    * `0` → rings start at the center, e.g. `0.6` → a donut hole. NOT pixels.
    */
   innerRadius?: number;
+
+  /**
+   * Label colour for EVERY node. Setting it disables automatic on-fill contrast (the
+   * derived black/white choice against the node's own fill), giving one flat label colour;
+   * a per-datum `labelColor` still wins over it.
+   */
+  labelColor?: string;
 
   /**
    * Partition layout. `'radial'` (default) draws concentric rings (sunburst / donut);
@@ -79,6 +92,25 @@ export interface SunburstChartPresetOptions {
   maxDepth?: number;
 
   /**
+   * Deepest depth that still gets a label (1 = top-level branches only). Independent of
+   * `maxDepth`, which governs what is DRAWN. Unset ⇒ every drawn depth is eligible.
+   */
+  maxLabelDepth?: number;
+
+  /**
+   * Smallest node sweep in RADIANS that still gets a label — radial layout only. Default
+   * `0.15` rad (≈ 8.6°). A zero-sweep node is never labelled whatever the threshold.
+   */
+  minLabelAngle?: number;
+
+  /**
+   * Smallest cross-text extent in PIXELS that still gets a label: the arc length at the
+   * node's mid-radius (radial) or the rect width (linear). Catches the inner-ring nodes
+   * that hold a wide angle but almost no arc. Default 12.
+   */
+  minLabelSize?: number;
+
+  /**
    * Click handler for nodes
    */
   onClick?: NgeSunburstLayerConfig['onClick'];
@@ -89,9 +121,25 @@ export interface SunburstChartPresetOptions {
   padAngle?: number;
 
   /**
+   * Scale the self-computed outer radius by a RATIO (0–1): `1` (default) fills the plot,
+   * `0.75` draws it at three-quarters size. Applied AFTER the layer's own label reserves,
+   * and `innerRadius` scales with it, so the chart shrinks without distorting. The knob for
+   * "make the chart smaller in a box I do not control" — not `labelGutter`, which is
+   * measured off the arc and drags the labels inward with it.
+   */
+  radiusRatio?: number;
+
+  /**
    * Node color palette. Top-level branch index maps to colors[index % length].
    */
   seriesColors?: string[];
+
+  /**
+   * Draw a label on each node — along its arc (radial) or inside its rect (linear) — styled
+   * from `theme.sunburst.label`. Opt-in (default false); nodes below `minLabelAngle` /
+   * `minLabelSize` or past `maxLabelDepth` stay unlabelled.
+   */
+  showLabels?: boolean;
 
   /**
    * Start of the angular sweep in radians (radial layout). Default 0.
@@ -135,19 +183,37 @@ function defaultSunburstTooltipFormatter(data: NgeHierarchyDatum): NgeTooltipCon
  * });
  *
  * <nge-chart [config]="config" />
+ *
+ * @example
+ * // Labelled sunburst — labels ride the radius, and the nodes too small to hold text
+ * // are dropped rather than drawn over their neighbours.
+ * const labelled = createSunburstChartConfig({
+ *   data: budget,
+ *   showLabels: true,
+ *   maxLabelDepth: 2,    // the outer ring is too thin for text
+ *   minLabelSize: 16,    // a node needs 16px of arc before it earns a label
+ *   formatLabel: d => `${d.label} · ${d.value}`,
+ * });
  */
 export function createSunburstChartConfig(options: SunburstChartPresetOptions): NgeChartConfig {
   const {
     animation,
     data,
     endAngle,
+    formatLabel,
     innerRadius,
+    labelColor,
     layout,
     margin,
     maxDepth,
+    maxLabelDepth,
+    minLabelAngle,
+    minLabelSize,
     onClick,
     padAngle,
+    radiusRatio,
     seriesColors,
+    showLabels,
     startAngle,
     tooltip,
   } = options;
@@ -178,13 +244,20 @@ export function createSunburstChartConfig(options: SunburstChartPresetOptions): 
       {
         data,
         endAngle,
+        formatLabel,
         innerRadius,
+        labelColor,
         layout,
         maxDepth,
+        maxLabelDepth,
+        minLabelAngle,
+        minLabelSize,
         onClick,
         padAngle,
+        radiusRatio,
         renderer: renderSunburstLayer,
         seriesColors,
+        showLabels,
         startAngle,
         tooltip: tooltipConfig,
         type: 'sunburst',

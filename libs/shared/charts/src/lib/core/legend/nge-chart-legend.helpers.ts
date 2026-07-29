@@ -1,6 +1,7 @@
 import type {
   NgeAreaDataPoint,
   NgeBumpDataPoint,
+  NgeGraph,
   NgeGroupedBarDataPoint,
   NgeHierarchyDatum,
   NgeLineDataPoint,
@@ -10,10 +11,12 @@ import type {
 } from '../config/nge-chart-config.models';
 import type { NgeLegendItem } from './nge-chart-legend.models';
 
+import { deriveGraphNodes } from '../fns';
 import {
   DEFAULT_AREA_LAYER_THEME,
   DEFAULT_BAR_LAYER_THEME,
   DEFAULT_BUMP_LAYER_THEME,
+  DEFAULT_CHORD_LAYER_THEME,
   DEFAULT_LINE_LAYER_THEME,
   DEFAULT_PIE_LAYER_THEME,
   DEFAULT_SCATTER_LAYER_THEME,
@@ -54,7 +57,7 @@ export function extractBarTrendLineLegendItems(options: {
       color:
         options.meanLineColor ??
         DEFAULT_BAR_LAYER_THEME.statistical.meanLineColor ??
-        'var(--chart-tertiary)',
+        'var(--nge-chart-tertiary)',
       label: 'Mean',
     });
   }
@@ -64,7 +67,7 @@ export function extractBarTrendLineLegendItems(options: {
       color:
         options.medianLineColor ??
         DEFAULT_BAR_LAYER_THEME.statistical.medianLineColor ??
-        'var(--chart-secondary)',
+        'var(--nge-chart-secondary)',
       label: 'Median',
     });
   }
@@ -103,7 +106,7 @@ export function extractAreaChartLegendItems(
     color:
       seriesColors?.[i % seriesColors.length] ??
       colors[i % colors.length] ??
-      'var(--chart-primary)',
+      'var(--nge-chart-primary)',
     label: seriesId,
   }));
 }
@@ -135,7 +138,7 @@ export function extractStackedBarChartLegendItems(
     color:
       seriesColors?.[i % seriesColors.length] ??
       colors[i % colors.length] ??
-      'var(--chart-primary)',
+      'var(--nge-chart-primary)',
     label: seriesId,
   }));
 }
@@ -165,7 +168,7 @@ export function extractLineChartLegendItems(
   }
 
   return uniqueSeries.map((seriesId, i) => ({
-    color: seriesColors?.[i] ?? colors[i % colors.length] ?? 'var(--chart-primary)',
+    color: seriesColors?.[i] ?? colors[i % colors.length] ?? 'var(--nge-chart-primary)',
     label: seriesId,
   }));
 }
@@ -200,7 +203,7 @@ export function extractBumpChartLegendItems(
   }
 
   return uniqueSeries.map((seriesId, i) => ({
-    color: palette[i % palette.length] ?? 'var(--chart-primary)',
+    color: palette[i % palette.length] ?? 'var(--nge-chart-primary)',
     id: seriesId,
     label: seriesId,
   }));
@@ -213,6 +216,10 @@ export function extractBumpChartLegendItems(
  * `palette[d.index % length]`, so swatches and slices always agree. An empty
  * `seriesColors` is treated the same as unset (falls through to the theme palette).
  * Every pie point carries a label, so this always yields one item per unique slice.
+ *
+ * Each item also carries its slice's `value`. That is data, not presentation — the legend
+ * renders it only under `showValues`, so populating it here leaves every existing pie legend
+ * looking exactly as it did.
  */
 export function extractPieChartLegendItems(
   data: NgePieDataPoint[],
@@ -233,9 +240,10 @@ export function extractPieChartLegendItems(
   }
 
   return uniqueSlices.map((d, i) => ({
-    color: d.color ?? palette[i % palette.length] ?? 'var(--chart-primary)',
+    color: d.color ?? palette[i % palette.length] ?? 'var(--nge-chart-primary)',
     id: d.label,
     label: d.label,
+    value: d.value,
   }));
 }
 
@@ -266,7 +274,7 @@ export function extractSunburstChartLegendItems(
   }
 
   return uniqueBranches.map((d, i) => ({
-    color: d.color ?? palette[i % palette.length] ?? 'var(--chart-primary)',
+    color: d.color ?? palette[i % palette.length] ?? 'var(--nge-chart-primary)',
     id: d.label,
     label: d.label,
   }));
@@ -302,8 +310,38 @@ export function extractScatterChartLegendItems(
     color:
       seriesColors?.[i % seriesColors.length] ??
       colors[i % colors.length] ??
-      'var(--chart-primary)',
+      'var(--nge-chart-primary)',
     id: seriesId,
     label: seriesId,
+  }));
+}
+
+/**
+ * Extract legend items from a chord/arc relationship graph — one item per node, ordered
+ * however {@link deriveGraphNodes} resolves the graph's categorical set (explicit
+ * `data.nodes`, else link endpoints in first-seen order — the SAME resolution the chord
+ * renderer uses, from the same shared function, so the two can never disagree on order),
+ * coloured to match the renderer. A per-node `color` override wins; otherwise the palette
+ * cycles WITH modulo (`palette[i % length]`) exactly like the renderer's
+ * `palette[i % palette.length]`, so swatches and arcs/circles always agree. An empty
+ * `seriesColors` is treated the same as unset (falls through to the theme palette).
+ *
+ * Carries no `value` — a node's magnitude is the SUMMED flow the chord layout computes
+ * from its links, not a field supplied on the input datum, so populating it here would
+ * read `undefined` for the common case (no explicit `nodes`) and stale for the rest.
+ */
+export function extractChordChartLegendItems(
+  data: NgeGraph,
+  seriesColors?: string[],
+  themeColors?: string[]
+): NgeLegendItem[] {
+  const fallbackColors = DEFAULT_CHORD_LAYER_THEME.node.colors ?? [];
+  // An empty seriesColors is the same as unset — cycle the theme palette.
+  const palette = seriesColors?.length ? seriesColors : (themeColors ?? fallbackColors);
+
+  return deriveGraphNodes(data).map((node, i) => ({
+    color: node.color ?? palette[i % palette.length] ?? 'var(--nge-chart-primary)',
+    id: node.id,
+    label: node.label ?? node.id,
   }));
 }

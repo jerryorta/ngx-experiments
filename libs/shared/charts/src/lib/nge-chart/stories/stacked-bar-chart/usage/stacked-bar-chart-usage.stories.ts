@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { StackedBarChartUsageStoriesComponent } from './stacked-bar-chart-usage-stories.component';
+import { NgeStackedBarChartUsageStoriesComponent } from './stacked-bar-chart-usage-stories.component';
 
-const meta: Meta<StackedBarChartUsageStoriesComponent> = {
-  component: StackedBarChartUsageStoriesComponent,
+const meta: Meta<NgeStackedBarChartUsageStoriesComponent> = {
+  component: NgeStackedBarChartUsageStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<StackedBarChartUsageStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<StackedBarChartUsageStoriesComponent>;
+type Story = StoryObj<NgeStackedBarChartUsageStoriesComponent>;
 
 export const Usage: Story = {
   args: {},

@@ -13,13 +13,13 @@ const DEFAULT_WINLOSS_MARGIN = { bottom: 2, left: 2, right: 2, top: 2 };
 const DEFAULT_WINLOSS_BAR_PADDING = 0.2;
 
 /** Win mark colour — the primary accent token. */
-const DEFAULT_WIN_COLOR = 'var(--chart-primary)';
+const DEFAULT_WIN_COLOR = 'var(--nge-chart-primary)';
 
 /** Loss mark colour — the error/failure accent token. */
-const DEFAULT_LOSS_COLOR = 'var(--chart-error)';
+const DEFAULT_LOSS_COLOR = 'var(--nge-chart-error)';
 
 /** Tie mark colour — a muted on-surface token (ties render as a zero-height mark). */
-const DEFAULT_TIE_COLOR = 'var(--chart-on-surface-variant)';
+const DEFAULT_TIE_COLOR = 'var(--nge-chart-on-surface-variant)';
 
 /**
  * One period's outcome for a win-loss sparkline: a `label` and a signed `value`.
@@ -45,11 +45,11 @@ export interface WinLossSparklineChartPresetOptions extends Omit<
 > {
   /** One entry per period; only each `value`'s sign is used. */
   data: WinLossDataPoint[];
-  /** Colour for loss marks (`value < 0`). @default var(--chart-error) */
+  /** Colour for loss marks (`value < 0`). @default var(--nge-chart-error) */
   lossColor?: string;
-  /** Colour for tie marks (`value === 0`, rendered as a zero-height mark). @default var(--chart-on-surface-variant) */
+  /** Colour for tie marks (`value === 0`, rendered as a zero-height mark). @default var(--nge-chart-on-surface-variant) */
   tieColor?: string;
-  /** Colour for win marks (`value > 0`). @default var(--chart-primary) */
+  /** Colour for win marks (`value > 0`). @default var(--nge-chart-primary) */
   winColor?: string;
 }
 

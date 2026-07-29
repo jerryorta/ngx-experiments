@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { SunburstChartUsageStoriesComponent } from './sunburst-chart-usage-stories.component';
+import { NgeSunburstChartUsageStoriesComponent } from './sunburst-chart-usage-stories.component';
 
-const meta: Meta<SunburstChartUsageStoriesComponent> = {
-  component: SunburstChartUsageStoriesComponent,
+const meta: Meta<NgeSunburstChartUsageStoriesComponent> = {
+  component: NgeSunburstChartUsageStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<SunburstChartUsageStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<SunburstChartUsageStoriesComponent>;
+type Story = StoryObj<NgeSunburstChartUsageStoriesComponent>;
 
 export const Usage: Story = {
   args: {},

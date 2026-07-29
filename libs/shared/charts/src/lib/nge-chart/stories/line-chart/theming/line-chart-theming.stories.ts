@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { LineChartThemingComponent } from './line-chart-theming.component';
+import { NgeLineChartThemingComponent } from './line-chart-theming.component';
 
-const meta: Meta<LineChartThemingComponent> = {
-  component: LineChartThemingComponent,
+const meta: Meta<NgeLineChartThemingComponent> = {
+  component: NgeLineChartThemingComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<LineChartThemingComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<LineChartThemingComponent>;
+type Story = StoryObj<NgeLineChartThemingComponent>;
 
 export const Theming: Story = {
   args: {},

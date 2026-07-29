@@ -21,7 +21,7 @@ import { NgeChartComponent } from '../../../nge-chart.component';
   styleUrl: './line-chart-usage-stories.component.scss',
   templateUrl: './line-chart-usage-stories.component.html',
 })
-export class LineChartUsageStoriesComponent {
+export class NgeLineChartUsageStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/line-chart/usage';
 

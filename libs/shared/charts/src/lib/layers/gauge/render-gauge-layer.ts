@@ -17,6 +17,7 @@ import type { NgeChartLayerContext } from '../../core/layer';
 import type { NgeGaugeLayerTheme, ResolvedNgeGaugeLayerTheme } from '../../core/theme';
 import type { NgeTooltipEvent } from '../../core/tooltip';
 
+import { applyRadiusRatio } from '../../core/fns';
 import { mergeGaugeLayerTheme } from '../../core/theme';
 
 /** Default sweep: a 270° speedometer (radial-bar convention, 0 = 12 o'clock, clockwise). */
@@ -126,7 +127,10 @@ export function renderGaugeLayer(
   // half-dimension, and read innerRadius as a 0–1 ratio of it (clamped so it can't invert).
   const cx = dimensions.boundedWidth / 2;
   const cy = dimensions.boundedHeight / 2;
-  const outerRadius = Math.min(dimensions.boundedWidth, dimensions.boundedHeight) / 2;
+  const outerRadius = applyRadiusRatio(
+    Math.min(dimensions.boundedWidth, dimensions.boundedHeight) / 2,
+    config.radiusRatio
+  );
   const innerRatio = Math.max(
     0,
     Math.min(config.innerRadius ?? DEFAULT_INNER_RADIUS_RATIO, 1 - 1e-6)

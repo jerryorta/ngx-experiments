@@ -2,9 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { SunburstChartInteractionStoriesComponent } from './sunburst-chart-interaction-stories.component';
+import { NgeSunburstChartInteractionStoriesComponent } from './sunburst-chart-interaction-stories.component';
 
-const meta: Meta<SunburstChartInteractionStoriesComponent> = {
+const meta: Meta<NgeSunburstChartInteractionStoriesComponent> = {
   argTypes: {
     // Layer - Geometry
     endAngle: {
@@ -23,6 +23,26 @@ const meta: Meta<SunburstChartInteractionStoriesComponent> = {
       description:
         'Suppress the internal legend and show the standalone interactive <nge-chart-legend> above the chart; click a branch to toggle it in/out of the sunburst.',
       table: { category: 'Layer - Legend' },
+    },
+    // Theme - Label Styling
+    labelColor: {
+      control: 'color',
+      description:
+        'Flat label colour for EVERY node. Leave empty to keep the automatic on-fill contrast (black on light nodes, white on dark ones).',
+      if: { arg: 'showLabels' },
+      table: { category: 'Theme - Label Styling' },
+    },
+    labelFontSize: {
+      control: { max: 24, min: 6, step: 1, type: 'range' },
+      description: 'Label font size (px)',
+      if: { arg: 'showLabels' },
+      table: { category: 'Theme - Label Styling' },
+    },
+    labelFontWeight: {
+      control: { max: 900, min: 100, step: 100, type: 'range' },
+      description: 'Label font weight',
+      if: { arg: 'showLabels' },
+      table: { category: 'Theme - Label Styling' },
     },
     // Layer - Layout
     layout: {
@@ -64,6 +84,28 @@ const meta: Meta<SunburstChartInteractionStoriesComponent> = {
       description: 'Max rings / columns to render (0 = full depth)',
       table: { category: 'Layer - Geometry' },
     },
+    // Layer - Labels
+    maxLabelDepth: {
+      control: { max: 4, min: 0, step: 1, type: 'range' },
+      description:
+        'Deepest ring / column that still gets a label (0 = every drawn depth). Independent of maxDepth, which governs what is DRAWN.',
+      if: { arg: 'showLabels' },
+      table: { category: 'Layer - Labels' },
+    },
+    minLabelAngle: {
+      control: { max: 1, min: 0, step: 0.01, type: 'range' },
+      description:
+        'Smallest node sweep (radians) that still gets a label — radial layout only. A zero-sweep node is never labelled whatever the threshold.',
+      if: { arg: 'showLabels' },
+      table: { category: 'Layer - Labels' },
+    },
+    minLabelSize: {
+      control: { max: 80, min: 0, step: 2, type: 'range' },
+      description:
+        'Smallest cross-text extent (px) that still gets a label: the arc length at the node mid-radius (radial) or the rect width (linear). Catches inner-ring nodes that hold a wide angle but almost no arc.',
+      if: { arg: 'showLabels' },
+      table: { category: 'Layer - Labels' },
+    },
     padAngle: {
       control: { max: 0.05, min: 0, step: 0.005, type: 'range' },
       description: 'Angular gap between adjacent nodes in radians (radial layout)',
@@ -100,6 +142,12 @@ const meta: Meta<SunburstChartInteractionStoriesComponent> = {
       control: 'color',
       description: 'Branch 3 fill (Transport)',
       table: { category: 'Theme - Segment Palette' },
+    },
+    showLabels: {
+      control: 'boolean',
+      description:
+        'Draw a label on each node — along its radius (radial) or inside its rect (linear). Opt-in.',
+      table: { category: 'Layer - Labels' },
     },
     showLegend: {
       control: 'boolean',
@@ -160,7 +208,7 @@ const meta: Meta<SunburstChartInteractionStoriesComponent> = {
       table: { category: 'Layer - Tooltip' },
     },
   },
-  component: SunburstChartInteractionStoriesComponent,
+  component: NgeSunburstChartInteractionStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -170,13 +218,16 @@ const meta: Meta<SunburstChartInteractionStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<SunburstChartInteractionStoriesComponent>;
+type Story = StoryObj<NgeSunburstChartInteractionStoriesComponent>;
 
 export const Interaction: Story = {
   args: {
     endAngle: 6.28,
     innerRadius: 0,
     interactiveLegend: false,
+    labelColor: '',
+    labelFontSize: 10,
+    labelFontWeight: 600,
     layout: 'radial',
     legendPosition: 'right',
     marginBottom: 10,
@@ -184,6 +235,9 @@ export const Interaction: Story = {
     marginRight: 10,
     marginTop: 10,
     maxDepth: 0,
+    maxLabelDepth: 0,
+    minLabelAngle: 0.15,
+    minLabelSize: 12,
     padAngle: 0,
     segmentOpacity: 1,
     segmentStroke: '',
@@ -191,6 +245,7 @@ export const Interaction: Story = {
     seriesColor1: '#1E88E5',
     seriesColor2: '#43A047',
     seriesColor3: '#FB8C00',
+    showLabels: false,
     showLegend: true,
     showTooltip: true,
     startAngle: 0,
@@ -216,5 +271,31 @@ export const InteractiveLegend: Story = {
   args: {
     ...Interaction.args,
     interactiveLegend: true,
+  },
+};
+
+/**
+ * On-node labels, opened at the settings a crowded hierarchy actually needs. Each label runs
+ * ALONG its ring's radius and flips on the left hemisphere so none reads upside down; its
+ * colour is derived per node from that node's own fill (`labelColor` empty), so it stays
+ * legible across the whole palette rather than betting on one flat value.
+ *
+ * The two thresholds do different jobs, and the controls show why both exist. Drop
+ * `minLabelSize` to 0 and the inner ring picks up labels it has no arc to hold — an angle
+ * threshold alone cannot suppress those, because their sweep is generous. Raise
+ * `minLabelAngle` instead and only the narrow wedges go. `maxLabelDepth` is the blunt
+ * instrument for a deep tree: label the rings that read, draw all of them.
+ *
+ * Flip `layout` to `linear` to see the same labels centered horizontally in their icicle
+ * cells, with `minLabelSize` measured against the rect's width.
+ */
+export const LabelledNodes: Story = {
+  args: {
+    ...Interaction.args,
+    innerRadius: 0.25,
+    maxLabelDepth: 2,
+    minLabelSize: 24,
+    showLabels: true,
+    showLegend: false,
   },
 };

@@ -2,32 +2,46 @@
   [reviewStatus]="reviewStatus"
   [storybookFilePath]="storybookFilePath"
 >
-  <div class="crosshair-container">
-    <p class="crosshair-hint">
-      Move the pointer across the plot — the dashed guide snaps to the nearest date, a focus dot
-      marks each series there, and (with <strong>sharedTooltip</strong>) the shared card lists every
-      series' value at that x. Use the Storybook controls to switch the <strong>host</strong> and
-      toggle the guides / shared tooltip.
-    </p>
-    <div class="chart-wrapper">
+  <div class="nge-story-crosshair-container">
+    @if (enableGestures()) {
+      <p class="nge-story-crosshair-hint">
+        Gestures and the crosshair are both live. <strong>Drag</strong> to pan and
+        <strong>scroll</strong> to zoom — the guide, focus dots and shared card track the pointer
+        continuously, with no flicker, even though every frame re-renders the chart.
+        <strong>Shift-drag</strong> to brush-zoom: the crosshair steps aside for the selection
+        rectangle and returns when you release. <strong>Double-click</strong> resets.
+      </p>
+    } @else {
+      <p class="nge-story-crosshair-hint">
+        Move the pointer across the plot — the dashed guide snaps to the nearest date, a focus dot
+        marks each series there, and (with <strong>sharedTooltip</strong>) the shared card lists
+        every series' value at that x. Use the Storybook controls to switch the
+        <strong>host</strong> and toggle the guides / shared tooltip. Move
+        <strong>legendPosition</strong> through all four edges: the card stays beside the guide in
+        each one, including <em>top</em> and <em>left</em>, where the legend shifts the plot's
+        origin inside the chart.
+      </p>
+    }
+    <div class="nge-story-chart-wrapper">
       <nge-chart
         [config]="config()"
         [chromelessTooltip]="true"
+        (chartGesture)="transform.onChartGesture($event)"
       >
         <ng-template
           #ngeChartTooltip
           let-content
         >
-          <div class="crosshair-tip">
-            <div class="crosshair-tip__header">{{ content?.label }}</div>
+          <div class="nge-story-crosshair-tip">
+            <div class="nge-story-crosshair-tip__header">{{ content?.label }}</div>
             @for (row of rowsOf(content); track row.label) {
-              <div class="crosshair-tip__row">
+              <div class="nge-story-crosshair-tip__row">
                 <span
-                  class="crosshair-tip__swatch"
+                  class="nge-story-crosshair-tip__swatch"
                   [style.background]="row.color"
                 ></span>
-                <span class="crosshair-tip__label">{{ row.label }}</span>
-                <span class="crosshair-tip__value">{{ row.value }}</span>
+                <span class="nge-story-crosshair-tip__label">{{ row.label }}</span>
+                <span class="nge-story-crosshair-tip__value">{{ row.value }}</span>
               </div>
             }
           </div>

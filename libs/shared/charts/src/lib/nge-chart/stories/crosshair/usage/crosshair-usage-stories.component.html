@@ -2,9 +2,9 @@
   [reviewStatus]="reviewStatus"
   [storybookFilePath]="storybookFilePath"
 >
-  <div class="stories-container">
+  <div class="nge-story-container">
     <h2>Crosshair — Usage</h2>
-    <p class="intro-text">
+    <p class="nge-story-intro-text">
       The shared crosshair snaps a dashed vertical guide to the nearest datum x, marks each series
       with a focus dot, and — with <code>shared: true</code> — shows ONE tooltip listing every
       series' value at that x. The shared tooltip is a real Angular tooltip: the chart runs
@@ -15,14 +15,14 @@
     </p>
 
     <!-- EXAMPLE 1: Line host, multi-series -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>1. Line host — multi-series</h4>
-      <p class="story-description">
+      <p class="nge-story-description">
         Three series on a LINE host. Enable the crosshair on the chart's
         <code>base.crosshair</code>, then render the shared card from <code>content.rows</code> in a
         chromeless <code>#ngeChartTooltip</code> template.
       </p>
-      <div class="code-block">
+      <div class="nge-story-code-block">
         <pre>
 const cfg = createLineChartConfig({{ "{" }} data, seriesColors {{ "}" }});
 cfg.base.crosshair = {{ "{" }} x: true, shared: true {{ "}" }};
@@ -31,10 +31,9 @@ cfg.base.crosshair = {{ "{" }} x: true, shared: true {{ "}" }};
   &lt;ng-template #ngeChartTooltip let-content&gt;
     &lt;!-- header = content.label, one row per content.rows entry --&gt;
   &lt;/ng-template&gt;
-&lt;/nge-chart&gt;</pre
-        >
+&lt;/nge-chart&gt;</pre>
       </div>
-      <div class="chart-container">
+      <div class="nge-story-chart-container">
         <nge-chart
           [config]="lineMultiConfig"
           [chromelessTooltip]="true"
@@ -43,16 +42,16 @@ cfg.base.crosshair = {{ "{" }} x: true, shared: true {{ "}" }};
             #ngeChartTooltip
             let-content
           >
-            <div class="crosshair-tip">
-              <div class="crosshair-tip__header">{{ content?.label }}</div>
+            <div class="nge-story-crosshair-tip">
+              <div class="nge-story-crosshair-tip__header">{{ content?.label }}</div>
               @for (row of rowsOf(content); track row.label) {
-                <div class="crosshair-tip__row">
+                <div class="nge-story-crosshair-tip__row">
                   <span
-                    class="crosshair-tip__swatch"
+                    class="nge-story-crosshair-tip__swatch"
                     [style.background]="row.color"
                   ></span>
-                  <span class="crosshair-tip__label">{{ row.label }}</span>
-                  <span class="crosshair-tip__value">{{ row.value }}</span>
+                  <span class="nge-story-crosshair-tip__label">{{ row.label }}</span>
+                  <span class="nge-story-crosshair-tip__value">{{ row.value }}</span>
                 </div>
               }
             </div>
@@ -62,14 +61,14 @@ cfg.base.crosshair = {{ "{" }} x: true, shared: true {{ "}" }};
     </section>
 
     <!-- EXAMPLE 2: Area host, multi-series -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>2. Area host — multi-series</h4>
-      <p class="story-description">
+      <p class="nge-story-description">
         The SAME crosshair over an AREA host (overlaid fills with a top stroke). The engine-level
         crosshair sources its rows from any line/area layer, so nothing about the tooltip wiring
         changes between host types.
       </p>
-      <div class="chart-container">
+      <div class="nge-story-chart-container">
         <nge-chart
           [config]="areaMultiConfig"
           [chromelessTooltip]="true"
@@ -78,16 +77,16 @@ cfg.base.crosshair = {{ "{" }} x: true, shared: true {{ "}" }};
             #ngeChartTooltip
             let-content
           >
-            <div class="crosshair-tip">
-              <div class="crosshair-tip__header">{{ content?.label }}</div>
+            <div class="nge-story-crosshair-tip">
+              <div class="nge-story-crosshair-tip__header">{{ content?.label }}</div>
               @for (row of rowsOf(content); track row.label) {
-                <div class="crosshair-tip__row">
+                <div class="nge-story-crosshair-tip__row">
                   <span
-                    class="crosshair-tip__swatch"
+                    class="nge-story-crosshair-tip__swatch"
                     [style.background]="row.color"
                   ></span>
-                  <span class="crosshair-tip__label">{{ row.label }}</span>
-                  <span class="crosshair-tip__value">{{ row.value }}</span>
+                  <span class="nge-story-crosshair-tip__label">{{ row.label }}</span>
+                  <span class="nge-story-crosshair-tip__value">{{ row.value }}</span>
                 </div>
               }
             </div>
@@ -97,14 +96,14 @@ cfg.base.crosshair = {{ "{" }} x: true, shared: true {{ "}" }};
     </section>
 
     <!-- EXAMPLE 3: Single-series -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>3. Single series</h4>
-      <p class="story-description">
+      <p class="nge-story-description">
         With one series the shared tooltip degrades gracefully to a single row (labelled
         <code>Value</code> when the data carries no <code>seriesId</code>). The guide + focus dot
         behave exactly as in the multi-series case.
       </p>
-      <div class="chart-container">
+      <div class="nge-story-chart-container">
         <nge-chart
           [config]="lineSingleConfig"
           [chromelessTooltip]="true"
@@ -113,16 +112,169 @@ cfg.base.crosshair = {{ "{" }} x: true, shared: true {{ "}" }};
             #ngeChartTooltip
             let-content
           >
-            <div class="crosshair-tip">
-              <div class="crosshair-tip__header">{{ content?.label }}</div>
+            <div class="nge-story-crosshair-tip">
+              <div class="nge-story-crosshair-tip__header">{{ content?.label }}</div>
               @for (row of rowsOf(content); track row.label) {
-                <div class="crosshair-tip__row">
+                <div class="nge-story-crosshair-tip__row">
                   <span
-                    class="crosshair-tip__swatch"
+                    class="nge-story-crosshair-tip__swatch"
                     [style.background]="row.color"
                   ></span>
-                  <span class="crosshair-tip__label">{{ row.label }}</span>
-                  <span class="crosshair-tip__value">{{ row.value }}</span>
+                  <span class="nge-story-crosshair-tip__label">{{ row.label }}</span>
+                  <span class="nge-story-crosshair-tip__value">{{ row.value }}</span>
+                </div>
+              }
+            </div>
+          </ng-template>
+        </nge-chart>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: snap: 'datum' vs snap: 'tick' -->
+    <section class="nge-story-section">
+      <h4>4. Snapping — <code>'datum'</code> vs <code>'tick'</code></h4>
+      <p class="nge-story-description">
+        Both charts below share the SAME data on a continuous numeric x, observed every 7 days, with
+        gridlines at <code>xAxisTicks: 10</code> — so the observations never coincide with the round
+        tick values d3 picks. With <code>snap: 'datum'</code> the guide lands on a data point,
+        between gridlines. With <code>snap: 'tick'</code> it locks onto a gridline instead, using
+        the same tick geometry the axis is drawn from. The focus dots and tooltip keep describing
+        the nearest real datum either way, so the dots stay on the series and the tooltip header
+        names the datum's x — never the tick's. On a categorical x (examples 1–3) every tick already
+        sits on a node, so the two modes are identical.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>cfg.base.crosshair = {{ "{" }} x: true, shared: true, snap: 'tick' {{ "}" }};</pre>
+      </div>
+
+      <h5>snap: 'datum'</h5>
+      <div class="nge-story-chart-container">
+        <nge-chart
+          [config]="snapDatumConfig"
+          [chromelessTooltip]="true"
+        >
+          <ng-template
+            #ngeChartTooltip
+            let-content
+          >
+            <div class="nge-story-crosshair-tip">
+              <div class="nge-story-crosshair-tip__header">{{ content?.label }}</div>
+              @for (row of rowsOf(content); track row.label) {
+                <div class="nge-story-crosshair-tip__row">
+                  <span
+                    class="nge-story-crosshair-tip__swatch"
+                    [style.background]="row.color"
+                  ></span>
+                  <span class="nge-story-crosshair-tip__label">{{ row.label }}</span>
+                  <span class="nge-story-crosshair-tip__value">{{ row.value }}</span>
+                </div>
+              }
+            </div>
+          </ng-template>
+        </nge-chart>
+      </div>
+
+      <h5>snap: 'tick'</h5>
+      <div class="nge-story-chart-container">
+        <nge-chart
+          [config]="snapTickConfig"
+          [chromelessTooltip]="true"
+        >
+          <ng-template
+            #ngeChartTooltip
+            let-content
+          >
+            <div class="nge-story-crosshair-tip">
+              <div class="nge-story-crosshair-tip__header">{{ content?.label }}</div>
+              @for (row of rowsOf(content); track row.label) {
+                <div class="nge-story-crosshair-tip__row">
+                  <span
+                    class="nge-story-crosshair-tip__swatch"
+                    [style.background]="row.color"
+                  ></span>
+                  <span class="nge-story-crosshair-tip__label">{{ row.label }}</span>
+                  <span class="nge-story-crosshair-tip__value">{{ row.value }}</span>
+                </div>
+              }
+            </div>
+          </ng-template>
+        </nge-chart>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Scatter host — 2-D nearest point -->
+    <section class="nge-story-section">
+      <h4>5. Scatter host — nearest point in 2-D</h4>
+      <p class="nge-story-description">
+        Scatter y is not a function of x, so "the value at this x" is not a well-formed question —
+        the meaningful anchor is the nearest <strong>point</strong>. A scatter host therefore
+        resolves the anchor in 2-D with <code>Delaunay.find()</code>, the same triangulation the
+        scatter layer builds for its own hit-test overlay, and the guide lands on that point. Move
+        <em>vertically</em> at a fixed x and the crosshair re-anchors onto whichever series' point
+        is genuinely closest — something the line/area hosts' x-only snap cannot do.
+        <code>snap: 'tick'</code> is inert here: a tick is an x, and this anchor is a point.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+const cfg = createScatterChartConfig({{ "{" }}
+  data,
+  // the layer's own Voronoi tooltip writes to the SAME host as the
+  // crosshair — leave both on and they fight over the card
+  tooltip: {{ "{" }} enabled: false {{ "}" }},
+{{ "}" }});
+cfg.base.crosshair = {{ "{" }} x: true, shared: true {{ "}" }};</pre>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart
+          [config]="scatterConfigX"
+          [chromelessTooltip]="true"
+        >
+          <ng-template
+            #ngeChartTooltip
+            let-content
+          >
+            <div class="nge-story-crosshair-tip">
+              <div class="nge-story-crosshair-tip__header">{{ content?.label }}</div>
+              @for (row of rowsOf(content); track row.label) {
+                <div class="nge-story-crosshair-tip__row">
+                  <span
+                    class="nge-story-crosshair-tip__swatch"
+                    [style.background]="row.color"
+                  ></span>
+                  <span class="nge-story-crosshair-tip__label">{{ row.label }}</span>
+                  <span class="nge-story-crosshair-tip__value">{{ row.value }}</span>
+                </div>
+              }
+            </div>
+          </ng-template>
+        </nge-chart>
+      </div>
+
+      <h5>Both guides on the point</h5>
+      <p class="nge-story-description">
+        With <code>y: true</code> as well, the horizontal guide stops tracking the raw pointer and
+        settles on the anchor point's y — so the full crosshair rides the resolved point instead of
+        crossing at the cursor.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart
+          [config]="scatterConfigXY"
+          [chromelessTooltip]="true"
+        >
+          <ng-template
+            #ngeChartTooltip
+            let-content
+          >
+            <div class="nge-story-crosshair-tip">
+              <div class="nge-story-crosshair-tip__header">{{ content?.label }}</div>
+              @for (row of rowsOf(content); track row.label) {
+                <div class="nge-story-crosshair-tip__row">
+                  <span
+                    class="nge-story-crosshair-tip__swatch"
+                    [style.background]="row.color"
+                  ></span>
+                  <span class="nge-story-crosshair-tip__label">{{ row.label }}</span>
+                  <span class="nge-story-crosshair-tip__value">{{ row.value }}</span>
                 </div>
               }
             </div>

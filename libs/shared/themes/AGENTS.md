@@ -13,9 +13,9 @@
   `--ldg-*` in `@nge/ledger-themes`) alias these; never the reverse.
 - **Bridge files** map a bespoke shared lib's own token family onto the active persona:
   `_dlc-calendar-tokens.scss` (`--nge-calendar-*`) and `_dlc-chip-tokens.scss`. The
-  **`--chart-*` bridge for `@nge/charts` is declared per persona** inside each
+  **`--nge-chart-*` bridge for `@nge/charts` is declared per persona** inside each
   `_dlc-<persona>-<mode>.scss` — adding or renaming a chart token means touching all six.
-  Live list: `grep -rl -- '--chart-' libs/*/themes/src`.
+  Live list: `grep -rl -- '--nge-chart-' libs/*/themes/src`.
 - **Applying a persona themes CDK overlays too** only if the persona class is mirrored onto
   `<body>` — that is what the Storybook `preview.ts` and the Ledger `ThemeStore` both do. A
   persona class set on an inner element will not reach overlay content.

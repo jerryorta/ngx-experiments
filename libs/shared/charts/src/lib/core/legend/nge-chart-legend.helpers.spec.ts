@@ -1,5 +1,6 @@
 import type {
   NgeAreaDataPoint,
+  NgeGraph,
   NgeHierarchyDatum,
   NgePieDataPoint,
   NgeScatterDataPoint,
@@ -7,12 +8,14 @@ import type {
 
 import {
   DEFAULT_AREA_LAYER_THEME,
+  DEFAULT_CHORD_LAYER_THEME,
   DEFAULT_PIE_LAYER_THEME,
   DEFAULT_SCATTER_LAYER_THEME,
   DEFAULT_SUNBURST_LAYER_THEME,
 } from '../theme/nge-chart-theme.defaults';
 import {
   extractAreaChartLegendItems,
+  extractChordChartLegendItems,
   extractPieChartLegendItems,
   extractScatterChartLegendItems,
   extractSunburstChartLegendItems,
@@ -191,9 +194,21 @@ describe('extractPieChartLegendItems', () => {
     ];
 
     expect(extractPieChartLegendItems(data)).toEqual([
-      { color: defaultColors[0], id: 'Rent', label: 'Rent' },
-      { color: defaultColors[1], id: 'Food', label: 'Food' },
+      { color: defaultColors[0], id: 'Rent', label: 'Rent', value: 1800 },
+      { color: defaultColors[1], id: 'Food', label: 'Food', value: 600 },
     ]);
+  });
+
+  // ARCH-284 — the value rides along as DATA. Whether it is ever shown is the legend
+  // component's call (`showValues`), so populating it here cannot change how any existing
+  // pie legend looks.
+  it("carries each slice's value, for a legend standing in as the data table", () => {
+    const data: NgePieDataPoint[] = [
+      { label: 'USA', value: 932 },
+      { label: 'Britain', value: 211 },
+    ];
+
+    expect(extractPieChartLegendItems(data).map(item => item.value)).toEqual([932, 211]);
   });
 
   it('prefers seriesColors positionally over the theme palette', () => {
@@ -203,8 +218,8 @@ describe('extractPieChartLegendItems', () => {
     ];
 
     expect(extractPieChartLegendItems(data, ['#111111', '#222222'])).toEqual([
-      { color: '#111111', id: 'A', label: 'A' },
-      { color: '#222222', id: 'B', label: 'B' },
+      { color: '#111111', id: 'A', label: 'A', value: 1 },
+      { color: '#222222', id: 'B', label: 'B', value: 2 },
     ]);
   });
 
@@ -217,9 +232,9 @@ describe('extractPieChartLegendItems', () => {
 
     // Slice C (i=2, 2%2=0) reuses '#a', matching the renderer's `palette[d.index % length]`.
     expect(extractPieChartLegendItems(data, undefined, ['#a', '#b'])).toEqual([
-      { color: '#a', id: 'A', label: 'A' },
-      { color: '#b', id: 'B', label: 'B' },
-      { color: '#a', id: 'C', label: 'C' },
+      { color: '#a', id: 'A', label: 'A', value: 1 },
+      { color: '#b', id: 'B', label: 'B', value: 2 },
+      { color: '#a', id: 'C', label: 'C', value: 3 },
     ]);
   });
 
@@ -230,8 +245,8 @@ describe('extractPieChartLegendItems', () => {
     ];
 
     expect(extractPieChartLegendItems(data)).toEqual([
-      { color: defaultColors[0], id: 'A', label: 'A' },
-      { color: 'var(--override)', id: 'B', label: 'B' },
+      { color: defaultColors[0], id: 'A', label: 'A', value: 1 },
+      { color: 'var(--override)', id: 'B', label: 'B', value: 2 },
     ]);
   });
 
@@ -251,7 +266,7 @@ describe('extractPieChartLegendItems', () => {
     const data: NgePieDataPoint[] = [{ label: 'Solo', value: 1 }];
 
     expect(extractPieChartLegendItems(data, [])).toEqual([
-      { color: defaultColors[0], id: 'Solo', label: 'Solo' },
+      { color: defaultColors[0], id: 'Solo', label: 'Solo', value: 1 },
     ]);
   });
 });
@@ -351,5 +366,116 @@ describe('extractSunburstChartLegendItems', () => {
     expect(extractSunburstChartLegendItems(data, [])).toEqual([
       { color: defaultColors[0], id: 'Solo', label: 'Solo' },
     ]);
+  });
+});
+
+describe('extractChordChartLegendItems', () => {
+  const defaultColors = DEFAULT_CHORD_LAYER_THEME.node.colors ?? [];
+
+  it('returns one item per node (id + label) in explicit `nodes` order, colored by node index', () => {
+    const data: NgeGraph = {
+      links: [
+        { source: 'B', target: 'A', value: 5 },
+        { source: 'A', target: 'C', value: 3 },
+      ],
+      nodes: [
+        { id: 'A', label: 'Alpha' },
+        { id: 'B', label: 'Beta' },
+        { id: 'C', label: 'Gamma' },
+      ],
+    };
+
+    expect(extractChordChartLegendItems(data)).toEqual([
+      { color: defaultColors[0], id: 'A', label: 'Alpha' },
+      { color: defaultColors[1], id: 'B', label: 'Beta' },
+      { color: defaultColors[2], id: 'C', label: 'Gamma' },
+    ]);
+  });
+
+  it('falls back to the id as the label when a node has none', () => {
+    const data: NgeGraph = { links: [], nodes: [{ id: 'solo' }] };
+
+    expect(extractChordChartLegendItems(data)).toEqual([
+      { color: defaultColors[0], id: 'solo', label: 'solo' },
+    ]);
+  });
+
+  it('derives node order from first-seen link endpoints when `nodes` is omitted', () => {
+    const data: NgeGraph = {
+      links: [
+        { source: 'B', target: 'A', value: 5 },
+        { source: 'A', target: 'C', value: 3 },
+      ],
+    };
+
+    expect(extractChordChartLegendItems(data).map(item => item.id)).toEqual(['B', 'A', 'C']);
+  });
+
+  it('prefers seriesColors positionally over the theme palette', () => {
+    const data: NgeGraph = { links: [], nodes: [{ id: 'A' }, { id: 'B' }] };
+
+    expect(extractChordChartLegendItems(data, ['#111111', '#222222'])).toEqual([
+      { color: '#111111', id: 'A', label: 'A' },
+      { color: '#222222', id: 'B', label: 'B' },
+    ]);
+  });
+
+  it('cycles seriesColors with modulo, matching the renderer (legend↔renderer parity)', () => {
+    const data: NgeGraph = { links: [], nodes: [{ id: 'A' }, { id: 'B' }, { id: 'C' }] };
+
+    // Node C (i=2, 2%2=0) reuses '#f00', matching the renderer's `palette[i % palette.length]`.
+    expect(extractChordChartLegendItems(data, ['#f00', '#00f'])).toEqual([
+      { color: '#f00', id: 'A', label: 'A' },
+      { color: '#00f', id: 'B', label: 'B' },
+      { color: '#f00', id: 'C', label: 'C' },
+    ]);
+  });
+
+  it('uses an explicit theme palette when no seriesColors are supplied', () => {
+    const data: NgeGraph = { links: [], nodes: [{ id: 'A' }, { id: 'B' }] };
+
+    expect(extractChordChartLegendItems(data, undefined, ['#aaaaaa', '#bbbbbb'])).toEqual([
+      { color: '#aaaaaa', id: 'A', label: 'A' },
+      { color: '#bbbbbb', id: 'B', label: 'B' },
+    ]);
+  });
+
+  it('cycles the theme palette with modulo when there are more nodes than colors', () => {
+    const data: NgeGraph = { links: [], nodes: [{ id: 'A' }, { id: 'B' }, { id: 'C' }] };
+
+    expect(extractChordChartLegendItems(data, undefined, ['#a', '#b'])).toEqual([
+      { color: '#a', id: 'A', label: 'A' },
+      { color: '#b', id: 'B', label: 'B' },
+      { color: '#a', id: 'C', label: 'C' },
+    ]);
+  });
+
+  it('honors a per-node color override above the palette', () => {
+    const data: NgeGraph = {
+      links: [],
+      nodes: [{ id: 'A' }, { color: 'var(--override)', id: 'B' }],
+    };
+
+    expect(extractChordChartLegendItems(data)).toEqual([
+      { color: defaultColors[0], id: 'A', label: 'A' },
+      { color: 'var(--override)', id: 'B', label: 'B' },
+    ]);
+  });
+
+  it('treats an empty seriesColors as unset (falls through to the theme palette)', () => {
+    const data: NgeGraph = { links: [], nodes: [{ id: 'Solo' }] };
+
+    expect(extractChordChartLegendItems(data, [])).toEqual([
+      { color: defaultColors[0], id: 'Solo', label: 'Solo' },
+    ]);
+  });
+
+  it("carries no value — a node's magnitude belongs to the layout, not the input datum", () => {
+    const data: NgeGraph = {
+      links: [{ source: 'A', target: 'B', value: 10 }],
+      nodes: [{ id: 'A', value: 999 }, { id: 'B' }],
+    };
+
+    expect(extractChordChartLegendItems(data).every(item => item.value === undefined)).toBe(true);
   });
 });

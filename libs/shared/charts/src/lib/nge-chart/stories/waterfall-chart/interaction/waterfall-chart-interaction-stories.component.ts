@@ -12,15 +12,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'waterfall-chart-interaction-stories',
+    class: 'nge-waterfall-chart-interaction-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'waterfall-chart-interaction-stories',
+  selector: 'nge-waterfall-chart-interaction-stories',
   standalone: true,
   styleUrl: './waterfall-chart-interaction-stories.component.scss',
   templateUrl: './waterfall-chart-interaction-stories.component.html',
 })
-export class WaterfallChartInteractionStoriesComponent {
+export class NgeWaterfallChartInteractionStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/waterfall-chart/interaction';
 

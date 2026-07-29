@@ -22,15 +22,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'overlay-usage-stories',
+    class: 'nge-overlay-usage-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'overlay-usage-stories',
+  selector: 'nge-overlay-usage-stories',
   standalone: true,
   styleUrl: './overlay-usage-stories.component.scss',
   templateUrl: './overlay-usage-stories.component.html',
 })
-export class OverlayUsageStoriesComponent {
+export class NgeOverlayUsageStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/overlay/usage';
 

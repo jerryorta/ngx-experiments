@@ -115,8 +115,8 @@ describe('createBumpChartConfig', () => {
     const config = createBumpChartConfig({ data: DATA, legend: { enabled: true } });
 
     expect(config.legend?.items).toEqual([
-      { color: 'var(--chart-primary)', id: 'North', label: 'North' },
-      { color: 'var(--chart-secondary)', id: 'South', label: 'South' },
+      { color: 'var(--nge-chart-primary)', id: 'North', label: 'North' },
+      { color: 'var(--nge-chart-secondary)', id: 'South', label: 'South' },
     ]);
   });
 
@@ -129,8 +129,8 @@ describe('createBumpChartConfig', () => {
     });
 
     expect(config.legend?.items).toEqual([
-      { color: 'var(--chart-primary)', id: 'North', label: 'North' },
-      { color: 'var(--chart-secondary)', id: 'South', label: 'South' },
+      { color: 'var(--nge-chart-primary)', id: 'North', label: 'North' },
+      { color: 'var(--nge-chart-secondary)', id: 'South', label: 'South' },
     ]);
   });
 });

@@ -22,22 +22,22 @@ const REVENUE: NgeWaterfallDataPoint[] = [
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'waterfall-chart-theming',
+    class: 'nge-waterfall-chart-theming',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'waterfall-chart-theming',
+  selector: 'nge-waterfall-chart-theming',
   standalone: true,
   styleUrl: './waterfall-chart-theming.component.scss',
   templateUrl: './waterfall-chart-theming.component.html',
 })
-export class WaterfallChartThemingComponent {
+export class NgeWaterfallChartThemingComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/waterfall-chart/theming';
 
   sampleData: NgeWaterfallDataPoint[] = REVENUE;
 
   // 1. Default — rise / fall / total pull from the theme's `waterfall` slice
-  // (semantic green / red rise / fall + a `var(--chart-primary)` total).
+  // (semantic green / red rise / fall + a `var(--nge-chart-primary)` total).
   defaultConfig = createWaterfallChartConfig({
     data: this.sampleData,
     showLabels: true,

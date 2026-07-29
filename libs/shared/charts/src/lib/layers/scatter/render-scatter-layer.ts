@@ -349,7 +349,7 @@ function renderSeries(
 /**
  * Render one series' scatter points with a D3 join.
  * Fill + stroke are applied synchronously via `.style()` (never `.attr()`) so the
- * `var(--chart-*)` palette resolves — a `var()` in an SVG presentation attribute
+ * `var(--nge-chart-*)` palette resolves — a `var()` in an SVG presentation attribute
  * fails silently. Geometry (`cx`/`cy`/`r`) and `opacity` animate in.
  */
 function renderPoints(

@@ -36,29 +36,29 @@ function makeSamples(
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'histogram-chart-theming',
+    class: 'nge-histogram-chart-theming',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'histogram-chart-theming',
+  selector: 'nge-histogram-chart-theming',
   standalone: true,
   styleUrl: './histogram-chart-theming.component.scss',
   templateUrl: './histogram-chart-theming.component.html',
 })
-export class HistogramChartThemingComponent {
+export class NgeHistogramChartThemingComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/histogram-chart/theming';
 
   sampleData: NgeHistogramDataPoint[] = makeSamples(140, 50, 80, 42);
 
-  // 1. Default — bars fill `--chart-primary`, the rootogram curve reads
-  // `--chart-secondary`, and count labels read `--chart-on-surface`.
+  // 1. Default — bars fill `--nge-chart-primary`, the rootogram curve reads
+  // `--nge-chart-secondary`, and count labels read `--nge-chart-on-surface`.
   defaultConfig = createHistogramChartConfig({
     data: this.sampleData,
     showLabels: true,
     xAxisLabel: 'Value',
   });
 
-  // 2. Bar fill — override `theme.histogram.bar.color` (the `--chart-primary`
+  // 2. Bar fill — override `theme.histogram.bar.color` (the `--nge-chart-primary`
   // slot) with a custom green.
   barFillConfig: NgeChartConfig = {
     ...createHistogramChartConfig({ data: this.sampleData, xAxisLabel: 'Value' }),
@@ -75,7 +75,7 @@ export class HistogramChartThemingComponent {
   };
 
   // 4. Rootogram curve + nodes — override `theme.histogram.curve.color` and
-  // `theme.histogram.node.color` (both the `--chart-secondary` slot) so the
+  // `theme.histogram.node.color` (both the `--nge-chart-secondary` slot) so the
   // fitted normal curve reads a bold red dash and its per-bin nodes match.
   curveConfig: NgeChartConfig = {
     ...createHistogramChartConfig({
@@ -93,7 +93,7 @@ export class HistogramChartThemingComponent {
   };
 
   // 5. Label color — override `theme.histogram.label.color` (the
-  // `--chart-on-surface` slot) plus size / weight.
+  // `--nge-chart-on-surface` slot) plus size / weight.
   labelConfig: NgeChartConfig = {
     ...createHistogramChartConfig({
       binCount: 8,

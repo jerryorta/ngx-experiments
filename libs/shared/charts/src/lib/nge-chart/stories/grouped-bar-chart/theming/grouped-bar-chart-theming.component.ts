@@ -1,6 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, ViewEncapsulation } from '@angular/core';
-import { NgeStorybookReviewContainerComponent, REVIEW_STATUS } from '@nge/storybook';
+import {
+  NgeStorybookReviewContainerComponent,
+  REVIEW_STATUS,
+} from '@nge/storybook';
 
 import type { NgeChartConfig, NgeGroupedBarDataPoint } from '../../../../core/config';
 
@@ -18,7 +21,7 @@ import { NgeChartComponent } from '../../../nge-chart.component';
   styleUrl: './grouped-bar-chart-theming.component.scss',
   templateUrl: './grouped-bar-chart-theming.component.html',
 })
-export class GroupedBarChartThemingComponent {
+export class NgeGroupedBarChartThemingComponent {
   reviewStatus = REVIEW_STATUS.FINAL;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/grouped-bar-chart/theming';
 

@@ -2,23 +2,23 @@
   [reviewStatus]="reviewStatus"
   [storybookFilePath]="storybookFilePath"
 >
-  <div class="interaction-container">
-    <div class="interaction-row">
+  <div class="nge-story-interaction-container">
+    <div class="nge-story-interaction-row">
       <button
         type="button"
-        class="interaction-btn interaction-btn--primary"
+        class="nge-story-interaction-btn nge-story-interaction-btn--primary"
         (click)="randomizeData()"
       >
         Randomize Data
       </button>
       @if (enableGestures()) {
-        <span class="interaction-hint">
+        <span class="nge-story-interaction-hint">
           Wheel to zoom · drag to pan · shift-drag to brush-zoom · double-click to reset. The
           category axis windows by whole categories; the value axis auto-fits.
         </span>
       }
     </div>
-    <div class="chart-wrapper">
+    <div class="nge-story-chart-wrapper">
       <nge-chart
         [config]="config()"
         (chartGesture)="transform.onChartGesture($event)"

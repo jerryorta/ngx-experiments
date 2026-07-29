@@ -1,0 +1,38 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  @let sideBySide = legendOrientation() === "vertical";
+
+  <div class="nge-story-highlight-container">
+    <p class="nge-story-highlight-caption">
+      The pie carries no labels — the legend is the data table. Click a row to emphasise its slice;
+      click again to release it. Every arc stays exactly where it is, which is what separates this
+      from a legend that filters slices out and regrows the survivors.
+    </p>
+
+    <div
+      class="nge-story-highlight-layout"
+      [class.nge-story-highlight-layout--side-by-side]="sideBySide"
+    >
+      <div class="nge-story-highlight-chart">
+        <nge-chart [config]="config()" />
+      </div>
+
+      <div class="nge-story-highlight-legend">
+        <nge-chart-legend
+          [items]="legendItems()"
+          [interactive]="true"
+          [orientation]="legendOrientation()"
+          [layout]="legendLayout()"
+          [showValues]="true"
+          [formatValue]="formatValue"
+          [showClearAction]="showClearAction()"
+          swatchShape="square"
+          (itemClick)="onLegendItemClick($event)"
+          (clearAction)="onClearHighlight()"
+        />
+      </div>
+    </div>
+  </div>
+</nge-storybook-review-container>

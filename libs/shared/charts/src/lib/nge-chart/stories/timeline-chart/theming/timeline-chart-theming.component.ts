@@ -13,15 +13,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'timeline-chart-theming',
+    class: 'nge-timeline-chart-theming',
   },
   imports: [CommonModule, NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'timeline-chart-theming',
+  selector: 'nge-timeline-chart-theming',
   standalone: true,
   styleUrl: './timeline-chart-theming.component.scss',
   templateUrl: './timeline-chart-theming.component.html',
 })
-export class TimelineChartThemingComponent {
+export class NgeTimelineChartThemingComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/timeline-chart/theming';
 

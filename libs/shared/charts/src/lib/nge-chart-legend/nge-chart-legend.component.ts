@@ -23,6 +23,10 @@ import type { NgeLegendItem } from '../core/legend';
  * `itemClick` — pair with a transform (e.g. NgeScatterChartTransform) to
  * drive series selection. Item `opacity`/`selected` reflect that state.
  *
+ * `showValues` adds each item's magnitude beside its label, which is what lets a
+ * chart drop its on-mark labels entirely and let the legend carry the numbers;
+ * `showClearAction` appends a button for releasing the caller's selection.
+ *
  * @example
  * <nge-chart-legend [items]="legendItems" />
  * <nge-chart-legend [items]="legendItems" orientation="vertical" swatchShape="line" />
@@ -62,7 +66,28 @@ export class NgeChartLegendComponent {
    * `orientation: 'vertical'` (already a single left-aligned column).
    */
   readonly layout = input<'flow' | 'grid'>('flow');
+  /**
+   * Render each item's `value` beside its label, turning the legend into the chart's data
+   * table. Off by default so populating `value` upstream never changes an existing legend.
+   * The pairing it exists for is a pie with `showLabels: false`, where the numbers have
+   * nowhere else to live.
+   */
+  readonly showValues = input<boolean>(false);
+  /** How a `value` is rendered when `showValues` is set. Default: the raw number. */
+  readonly formatValue = input<(value: number) => string>(value => String(value));
+  /**
+   * Append a button that emits `clearAction`, for releasing whatever selection the caller
+   * is tracking. Only meaningful alongside `interactive`. Default: false.
+   */
+  readonly showClearAction = input<boolean>(false);
+  /**
+   * Text for the clear button. Defaults to "Clear highlight" rather than "show all" /
+   * "unselect all", both of which imply entries were hidden — this legend never hides one.
+   */
+  readonly clearActionLabel = input<string>('Clear highlight');
 
   /** Emitted when an interactive legend entry is clicked */
   readonly itemClick = output<NgeLegendItem>();
+  /** Emitted when the `showClearAction` button is pressed */
+  readonly clearAction = output<void>();
 }

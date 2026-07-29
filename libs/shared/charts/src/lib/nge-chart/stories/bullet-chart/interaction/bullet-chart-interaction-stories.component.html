@@ -2,32 +2,32 @@
   [reviewStatus]="reviewStatus"
   [storybookFilePath]="storybookFilePath"
 >
-  <div class="stories-container">
+  <div class="nge-story-container">
     <h2>Bullet Chart - Interactive Controls</h2>
-    <p class="intro-text">
+    <p class="nge-story-intro-text">
       Use the Storybook controls panel to adjust bullet chart configuration in real-time. All
       changes are applied immediately to the chart below.
     </p>
 
-    <div class="interaction-row">
+    <div class="nge-story-interaction-row">
       <button
         type="button"
-        class="interaction-btn interaction-btn--primary"
+        class="nge-story-interaction-btn nge-story-interaction-btn--primary"
         (click)="randomizeProgress()"
       >
         Randomize Progress
       </button>
     </div>
 
-    <div class="chart-container">
+    <div class="nge-story-chart-container">
       <nge-chart [config]="config()">
         <ng-template
           #ngeChartTooltip
           let-content
         >
-          <div class="bullet-tooltip-content">
-            <div class="bullet-tooltip-label">{{ content?.label }}</div>
-            <div class="bullet-tooltip-value">
+          <div class="nge-story-bullet-tooltip-content">
+            <div class="nge-story-bullet-tooltip-label">{{ content?.label }}</div>
+            <div class="nge-story-bullet-tooltip-value">
               {{ content?.extra?.progress }}<br />
               ({{
                 ((content?.extra?.progress - content?.extra?.min) /
@@ -40,7 +40,7 @@
       </nge-chart>
     </div>
 
-    <div class="controls-info">
+    <div class="nge-story-controls-info">
       <h4>Available Controls</h4>
       <ul>
         <li><strong>Data:</strong> Adjust progress, min, max, and color</li>

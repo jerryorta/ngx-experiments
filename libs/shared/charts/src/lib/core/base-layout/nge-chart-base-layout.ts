@@ -305,7 +305,7 @@ export function createBaseLayout(target: HTMLElement | ShadowRoot): NgeChartBase
         .attr('x2', d => d)
         .attr('y1', 0)
         .attr('y2', dimensions.boundedHeight)
-        .style('stroke', mergedTheme.grid.lineColor ?? 'var(--chart-outline-variant)')
+        .style('stroke', mergedTheme.grid.lineColor ?? 'var(--nge-chart-outline-variant)')
         .style('stroke-width', mergedTheme.grid.lineWidth ?? 1)
         .style('stroke-dasharray', mergedTheme.grid.lineDash ?? '2 2');
       xLines.exit().remove();
@@ -330,7 +330,7 @@ export function createBaseLayout(target: HTMLElement | ShadowRoot): NgeChartBase
         .attr('x2', dimensions.boundedWidth)
         .attr('y1', d => d)
         .attr('y2', d => d)
-        .style('stroke', mergedTheme.grid.lineColor ?? 'var(--chart-outline-variant)')
+        .style('stroke', mergedTheme.grid.lineColor ?? 'var(--nge-chart-outline-variant)')
         .style('stroke-width', mergedTheme.grid.lineWidth ?? 1)
         .style('stroke-dasharray', mergedTheme.grid.lineDash ?? '2 2');
       yLines.exit().remove();
@@ -558,7 +558,7 @@ export function createBaseLayout(target: HTMLElement | ShadowRoot): NgeChartBase
     // the focus axis's fade), so the top/right frame lines stay visible at 100%
     // when the focus axis labels are hidden. When the focus axis IS visible the
     // border coincides with its baseline (identical line → no doubling).
-    const borderStroke = mergedTheme.axis.lineColor ?? 'var(--chart-outline-variant)';
+    const borderStroke = mergedTheme.axis.lineColor ?? 'var(--nge-chart-outline-variant)';
     const borderWidth = `${mergedTheme.axis.lineWidth ?? 1}px`;
 
     if (config.xRangeAxis) {
@@ -613,7 +613,7 @@ export function createBaseLayout(target: HTMLElement | ShadowRoot): NgeChartBase
         .attr('y', dimensions.boundedHeight + config.margin.bottom - 2 + xLabelTierOffset)
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'auto')
-        .style('fill', labelTheme.labelColor ?? 'var(--chart-on-surface-variant)')
+        .style('fill', labelTheme.labelColor ?? 'var(--nge-chart-on-surface-variant)')
         .style('font-size', `${labelTheme.labelFontSize ?? 11}px`)
         .style('font-weight', String(labelTheme.labelFontWeight ?? 500))
         .style('pointer-events', 'none')
@@ -641,7 +641,7 @@ export function createBaseLayout(target: HTMLElement | ShadowRoot): NgeChartBase
         .attr('x', -dimensions.boundedHeight / 2)
         .attr('y', yLabelX)
         .attr('text-anchor', 'middle')
-        .style('fill', labelTheme.labelColor ?? 'var(--chart-on-surface-variant)')
+        .style('fill', labelTheme.labelColor ?? 'var(--nge-chart-on-surface-variant)')
         .style('font-size', `${labelTheme.labelFontSize ?? 11}px`)
         .style('font-weight', String(labelTheme.labelFontWeight ?? 500))
         .style('pointer-events', 'none')
@@ -658,7 +658,7 @@ export function createBaseLayout(target: HTMLElement | ShadowRoot): NgeChartBase
       }
       // Use custom y2 axis label color if specified, otherwise fall back to theme
       const y2LabelColor =
-        config.y2AxisLabelColor || labelTheme.labelColor || 'var(--chart-on-surface-variant)';
+        config.y2AxisLabelColor || labelTheme.labelColor || 'var(--nge-chart-on-surface-variant)';
       y2AxisLabelEl
         .attr('transform', 'rotate(90)')
         .attr('x', dimensions.boundedHeight / 2)

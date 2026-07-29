@@ -26,7 +26,7 @@ export interface ParetoChartPresetOptions {
    */
   animationMs?: number;
 
-  /** Uniform bar fill. Falls back to the bar theme (`var(--chart-primary)`). */
+  /** Uniform bar fill. Falls back to the bar theme (`var(--nge-chart-primary)`). */
   barColor?: string;
 
   /** Padding between bars (0-1). Default 0.2. */
@@ -38,7 +38,7 @@ export interface ParetoChartPresetOptions {
   /** Category values — rendered as individual (zero-anchored) bars. */
   data: NgeBarDataPoint[];
 
-  /** Color of the cumulative % line. Default `var(--chart-secondary)`. */
+  /** Color of the cumulative % line. Default `var(--nge-chart-secondary)`. */
   lineColor?: string;
 
   /** Chart margin configuration. */
@@ -99,7 +99,7 @@ export function createParetoChartConfig(options: ParetoChartPresetOptions): NgeC
     barPadding = 0.2,
     barRadius,
     data,
-    lineColor = 'var(--chart-secondary)',
+    lineColor = 'var(--nge-chart-secondary)',
     margin = { bottom: 45, left: 55, right: 60, top: 20 },
     onBarClick,
     showLabels = false,

@@ -23,6 +23,7 @@ interface ContextOptions {
   levels?: number;
   onClick?: jest.Mock;
   onTooltip?: jest.Mock;
+  radiusRatio?: number;
   render?: NgeRadarLayerConfig['render'];
   seriesColors?: string[];
   startAngle?: number;
@@ -80,6 +81,7 @@ function createContext(
     innerRadius: options.innerRadius,
     levels: options.levels,
     onClick: options.onClick,
+    radiusRatio: options.radiusRatio,
     render: options.render,
     renderer: renderRadarLayer,
     seriesColors: options.seriesColors,
@@ -159,6 +161,37 @@ function seriesLine(g: SVGGElement, seriesId: string): SVGPathElement {
 const settle = (ms = 400): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
 
 describe('renderRadarLayer', () => {
+  describe('radiusRatio', () => {
+    it('scales the web down without distorting it', () => {
+      const full = createContext(RADAR);
+      const small = createContext(RADAR, { radiusRatio: 0.5 });
+
+      renderRadarLayer(full.context);
+      renderRadarLayer(small.context);
+
+      // A spoke runs from the center out to `outerRadius`, so its endpoint distance IS the
+      // radius: 100 on the square fixture, 50 once halved.
+      const spokeLength = (g: SVGGElement): number => {
+        const line = g.querySelector<SVGLineElement>('.nge-radar-axis');
+        return Math.hypot(Number(line?.getAttribute('x2')), Number(line?.getAttribute('y2')));
+      };
+      expect(spokeLength(full.g)).toBeCloseTo(100, 6);
+      expect(spokeLength(small.g)).toBeCloseTo(50, 6);
+    });
+
+    it('fills the plot when omitted', () => {
+      const omitted = createContext(RADAR);
+      const explicit = createContext(RADAR, { radiusRatio: 1 });
+
+      renderRadarLayer(omitted.context);
+      renderRadarLayer(explicit.context);
+
+      expect(omitted.g.querySelector('.nge-radar-axis')?.getAttribute('y2')).toBe(
+        explicit.g.querySelector('.nge-radar-axis')?.getAttribute('y2')
+      );
+    });
+  });
+
   afterEach(() => {
     document.body.innerHTML = '';
   });
@@ -405,8 +438,8 @@ describe('renderRadarLayer', () => {
       renderRadarLayer(context);
 
       // Series order (s1 then s2) → palette[0], palette[1] — stable by series index.
-      expect(styleOf(seriesLine(g, 's1'), 'stroke')).toBe('var(--chart-primary)');
-      expect(styleOf(seriesLine(g, 's2'), 'stroke')).toBe('var(--chart-secondary)');
+      expect(styleOf(seriesLine(g, 's1'), 'stroke')).toBe('var(--nge-chart-primary)');
+      expect(styleOf(seriesLine(g, 's2'), 'stroke')).toBe('var(--nge-chart-secondary)');
     });
 
     it('honors the config seriesColors palette', () => {
@@ -552,7 +585,7 @@ describe('renderRadarLayer', () => {
       // Single series, 5 dimensions → 5 dots, colored with the series color.
       expect(g.querySelectorAll('.nge-radar-vertex')).toHaveLength(5);
       expect(styleOf(g.querySelector('.nge-radar-vertex') as Element, 'fill')).toBe(
-        'var(--chart-primary)'
+        'var(--nge-chart-primary)'
       );
     });
 
@@ -571,7 +604,7 @@ describe('renderRadarLayer', () => {
 
       renderRadarLayer(context);
 
-      expect(styleOf(seriesLine(g, '__default__'), 'stroke')).toBe('var(--chart-primary)');
+      expect(styleOf(seriesLine(g, '__default__'), 'stroke')).toBe('var(--nge-chart-primary)');
     });
   });
 });

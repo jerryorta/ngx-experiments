@@ -1,0 +1,134 @@
+// =============================================================================
+// Chart Design Tokens — Default Values (light theme)
+//
+// This file defines the visual token contract for the nge-chart library.
+// All --nge-chart-* tokens are set here with sensible light-theme defaults so
+// charts render correctly even when no domain theme is active.
+//
+// Domain themes (MW, CG, etc.) override these defaults by re-declaring the
+// same custom properties inside their theme class selectors.
+//
+// ORDER MATTERS, specificity does not: `:root` is a pseudo-class, so it scores
+// (0,1,0) — exactly the same as a single class like `.mw-light`. A tie is broken
+// by source order, so a host MUST load this file BEFORE its theme mixins or the
+// defaults here will override the theme instead of the other way round.
+//
+// To add chart support to a new theme, map every token listed here to an
+// appropriate value from that theme's own token set.
+// =============================================================================
+
+:root {
+  // ---------------------------------------------------------------------------
+  // Surface tokens
+  // Used for: chart backgrounds, card panels, container fills
+  // ---------------------------------------------------------------------------
+
+  // Primary background — the main surface behind a chart
+  --nge-chart-surface: #ffffff;
+
+  // Alternate/muted background — used for info boxes, highlighted story sections
+  --nge-chart-surface-variant: #f5f5f5;
+
+  // Container background — used for code blocks, inline code highlights
+  --nge-chart-surface-container: #eeeeee;
+
+  // Lighter container — used where a subtler container fill is needed
+  --nge-chart-surface-container-low: #f8f8f8;
+
+  // Darkest container — used for bullet/diverging chart background bars
+  --nge-chart-surface-container-highest: #e0e0e0;
+
+  // Inverted surface — background for elements that invert (e.g. dark tooltips on light themes)
+  --nge-chart-inverse-surface: #333333;
+
+  // Text on inverted surface — e.g. label text inside a dark tooltip bubble
+  --nge-chart-inverse-on-surface: #ffffff;
+
+  // ---------------------------------------------------------------------------
+  // Content tokens
+  // Used for: axis labels, tick marks, data labels, legend text
+  // ---------------------------------------------------------------------------
+
+  // Primary content color — main axis labels, value labels, legend text
+  --nge-chart-on-surface: #1d1b20;
+
+  // Secondary/muted content — axis descriptions, helper text, dimmed labels
+  --nge-chart-on-surface-variant: #666666;
+
+  // ---------------------------------------------------------------------------
+  // Absolute tokens — deliberately NOT theme-relative
+  // Used for: marks drawn ON TOP of a saturated data fill (on-arc pie labels,
+  // in-bar value labels, on-cell heatmap text)
+  //
+  // Every semantic token flips between light and dark: --nge-chart-on-surface
+  // goes near-black on a light surface, --nge-chart-on-primary resolves to
+  // #090b0d in the MW dark bridge, and --nge-chart-inverse-on-surface maps to
+  // each theme's own surface. That behaviour is correct for text on the PAGE,
+  // and wrong for text on a slice/bar/cell, whose backdrop comes from the series
+  // palette rather than the surface. These two stay put so that text has a
+  // constant, predictable backdrop contrast.
+  //
+  // A theme bridge SHOULD leave these alone; remap them only to shift an entire
+  // brand off pure white / pure black.
+  // ---------------------------------------------------------------------------
+
+  // Absolute white — default color for labels sitting on a filled data mark
+  --nge-chart-white: #ffffff;
+
+  // Absolute black — the counterpart for light-filled marks
+  --nge-chart-black: #000000;
+
+  // ---------------------------------------------------------------------------
+  // Data-label typography tokens
+  // Used for: the text marks layers draw on their own data (not axis/legend text)
+  // ---------------------------------------------------------------------------
+
+  // Data-label size — on-arc / on-bar / on-cell label text
+  --nge-chart-label-font-size: 10px;
+
+  // Data-label weight — semibold, so short labels stay legible over a fill
+  --nge-chart-label-font-weight: 600;
+
+  // ---------------------------------------------------------------------------
+  // Border tokens
+  // Used for: axis lines, grid lines, chart card outlines
+  // ---------------------------------------------------------------------------
+
+  // Primary border — axis domain lines, card dividers
+  --nge-chart-outline: #79747e;
+
+  // Subtle border — grid lines, low-contrast card outlines, chart containers
+  --nge-chart-outline-variant: #e0e0e0;
+
+  // ---------------------------------------------------------------------------
+  // Accent tokens
+  // Used for: data series colors, interactive highlights, statistical markers
+  //
+  // Series color assignment:
+  //   Series 1 / primary accent   → --nge-chart-primary
+  //   Series 2 / secondary accent → --nge-chart-secondary  (e.g. median lines)
+  //   Series 3 / tertiary accent  → --nge-chart-tertiary   (e.g. mean lines)
+  //   Error / failure state       → --nge-chart-error
+  // ---------------------------------------------------------------------------
+
+  // Primary data series color — bar fills, line strokes, area fills, progress bars
+  --nge-chart-primary: #1976d2;
+
+  // Primary hover/selected state — hovered bars, selected data points
+  --nge-chart-primary-container: #bbdefb;
+
+  // Text on primary-colored elements — labels drawn inside primary-colored shapes
+  --nge-chart-on-primary: #ffffff;
+
+  // Second data series — median reference lines, second line in multi-series charts
+  --nge-chart-secondary: #625b71;
+
+  // Secondary container / hover state — secondary element backgrounds
+  --nge-chart-secondary-container: #e8def8;
+
+  // Third data series — mean reference lines, third line in multi-series charts
+  --nge-chart-tertiary: #7d5260;
+
+  // Error / failure state — error indicators, out-of-range markers
+  --nge-chart-error: #b3261e;
+}

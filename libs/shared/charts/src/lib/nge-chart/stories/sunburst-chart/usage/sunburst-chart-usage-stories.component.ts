@@ -13,15 +13,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'sunburst-chart-usage-stories',
+    class: 'nge-sunburst-chart-usage-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'sunburst-chart-usage-stories',
+  selector: 'nge-sunburst-chart-usage-stories',
   standalone: true,
   styleUrl: './sunburst-chart-usage-stories.component.scss',
   templateUrl: './sunburst-chart-usage-stories.component.html',
 })
-export class SunburstChartUsageStoriesComponent {
+export class NgeSunburstChartUsageStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/sunburst-chart/usage';
 
@@ -137,6 +137,32 @@ export class SunburstChartUsageStoriesComponent {
       tooltip: { enabled: true },
     })
   );
+
+  // ============================================
+  // EXAMPLE 8: On-arc Labels
+  // ============================================
+  labelledConfig = createSunburstChartConfig({
+    data: this.budgetHierarchy,
+    innerRadius: 0.25,
+    // The outer ring is too thin to hold text, and an inner node needs real arc — not just
+    // a wide angle — before a label fits.
+    maxLabelDepth: 2,
+    minLabelSize: 24,
+    showLabels: true,
+    tooltip: { enabled: true },
+  });
+
+  // ============================================
+  // EXAMPLE 9: In-rect Labels (icicle)
+  // ============================================
+  labelledIcicleConfig = createSunburstChartConfig({
+    data: this.budgetHierarchy,
+    // Internal nodes report their SUMMED value, so the formatter works at every depth.
+    formatLabel: (d: NgeHierarchyDatum) => `${d.label} · $${d.value}`,
+    layout: 'linear',
+    minLabelSize: 70,
+    showLabels: true,
+  });
 
   randomizeData(): void {
     this.dynamicData.set(this.rerollLeaves(this.budgetHierarchy));
