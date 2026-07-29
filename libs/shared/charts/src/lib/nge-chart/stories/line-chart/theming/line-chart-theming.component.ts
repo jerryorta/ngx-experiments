@@ -13,15 +13,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'line-chart-theming',
+    class: 'nge-line-chart-theming',
   },
   imports: [CommonModule, NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'line-chart-theming',
+  selector: 'nge-line-chart-theming',
   standalone: true,
   styleUrl: './line-chart-theming.component.scss',
   templateUrl: './line-chart-theming.component.html',
 })
-export class LineChartThemingComponent {
+export class NgeLineChartThemingComponent {
   reviewStatus = REVIEW_STATUS.FINAL;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/line-chart/theming';
 

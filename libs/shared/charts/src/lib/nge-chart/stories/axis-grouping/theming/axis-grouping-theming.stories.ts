@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { AxisGroupingThemingComponent } from './axis-grouping-theming.component';
+import { NgeAxisGroupingThemingComponent } from './axis-grouping-theming.component';
 
-const meta: Meta<AxisGroupingThemingComponent> = {
-  component: AxisGroupingThemingComponent,
+const meta: Meta<NgeAxisGroupingThemingComponent> = {
+  component: NgeAxisGroupingThemingComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<AxisGroupingThemingComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<AxisGroupingThemingComponent>;
+type Story = StoryObj<NgeAxisGroupingThemingComponent>;
 
 export const Theming: Story = {
   args: {},

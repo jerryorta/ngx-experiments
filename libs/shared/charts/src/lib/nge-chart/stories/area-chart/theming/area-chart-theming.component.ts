@@ -20,15 +20,15 @@ function monthlySeries(seriesId: string, values: number[]): NgeAreaDataPoint[] {
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'area-chart-theming',
+    class: 'nge-area-chart-theming',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'area-chart-theming',
+  selector: 'nge-area-chart-theming',
   standalone: true,
   styleUrl: './area-chart-theming.component.scss',
   templateUrl: './area-chart-theming.component.html',
 })
-export class AreaChartThemingComponent {
+export class NgeAreaChartThemingComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/area-chart/theming';
 
@@ -39,7 +39,7 @@ export class AreaChartThemingComponent {
     ...monthlySeries('Referral', [6, 8, 7, 10, 12, 14]),
   ];
 
-  // Default — palette comes from the theme's `area.fill.colors` (var(--chart-*)).
+  // Default — palette comes from the theme's `area.fill.colors` (var(--nge-chart-*)).
   defaultConfig = createAreaChartConfig({
     data: this.sampleData,
     legend: { enabled: true },
@@ -179,9 +179,9 @@ export class AreaChartThemingComponent {
     },
   };
 
-  // Branded via `--chart-*` token overrides: NO seriesColors and NO theme fill
-  // colors, so the fills fall through to the theme palette (var(--chart-primary),
-  // var(--chart-secondary), var(--chart-tertiary)). The SCSS overrides those
+  // Branded via `--nge-chart-*` token overrides: NO seriesColors and NO theme fill
+  // colors, so the fills fall through to the theme palette (var(--nge-chart-primary),
+  // var(--nge-chart-secondary), var(--nge-chart-tertiary)). The SCSS overrides those
   // tokens for BOTH light and dark, so the CSS variables — not the config — drive
   // the colors.
   brandedConfig = createAreaChartConfig({

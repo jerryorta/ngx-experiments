@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { TimelineChartUsageStoriesComponent } from './timeline-chart-usage-stories.component';
+import { NgeTimelineChartUsageStoriesComponent } from './timeline-chart-usage-stories.component';
 
-const meta: Meta<TimelineChartUsageStoriesComponent> = {
-  component: TimelineChartUsageStoriesComponent,
+const meta: Meta<NgeTimelineChartUsageStoriesComponent> = {
+  component: NgeTimelineChartUsageStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<TimelineChartUsageStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<TimelineChartUsageStoriesComponent>;
+type Story = StoryObj<NgeTimelineChartUsageStoriesComponent>;
 
 export const Usage: Story = {
   args: {},

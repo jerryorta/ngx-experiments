@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { FinancialChartThemingComponent } from './financial-chart-theming.component';
+import { NgeFinancialChartThemingComponent } from './financial-chart-theming.component';
 
-const meta: Meta<FinancialChartThemingComponent> = {
-  component: FinancialChartThemingComponent,
+const meta: Meta<NgeFinancialChartThemingComponent> = {
+  component: NgeFinancialChartThemingComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<FinancialChartThemingComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<FinancialChartThemingComponent>;
+type Story = StoryObj<NgeFinancialChartThemingComponent>;
 
 export const Theming: Story = {
   args: {},

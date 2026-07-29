@@ -18,15 +18,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'gauge-interaction-stories',
+    class: 'nge-gauge-interaction-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'gauge-interaction-stories',
+  selector: 'nge-gauge-interaction-stories',
   standalone: true,
   styleUrl: './gauge-interaction-stories.component.scss',
   templateUrl: './gauge-interaction-stories.component.html',
 })
-export class GaugeInteractionStoriesComponent {
+export class NgeGaugeInteractionStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/gauge/interaction';
 

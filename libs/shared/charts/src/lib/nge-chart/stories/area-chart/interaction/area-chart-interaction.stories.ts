@@ -2,9 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { AreaChartInteractionStoriesComponent } from './area-chart-interaction-stories.component';
+import { NgeAreaChartInteractionStoriesComponent } from './area-chart-interaction-stories.component';
 
-const meta: Meta<AreaChartInteractionStoriesComponent> = {
+const meta: Meta<NgeAreaChartInteractionStoriesComponent> = {
   argTypes: {
     // Layer
     animationMs: {
@@ -132,7 +132,7 @@ const meta: Meta<AreaChartInteractionStoriesComponent> = {
       table: { category: 'Axis' },
     },
   },
-  component: AreaChartInteractionStoriesComponent,
+  component: NgeAreaChartInteractionStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -142,7 +142,7 @@ const meta: Meta<AreaChartInteractionStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<AreaChartInteractionStoriesComponent>;
+type Story = StoryObj<NgeAreaChartInteractionStoriesComponent>;
 
 export const Interaction: Story = {
   args: {

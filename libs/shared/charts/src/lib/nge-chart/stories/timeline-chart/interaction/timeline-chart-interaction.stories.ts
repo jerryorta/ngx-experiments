@@ -2,9 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { TimelineChartInteractionStoriesComponent } from './timeline-chart-interaction-stories.component';
+import { NgeTimelineChartInteractionStoriesComponent } from './timeline-chart-interaction-stories.component';
 
-const meta: Meta<TimelineChartInteractionStoriesComponent> = {
+const meta: Meta<NgeTimelineChartInteractionStoriesComponent> = {
   argTypes: {
     // Theme - Bar Styling
     barColor: {
@@ -111,7 +111,7 @@ const meta: Meta<TimelineChartInteractionStoriesComponent> = {
       table: { category: 'Layer - Tooltip' },
     },
   },
-  component: TimelineChartInteractionStoriesComponent,
+  component: NgeTimelineChartInteractionStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -121,7 +121,7 @@ const meta: Meta<TimelineChartInteractionStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<TimelineChartInteractionStoriesComponent>;
+type Story = StoryObj<NgeTimelineChartInteractionStoriesComponent>;
 
 export const Interaction: Story = {
   args: {

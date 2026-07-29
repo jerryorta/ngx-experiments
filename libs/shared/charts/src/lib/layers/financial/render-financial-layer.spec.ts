@@ -295,8 +295,8 @@ describe('renderFinancialLayer', () => {
       // Yang lines are thicker than yin lines.
       expect(styleOf(lines[0], 'stroke-width')).toBe('2.5px');
       expect(styleOf(lines[1], 'stroke-width')).toBe('1.25px');
-      expect(styleOf(lines[0], 'stroke')).toBe('var(--chart-primary)');
-      expect(styleOf(lines[1], 'stroke')).toBe('var(--chart-error)');
+      expect(styleOf(lines[0], 'stroke')).toBe('var(--nge-chart-primary)');
+      expect(styleOf(lines[1], 'stroke')).toBe('var(--nge-chart-error)');
     });
   });
 

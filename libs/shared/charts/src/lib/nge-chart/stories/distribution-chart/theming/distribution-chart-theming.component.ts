@@ -31,15 +31,15 @@ function makeValues(count: number, center: number, spread: number, seed: number)
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'distribution-chart-theming',
+    class: 'nge-distribution-chart-theming',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'distribution-chart-theming',
+  selector: 'nge-distribution-chart-theming',
   standalone: true,
   styleUrl: './distribution-chart-theming.component.scss',
   templateUrl: './distribution-chart-theming.component.html',
 })
-export class DistributionChartThemingComponent {
+export class NgeDistributionChartThemingComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/distribution-chart/theming';
 
@@ -50,9 +50,9 @@ export class DistributionChartThemingComponent {
     { category: 'Class D', values: makeValues(45, 88, 24, 51) },
   ];
 
-  // 1. Default — box fills the translucent `--chart-primary`, the median reads
-  // `--chart-secondary`, the mean glyph `--chart-tertiary`, outliers `--chart-error`,
-  // and whiskers the muted `--chart-on-surface-variant`.
+  // 1. Default — box fills the translucent `--nge-chart-primary`, the median reads
+  // `--nge-chart-secondary`, the mean glyph `--nge-chart-tertiary`, outliers `--nge-chart-error`,
+  // and whiskers the muted `--nge-chart-on-surface-variant`.
   defaultConfig = createDistributionChartConfig({
     data: this.sampleData,
     showMean: true,

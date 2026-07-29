@@ -14,7 +14,7 @@ Add only genuine Ledger-specific content below (concrete primitive inventory, do
   and `@nge/calendar` cover most needs — only genuinely Ledger-shaped pieces belong here. A
   component that turns out to be generic gets promoted up to `@nge/ui-design-library`.
 - **`ldg-donut-chart` follows the `@nge/charts` layer contract** — a thin wrapper over a
-  promotable render fn (`render-ldg-donut-layer.ts`) + layer config + `theme.donut` (`--chart-*`)
+  promotable render fn (`render-ldg-donut-layer.ts`) + layer config + `theme.donut` (`--nge-chart-*`)
   + a `createLdgDonutChartConfig` preset. A self-contained bespoke `<svg>` component is the
   anti-pattern here (see `docs/architecture/charts.md`). Domain-incubated layers render through
   the generic registry via a single cast at the preset — no shared-lib edit needed; promotion is

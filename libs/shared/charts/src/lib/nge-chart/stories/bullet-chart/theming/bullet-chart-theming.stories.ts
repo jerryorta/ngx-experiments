@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { BulletChartThemingComponent } from './bullet-chart-theming.component';
+import { NgeBulletChartThemingComponent } from './bullet-chart-theming.component';
 
-const meta: Meta<BulletChartThemingComponent> = {
-  component: BulletChartThemingComponent,
+const meta: Meta<NgeBulletChartThemingComponent> = {
+  component: NgeBulletChartThemingComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<BulletChartThemingComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<BulletChartThemingComponent>;
+type Story = StoryObj<NgeBulletChartThemingComponent>;
 
 export const Theming: Story = {
   args: {},

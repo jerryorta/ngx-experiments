@@ -18,7 +18,7 @@ Key points:
 - Use Tailwind utility classes instead of custom SCSS
 - Leverage Tailwind's design system for consistency
 - **New components:** reference your own `--<prefix>-*` design tokens with literal fallbacks via the
-  Tailwind CSS-variable syntax — e.g. `text-[var(--giga-calendar-on-surface,#1a1a1a)]` — never
+  Tailwind CSS-variable syntax — e.g. `text-[var(--nge-calendar-on-surface,#1a1a1a)]` — never
   `--mat-sys-*`
 - **Legacy (evolving-cognition / real-estate) only:** combine Tailwind with Material Design tokens via
   CSS-variable syntax: `text-(--mat-sys-primary)`
@@ -32,8 +32,8 @@ Always use Tailwind's CSS variable syntax when working with CSS custom propertie
 
 ```html
 <!-- New components: own --<prefix>-* tokens with literal fallbacks -->
-<div class="text-[var(--giga-calendar-on-surface,#1a1a1a)] bg-[var(--giga-calendar-surface,#ffffff)]">
-  <button class="px-4 py-2 rounded-md bg-[var(--giga-calendar-primary,#2563eb)] text-[var(--giga-calendar-on-primary,#ffffff)] hover:opacity-90">
+<div class="text-[var(--nge-calendar-on-surface,#1a1a1a)] bg-[var(--nge-calendar-surface,#ffffff)]">
+  <button class="px-4 py-2 rounded-md bg-[var(--nge-calendar-primary,#2563eb)] text-[var(--nge-calendar-on-primary,#ffffff)] hover:opacity-90">
     Button
   </button>
 </div>

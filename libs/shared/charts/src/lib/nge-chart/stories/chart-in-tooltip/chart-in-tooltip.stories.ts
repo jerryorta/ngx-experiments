@@ -2,9 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { ChartInTooltipStoriesComponent } from './chart-in-tooltip-stories.component';
+import { NgeChartInTooltipStoriesComponent } from './chart-in-tooltip-stories.component';
 
-const meta: Meta<ChartInTooltipStoriesComponent> = {
+const meta: Meta<NgeChartInTooltipStoriesComponent> = {
   argTypes: {
     variant: {
       control: { type: 'radio' },
@@ -13,7 +13,7 @@ const meta: Meta<ChartInTooltipStoriesComponent> = {
       options: ['stacked', 'grouped'],
     },
   },
-  component: ChartInTooltipStoriesComponent,
+  component: NgeChartInTooltipStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -23,7 +23,7 @@ const meta: Meta<ChartInTooltipStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<ChartInTooltipStoriesComponent>;
+type Story = StoryObj<NgeChartInTooltipStoriesComponent>;
 
 /**
  * Hover a stacked column — a DONUT of that column's segments renders inside the

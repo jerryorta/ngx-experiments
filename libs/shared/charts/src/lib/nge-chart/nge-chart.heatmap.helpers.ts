@@ -33,7 +33,7 @@ const DEFAULT_CELL_PADDING = 0.05;
  * The named sequential `d3-scale-chromatic` interpolators the heatmap layer's
  * `scheme` option selects between (a `scheme` overrides the theme token ramp). Each
  * maps a normalised `t ∈ [0, 1]` to a concrete colour string, so the renderer can
- * feed it straight into a `scaleSequential` without resolving any `var(--chart-*)`
+ * feed it straight into a `scaleSequential` without resolving any `var(--nge-chart-*)`
  * token (unlike the token ramp, which must be resolved first).
  */
 export const HEATMAP_SCHEME_INTERPOLATORS: Record<HeatmapColorScheme, (t: number) => string> = {

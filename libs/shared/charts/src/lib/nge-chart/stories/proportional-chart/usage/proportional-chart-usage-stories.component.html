@@ -1,0 +1,242 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-story-container">
+    <h2>Proportional Area Chart - Usage Examples</h2>
+    <p class="nge-story-intro-text">
+      One layer that encodes value as <strong>area</strong>, not length. Every mark's linear size
+      scales as <code>&radic;(value / max)</code>, so a datum worth four times another draws four
+      times its area. The <code>mark</code> option picks the primitive and covers the catalog's
+      whole proportional family — waffle, proportional area, nested area and packed circles.
+    </p>
+
+    <!-- EXAMPLE 1: Basic Usage -->
+    <section class="nge-story-section">
+      <h4>1. Basic Usage</h4>
+      <p class="nge-story-description">
+        Simplest way to create a chart using <code>createProportionalChartConfig()</code>. Marks are
+        laid out in an evenly-spaced row and sized by area.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+data = [
+  {{ "{" }} label: 'Solar', value: 120 {{ "}" }},
+  {{ "{" }} label: 'Wind', value: 80 {{ "}" }},
+  // ...
+];
+
+config = createProportionalChartConfig({{ "{" }}
+  data: this.data,
+  showLabels: true,
+{{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="basicConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Other single-shape marks -->
+    <section class="nge-story-section">
+      <h4>2. Square and Half-Circle Marks</h4>
+      <p class="nge-story-description">
+        The same magnitudes drawn as a different primitive. <code>mark: 'square'</code> gives the
+        Square Proportional Area; <code>mark: 'half-circle'</code> stands the semicircles on one
+        baseline, which makes their relative heights easier to compare.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createProportionalChartConfig({{ "{" }}
+  data: this.data,
+  mark: 'square',        // or 'half-circle'
+  showLabels: true,
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5>Squares</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="squareConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>Half-circles</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="halfCircleConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Waffle -->
+    <section class="nge-story-section">
+      <h4>3. Waffle Chart</h4>
+      <p class="nge-story-description">
+        <code>mark: 'grid'</code> draws a 10&times;10 grid where each cell is one percentage point.
+        A waffle names its categories through a <strong>legend</strong> rather than on-cell text, so
+        <code>showLabels</code> is ignored for this mark — pair it with
+        <code>extractSunburstChartLegendItems()</code> and a <code>&lt;nge-chart-legend&gt;</code>,
+        both of which read the same <code>NgeHierarchyDatum[]</code> and cycle the same palette.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createProportionalChartConfig({{ "{" }}
+  data: this.gridData,
+  mark: 'grid',
+{{ "}" }});
+
+legendItems = extractSunburstChartLegendItems(this.gridData);
+
+&lt;nge-chart-legend [items]="legendItems" /&gt;
+&lt;nge-chart [config]="config" /&gt;</pre>
+      </div>
+      <nge-chart-legend [items]="waffleLegendItems" />
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="waffleConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Unit waffle -->
+    <section class="nge-story-section">
+      <h4>4. Unit Waffle</h4>
+      <p class="nge-story-description">
+        Setting <code>valuePerCell</code> turns the waffle into a unit chart — one cell per fixed
+        quantity — and leaves any surplus cells empty. Here a 5&times;12 grid counts 60 orders.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createProportionalChartConfig({{ "{" }}
+  data: this.orders,
+  mark: 'grid',
+  rows: 5,
+  columns: 12,
+  valuePerCell: 1,
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="unitWaffleConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Packed circles -->
+    <section class="nge-story-section">
+      <h4>5. Packed Circles</h4>
+      <p class="nge-story-description">
+        <code>mark: 'packed'</code> runs <code>d3.pack()</code> over the data and draws its leaf
+        circles. Nesting the data groups the leaves into clusters, and every leaf inherits its
+        top-level branch's colour.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+data = [
+  {{ "{" }} label: 'Mobile', children: [
+    {{ "{" }} label: 'iOS', value: 62 {{ "}" }},
+    {{ "{" }} label: 'Android', value: 91 {{ "}" }},
+  ] {{ "}" }},
+  // ...
+];
+
+config = createProportionalChartConfig({{ "{" }}
+  data: this.data,
+  mark: 'packed',
+  showLabels: true,
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="packedConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Nested -->
+    <section class="nge-story-section">
+      <h4>6. Nested Proportional Area</h4>
+      <p class="nge-story-description">
+        <code>layout: 'nested'</code> stacks the marks concentrically on one bottom baseline,
+        largest first — the shape to reach for when the values are subsets of one another.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createProportionalChartConfig({{ "{" }}
+  data: this.funnelData,
+  layout: 'nested',
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="nestedConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7: Click handling -->
+    <section class="nge-story-section">
+      <h4>7. Click Handling</h4>
+      <p class="nge-story-description">
+        <code>onClick</code> receives the datum and its input index. A waffle's empty remainder
+        cells name no datum, so they never fire.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createProportionalChartConfig({{ "{" }}
+  data: this.data,
+  onClick: (event) =&gt; this.lastClicked.set(event.data.label),
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-interaction-display">Last clicked: {{ lastClicked() }}</div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="clickableConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 8: Tooltips -->
+    <section class="nge-story-section">
+      <h4>8. Tooltips</h4>
+      <p class="nge-story-description">
+        Hover a mark for a tooltip anchored at its centroid. The formatter receives the datum with
+        its <strong>summed</strong> magnitude, so an internal node reports its aggregate.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createProportionalChartConfig({{ "{" }}
+  data: this.data,
+  tooltip: {{ "{" }}
+    enabled: true,
+    formatContent: (d) =&gt; ({{ "{" }} label: d.label, value: d.value + ' TWh' {{ "}" }}),
+  {{ "}" }},
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="tooltipConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 9: Dynamic data -->
+    <section class="nge-story-section nge-story-section--highlight">
+      <h4>9. Dynamic Data with Signals</h4>
+      <p class="nge-story-description">
+        Wrap the factory in a <code>computed()</code> and the marks grow, shrink and reflow through
+        the shared enter/update/exit animation whenever the signal changes.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+data = signal&lt;NgeHierarchyDatum[]&gt;([...]);
+
+config = computed(() =&gt;
+  createProportionalChartConfig({{ "{" }} data: this.data(), showLabels: true {{ "}" }})
+);</pre>
+      </div>
+      <div class="nge-story-interaction-row">
+        <button
+          type="button"
+          class="nge-story-action-button"
+          (click)="randomizeData()"
+        >
+          Randomize Data
+        </button>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

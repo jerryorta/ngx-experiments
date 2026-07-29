@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { BumpChartUsageStoriesComponent } from './bump-chart-usage-stories.component';
+import { NgeBumpChartUsageStoriesComponent } from './bump-chart-usage-stories.component';
 
-const meta: Meta<BumpChartUsageStoriesComponent> = {
-  component: BumpChartUsageStoriesComponent,
+const meta: Meta<NgeBumpChartUsageStoriesComponent> = {
+  component: NgeBumpChartUsageStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<BumpChartUsageStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<BumpChartUsageStoriesComponent>;
+type Story = StoryObj<NgeBumpChartUsageStoriesComponent>;
 
 export const Usage: Story = {
   args: {},

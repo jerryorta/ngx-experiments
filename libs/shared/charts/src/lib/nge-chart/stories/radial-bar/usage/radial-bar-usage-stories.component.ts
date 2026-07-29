@@ -13,15 +13,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'radial-bar-usage-stories',
+    class: 'nge-radial-bar-usage-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'radial-bar-usage-stories',
+  selector: 'nge-radial-bar-usage-stories',
   standalone: true,
   styleUrl: './radial-bar-usage-stories.component.scss',
   templateUrl: './radial-bar-usage-stories.component.html',
 })
-export class RadialBarUsageStoriesComponent {
+export class NgeRadialBarUsageStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/radial-bar/usage';
 
@@ -120,7 +120,29 @@ export class RadialBarUsageStoriesComponent {
   });
 
   // ============================================
-  // EXAMPLE 7: Click Handling
+  // EXAMPLE 7: On-bar Labels
+  // ============================================
+  labelledConfig = createRadialBarChartConfig({
+    data: this.barData,
+    formatLabel: d => `${d.label} ${d.value}`,
+    innerRadius: 0.15,
+    padAngle: 0.02,
+    showLabels: true,
+  });
+
+  // ============================================
+  // EXAMPLE 8: Outside Labels (category ring)
+  // ============================================
+  labelledOutsideConfig = createRadialBarChartConfig({
+    data: this.barData,
+    labelPosition: 'outside',
+    padAngle: 0,
+    showLabels: true,
+    wedge: 'equal',
+  });
+
+  // ============================================
+  // EXAMPLE 9: Click Handling
   // ============================================
   readonly lastClicked = signal<string>('None');
 
@@ -134,7 +156,7 @@ export class RadialBarUsageStoriesComponent {
   });
 
   // ============================================
-  // EXAMPLE 8: Dynamic Data with Signals
+  // EXAMPLE 10: Dynamic Data with Signals
   // ============================================
   readonly dynamicData = signal<NgeRadialBarDataPoint[]>(this.barData);
 

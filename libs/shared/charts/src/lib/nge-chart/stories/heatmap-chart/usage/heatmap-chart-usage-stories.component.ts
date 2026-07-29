@@ -24,15 +24,15 @@ function makeSalesGrid(): NgeHeatmapDataPoint[] {
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'heatmap-chart-usage-stories',
+    class: 'nge-heatmap-chart-usage-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'heatmap-chart-usage-stories',
+  selector: 'nge-heatmap-chart-usage-stories',
   standalone: true,
   styleUrl: './heatmap-chart-usage-stories.component.scss',
   templateUrl: './heatmap-chart-usage-stories.component.html',
 })
-export class HeatmapChartUsageStoriesComponent {
+export class NgeHeatmapChartUsageStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/heatmap-chart/usage';
 

@@ -41,22 +41,22 @@ const MARKET_SHARE: NgeLollipopDataPoint[] = [
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'lollipop-chart-theming',
+    class: 'nge-lollipop-chart-theming',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'lollipop-chart-theming',
+  selector: 'nge-lollipop-chart-theming',
   standalone: true,
   styleUrl: './lollipop-chart-theming.component.scss',
   templateUrl: './lollipop-chart-theming.component.html',
 })
-export class LollipopChartThemingComponent {
+export class NgeLollipopChartThemingComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/lollipop-chart/theming';
 
   sampleData: NgeLollipopDataPoint[] = CITY_SCORES;
 
   // 1. Default — stem / marker / label pull from the theme's `lollipop` slice
-  // (a muted `var(--chart-outline-variant)` stem + a `var(--chart-primary)` marker).
+  // (a muted `var(--nge-chart-outline-variant)` stem + a `var(--nge-chart-primary)` marker).
   defaultConfig = createLollipopChartConfig({
     data: this.sampleData,
     showLabels: true,
@@ -110,7 +110,7 @@ export class LollipopChartThemingComponent {
     },
   };
 
-  // 5. Semantic tokens — override with `var(--chart-*)` tokens so the marker + stem
+  // 5. Semantic tokens — override with `var(--nge-chart-*)` tokens so the marker + stem
   // track the surrounding theme and adapt automatically to light / dark.
   tokenConfig: NgeChartConfig = {
     ...createLollipopChartConfig({
@@ -120,8 +120,8 @@ export class LollipopChartThemingComponent {
     }),
     theme: {
       lollipop: {
-        marker: { color: 'var(--chart-tertiary)' },
-        stem: { color: 'var(--chart-secondary)' },
+        marker: { color: 'var(--nge-chart-tertiary)' },
+        stem: { color: 'var(--nge-chart-secondary)' },
       },
     },
   };

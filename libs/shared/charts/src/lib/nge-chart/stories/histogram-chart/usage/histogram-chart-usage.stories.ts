@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { HistogramChartUsageStoriesComponent } from './histogram-chart-usage-stories.component';
+import { NgeHistogramChartUsageStoriesComponent } from './histogram-chart-usage-stories.component';
 
-const meta: Meta<HistogramChartUsageStoriesComponent> = {
-  component: HistogramChartUsageStoriesComponent,
+const meta: Meta<NgeHistogramChartUsageStoriesComponent> = {
+  component: NgeHistogramChartUsageStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<HistogramChartUsageStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<HistogramChartUsageStoriesComponent>;
+type Story = StoryObj<NgeHistogramChartUsageStoriesComponent>;
 
 export const Usage: Story = {
   args: {},

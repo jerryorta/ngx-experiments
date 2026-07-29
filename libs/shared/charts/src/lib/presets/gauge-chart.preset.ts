@@ -85,6 +85,15 @@ export interface GaugeChartPresetOptions {
   onClick?: NgeGaugeLayerConfig['onClick'];
 
   /**
+   * Scale the self-computed outer radius by a RATIO (0–1): `1` (default) fills the plot,
+   * `0.75` draws it at three-quarters size. Applied AFTER the layer's own label reserves,
+   * and `innerRadius` scales with it, so the chart shrinks without distorting. The knob for
+   * "make the chart smaller in a box I do not control" — not `labelGutter`, which is
+   * measured off the arc and drags the labels inward with it.
+   */
+  radiusRatio?: number;
+
+  /**
    * Meter form: `'arc'` circular gauge (default) or `'linear'` horizontal progress bar.
    */
   shape?: NgeGaugeShape;
@@ -145,6 +154,7 @@ export function createGaugeChartConfig(options: GaugeChartPresetOptions): NgeCha
     innerRadius,
     margin,
     onClick,
+    radiusRatio,
     shape,
     showValueLabel,
     startAngle,
@@ -181,6 +191,7 @@ export function createGaugeChartConfig(options: GaugeChartPresetOptions): NgeCha
         indicator,
         innerRadius,
         onClick,
+        radiusRatio,
         renderer: renderGaugeLayer,
         shape,
         showValueLabel,

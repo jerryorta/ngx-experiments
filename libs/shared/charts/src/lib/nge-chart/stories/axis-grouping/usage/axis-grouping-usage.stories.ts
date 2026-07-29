@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { AxisGroupingUsageStoriesComponent } from './axis-grouping-usage-stories.component';
+import { NgeAxisGroupingUsageStoriesComponent } from './axis-grouping-usage-stories.component';
 
-const meta: Meta<AxisGroupingUsageStoriesComponent> = {
-  component: AxisGroupingUsageStoriesComponent,
+const meta: Meta<NgeAxisGroupingUsageStoriesComponent> = {
+  component: NgeAxisGroupingUsageStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<AxisGroupingUsageStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<AxisGroupingUsageStoriesComponent>;
+type Story = StoryObj<NgeAxisGroupingUsageStoriesComponent>;
 
 export const Usage: Story = {
   args: {},

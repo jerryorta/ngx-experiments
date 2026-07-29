@@ -80,7 +80,7 @@ function withThemedXAxisGroups(
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'axis-grouping-theming',
+    class: 'nge-axis-grouping-theming',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
   selector: 'nge-axis-grouping-theming',
@@ -88,7 +88,7 @@ function withThemedXAxisGroups(
   styleUrl: './axis-grouping-theming.component.scss',
   templateUrl: './axis-grouping-theming.component.html',
 })
-export class AxisGroupingThemingComponent {
+export class NgeAxisGroupingThemingComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/axis-grouping/theming';
 

@@ -2,30 +2,30 @@
   [reviewStatus]="reviewStatus"
   [storybookFilePath]="storybookFilePath"
 >
-  <div class="stories-container">
+  <div class="nge-story-container">
     <h2>Lollipop Chart - Interactive Controls</h2>
-    <p class="intro-text">
+    <p class="nge-story-intro-text">
       Use the Storybook controls panel to reshape the lollipop in real time. Toggle
       <strong>showStem</strong> for a dot plot, <strong>connect</strong> to join the series into a
       trend line, and switch the <strong>shape</strong> / <strong>orientation</strong>. Press
       Randomize to re-roll the scores.
     </p>
 
-    <div class="interaction-row">
+    <div class="nge-story-interaction-row">
       <button
         type="button"
-        class="interaction-btn interaction-btn--primary"
+        class="nge-story-interaction-btn nge-story-interaction-btn--primary"
         (click)="randomizeData()"
       >
         Randomize Data
       </button>
     </div>
 
-    <div class="chart-container">
+    <div class="nge-story-chart-container">
       <nge-chart [config]="config()" />
     </div>
 
-    <div class="controls-info">
+    <div class="nge-story-controls-info">
       <h4>Available Controls</h4>
       <ul>
         <li><strong>Margins:</strong> top / right / bottom / left chart margins</li>

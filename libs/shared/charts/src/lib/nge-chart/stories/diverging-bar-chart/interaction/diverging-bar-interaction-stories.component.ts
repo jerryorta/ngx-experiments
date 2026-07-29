@@ -12,15 +12,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'diverging-bar-interaction-stories',
+    class: 'nge-diverging-bar-interaction-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'diverging-bar-interaction-stories',
+  selector: 'nge-diverging-bar-interaction-stories',
   standalone: true,
   styleUrl: './diverging-bar-interaction-stories.component.scss',
   templateUrl: './diverging-bar-interaction-stories.component.html',
 })
-export class DivergingBarInteractionStoriesComponent {
+export class NgeDivergingBarInteractionStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath =
     'libs/shared/charts/src/lib/nge-chart/stories/diverging-bar-chart/interaction';

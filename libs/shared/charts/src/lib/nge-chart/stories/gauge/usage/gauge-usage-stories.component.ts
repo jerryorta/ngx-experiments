@@ -13,15 +13,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'gauge-usage-stories',
+    class: 'nge-gauge-usage-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'gauge-usage-stories',
+  selector: 'nge-gauge-usage-stories',
   standalone: true,
   styleUrl: './gauge-usage-stories.component.scss',
   templateUrl: './gauge-usage-stories.component.html',
 })
-export class GaugeUsageStoriesComponent {
+export class NgeGaugeUsageStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/gauge/usage';
 

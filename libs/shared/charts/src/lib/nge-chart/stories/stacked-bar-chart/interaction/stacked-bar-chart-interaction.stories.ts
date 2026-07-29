@@ -2,9 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { StackedBarChartInteractionStoriesComponent } from './stacked-bar-chart-interaction-stories.component';
+import { NgeStackedBarChartInteractionStoriesComponent } from './stacked-bar-chart-interaction-stories.component';
 
-const meta: Meta<StackedBarChartInteractionStoriesComponent> = {
+const meta: Meta<NgeStackedBarChartInteractionStoriesComponent> = {
   argTypes: {
     // Layer - Layout
     animationMs: {
@@ -198,7 +198,7 @@ const meta: Meta<StackedBarChartInteractionStoriesComponent> = {
       table: { category: 'Layer - Visibility' },
     },
   },
-  component: StackedBarChartInteractionStoriesComponent,
+  component: NgeStackedBarChartInteractionStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -208,7 +208,7 @@ const meta: Meta<StackedBarChartInteractionStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<StackedBarChartInteractionStoriesComponent>;
+type Story = StoryObj<NgeStackedBarChartInteractionStoriesComponent>;
 
 export const Interaction: Story = {
   args: {

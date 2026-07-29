@@ -2,9 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { ScatterChartInteractionStoriesComponent } from './scatter-chart-interaction-stories.component';
+import { NgeScatterChartInteractionStoriesComponent } from './scatter-chart-interaction-stories.component';
 
-const meta: Meta<ScatterChartInteractionStoriesComponent> = {
+const meta: Meta<NgeScatterChartInteractionStoriesComponent> = {
   argTypes: {
     // Theme - Axis Styling
     axisLabelFontSize: {
@@ -237,7 +237,7 @@ const meta: Meta<ScatterChartInteractionStoriesComponent> = {
       table: { category: 'Layer - Domain' },
     },
   },
-  component: ScatterChartInteractionStoriesComponent,
+  component: NgeScatterChartInteractionStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -247,7 +247,7 @@ const meta: Meta<ScatterChartInteractionStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<ScatterChartInteractionStoriesComponent>;
+type Story = StoryObj<NgeScatterChartInteractionStoriesComponent>;
 
 export const Interaction: Story = {
   args: {

@@ -2,9 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { CustomTooltipPrototypeStoriesComponent } from './custom-tooltip-prototype-stories.component';
+import { NgeCustomTooltipPrototypeStoriesComponent } from './custom-tooltip-prototype-stories.component';
 
-const meta: Meta<CustomTooltipPrototypeStoriesComponent> = {
+const meta: Meta<NgeCustomTooltipPrototypeStoriesComponent> = {
   argTypes: {
     chromeless: {
       control: 'boolean',
@@ -12,7 +12,7 @@ const meta: Meta<CustomTooltipPrototypeStoriesComponent> = {
         'Drop the default tooltip bubble — the custom #ngeChartTooltip template becomes the entire tooltip (its own chrome).',
     },
   },
-  component: CustomTooltipPrototypeStoriesComponent,
+  component: NgeCustomTooltipPrototypeStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -22,7 +22,7 @@ const meta: Meta<CustomTooltipPrototypeStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<CustomTooltipPrototypeStoriesComponent>;
+type Story = StoryObj<NgeCustomTooltipPrototypeStoriesComponent>;
 
 /**
  * A custom Angular tooltip (`#ngeChartTooltip` template) replacing the default

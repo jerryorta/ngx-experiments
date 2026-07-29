@@ -205,7 +205,7 @@ describe('renderWaterfallLayer', () => {
 
       expect(styleOf(barRect(g, 'Open'), 'fill')).toBe('#4caf50'); // rising delta
       expect(styleOf(barRect(g, 'Loss'), 'fill')).toBe('#f44336'); // falling delta
-      expect(styleOf(barRect(g, 'Close'), 'fill')).toBe('var(--chart-primary)'); // total
+      expect(styleOf(barRect(g, 'Close'), 'fill')).toBe('var(--nge-chart-primary)'); // total
     });
 
     it('honors config rise / fall / total color overrides', () => {

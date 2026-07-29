@@ -31,24 +31,33 @@ export type NgeChartLayerType =
   | 'bar'
   | 'bullet'
   | 'bump'
+  | 'chord'
   | 'distribution'
   | 'diverging-bar'
   | 'financial'
+  | 'funnel'
   | 'gauge'
   | 'grouped-bar'
   | 'heatmap'
   | 'histogram'
   | 'line'
   | 'lollipop'
+  | 'network'
   | 'overlay'
+  | 'parallel-coords'
   | 'pie'
+  | 'proportional'
   | 'radar'
   | 'radial-bar'
+  | 'sankey'
   | 'scatter'
   | 'stacked-bar'
   | 'sunburst'
   | 'timeline'
-  | 'waterfall';
+  | 'tree'
+  | 'treemap'
+  | 'waterfall'
+  | 'wordcloud';
 
 /**
  * Bar layer configuration
@@ -67,6 +76,13 @@ export interface NgeBarLayerConfig {
   barPadding?: number;
   barRadius?: number;
   data: NgeBarDataPoint[];
+  /**
+   * Value-label colour for EVERY bar — rung 2 of the label-colour chain (per-datum →
+   * layer config → `theme.bar.label.color`). Bar value labels are drawn on the plot
+   * surface just outside the bar, not on its fill, so this layer has no derived
+   * on-fill contrast rung; a per-datum `labelColor` still wins over it.
+   */
+  labelColor?: string;
   /** Format function for value labels displayed on bars */
   labelFormat?: (value: number) => string;
   onClick?: (event: NgeChartLayerClickEvent<NgeBarDataPoint>) => void;
@@ -364,25 +380,273 @@ export interface NgePieLayerConfig {
   data: NgePieDataPoint[];
   /** End of the angular sweep in radians (semi-circle / gauge). Default `2 * Math.PI` (full turn). */
   endAngle?: number;
+  /** Format the slice label (when `showLabels` is set). Defaults to the datum's own `label`. */
+  formatLabel?: (d: NgePieDataPoint) => string;
+  /**
+   * Slice labels to emphasise. Named slices keep `theme.pie.slice.opacity`; every other
+   * slice drops to `theme.pie.slice.dimmedOpacity`. Omitted or empty means "no selection" —
+   * every slice renders at full opacity, exactly as before this option existed.
+   *
+   * **Arc geometry is untouched.** This is the whole difference from filtering the data:
+   * removing a slice re-runs `d3.pie()` and every surviving wedge grows to fill the gap,
+   * which destroys the part-to-whole comparison a pie exists to show. Dimming leaves each
+   * wedge at the angle it already had, so selection is a reading aid rather than a
+   * re-computation. Pair it with a legend — the layer holds no selection state of its own,
+   * so the caller decides what is in here (`nge-chart-legend`'s `itemClick` /
+   * `clearAction`).
+   */
+  highlightedLabels?: string[];
   /**
    * Inner radius as a RATIO (0–1) of the self-computed outer radius: `0` → a full pie,
    * e.g. `0.6` → a donut whose center hole is 60% of the radius. NOT pixels (so it
    * stays resize-safe). Default 0.
    */
   innerRadius?: number;
+  /**
+   * Label colour for EVERY slice — rung 2 of the label-colour chain (per-datum → layer
+   * config → derived from the slice fill → the theme colour). Setting it deliberately
+   * disables automatic on-fill contrast, giving one flat label colour; a per-datum
+   * `labelColor` still wins over it.
+   *
+   * Derived contrast applies to `labelPosition: 'inside'` only — an outside label sits on
+   * the plot surface, not on a slice fill, so it always takes
+   * `theme.pie.labelOutside.color`. Both explicit rungs work in either mode.
+   */
+  labelColor?: string;
+  /**
+   * Width in pixels reserved on EACH side for outside labels. The pie's outer radius
+   * shrinks to fit `boundedWidth - 2 * labelGutter`, because the layers group is clipped
+   * to the plot area — a label drawn past `boundedWidth` would be cut off. Ignored when
+   * `labelPosition` is `'inside'`. Default 96.
+   */
+  labelGutter?: number;
+  /**
+   * How outside labels are arranged around the pie. Only consulted when `labelPosition`
+   * is `'outside'`.
+   *
+   * - `'perimeter'` (default) keeps each label on a ring just past the arc, at its own
+   *   slice's mid-angle — so the label ring follows the pie's curve and a label the collision
+   *   pass never touched sits exactly where its wedge points. Both layouts leader the SAME
+   *   SLICES — `displaced` weighs the label's height, which identifies its wedge either way —
+   *   but the ring's connectors are far shorter, because each ends on its own slice's bearing
+   *   instead of reaching across to a ruler line. Measured on the 30-country reference at
+   *   `leaderLines: 'all'`: mean leader 45px against the column's 185px, 1341px of total ink
+   *   against 5556px.
+   * - `'columns'` stacks each hemisphere into a straight vertical column at a fixed x.
+   *   Separation is guaranteed, but every label is pulled off its slice's own bearing even
+   *   when nothing was going to collide, so its connectors run as long diagonals. Reach for
+   *   it past the ring's density ceiling —
+   *   leaders stay untangled to ~20 categories on the ring and cross sharply above that,
+   *   while a column terminates every leader at the same x and so stays nested at any count.
+   *
+   * Both layouts separate on collision and both reserve `labelGutter` — only the resting
+   * place of an uncrowded label differs.
+   */
+  labelLayout?: 'columns' | 'perimeter';
+  /**
+   * Minimum vertical spacing in pixels between two adjacent outside labels — the distance
+   * the collision pass pushes them apart. Raise it alongside
+   * `theme.pie.labelOutside.fontSize`. Ignored when `labelPosition` is `'inside'`.
+   * Default 14.
+   */
+  labelLineHeight?: number;
+  /**
+   * Radial distance in pixels from the arc's outer edge out to the label ring (or hemisphere
+   * column) — how far the labels sit clear of the pie. Ignored when `labelPosition` is
+   * `'inside'`. Default 12.
+   *
+   * Under `labelLayout: 'perimeter'` (the default) this knob does double duty: the ring it
+   * defines has to fit inside the plot's height, so raising it also **shrinks the pie**. That
+   * is the lever for opening up a crowded chart without enlarging the canvas — a smaller pie
+   * with its labels further out, in the same box. Under `'columns'` it only moves the columns
+   * outward, since the pie is not height-constrained by them.
+   */
+  labelOffset?: number;
+  /**
+   * Where `showLabels` draws each slice's label.
+   *
+   * - `'inside'` (default) centers it on the slice's arc centroid, styled from
+   *   `theme.pie.label` with automatic on-fill contrast. Legible only while slices stay
+   *   wide, so `minLabelAngle` drops the narrow ones.
+   * - `'outside'` places EVERY label beyond the arc in two hemisphere columns, styled from
+   *   `theme.pie.labelOutside`. Labels are pushed apart so none overlap, and a displaced
+   *   label gets a leader line back to its slice. Reserves `labelGutter` px on each side
+   *   and drops `minLabelAngle`'s default to 0 — a sliver can be labelled outside because
+   *   the wedge no longer has to contain the text.
+   */
+  labelPosition?: 'inside' | 'outside';
+  /**
+   * Radial distance in pixels from the arc's outer edge out to the leader's ELBOW — the
+   * length of the stub that leaves the wedge. **Defaults to `labelOffset`**, which keeps the
+   * elbow on the label ring exactly as it was before this option existed.
+   *
+   * Set it SHORTER than `labelOffset` to decouple the two: a stubby radial tick off the
+   * slice, then a longer run out to text that sits further away. Without it one knob drives
+   * both, so pushing the labels out also lengthens every stub.
+   *
+   * Only used with `labelPosition: 'outside'`. A value larger than `labelOffset` puts the
+   * elbow beyond the labels — allowed (nothing breaks, and the ring's vertical reserve grows
+   * to match so it cannot be clipped), but it inverts the shape the connector is describing.
+   */
+  leaderElbowOffset?: number;
+  /**
+   * Which outside labels get a leader line back to their slice. Only consulted when
+   * `labelPosition` is `'outside'` — an on-arc label sits on the slice it names, so it
+   * never needs a connector.
+   *
+   * - `'displaced'` (default) draws one only where a label's HEIGHT no longer names its wedge
+   *   — that is, where the collision pass had to move it. On a chart where the crowding is
+   *   local, the leaders appear exactly where the eye needs help tracing a label back to a
+   *   thin wedge, and nowhere else. `labelLayout` does not change who qualifies: a label
+   *   pulled out to a hemisphere column keeps the height that identifies it, so it stays
+   *   traceable without a connector.
+   * - `'all'` draws one for EVERY outside label. A label resting at its natural anchor gets
+   *   a short, near-straight radial tick rather than an elbow — the uniform look, where the
+   *   connector reads as a consistent part of the chart's grammar instead of a hint that
+   *   only some slices needed.
+   * - `'none'` draws none, leaving the label columns to stand on their own. Often cleaner
+   *   on a dense pie with short labels.
+   */
+  leaderLines?: 'all' | 'displaced' | 'none';
+  /**
+   * Smallest slice sweep (in RADIANS) that still gets a label — the small-slice rule. A
+   * slice narrower than this is dropped from the label join entirely rather than drawn
+   * with text spilling over its neighbours; it regains its label as soon as the data
+   * widens it past the threshold. Only consulted when `showLabels` is set.
+   *
+   * Default `0.15` rad (≈ 8.6°, i.e. ~2.4% of a full turn) for `labelPosition: 'inside'`,
+   * where the text has to fit within the wedge — and `0` for `'outside'`, where it does
+   * not. An explicit value is honoured in BOTH modes, so slivers can still be suppressed
+   * on purpose. A zero-sweep slice is never labelled either way: a threshold of 0 must not
+   * put text on an invisible slice.
+   */
+  minLabelAngle?: number;
   /** Click handler for slices. */
   onClick?: (event: NgeChartLayerClickEvent<NgePieDataPoint>) => void;
   /** Angular gap between adjacent slices in radians. Default 0. */
   padAngle?: number;
   /** Renderer function. Import `renderPieLayer` from '@nge/charts'. */
+  /**
+   * Scale the self-computed outer radius by a RATIO (0–1): `1` (default) fills the plot,
+   * `0.75` draws the pie at three-quarters size. Applied AFTER the layer's own label
+   * reserves, so it composes with them rather than fighting them, and `innerRadius` — being
+   * a ratio OF the outer radius — scales with it, so the chart shrinks without distorting.
+   *
+   * This is the knob for "make the chart smaller in a box I do not control". Do NOT reach
+   * for `labelGutter`: it is measured off the arc, so shrinking the mark with it pulls the
+   * labels inward too and merely moves the dead space to the edges. Pair with `labelOffset`
+   * to set how far off the mark the labels then sit.
+   */
+  radiusRatio?: number;
   renderer: NgeChartLayerRenderFn<NgePieDataPoint, NgePieLayerConfig, any>;
   /** Slice color palette. Slice input index maps to colors[index % length]. */
   seriesColors?: string[];
+  /**
+   * Draw a label on each slice, centered at its arc centroid and styled from
+   * `theme.pie.label`. Opt-in (default false) so existing pies keep their current look;
+   * slices narrower than `minLabelAngle` stay unlabelled.
+   */
+  showLabels?: boolean;
   /** Start of the angular sweep in radians (semi-circle / gauge). Default 0 (12 o'clock). */
   startAngle?: number;
   /** Tooltip configuration. Set `enabled: true` to show tooltips on hover. */
   tooltip?: Partial<NgeTooltipConfig<NgePieDataPoint>>;
   type: 'pie';
+}
+
+/**
+ * Funnel / pyramid layer configuration.
+ *
+ * A vertical stack of trapezoids sized by value — a self-scaled, array-data primitive
+ * (it IGNORES the shared cartesian scales, computing widths from `context.dimensions`
+ * the same way `pie` computes its own center + radius). Band *i* is a trapezoid whose
+ * top width comes from `value[i]` and whose bottom width comes from `value[i + 1]`; the
+ * last band has no successor, so `neckRatio` (a ratio of the widest width) supplies its
+ * bottom width instead — omit it for a flat-bottomed **Funnel Chart**, or set it to `0`
+ * to collapse the last band to a point, producing a **Pyramid Chart**. `direction`
+ * picks which end is widest: `'down'` (default) stacks widest-at-top narrowing downward
+ * (funnel); `'up'` stacks widest-at-bottom narrowing upward (pyramid). `align` picks
+ * horizontal placement: `'center'` (default) centers each band, `'left'` pins every
+ * band's left edge to x = 0. Band color resolves per-datum `color` → `seriesColors[i]`
+ * → the theme `band.colors` palette (by input index). `label` is the enter/update/exit
+ * join key.
+ */
+export interface NgeFunnelLayerConfig {
+  /**
+   * Horizontal placement of each band within the bounded width. `'center'` (default)
+   * centers every band; `'left'` pins every band's left edge to x = 0.
+   */
+  align?: 'center' | 'left';
+  /**
+   * Standard enter/update/exit animation (per-phase durations + easing). Overrides
+   * the chart-wide `animation` and the `animationMs` shorthand below.
+   */
+  animation?: NgeChartAnimationConfig;
+  /**
+   * Shorthand that sets enter = update = exit duration (ms); prefer `animation` for
+   * per-phase control. `0` = instant. Default 300.
+   */
+  animationMs?: number;
+  /** Data points to render — one band per point, top to bottom in input order. */
+  data: NgeFunnelDataPoint[];
+  /**
+   * Vertical stacking direction. `'down'` (default) stacks widest-at-top, narrowing
+   * downward (Funnel Chart). `'up'` stacks widest-at-bottom, narrowing upward
+   * (Pyramid Chart).
+   */
+  direction?: 'down' | 'up';
+  /** Format the on-band / tooltip label. Defaults to the datum's own `label`. */
+  formatLabel?: (d: NgeFunnelDataPoint) => string;
+  /** Vertical gap in pixels carved out between adjacent bands. Default 0. */
+  gap?: number;
+  /**
+   * Label colour for EVERY band — rung 2 of the label-colour chain (per-datum → layer
+   * config → derived from the band fill → the theme colour). Setting it deliberately
+   * disables automatic on-fill contrast, giving one flat label colour; a per-datum
+   * `labelColor` still wins over it. Derived contrast only applies to
+   * `labelPosition: 'inside'` — an outside label sits on the plot surface, so it always
+   * takes `theme.funnel.labelOutside.color`.
+   */
+  labelColor?: string;
+  /**
+   * Width in pixels reserved on the right for outside labels. The funnel itself is
+   * drawn into `boundedWidth - labelGutter`, because the layers group is clipped to the
+   * plot area — a label drawn past `boundedWidth` would be cut off. Ignored when
+   * `labelPosition` is `'inside'`. Default 96.
+   */
+  labelGutter?: number;
+  /**
+   * Where `showLabels` draws each band's label.
+   *
+   * - `'inside'` (default) centers it within the band — legible only while bands stay wide.
+   * - `'edge'` sets each label just outside the band's own right edge, so the column of
+   *   labels steps inward with the funnel's taper (the classic funnel annotation).
+   * - `'right'` pins every label to one x at the gutter's left edge, giving a straight,
+   *   aligned column regardless of taper.
+   *
+   * `'edge'` and `'right'` both reserve `labelGutter` px off the funnel's width, and both
+   * style their labels from `theme.funnel.labelOutside` rather than the in-band
+   * `theme.funnel.label`.
+   */
+  labelPosition?: 'edge' | 'inside' | 'right';
+  /**
+   * The LAST band's bottom width, as a RATIO (0–1) of the widest band width — it has
+   * no successor value to narrow toward. Unset (default) ⇒ the last band's bottom
+   * width equals its own top width (a flat-bottomed funnel). `0` collapses the last
+   * band to a point — the pyramid apex.
+   */
+  neckRatio?: number;
+  /** Click handler for bands. */
+  onClick?: (event: NgeChartLayerClickEvent<NgeFunnelDataPoint>) => void;
+  /** Renderer function. Import `renderFunnelLayer` from '@nge/charts'. */
+  renderer: NgeChartLayerRenderFn<NgeFunnelDataPoint, NgeFunnelLayerConfig, any>;
+  /** Band color palette. Band input index maps to colors[index % length]. */
+  seriesColors?: string[];
+  /** Draw a label centered in each band. Default false. */
+  showLabels?: boolean;
+  /** Tooltip configuration. Set `enabled: true` to show tooltips on hover. */
+  tooltip?: Partial<NgeTooltipConfig<NgeFunnelDataPoint>>;
+  type: 'funnel';
 }
 
 /**
@@ -398,6 +662,13 @@ export interface NgePieLayerConfig {
  * `d3.hierarchy().sum()`. Node color resolves per-node `color` → the `seriesColors`
  * palette (by top-level branch index) → the theme `segment.colors` palette. The layer is
  * inherently categorical — pair it with a legend over the top-level branches.
+ *
+ * Opt-in per-node labels (`showLabels`) are drawn ON the node — along the radius in
+ * `'radial'`, horizontally inside the rect in `'linear'` — styled from
+ * `theme.sunburst.label` with automatic on-fill contrast. A hierarchy crowds far faster
+ * than a flat chart, so three thresholds keep the ones that cannot fit off the canvas:
+ * `minLabelAngle` (narrow wedges), `minLabelSize` (short arcs / rects at any angle), and
+ * `maxLabelDepth` (rings past a chosen depth).
  */
 export interface NgeSunburstLayerConfig {
   /**
@@ -414,6 +685,10 @@ export interface NgeSunburstLayerConfig {
   data: NgeHierarchyDatum[];
   /** End of the angular sweep in radians (radial layout). Default `2 * Math.PI` (full turn). */
   endAngle?: number;
+  /** Format a node's label (when `showLabels` is set). Receives the node datum carrying its
+   * SUMMED value, so an internal node reports its aggregate rather than `undefined`.
+   * Defaults to the datum's own `label`. */
+  formatLabel?: (d: NgeHierarchyDatum) => string;
   /**
    * Inner radius as a RATIO (0–1) of the self-computed outer radius (radial layout):
    * `0` → rings start at the center, `> 0` carves a center hole (donut). NOT pixels
@@ -421,25 +696,183 @@ export interface NgeSunburstLayerConfig {
    */
   innerRadius?: number;
   /**
+   * Label colour for EVERY node — rung 2 of the label-colour chain (per-datum → layer
+   * config → derived from the node fill → `theme.sunburst.label.color`). Setting it
+   * deliberately disables automatic on-fill contrast, giving one flat label colour; a
+   * per-datum `labelColor` still wins over it.
+   */
+  labelColor?: string;
+  /**
    * Partition layout. `'radial'` (default) draws concentric rings (sunburst / donut /
    * pie rings); `'linear'` draws stacked rectangle columns (icicle).
    */
   layout?: 'linear' | 'radial';
   /** Optional depth cap — render at most this many rings / columns. Unset ⇒ full depth. */
   maxDepth?: number;
+  /**
+   * Deepest depth that still gets a label (1 = top-level branches only). Independent of
+   * `maxDepth`, which governs what is DRAWN: a chart can render five rings while labelling
+   * only the two that have room. Unset ⇒ every drawn depth is eligible.
+   */
+  maxLabelDepth?: number;
+  /**
+   * Smallest node sweep (in RADIANS) that still gets a label — the narrow-node half of the
+   * suppression rule, and RADIAL layout only (a linear cell has no sweep). A node narrower
+   * than this is dropped from the label join entirely rather than drawn with text spilling
+   * across its neighbours, and regains its label as soon as the data widens it. Default
+   * `0.15` rad (≈ 8.6°), the pie layer's threshold. A zero-sweep node is never labelled
+   * whatever the threshold — a value of 0 must not put text on a node nobody can see.
+   */
+  minLabelAngle?: number;
+  /**
+   * Smallest cross-text extent (in PIXELS) that still gets a label — the absolute-size half
+   * of the suppression rule, and the one `minLabelAngle` cannot express: an inner ring node
+   * can hold a generous angle and still have almost no arc to seat a line of text.
+   *
+   * Measured in whichever direction the text's cap-height runs: RADIAL → the node's arc
+   * length at its mid-radius (`sweep × midRadius`); LINEAR → the rect's width. Default 12px,
+   * about one line box at the default label font size.
+   */
+  minLabelSize?: number;
   /** Click handler for nodes. */
   onClick?: (event: NgeChartLayerClickEvent<NgeHierarchyDatum>) => void;
   /** Angular gap between adjacent nodes in radians (radial layout). Default 0. */
   padAngle?: number;
   /** Renderer function. Import `renderSunburstLayer` from '@nge/charts'. */
+  /**
+   * Scale the self-computed outer radius by a RATIO (0–1): `1` (default) fills the plot,
+   * `0.75` draws the rings at three-quarters size. Applied AFTER the layer's own label
+   * reserves, so it composes with them rather than fighting them, and `innerRadius` — being
+   * a ratio OF the outer radius — scales with it, so the chart shrinks without distorting.
+   *
+   * This is the knob for "make the chart smaller in a box I do not control". Do NOT reach
+   * for `labelGutter`: it is measured off the arc, so shrinking the mark with it pulls the
+   * labels inward too and merely moves the dead space to the edges. Pair with `labelOffset`
+   * to set how far off the mark the labels then sit.
+   */
+  radiusRatio?: number;
   renderer: NgeChartLayerRenderFn<NgeHierarchyDatum, NgeSunburstLayerConfig, any>;
   /** Node color palette assigned by top-level branch index. index maps to colors[index % length]. */
   seriesColors?: string[];
+  /**
+   * Draw a label on each node — on its arc (radial) or inside its rect (linear) — styled
+   * from `theme.sunburst.label`. Opt-in (default false) so existing sunbursts keep their
+   * current look; nodes below `minLabelAngle` / `minLabelSize` / past `maxLabelDepth` stay
+   * unlabelled.
+   */
+  showLabels?: boolean;
   /** Start of the angular sweep in radians (radial layout). Default 0 (12 o'clock). */
   startAngle?: number;
   /** Tooltip configuration. Set `enabled: true` to show tooltips on hover. */
   tooltip?: Partial<NgeTooltipConfig<NgeHierarchyDatum>>;
   type: 'sunburst';
+}
+
+/** Which shape the proportional layer sizes by area — the primary render discriminator. */
+export type NgeProportionalMark = 'circle' | 'grid' | 'half-circle' | 'packed' | 'square';
+
+/** How the proportional layer arranges its single-shape marks relative to one another. */
+export type NgeProportionalLayout = 'nested' | 'row';
+
+/**
+ * Proportional-area / waffle layer configuration.
+ *
+ * One area-encoding primitive fans out across the catalog's proportional family, seated on
+ * self-computed geometry (it IGNORES the shared cartesian scales). Every mark's AREA — not
+ * its width or height — is proportional to `value`, so a linear dimension scales with the
+ * square root of the magnitude. `mark` picks the shape:
+ *
+ * - `mark: 'circle'` (default) draws one circle per datum, radius `√(value / max)` of the
+ *   slot — the **Proportional Area Chart** / **Circular Bubble**.
+ * - `mark: 'half-circle'` draws the same magnitudes as semicircles rising from a shared bottom
+ *   baseline — the **Half-Circle Proportional Area**.
+ * - `mark: 'square'` substitutes a square of side `√(value / max)` — the **Square
+ *   Proportional Area**.
+ * - `mark: 'grid'` draws a `rows × columns` cell grid and fills `value / valuePerCell` cells
+ *   per category, bottom-left origin — the **Waffle Chart**. Unfilled cells are drawn from
+ *   `theme.proportional.emptyCell`.
+ * - `mark: 'packed'` runs `d3.pack()` over the data and draws the resulting leaf circles —
+ *   the **Packed Circle** / **Clustered Force**-style grouping when the data nests.
+ *
+ * `layout` then arranges the three single-shape marks: `'row'` (default) spaces them evenly
+ * across the plot width, `'nested'` stacks them concentrically on a shared bottom baseline —
+ * the **Nested Proportional Area**. It is ignored by `'grid'` and `'packed'`, which own their
+ * own layout.
+ */
+export interface NgeProportionalLayerConfig {
+  /**
+   * Standard enter/update/exit animation (per-phase durations + easing). Overrides
+   * the chart-wide `animation` and the `animationMs` shorthand below.
+   */
+  animation?: NgeChartAnimationConfig;
+  /**
+   * Shorthand that sets enter = update = exit duration (ms); prefer `animation` for
+   * per-phase control. `0` = instant, used during zoom/pan gestures. Default 300.
+   */
+  animationMs?: number;
+  /** Grid columns (`mark: 'grid'` only). Default 10 — with `rows`, a 100-cell percentage waffle. */
+  columns?: number;
+  /**
+   * Nodes to render. A flat array of leaves gives one mark per datum; nesting groups the
+   * `'packed'` mark's circles. An internal node's magnitude is summed from its children by
+   * `d3.hierarchy().sum()`, so only leaves need a `value`.
+   */
+  data: NgeHierarchyDatum[];
+  /** Format the on-mark / tooltip label. Defaults to the datum's own `label`. */
+  formatLabel?: (d: NgeHierarchyDatum) => string;
+  /**
+   * On-mark label colour for EVERY mark — rung 2 of the label-colour chain (per-datum →
+   * layer config → derived from the mark fill → `theme.proportional.label.color`). Setting
+   * it deliberately disables the automatic on-fill contrast; a per-datum `labelColor` still
+   * wins over it.
+   */
+  labelColor?: string;
+  /**
+   * How the single-shape marks are arranged. `'row'` (default) spaces them evenly across the
+   * plot width; `'nested'` stacks them concentrically on a shared bottom baseline. Ignored by
+   * `mark: 'grid'` and `mark: 'packed'`.
+   */
+  layout?: NgeProportionalLayout;
+  /** Which area-encoded shape to draw. Default `'circle'`. */
+  mark?: NgeProportionalMark;
+  /**
+   * Smallest mark width (px) that still earns a label — a mark narrower than this is drawn
+   * unlabelled rather than overflowing. Measured across the mark's own inner width (a
+   * circle's diameter, a square's side). Default 24.
+   */
+  minLabelSize?: number;
+  onClick?: (event: NgeChartLayerClickEvent<NgeHierarchyDatum>) => void;
+  /**
+   * Separation between marks in pixels — the gutter between grid cells, the padding passed to
+   * `d3.pack()`, and the inset taken off each `'row'` slot. Default 2.
+   */
+  padding?: number;
+  /** Renderer function. Import `renderProportionalLayer` from '@nge/charts'. */
+  renderer: NgeChartLayerRenderFn<NgeHierarchyDatum, NgeProportionalLayerConfig, any>;
+  /** Grid rows (`mark: 'grid'` only). Default 10 — with `columns`, a 100-cell percentage waffle. */
+  rows?: number;
+  /** Mark color palette. Top-level input index maps to colors[index % length]. */
+  seriesColors?: string[];
+  /**
+   * Draw each datum's label on its own mark. Default false.
+   *
+   * Scoped to the single-mark shapes — `'circle'`, `'half-circle'`, `'square'` and `'packed'`.
+   * `mark: 'grid'` draws NO labels whatever this is set to: a waffle's categories are named by
+   * a legend, not by text repeated across a category's run of cells (the same shape as the
+   * radial-bar layer scoping its labels to `mark: 'bar'`). Pair a waffle with
+   * `extractSunburstChartLegendItems()` and a `<nge-chart-legend>` instead.
+   */
+  showLabels?: boolean;
+  /** Tooltip configuration. Set `enabled: true` to show tooltips on hover. */
+  tooltip?: Partial<NgeTooltipConfig<NgeHierarchyDatum>>;
+  type: 'proportional';
+  /**
+   * Magnitude one grid cell represents (`mark: 'grid'` only). Unset (default) ⇒ the data's
+   * total divided by `rows × columns`, so the grid is exactly filled and each cell reads as a
+   * percentage point. Setting it turns the waffle into a UNIT chart — one cell per fixed
+   * quantity — and leaves any surplus cells empty.
+   */
+  valuePerCell?: number;
 }
 
 /** Which shape the radar layer draws each series as — the primary render discriminator. */
@@ -497,6 +930,18 @@ export interface NgeRadarLayerConfig {
   /** Click handler for series vertices. */
   onClick?: (event: NgeChartLayerClickEvent<NgeRadarDataPoint>) => void;
   /** Series shape: `'area'` filled polygon (default) or `'line'` stroked outline (polar chart). */
+  /**
+   * Scale the self-computed outer radius by a RATIO (0–1): `1` (default) fills the plot,
+   * `0.75` draws the web at three-quarters size. Applied AFTER the layer's own label
+   * reserves, so it composes with them rather than fighting them, and `innerRadius` — being
+   * a ratio OF the outer radius — scales with it, so the chart shrinks without distorting.
+   *
+   * This is the knob for "make the chart smaller in a box I do not control". Do NOT reach
+   * for `labelGutter`: it is measured off the arc, so shrinking the mark with it pulls the
+   * labels inward too and merely moves the dead space to the edges. Pair with `labelOffset`
+   * to set how far off the mark the labels then sit.
+   */
+  radiusRatio?: number;
   render?: NgeRadarRender;
   /** Renderer function. Import `renderRadarLayer` from '@nge/charts'. */
   renderer: NgeChartLayerRenderFn<NgeRadarDataPoint, NgeRadarLayerConfig, any>;
@@ -553,21 +998,101 @@ export interface NgeRadialBarLayerConfig {
   /** End of the angular sweep in radians (semi-circle / gauge). Default `2 * Math.PI` (full turn). */
   endAngle?: number;
   /**
+   * Format a bar's label (when `showLabels` is set). Receives the bar's own datum, so a
+   * value label is just `d => String(d.value)` and a combined one
+   * `d => \`${d.label} ${d.value}\`` — the layer draws ONE label per bar rather than a
+   * separate category and value join. Defaults to the datum's own `label`.
+   */
+  formatLabel?: (d: NgeRadialBarDataPoint) => string;
+  /**
    * Inner radius as a RATIO (0–1) of the self-computed outer radius: `0` → bars/rings
    * start at the center, e.g. `0.3` carves a center hole. NOT pixels (so it stays
    * resize-safe). Default 0.
    */
   innerRadius?: number;
+  /**
+   * Label colour for EVERY bar — rung 2 of the label-colour chain (per-datum → layer
+   * config → derived from the bar fill → the theme colour). Setting it deliberately
+   * disables automatic on-fill contrast, giving one flat label colour; a per-datum
+   * `labelColor` still wins over it.
+   *
+   * Derived contrast applies to `labelPosition: 'inside'` only — an outside label sits on
+   * the plot surface, not on a bar fill, so it always takes
+   * `theme['radial-bar'].labelOutside.color`. Both explicit rungs work in either mode.
+   */
+  labelColor?: string;
+  /**
+   * Width in pixels reserved around the chart for outside labels. The outer radius shrinks
+   * by this much, because the layers group is clipped to the plot area — a label drawn past
+   * the bounded rect would be cut off, and this layer's labels ring the whole chart rather
+   * than sitting in two side columns. Ignored when `labelPosition` is `'inside'`. Default 48.
+   */
+  labelGutter?: number;
+  /**
+   * Where `showLabels` draws each bar's label (`mark: 'bar'` only).
+   *
+   * - `'inside'` (default) puts it ON the bar at its mid-radius, running ALONG the radius
+   *   with the left hemisphere flipped 180° so nothing reads upside-down, styled from
+   *   `theme['radial-bar'].label` with automatic on-fill contrast. Text is bounded by the
+   *   bar's radial extent, so a short bar drops its label rather than spilling.
+   * - `'outside'` places every label horizontally just beyond the chart's outer radius, at
+   *   the bar's band mid-angle, anchored away from the center — a category ring around the
+   *   chart, styled from `theme['radial-bar'].labelOutside`. Drops `minLabelAngle`'s
+   *   default to 0, because the bar no longer has to contain the text.
+   */
+  labelPosition?: 'inside' | 'outside';
   /** Radial shape: `'bar'` arcs (default), `'area'` closed radial area, `'cell'` heatmap grid. */
   mark?: NgeRadialBarMark;
+  /**
+   * Smallest bar sweep (in RADIANS) that still gets a label. A bar narrower than this is
+   * dropped from the label join entirely rather than drawn with text spilling across its
+   * neighbours, and regains its label as soon as the data widens it. Default `0.15` rad
+   * (≈ 8.6°) for `labelPosition: 'inside'` and `0` for `'outside'`, where the bar's width
+   * stops being a constraint. A zero-sweep bar is never labelled whatever the threshold.
+   */
+  minLabelAngle?: number;
+  /**
+   * Smallest extent (in PIXELS) that still gets a label — the absolute-size half of the
+   * suppression rule, measured in whichever direction the text runs.
+   *
+   * `'inside'` text runs along the radius, so this is compared against the bar's radial
+   * extent (`outerRadius − innerRadius`) — the thin-bar rule — AND against the arc length
+   * at the bar's mid-radius, which bounds the text's cap-height. `'outside'` text sits off
+   * the mark, so only the arc-length half applies. Default 12px, about one line box at the
+   * default label font size.
+   */
+  minLabelSize?: number;
   /** Click handler for bars / cells / area vertices. */
   onClick?: (event: NgeChartLayerClickEvent<NgeRadialBarDataPoint>) => void;
   /** Angular gap between adjacent bars in radians (`mark: 'bar'`). `0` ⇒ contiguous wedges (rose). Default 0. */
   padAngle?: number;
   /** Renderer function. Import `renderRadialBarLayer` from '@nge/charts'. */
+  /**
+   * Scale the self-computed outer radius by a RATIO (0–1): `1` (default) fills the plot,
+   * `0.75` draws the bars at three-quarters size. Applied AFTER the layer's own label
+   * reserves, so it composes with them rather than fighting them, and `innerRadius` — being
+   * a ratio OF the outer radius — scales with it, so the chart shrinks without distorting.
+   *
+   * This is the knob for "make the chart smaller in a box I do not control". Do NOT reach
+   * for `labelGutter`: it is measured off the arc, so shrinking the mark with it pulls the
+   * labels inward too and merely moves the dead space to the edges. Pair with `labelOffset`
+   * to set how far off the mark the labels then sit.
+   */
+  radiusRatio?: number;
   renderer: NgeChartLayerRenderFn<NgeRadialBarDataPoint, NgeRadialBarLayerConfig, any>;
   /** Fill palette. Datum input index (bar/cell) or series index (area) maps to colors[index % length]. */
   seriesColors?: string[];
+  /**
+   * Draw a label on each bar — on it (`labelPosition: 'inside'`) or just beyond the
+   * perimeter (`'outside'`). Opt-in (default false) so existing radial bars keep their
+   * current look; bars below `minLabelAngle` / `minLabelSize` stay unlabelled.
+   *
+   * `mark: 'bar'` ONLY. `'area'` has no per-datum mark to annotate, and `'cell'` encodes
+   * its value as fill OPACITY over one base colour — the luminance derivation behind
+   * on-mark label colour reads the full-strength fill and would pick white text for a
+   * nearly-transparent cell, so cell labels need an opacity-aware rung first.
+   */
+  showLabels?: boolean;
   /** Start of the angular sweep in radians (semi-circle / gauge). Default 0 (12 o'clock). */
   startAngle?: number;
   /** Tooltip configuration. Set `enabled: true` to show tooltips on hover. */
@@ -814,6 +1339,18 @@ export interface NgeGaugeLayerConfig {
   /** Click handler for the gauge. */
   onClick?: (event: NgeChartLayerClickEvent<NgeGaugeDataPoint>) => void;
   /** Renderer function. Import `renderGaugeLayer` from '@nge/charts'. */
+  /**
+   * Scale the self-computed outer radius by a RATIO (0–1): `1` (default) fills the plot,
+   * `0.75` draws the gauge arc at three-quarters size. Applied AFTER the layer's own label
+   * reserves, so it composes with them rather than fighting them, and `innerRadius` — being
+   * a ratio OF the outer radius — scales with it, so the chart shrinks without distorting.
+   *
+   * This is the knob for "make the chart smaller in a box I do not control". Do NOT reach
+   * for `labelGutter`: it is measured off the arc, so shrinking the mark with it pulls the
+   * labels inward too and merely moves the dead space to the edges. Pair with `labelOffset`
+   * to set how far off the mark the labels then sit.
+   */
+  radiusRatio?: number;
   renderer: NgeChartLayerRenderFn<NgeGaugeDataPoint, NgeGaugeLayerConfig, any>;
   /** Meter form: `'arc'` circular gauge (default) or `'linear'` horizontal progress bar. */
   shape?: NgeGaugeShape;
@@ -911,6 +1448,13 @@ export interface NgeStackedBarLayerConfig {
   barRadius?: number;
   /** Data points to render. Points sharing a `seriesId` form one stack series. */
   data: NgeStackedBarDataPoint[];
+  /**
+   * In-segment label colour for EVERY segment — rung 2 of the label-colour chain
+   * (per-datum → layer config → derived from the segment fill →
+   * `theme['stacked-bar'].label.color`). Setting it deliberately disables automatic
+   * on-fill contrast; a per-datum `labelColor` still wins over it.
+   */
+  labelColor?: string;
   /** Click handler for segments */
   onClick?: (event: NgeChartLayerClickEvent<NgeStackedBarDataPoint>) => void;
   /** Bar orientation. Ignored (treated as vertical) for Marimekko. */
@@ -1169,6 +1713,13 @@ export interface NgeHeatmapLayerConfig {
   data: NgeHeatmapDataPoint[];
   /** Explicit color domain [min, max]. Defaults to the data's non-null value extent. */
   domain?: [number, number];
+  /**
+   * In-cell label colour for EVERY cell — rung 2 of the label-colour chain (per-datum →
+   * layer config → derived from the cell fill → `theme.heatmap.label.color`). Setting it
+   * deliberately disables automatic on-fill contrast; a per-cell `labelColor` still wins
+   * over it.
+   */
+  labelColor?: string;
   /** Format the in-cell / tooltip value. Default String(value). */
   labelFormat?: (value: number) => string;
   /** Cell (color-encoded) vs bubble (size-encoded) marks. Default 'cell'. */
@@ -1231,6 +1782,861 @@ export interface NgeTimelineLayerConfig {
   type: 'timeline';
 }
 
+/** How the word-cloud layer maps a word's `value` onto its font size. */
+export type NgeWordCloudScale = 'linear' | 'log' | 'sqrt';
+
+/**
+ * Word cloud layer configuration.
+ *
+ * Frequency-sized text placed by a spiral layout, seated on self-computed geometry (it
+ * IGNORES the shared cartesian scales). Each datum's `value` maps to a font size through
+ * `scale`, and the words are placed largest-first along an archimedean spiral out from the
+ * plot centre, taking the first position whose bounding box clears every word already
+ * placed. Covers the catalog's *Word Cloud* type.
+ *
+ * **Placement is deterministic** — same data, same size, same picture. The classic
+ * implementations randomise the spiral's start angle and each word's rotation, but a chart
+ * that re-renders on resize, theme change and data update would then reshuffle every word on
+ * every render and defeat the keyed enter/update/exit join. `rotations` is therefore applied
+ * by index rather than at random.
+ *
+ * A word that finds no free position within the layout's iteration budget is **dropped**
+ * rather than overlapped — the same "suppress what cannot be drawn cleanly" rule the
+ * `minLabelSize` thresholds apply elsewhere.
+ */
+export interface NgeWordCloudLayerConfig {
+  /**
+   * Standard enter/update/exit animation (per-phase durations + easing). Overrides
+   * the chart-wide `animation` and the `animationMs` shorthand below.
+   */
+  animation?: NgeChartAnimationConfig;
+  /**
+   * Shorthand that sets enter = update = exit duration (ms); prefer `animation` for
+   * per-phase control. `0` = instant, used during zoom/pan gestures. Default 300.
+   */
+  animationMs?: number;
+  /** Words to render — one `<text>` mark per datum. */
+  data: NgeWordCloudDataPoint[];
+  /**
+   * Font family the words are drawn AND measured in. Falls back to
+   * `theme.wordcloud.word.fontFamily`. Measurement and rendering must agree, so setting one
+   * without the other is what produces a cloud with overlapping or over-spaced words.
+   */
+  fontFamily?: string;
+  /** Format the rendered word / tooltip label. Defaults to the datum's own `label`. */
+  formatLabel?: (d: NgeWordCloudDataPoint) => string;
+  /** Font size (px) of the highest-valued word. Default 64. */
+  maxFontSize?: number;
+  /** Font size (px) of the lowest-valued word. Default 10. */
+  minFontSize?: number;
+  onClick?: (event: NgeChartLayerClickEvent<NgeWordCloudDataPoint>) => void;
+  /** Clearance (px) kept between adjacent word boxes. Default 2. */
+  padding?: number;
+  /** Renderer function. Import `renderWordCloudLayer` from '@nge/charts'. */
+  renderer: NgeChartLayerRenderFn<NgeWordCloudDataPoint, NgeWordCloudLayerConfig, any>;
+  /**
+   * Rotation angles (degrees) cycled across the words by placement order. Default `[0]` —
+   * every word horizontal. `[0, 90]` gives the classic mixed-orientation cloud. Applied by
+   * index, never at random, so the layout stays stable across re-renders.
+   */
+  rotations?: number[];
+  /**
+   * How `value` maps to font size. `'sqrt'` (default) scales the word's AREA with its value,
+   * which is what keeps a high-frequency outlier from swamping the cloud; `'linear'` scales
+   * the height directly; `'log'` compresses a long tail. `'log'` falls back to `'sqrt'` when
+   * any value is non-positive, which a log domain cannot represent.
+   */
+  scale?: NgeWordCloudScale;
+  /** Word color palette. Placement order maps to colors[index % length]. */
+  seriesColors?: string[];
+  /** Tooltip configuration. Set `enabled: true` to show tooltips on hover. */
+  tooltip?: Partial<NgeTooltipConfig<NgeWordCloudDataPoint>>;
+  type: 'wordcloud';
+}
+
+/**
+ * A value on one parallel-coordinates axis. A number puts the axis on a linear scale; a
+ * string puts it on a point (ordinal) scale, which is how a categorical dimension such as
+ * `origin` sits alongside numeric ones in the same chart.
+ */
+export type NgeParallelCoordsValue = number | string;
+
+/** Polyline shape across the axes: straight segments, or an x-monotone curve. */
+export type NgeParallelCoordsCurve = 'linear' | 'monotone';
+
+/**
+ * One dimension's brush selection, in DATA terms rather than pixels — so a consumer can feed
+ * it straight into its own filtering (a table query, a sibling chart) instead of re-deriving
+ * what a pixel band meant. The shape follows the axis's scale type: `range` for the linear
+ * axis a numeric dimension resolves to, `categories` for the point axis a categorical one gets.
+ */
+export type NgeParallelCoordsBrushExtent =
+  | {
+      /** Selected categories, in axis (domain) order. */
+      categories: string[];
+      kind: 'categories';
+    }
+  | {
+      kind: 'range';
+      /** Selected `[min, max]`, ascending. */
+      range: [number, number];
+    };
+
+/**
+ * Active brush extents keyed by dimension `label`. A dimension absent from the map is
+ * unbrushed; the extents present compose as AND.
+ */
+export type NgeParallelCoordsBrushExtents = Record<string, NgeParallelCoordsBrushExtent>;
+
+/** Payload of a brush change — one drag on one axis. */
+export interface NgeParallelCoordsBrushEvent {
+  /** The dimension whose extent changed. */
+  dimension: string;
+  /** The extent for `dimension` after this change; `null` when the drag cleared it. */
+  extent: NgeParallelCoordsBrushExtent | null;
+  /**
+   * Every active extent after this change — feed it straight back as `brushExtents` to close
+   * the controlled loop, without having to merge the single-dimension change yourself.
+   */
+  extents: NgeParallelCoordsBrushExtents;
+}
+
+/**
+ * Parallel coordinates layer configuration.
+ *
+ * A MULTI-AXIS cartesian primitive seated on self-computed geometry (it IGNORES the shared
+ * cartesian scales). The N unique dimension `label`s become N vertical axes evenly spaced
+ * across the plot width, and every `seriesId` group draws as one polyline visiting each axis
+ * at its value for that dimension. Covers the catalog's *Parallel Coordinates* type;
+ * `curve: 'monotone'` gives its curved variant.
+ *
+ * **Every axis carries its OWN scale.** This is the difference from the radar layer, which
+ * shares one radial scale across all its spokes: parallel-coordinates dimensions are
+ * different quantities (a price against a weight against a rating), so a shared domain would
+ * flatten every axis but the largest. Axes whose values are all finite numbers get a
+ * `scaleLinear`; any other axis gets a `scalePoint` over its categories in first-seen order.
+ *
+ * Line color resolves per-datum `color` → `colorBy` → the positional palette. Reach for
+ * `colorBy` on any real dataset: this chart type routinely draws hundreds of records, and
+ * cycling a six-entry palette by record index encodes nothing, whereas coloring by a
+ * dimension's value is the reading the chart is for.
+ */
+export interface NgeParallelCoordsLayerConfig {
+  /**
+   * Standard enter/update/exit animation (per-phase durations + easing). Overrides
+   * the chart-wide `animation` and the `animationMs` shorthand below.
+   */
+  animation?: NgeChartAnimationConfig;
+  /**
+   * Shorthand that sets enter = update = exit duration (ms); prefer `animation` for
+   * per-phase control. `0` = instant. Default 300.
+   */
+  animationMs?: number;
+  /**
+   * Controlled per-axis brush selections, keyed by dimension `label`. Records that fail any
+   * active extent drop to `theme['parallel-coords'].line.dimmedOpacity` instead of being
+   * removed, so the filtered-out population stays legible as context.
+   *
+   * The layer never mutates this — a drag emits through {@link onBrush} and the consumer
+   * feeds the new map back, which is what makes the extents shareable with the rest of a
+   * dashboard. Setting it without an `onBrush` handler is a valid read-only mode: the chrome
+   * and the dimming render, but there is no gesture.
+   *
+   * A record with NO value on a brushed dimension does not match — it cannot be shown to
+   * cross that axis inside the range. This is the one place the layer's usual "a record
+   * missing a dimension simply skips that axis" rule does not carry.
+   */
+  brushExtents?: NgeParallelCoordsBrushExtents;
+  /**
+   * Dimension `label` whose value colors each polyline: every distinct value of that
+   * dimension takes a palette entry in first-seen order, and a record's line inherits the
+   * color of its own value. Unset ⇒ color cycles the palette by record index.
+   */
+  colorBy?: string;
+  /** Polyline shape. Default `'linear'` (straight segments between axes). */
+  curve?: NgeParallelCoordsCurve;
+  /** Data points to render — one `{ label, value }` per axis, grouped into records by `seriesId`. */
+  data: NgeParallelCoordsDataPoint[];
+  /**
+   * Axis order, and the subset of dimensions to draw. Unset ⇒ every unique `label` in
+   * first-seen order. Reordering matters to the reading: parallel coordinates only reveals a
+   * correlation between two dimensions when their axes are adjacent.
+   */
+  dimensions?: string[];
+  /**
+   * Brush-change sink. Setting it is what ENABLES the drag gesture — a controlled brush with
+   * nowhere to report does nothing, the same reasoning that gates the chart-level range-axis
+   * brush on its handler. Drag an axis to select, drag a window's edge to resize or its body
+   * to pan, click an axis without dragging to clear it.
+   */
+  onBrush?: (event: NgeParallelCoordsBrushEvent) => void;
+  /** Click handler for record polylines. */
+  onClick?: (event: NgeChartLayerClickEvent<NgeParallelCoordsDataPoint>) => void;
+  /** Renderer function. Import `renderParallelCoordsLayer` from '@nge/charts'. */
+  renderer: NgeChartLayerRenderFn<NgeParallelCoordsDataPoint, NgeParallelCoordsLayerConfig, any>;
+  /** Line color palette. Record index (or `colorBy` category index) maps to colors[index % length]. */
+  seriesColors?: string[];
+  /** Tick count requested per numeric axis. Default 5. Point axes label every category. */
+  tickCount?: number;
+  /** Tooltip configuration. Set `enabled: true` to show tooltips on hover. */
+  tooltip?: Partial<NgeTooltipConfig<NgeParallelCoordsDataPoint>>;
+  type: 'parallel-coords';
+}
+
+/**
+ * How a treemap partitions its box.
+ *
+ * The six rectangular modes are `d3-hierarchy`'s own tiling functions and differ only in
+ * how they cut — every one of them still produces axis-aligned rectangles. `'voronoi'` is
+ * the odd member: a weighted-Voronoi (power-diagram) tessellation, a genuinely different
+ * algorithm that yields straight-edged convex POLYGONS. Reach for it when the reading is
+ * about grouping and adjacency rather than strict nesting, and accept that it is an
+ * iterative solve rather than a closed-form layout.
+ *
+ * - `'squarify'` (default) — drives cell aspect ratios toward 1, which is what makes areas
+ *   comparable by eye. The right default for "which of these is bigger".
+ * - `'binary'` — recursive halving; keeps sibling input order far better than squarify.
+ * - `'dice'` / `'slice'` — cut only across / only down. Use when one axis carries meaning.
+ * - `'slice-dice'` — alternates by depth, so each level reads as a distinct direction.
+ * - `'resquarify'` — squarified but STABLE: cells keep their place when values update, so an
+ *   animating treemap does not reshuffle. Prefer it over `'squarify'` for live data.
+ * - `'voronoi'` — the catalog's Convex Treemap.
+ */
+export type NgeTreemapTiling =
+  'binary' | 'dice' | 'resquarify' | 'slice' | 'slice-dice' | 'squarify' | 'voronoi';
+
+/**
+ * Treemap (nested proportional rectangles) layer configuration.
+ *
+ * Partitions a `NgeHierarchyDatum` tree into cells whose AREA is proportional to value,
+ * seated on the full plot rect (it IGNORES the shared cartesian scales, like the radial
+ * layers). One primitive fans out across the catalog family via `tiling`: the rectangular
+ * modes give **Treemap**, adding `paddingTop` / `paddingOuter` keeps parent cells visible
+ * behind their children for **Nested Proportional Area**, and `'voronoi'` gives the
+ * convex-polygon **Convex Treemap**. Cell colour resolves per-node `color` → the
+ * `seriesColors` palette (by top-level branch index) → the theme `cell.colors` palette,
+ * then lightens with depth by `theme.treemap.cell.depthFade` so nesting reads without an
+ * outline. The layer is inherently categorical — pair it with a legend over the top-level
+ * branches.
+ *
+ * Opt-in per-cell labels (`showLabels`) are drawn INSIDE the cell, styled from
+ * `theme.treemap.label` with automatic on-fill contrast, and elided to the cell width. A
+ * treemap's cells vary in size by orders of magnitude, so `minLabelSize` and
+ * `maxLabelDepth` drop the ones that cannot seat text rather than letting them spill.
+ */
+export interface NgeTreemapLayerConfig {
+  /**
+   * Standard enter/update/exit animation (per-phase durations + easing). Overrides
+   * the chart-wide `animation` and the `animationMs` shorthand below.
+   */
+  animation?: NgeChartAnimationConfig;
+  /**
+   * Shorthand that sets enter = update = exit duration (ms); prefer `animation` for
+   * per-phase control. `0` = instant. Default 300.
+   */
+  animationMs?: number;
+  /**
+   * `tiling: 'voronoi'` only — stop the solve once total cell-area error falls to this
+   * fraction of the plot area. Default `0.01` (1%). Lower is more faithful to the data and
+   * slower; the layout is iterative, so this is the main quality/cost dial.
+   */
+  convergenceRatio?: number;
+  /** Top-level hierarchy nodes (seated under a synthetic root) — one branch per node. */
+  data: NgeHierarchyDatum[];
+  /**
+   * Format a cell's label (when `showLabels` is set). Receives the node datum carrying its
+   * SUMMED value, so an internal node reports its aggregate rather than `undefined`.
+   * Defaults to the datum's own `label`.
+   */
+  formatLabel?: (d: NgeHierarchyDatum) => string;
+  /**
+   * Label colour for EVERY cell — rung 2 of the label-colour chain (per-datum → layer
+   * config → derived from the cell fill → `theme.treemap.label.color`). Setting it
+   * deliberately disables automatic on-fill contrast, giving one flat label colour; a
+   * per-datum `labelColor` still wins over it.
+   */
+  labelColor?: string;
+  /** Optional depth cap — render at most this many levels. Unset ⇒ full depth. */
+  maxDepth?: number;
+  /**
+   * `tiling: 'voronoi'` only — hard iteration ceiling, so a pathological dataset cannot
+   * hang the render. Default 50. Raise it only alongside a lower `convergenceRatio`.
+   */
+  maxIterationCount?: number;
+  /**
+   * Deepest level that still gets a label (1 = top-level branches only). Independent of
+   * `maxDepth`, which governs what is DRAWN: a treemap can render four levels while
+   * labelling only the two with room. Unset ⇒ every drawn level is eligible.
+   */
+  maxLabelDepth?: number;
+  /**
+   * Smallest cell extent (in PIXELS) that still gets a label, tested in BOTH directions —
+   * a cell must be at least this wide to seat the text and at least one line box tall to
+   * seat its cap-height. Cells below it are dropped from the label join entirely rather
+   * than drawn with text spilling across their neighbours, and regain their label as soon
+   * as the data grows them. Default 12px, about one line box at the default label size.
+   */
+  minLabelSize?: number;
+  /** Click handler for cells. */
+  onClick?: (event: NgeChartLayerClickEvent<NgeHierarchyDatum>) => void;
+  /**
+   * Gap (px) between sibling cells — `d3.treemap`'s `paddingInner`. Default 1, just enough
+   * to separate adjacent cells without the theme stroke. Rectangular tilings only.
+   */
+  padding?: number;
+  /**
+   * Inset (px) between a parent cell's edge and its children — `d3.treemap`'s
+   * `paddingOuter`. Non-zero is what makes a parent VISIBLE as a container behind its
+   * children, which is the Nested Proportional Area reading. Default 0. Rectangular
+   * tilings only.
+   */
+  paddingOuter?: number;
+  /**
+   * Extra inset (px) at the TOP of a parent cell, over and above `paddingOuter` —
+   * `d3.treemap`'s `paddingTop`. This is the strip a parent's own label sits in, so set it
+   * whenever `showLabels` is on and `maxLabelDepth` includes internal nodes. Default 0.
+   * Rectangular tilings only.
+   */
+  paddingTop?: number;
+  /** Renderer function. Import `renderTreemapLayer` from '@nge/charts'. */
+  renderer: NgeChartLayerRenderFn<NgeHierarchyDatum, NgeTreemapLayerConfig, any>;
+  /**
+   * `tiling: 'voronoi'` only — seed for the layout's initial cell sites. The tessellation
+   * starts from random positions, so without a fixed seed the same data draws a different
+   * arrangement on every render and reload. Default 1; change it to shop for a nicer
+   * arrangement of the same data.
+   */
+  seed?: number;
+  /** Cell color palette assigned by top-level branch index. index maps to colors[index % length]. */
+  seriesColors?: string[];
+  /**
+   * Draw a label inside each cell, styled from `theme.treemap.label`. Opt-in (default
+   * false); cells below `minLabelSize` or past `maxLabelDepth` stay unlabelled.
+   */
+  showLabels?: boolean;
+  /** Partition algorithm. Default `'squarify'`. See {@link NgeTreemapTiling}. */
+  tiling?: NgeTreemapTiling;
+  /** Tooltip configuration. Set `enabled: true` to show tooltips on hover. */
+  tooltip?: Partial<NgeTooltipConfig<NgeHierarchyDatum>>;
+  type: 'treemap';
+}
+
+/** How a sankey link's ribbon is drawn between its two node rects. */
+export type NgeSankeyLinkShape = 'curve' | 'parallelogram';
+
+/** Which column a node is pushed to when its depth leaves a choice. */
+export type NgeSankeyNodeAlign = 'center' | 'justify' | 'left' | 'right';
+
+/**
+ * Sankey layer configuration — weighted flow between staged nodes.
+ *
+ * Self-scaled to the plot rect (it IGNORES the shared cartesian scales, like the radial
+ * and treemap layers). `d3-sankey` assigns each node a column from its depth in the graph
+ * and a height proportional to the larger of its in/out flow; every link is a ribbon whose
+ * thickness is its `value`.
+ *
+ * One primitive covers three catalog entries. The base curved form is the **Sankey
+ * Diagram**; staging the same graph by a categorical variable (often time) is the
+ * **Alluvial Diagram**, which needs no separate mode; and `linkShape: 'parallelogram'`
+ * swaps the cubic ribbons for straight-sided ones, which — with categorical stages on
+ * parallel axes — is **Parallel Sets**.
+ *
+ * `data` is a single {@link NgeGraph} object rather than an array, the same shape
+ * exception the bullet layer makes. Node colour resolves per-node `color` → the
+ * `seriesColors` palette (by node index) → the theme `node.colors` palette; a link with no
+ * `color` inherits its source node's, which is what makes a flow readable as "coming from"
+ * somewhere.
+ *
+ * Opt-in labels (`showLabels`) sit BESIDE each node rect — a node rect is `nodeWidth` wide
+ * (16px by default), so text never fits inside one. With only that placement there is
+ * nothing to disambiguate, so the single `theme.sankey.label` slice is theme-relative and
+ * takes no on-fill contrast derivation, exactly like bar value labels. The layer reserves
+ * the labels' width inside the plot rect before laying out, because the layers group is
+ * clipped and a label hung past the edge would be discarded rather than merely tight.
+ */
+export interface NgeSankeyLayerConfig {
+  /**
+   * Standard enter/update/exit animation (per-phase durations + easing). Overrides
+   * the chart-wide `animation` and the `animationMs` shorthand below.
+   */
+  animation?: NgeChartAnimationConfig;
+  /**
+   * Shorthand that sets enter = update = exit duration (ms); prefer `animation` for
+   * per-phase control. `0` = instant. Default 300.
+   */
+  animationMs?: number;
+  /** The flow graph — nodes (optional, derived from link endpoints when omitted) + links. */
+  data: NgeGraph;
+  /**
+   * Format a node's label (when `showLabels` is set). Receives the node datum carrying
+   * its SUMMED flow as `value`, so a node reports its throughput rather than `undefined`.
+   * Defaults to the node's `label`, falling back to its `id`.
+   */
+  formatLabel?: (d: NgeGraphNode) => string;
+  /**
+   * Relaxation passes `d3-sankey` runs to reduce link crossings. Default 6. Higher is
+   * tidier and slower; 0 leaves nodes in their initial column order.
+   */
+  iterations?: number;
+  /**
+   * Label colour for EVERY node label — rung 2 of the label-colour chain (per-datum →
+   * layer config → derived from the mark fill → theme). Node labels sit outside the mark,
+   * so the derivation rung is deliberately inert here and this simply overrides the theme.
+   */
+  labelColor?: string;
+  /** Gap (px) between a node rect and its label. Default 6. */
+  labelPadding?: number;
+  /**
+   * Ribbon geometry. `'curve'` (default) gives the cubic Sankey/Alluvial ribbon;
+   * `'parallelogram'` gives the straight-sided Parallel Sets band. Both are drawn as
+   * FILLED paths with vertical ends, so a ribbon always meets its node rect square on.
+   */
+  linkShape?: NgeSankeyLinkShape;
+  /**
+   * Which column a node lands in when its depth leaves a choice — `d3-sankey`'s four
+   * alignment functions. `'justify'` (default) pushes sink nodes to the last column;
+   * `'left'` / `'right'` anchor to one side; `'center'` centres unconnected nodes.
+   */
+  nodeAlign?: NgeSankeyNodeAlign;
+  /** Vertical gap (px) between node rects in the same column. Default 8. */
+  nodePadding?: number;
+  /** Width (px) of a node rect. Default 16. */
+  nodeWidth?: number;
+  /** Click handler for node rects. */
+  onClick?: (event: NgeChartLayerClickEvent<NgeGraphNode>) => void;
+  /** Renderer function. Import `renderSankeyLayer` from '@nge/charts'. */
+  renderer: NgeChartLayerRenderFn<NgeGraphNode, NgeSankeyLayerConfig, any>;
+  /** Node colour palette assigned by node index. index maps to colors[index % length]. */
+  seriesColors?: string[];
+  /**
+   * Draw a label beside each node rect, styled from `theme.sankey.label`. Opt-in
+   * (default false). Labels in the left half sit to the right of their rect and vice
+   * versa, so they always fall inward.
+   */
+  showLabels?: boolean;
+  /** Tooltip configuration. Set `enabled: true` to show tooltips on hover. */
+  tooltip?: Partial<NgeTooltipConfig<NgeGraphNode>>;
+  type: 'sankey';
+}
+
+/** Which geometry the chord layer draws. See {@link NgeChordLayerConfig} `layout`. */
+export type NgeChordLayout = 'circular' | 'linear';
+
+/** How a connection between two nodes is drawn. See {@link NgeChordLayerConfig} `linkMark`. */
+export type NgeChordLinkMark = 'edge' | 'ribbon';
+
+/**
+ * Chord layer configuration — a circular or linear diagram of weighted relationships between
+ * nodes, folding three Data Viz Project catalog entries into one primitive via `layout` +
+ * `linkMark`.
+ *
+ * Self-scaled to the plot rect (it IGNORES the shared cartesian scales, like the radial and
+ * sankey layers). `data` is a single {@link NgeGraph} object rather than an array, the same
+ * shape exception the sankey layer makes.
+ *
+ * `layout: 'circular'` (default) seats every node as an arc on an outer ring, each arc sized
+ * by that node's total flow — computed by `d3.chord()` when `directed` is `false` (default),
+ * which merges `A→B` and `B→A` into ONE ribbon with asymmetric ends, or by
+ * `d3.chordDirected()` when `directed` is `true`, which keeps them as two separate ribbons
+ * for a genuinely one-way graph. Within that ring, `linkMark: 'ribbon'` (default) fills each
+ * connection as a `d3.ribbon()` shape between its two arcs — the classic **Chord Diagram** —
+ * while `linkMark: 'edge'` strokes a thin curve instead of filling it, trading *volume* for
+ * legibility of *which* nodes connect — the **Non-ribbon Chord**. `layout: 'linear'`
+ * abandons the ring for a horizontal baseline: nodes become circles on the baseline (radius
+ * proportional to `value`) labelled beneath, and every connection is drawn as a stroked
+ * semicircular arc above the baseline whose `stroke-width` is proportional to its `value` —
+ * the **Arc Diagram**. The linear layout is inherently stroked and renders as `'edge'`
+ * regardless of `linkMark`.
+ *
+ * Node colour resolves per-node `color` → the `seriesColors` palette (by node index) → the
+ * theme `node.colors` palette; a link with no `color` inherits its source node's, the same
+ * rule the sankey layer uses so a connection reads as "coming from" somewhere.
+ *
+ * Opt-in labels (`showLabels`) sit OFF the mark — past the outer edge of the ring in
+ * `'circular'` layout, beneath the node circle in `'linear'` layout — so the single
+ * `theme.chord.label` slice is theme-relative and carries no on-fill contrast derivation,
+ * exactly like the sankey layer's node labels.
+ */
+export interface NgeChordLayerConfig {
+  /**
+   * Standard enter/update/exit animation (per-phase durations + easing). Overrides
+   * the chart-wide `animation` and the `animationMs` shorthand below.
+   */
+  animation?: NgeChartAnimationConfig;
+  /**
+   * Shorthand that sets enter = update = exit duration (ms); prefer `animation` for
+   * per-phase control. `0` = instant. Default 300.
+   */
+  animationMs?: number;
+  /** The relationship graph — nodes (optional, derived from link endpoints when omitted) + weighted links. */
+  data: NgeGraph;
+  /**
+   * `false` (default) computes the layout with `d3.chord()`, which merges `A→B` and `B→A`
+   * into ONE ribbon with asymmetric ends — the classic chord-diagram form, even over
+   * directional data. `true` switches to `d3.chordDirected()`, drawing `A→B` and `B→A` as
+   * two distinct ribbons for a genuinely one-way graph.
+   */
+  directed?: boolean;
+  /**
+   * End of the ring's angular span in radians (circular layout only). Default `2 * Math.PI`
+   * (full turn).
+   */
+  endAngle?: number;
+  /**
+   * Format a node's label (when `showLabels` is set). Receives the node datum carrying its
+   * SUMMED flow — the same value that sizes its arc / circle — as `value`, so a node reports
+   * its throughput rather than `undefined`. Defaults to the node's `label`, falling back to
+   * its `id`.
+   */
+  formatLabel?: (d: NgeGraphNode) => string;
+  /**
+   * Inner radius as a RATIO (0–1) of the self-computed outer radius (circular layout only):
+   * the ring of arcs occupies the band between this radius and the outer radius, and every
+   * ribbon / edge attaches to its arc at this radius. NOT pixels (so it stays resize-safe).
+   * Default 0.9 — a thin arc band with the ribbons filling the rest of the disc.
+   */
+  innerRadius?: number;
+  /**
+   * Label colour for EVERY node label — rung 2 of the label-colour chain (per-datum → layer
+   * config → derived from the mark fill → theme). Node labels sit outside the mark, so the
+   * derivation rung is deliberately inert here and this simply overrides the theme.
+   */
+  labelColor?: string;
+  /** Gap (px) between a node's mark and its label. Default 6. */
+  labelPadding?: number;
+  /**
+   * Layout family. `'circular'` (default) draws the ring of arcs — Chord Diagram or
+   * Non-ribbon Chord, depending on `linkMark`; `'linear'` draws nodes on a horizontal
+   * baseline with arced connections above it — the Arc Diagram.
+   */
+  layout?: NgeChordLayout;
+  /**
+   * How a connection is drawn. `'ribbon'` (default) fills the area between two arcs;
+   * `'edge'` strokes a thin curve instead. The linear layout ignores this and always
+   * renders as `'edge'`.
+   */
+  linkMark?: NgeChordLinkMark;
+  /** Click handler for node arcs (circular layout) or node circles (linear layout). */
+  onClick?: (event: NgeChartLayerClickEvent<NgeGraphNode>) => void;
+  /** Angular gap between adjacent ring arcs, in radians (circular layout only). Default 0. */
+  padAngle?: number;
+  /**
+   * Scale the self-computed outer radius by a RATIO (0–1) (circular layout only). See
+   * `core/fns/radial-radius.fns.ts` — the shared sizing knob every radial layer applies as
+   * the LAST step of its radius computation, after its own label reserves.
+   */
+  radiusRatio?: number;
+  /** Renderer function. Import `renderChordLayer` from '@nge/charts'. */
+  renderer: NgeChartLayerRenderFn<NgeGraphNode, NgeChordLayerConfig, any>;
+  /** Node color palette assigned by node index. index maps to colors[index % length]. */
+  seriesColors?: string[];
+  /**
+   * Draw a label off each node — past the ring in `'circular'` layout, beneath the circle in
+   * `'linear'` layout — styled from `theme.chord.label`. Opt-in (default false).
+   */
+  showLabels?: boolean;
+  /**
+   * Order the sub-arcs within each group. `'none'` (default) leaves `d3-chord`'s own
+   * ordering; `'ascending'` / `'descending'` sort them by value.
+   */
+  sortSubgroups?: 'ascending' | 'descending' | 'none';
+  /** Start of the ring's angular span in radians (circular layout only). Default 0. */
+  startAngle?: number;
+  /** Tooltip configuration. Set `enabled: true` to show tooltips on hover. */
+  tooltip?: Partial<NgeTooltipConfig<NgeGraphNode>>;
+  type: 'chord';
+}
+
+/** Which geometry the network layer draws. See {@link NgeNetworkLayerConfig} `layout`. */
+export type NgeNetworkLayout = 'cluster' | 'force' | 'hive';
+
+/**
+ * Network layer configuration — a node-link graph drawn as a graph, where a node's POSITION
+ * carries the meaning. That is what separates it from the other two `NgeGraph` layers: sankey
+ * and chord are flow diagrams, so every node is seated on a prescribed column or ring and only
+ * the connections vary. Here the arrangement itself is the finding.
+ *
+ * Self-scaled to the plot rect (it IGNORES the shared cartesian scales, like the radial, sankey
+ * and chord layers). `data` is a single {@link NgeGraph} object rather than an array, the same
+ * shape exception those two make.
+ *
+ * `layout` folds four Data Viz Project catalog entries into one primitive, and splits into two
+ * genuinely different geometries rather than one parameterised solver:
+ *
+ * - `'force'` (default) runs a `d3-force` simulation — link, many-body, centering and collision
+ *   forces settle the graph into an arrangement where distance approximates relatedness. The
+ *   **Network Visualisation**; add `showLabels` and `directed` and it is the **Sociogram**, which
+ *   is a drawing convention over this same layout rather than a layout of its own.
+ * - `'cluster'` runs the SAME simulation with an added per-`group` positional anchor, so nodes
+ *   sharing a {@link NgeGraphNode} `group` gather while the graph's own structure still shapes
+ *   the interior — the **Clustered Force Layout**.
+ * - `'hive'` runs NO simulation. Nodes are placed deterministically on 2–3 straight axes
+ *   radiating from the centre, assigned by `group` (falling back to a degree rule) and ranked
+ *   along their axis by `value` (falling back to degree), with connections drawn as curves
+ *   between axes — the **Hive Plot**. It is a constrained layout, not a force parameter, which
+ *   is why it is a branch and not a flag.
+ *
+ * The simulation is DETERMINISTIC: it is seeded, run stopped for a fixed `tickCount`, and its
+ * settled positions are memoized per chart instance — so the same data draws the same picture on
+ * every render, reload and test run. See `layers/network/network-force-layout.ts`.
+ *
+ * Node colour resolves per-node `color` → the `seriesColors` palette (by node index) → the theme
+ * `node.colors` palette; a link with no `color` inherits its source node's, the same rule the
+ * sankey and chord layers use so a connection reads as "coming from" somewhere.
+ *
+ * Opt-in labels (`showLabels`) sit BESIDE the node circle, never on it, so the single
+ * `theme.network.label` slice is theme-relative and carries no on-fill contrast derivation.
+ */
+export interface NgeNetworkLayerConfig {
+  /**
+   * Standard enter/update/exit animation (per-phase durations + easing). Overrides
+   * the chart-wide `animation` and the `animationMs` shorthand below.
+   */
+  animation?: NgeChartAnimationConfig;
+  /**
+   * Shorthand that sets enter = update = exit duration (ms); prefer `animation` for
+   * per-phase control. `0` = instant. Default 300.
+   */
+  animationMs?: number;
+  /**
+   * How many axes the hive layout radiates from the centre (`'hive'` only). Clamped to 2–4;
+   * default 3. Nodes are assigned to an axis by `group` when the graph supplies one, else by
+   * a degree rule, so an ungrouped graph still plots.
+   */
+  axisCount?: number;
+  /**
+   * Many-body force strength (`'force'` / `'cluster'` only). Negative values repel — the sign
+   * that spreads a graph out; positive values would collapse it. Default -180.
+   */
+  charge?: number;
+  /**
+   * How hard a node is pulled toward its `group`'s anchor point (`'cluster'` only), 0–1.
+   * Default 0.35 — firm enough to separate the groups, loose enough that the graph's own
+   * link structure still shapes each cluster's interior.
+   */
+  clusterStrength?: number;
+  /** The relationship graph — nodes (optional, derived from link endpoints when omitted) + weighted links. */
+  data: NgeGraph;
+  /**
+   * Draw an arrowhead at each connection's target end, marking the direction of the
+   * relationship. Opt-in (default false) — an undirected graph reads cleaner without them.
+   * This plus `showLabels` is what turns the `'force'` layout into a Sociogram.
+   */
+  directed?: boolean;
+  /**
+   * Format a node's label (when `showLabels` is set). Receives the node datum carrying its
+   * resolved magnitude — the same value that sizes its circle — as `value`, so a node whose
+   * `value` the caller left unset still reports its degree rather than `undefined`. Defaults
+   * to the node's `label`, falling back to its `id`.
+   *
+   * Called MORE THAN ONCE per node per render — once to measure the label's width (which is
+   * what sizes the hive layout's axis reserve) and once to draw it. Keep it pure; a formatter
+   * that counts its own invocations or mutates state will not see one call per node.
+   */
+  formatLabel?: (d: NgeGraphNode) => string;
+  /**
+   * Start of the hive axes as a RATIO (0–1) of the self-computed outer radius (`'hive'`
+   * only) — every axis runs from this radius outward, leaving the centre clear so the
+   * inter-axis curves have room to read. Default 0.15.
+   */
+  innerRadius?: number;
+  /**
+   * Label colour for EVERY node label — rung 2 of the label-colour chain (per-datum → layer
+   * config → derived from the mark fill → theme). Node labels sit beside the circle rather
+   * than on it, so the derivation rung is deliberately inert here and this simply overrides
+   * the theme.
+   */
+  labelColor?: string;
+  /** Gap (px) between a node's circle and its label. Default 6. */
+  labelPadding?: number;
+  /**
+   * Layout family. `'force'` (default) settles a `d3-force` simulation; `'cluster'` adds a
+   * per-`group` anchor to it; `'hive'` places nodes deterministically on radial axes.
+   */
+  layout?: NgeNetworkLayout;
+  /**
+   * Target distance (px) between two linked nodes (`'force'` / `'cluster'` only). Default 60.
+   */
+  linkDistance?: number;
+  /** Largest node circle radius (px) — the radius of the highest-magnitude node. Default 16. */
+  maxNodeRadius?: number;
+  /** Smallest node circle radius (px) — the radius of a zero-magnitude node. Default 4. */
+  minNodeRadius?: number;
+  /** Click handler for node circles. */
+  onClick?: (event: NgeChartLayerClickEvent<NgeGraphNode>) => void;
+  /**
+   * Scale the self-computed outer radius by a RATIO (0–1) (`'hive'` only). See
+   * `core/fns/radial-radius.fns.ts` — the shared sizing knob every radial layer applies as
+   * the LAST step of its radius computation, after its own label reserves.
+   */
+  radiusRatio?: number;
+  /** Renderer function. Import `renderNetworkLayer` from '@nge/charts'. */
+  renderer: NgeChartLayerRenderFn<NgeGraphNode, NgeNetworkLayerConfig, any>;
+  /**
+   * Seed for the simulation's initial placement (`'force'` / `'cluster'` only). The layout is
+   * deterministic per seed, so changing it re-rolls the arrangement without changing the data.
+   * Default 42.
+   */
+  seed?: number;
+  /** Node color palette assigned by node index. index maps to colors[index % length]. */
+  seriesColors?: string[];
+  /**
+   * Draw a label beside each node circle, styled from `theme.network.label`. Opt-in
+   * (default false) — a dense graph is unreadable with every node named.
+   */
+  showLabels?: boolean;
+  /**
+   * How many iterations the simulation is stepped before the graph is drawn (`'force'` /
+   * `'cluster'` only). Default 300 — enough for a graph of a few dozen nodes to settle. The
+   * simulation is run STOPPED for exactly this many ticks rather than animating to rest,
+   * which is what makes the layout reproducible and unit-testable.
+   */
+  tickCount?: number;
+  /** Tooltip configuration. Set `enabled: true` to show tooltips on hover. */
+  tooltip?: Partial<NgeTooltipConfig<NgeGraphNode>>;
+  type: 'network';
+}
+
+/** Coordinate system the tree layer seats its nodes in. See {@link NgeTreeLayerConfig} `layout`. */
+export type NgeTreeLayout = 'radial' | 'tidy';
+
+/**
+ * Which edge of the plot the root sits on, and therefore which way depth grows.
+ * Cartesian (`'tidy'`) only — a radial tree puts the root at the centre, so depth always
+ * grows outward and there is no orientation left to choose.
+ */
+export type NgeTreeOrientation = 'bottom-top' | 'left-right' | 'right-left' | 'top-bottom';
+
+/** How a parent→child edge is drawn. See {@link NgeTreeLayerConfig} `linkShape`. */
+export type NgeTreeLinkShape = 'curve' | 'elbow' | 'straight';
+
+/**
+ * Tree layer configuration — a hierarchy drawn as a LINK DIAGRAM.
+ *
+ * This is the third reading of `NgeHierarchyDatum` and the only one that draws the
+ * parent→child relationship itself: the sunburst nests it as angle, the treemap as area, and
+ * both leave the edges implicit in adjacency. Here the edge is a mark, which is what makes
+ * structure — depth, branching factor, where a subtree hangs — directly legible.
+ *
+ * Self-scaled to the plot rect (it IGNORES the shared cartesian scales, like the radial,
+ * sankey, chord and network layers).
+ *
+ * Four Data Viz Project catalog entries fall out of two orthogonal choices rather than four
+ * code paths:
+ *
+ * - `alignLeaves` swaps `d3.tree()` for `d3.cluster()`, pushing every leaf onto the outer
+ *   edge regardless of its depth — the **Dendrogram** reading. It is a flag and not a third
+ *   `layout` member precisely because it composes with both coordinate systems: an aligned
+ *   radial tree is the circular dendrogram.
+ * - `layout` picks the coordinate system: `'tidy'` (default) is cartesian, `'radial'` wraps
+ *   the same layout onto a full turn with the root at the centre — the **Radial Convergence**.
+ *
+ * The remaining two entries are drawing conventions over the tidy layout rather than layouts
+ * of their own: `orientation: 'top-bottom'` + `linkShape: 'elbow'` + `showLabels` is the
+ * **Organisational Chart**, and `orientation: 'left-right'` + `linkShape: 'curve'` is the
+ * **Mind Map**.
+ *
+ * Node colour resolves per-node `color` → the `seriesColors` palette (by TOP-LEVEL branch
+ * index, so a branch and all its descendants share one hue) → the theme `node.colors`
+ * palette — the same rule the sunburst and treemap use, which is what lets one legend over
+ * the top-level branches serve all three.
+ *
+ * Opt-in labels (`showLabels`) sit BESIDE the node circle, never on it, so the single
+ * `theme.tree.label` slice is theme-relative and carries no on-fill contrast derivation.
+ */
+export interface NgeTreeLayerConfig {
+  /**
+   * Push every LEAF onto the outer edge of the plot regardless of its depth (`d3.cluster()`
+   * instead of `d3.tree()`), so the leaves line up and the internal nodes stretch to meet
+   * them. This is the Dendrogram reading — it makes the leaf set scannable as a list, at the
+   * cost of no longer showing depth by position. Default false (tidy: a node sits at its own
+   * depth).
+   */
+  alignLeaves?: boolean;
+  /**
+   * Standard enter/update/exit animation (per-phase durations + easing). Overrides
+   * the chart-wide `animation` and the `animationMs` shorthand below.
+   */
+  animation?: NgeChartAnimationConfig;
+  /**
+   * Shorthand that sets enter = update = exit duration (ms); prefer `animation` for
+   * per-phase control. `0` = instant. Default 300.
+   */
+  animationMs?: number;
+  /** Top-level hierarchy nodes (seated under a synthetic root) — one branch per node. */
+  data: NgeHierarchyDatum[];
+  /**
+   * Format a node's label (when `showLabels` is set). Receives the node datum carrying its
+   * SUMMED value, so an internal node reports its aggregate rather than `undefined`.
+   * Defaults to the datum's own `label`.
+   *
+   * Called MORE THAN ONCE per node per render — once to measure the widest label (which is
+   * what sizes the layout's label reserve) and once to draw it. Keep it pure; a formatter
+   * that counts its own invocations or mutates state will not see one call per node.
+   */
+  formatLabel?: (d: NgeHierarchyDatum) => string;
+  /**
+   * Label colour for EVERY node label — rung 2 of the label-colour chain (per-datum → layer
+   * config → derived from the mark fill → theme). A tree label sits beside its node circle
+   * rather than on it, so the derivation rung is deliberately inert here and this simply
+   * overrides the theme.
+   */
+  labelColor?: string;
+  /** Gap (px) between a node's circle and its label. Default 6. */
+  labelPadding?: number;
+  /**
+   * Coordinate system. `'tidy'` (default) seats the tree on the plot rect and grows depth in
+   * the `orientation` direction; `'radial'` puts the root at the centre and wraps the breadth
+   * axis onto a full turn.
+   */
+  layout?: NgeTreeLayout;
+  /**
+   * How a parent→child edge is drawn. `'curve'` (default) is the d3 link generator's smooth
+   * S-bend; `'elbow'` is the right-angle path of an org chart, which reads as a reporting
+   * line rather than a flow; `'straight'` is a plain segment, the sparsest option for a
+   * dense tree.
+   *
+   * `'elbow'` is cartesian-only — a right angle in polar coordinates is an arc-then-radius
+   * pair that reads as neither, so `layout: 'radial'` falls back to `'curve'`.
+   */
+  linkShape?: NgeTreeLinkShape;
+  /**
+   * Optional depth cap — render at most this many levels below the root. Unset ⇒ full depth.
+   * The cap is applied BEFORE layout, so the remaining levels spread across the whole plot
+   * rather than leaving a gap where the pruned depth used to be.
+   */
+  maxDepth?: number;
+  /** Node circle radius (px). Flat, not value-scaled — a tree's nodes mark structure, not magnitude. Default 4. */
+  nodeRadius?: number;
+  /** Click handler for node circles. */
+  onClick?: (event: NgeChartLayerClickEvent<NgeHierarchyDatum>) => void;
+  /**
+   * Which edge the root sits on, and therefore which way depth grows (`'tidy'` only).
+   * Default `'left-right'` — with `showLabels` on, a horizontal tree needs one label reserve
+   * on the leaf side, whereas a vertical one needs per-node horizontal room that varies with
+   * sibling spacing. Use `'top-bottom'` for the org-chart reading.
+   */
+  orientation?: NgeTreeOrientation;
+  /**
+   * Scale the self-computed outer radius by a RATIO (0–1) (`'radial'` only). See
+   * `core/fns/radial-radius.fns.ts` — the shared sizing knob every radial layer applies as
+   * the LAST step of its radius computation, after its own label reserves.
+   */
+  radiusRatio?: number;
+  /** Renderer function. Import `renderTreeLayer` from '@nge/charts'. */
+  renderer: NgeChartLayerRenderFn<NgeHierarchyDatum, NgeTreeLayerConfig, any>;
+  /** Node color palette assigned by top-level branch index. index maps to colors[index % length]. */
+  seriesColors?: string[];
+  /**
+   * Draw a label beside each node circle, styled from `theme.tree.label`. Opt-in (default
+   * false) — a deep tree is unreadable with every node named.
+   */
+  showLabels?: boolean;
+  /** Tooltip configuration. Set `enabled: true` to show tooltips on hover. */
+  tooltip?: Partial<NgeTooltipConfig<NgeHierarchyDatum>>;
+  type: 'tree';
+}
+
 /**
  * Union of all layer configs.
  * Discriminated by 'type' field.
@@ -1240,24 +2646,33 @@ export type NgeChartLayerDefinition =
   | NgeBarLayerConfig
   | NgeBulletLayerConfig
   | NgeBumpLayerConfig
+  | NgeChordLayerConfig
   | NgeDistributionLayerConfig
   | NgeDivergingBarLayerConfig
   | NgeFinancialLayerConfig
+  | NgeFunnelLayerConfig
   | NgeGaugeLayerConfig
   | NgeGroupedBarLayerConfig
   | NgeHeatmapLayerConfig
   | NgeHistogramLayerConfig
   | NgeLineLayerConfig
   | NgeLollipopLayerConfig
+  | NgeNetworkLayerConfig
   | NgeOverlayLayerConfig
+  | NgeParallelCoordsLayerConfig
   | NgePieLayerConfig
+  | NgeProportionalLayerConfig
   | NgeRadarLayerConfig
   | NgeRadialBarLayerConfig
+  | NgeSankeyLayerConfig
   | NgeScatterLayerConfig
   | NgeStackedBarLayerConfig
   | NgeSunburstLayerConfig
   | NgeTimelineLayerConfig
-  | NgeWaterfallLayerConfig;
+  | NgeTreeLayerConfig
+  | NgeTreemapLayerConfig
+  | NgeWaterfallLayerConfig
+  | NgeWordCloudLayerConfig;
 
 /**
  * Data point types for each layer
@@ -1343,6 +2758,28 @@ export interface NgeFinancialDataPoint {
 }
 
 /**
+ * One band of the funnel / pyramid layer: a proportional `value` labelled by `label`.
+ * `label` is the enter/update/exit join key, the legend row, and the default tooltip
+ * label — so it must be unique per band. `value` is treated as non-negative (negatives
+ * are clamped to 0 by the renderer). An optional `color` overrides the resolved palette
+ * color for this band.
+ */
+export interface NgeFunnelDataPoint {
+  /** Optional per-band fill override (wins over the seriesColors / theme palette). */
+  color?: string;
+  /** Band identity — the join key, legend row, and default tooltip label (unique per band). */
+  label: string;
+  /**
+   * Optional per-band in-band label colour — the highest-priority rung of the label-colour
+   * chain (per-datum → layer config → derived from the band fill → `theme.funnel.label.color`).
+   * Supplying it opts this band out of automatic on-fill contrast.
+   */
+  labelColor?: string;
+  /** Band magnitude (non-negative) — proportional to its width. */
+  value: number;
+}
+
+/**
  * One datum of the gauge (single-value meter) layer: a `value` measured against its own
  * `[min, max]` range. Mirrors `NgeBulletDataPoint` (kept flat + JSON-serializable so it
  * promotes cleanly out of a domain lib) with `value` in place of `progress`, plus an
@@ -1377,6 +2814,12 @@ export interface NgeHeatmapDataPoint {
   color?: string;
   /** Optional short in-cell label (falls back to the formatted value when showValues). */
   label?: string;
+  /**
+   * Optional per-cell label colour — the highest-priority rung of the label-colour chain
+   * (per-datum → layer config → derived from the cell fill → `theme.heatmap.label.color`).
+   * Supplying it opts this cell out of automatic on-fill contrast.
+   */
+  labelColor?: string;
   /** Row key — the y band-axis category. */
   row: string;
   /** Cell magnitude driving color (and bubble size). null ⇒ empty cell. */
@@ -1486,13 +2929,20 @@ export interface NgePieDataPoint {
   color?: string;
   /** Slice identity — the join key, legend row, and default tooltip label (unique per slice). */
   label: string;
+  /**
+   * Optional per-slice on-arc label colour — the highest-priority rung of the label-colour
+   * chain (per-datum → layer config → derived from the slice fill → `theme.pie.label.color`).
+   * Supplying it opts this slice out of automatic on-fill contrast.
+   */
+  labelColor?: string;
   /** Slice magnitude (non-negative) — proportional to its arc sweep. */
   value: number;
 }
 
 /**
- * One node of the shared hierarchical datum the sunburst / icicle layer partitions
- * (reused later by treemap / icicle). A tree of `label`-identified nodes: a leaf
+ * One node of the shared hierarchical datum the sunburst / icicle layer partitions and the
+ * proportional-area layer sizes by area (reused later by treemap). A tree of
+ * `label`-identified nodes: a leaf
  * carries its own non-negative `value`, while an internal node OMITS `value` and has
  * its magnitude summed from `children` by `d3.hierarchy().sum()`. `label` is the
  * enter/update/exit join-key segment, the legend row, and the default tooltip label.
@@ -1505,8 +2955,98 @@ export interface NgeHierarchyDatum {
   color?: string;
   /** Node identity — join-key segment, legend row, default tooltip label. */
   label: string;
+  /**
+   * Optional per-node label colour — the highest-priority rung of the label-colour chain
+   * (per-datum → layer config → derived from the node fill → `theme.<type>.label.color`).
+   * Supplying it opts this node out of automatic on-fill contrast.
+   */
+  labelColor?: string;
   /** Leaf magnitude (non-negative). Internal-node value is summed from children by d3.hierarchy().sum(); leave unset on internal nodes. */
   value?: number;
+}
+
+/**
+ * One vertex of a {@link NgeGraph} — the shared node-link model behind the flow and
+ * relationship layers (sankey today; chord / arc and network / force next).
+ *
+ * Kept flat and JSON-serializable, like every other datum here, so a graph assembled in a
+ * domain lib promotes into the shared library unchanged. `id` is the identity the links
+ * reference and the join key the render fns bind on, which is why it is required while
+ * `label` — a display concern — is not.
+ *
+ * ⚠️ `value` is an OUTPUT as much as an input. A layout that derives magnitude from the
+ * graph (sankey sums each node's larger side) writes the computed throughput back onto the
+ * node it hands to `formatLabel` / the tooltip, so a caller that left it unset still reads
+ * a number there.
+ */
+export interface NgeGraphNode {
+  /** Optional per-node fill override (wins over the palette). */
+  color?: string;
+  /**
+   * Optional category this node belongs to — the clustering / axis-assignment key for the
+   * layouts that arrange nodes by role rather than by flow (the network layer's `'cluster'`
+   * and `'hive'`). A plain string rather than a config-level accessor function, so a graph
+   * stays flat and JSON-serializable and promotes out of a domain lib unchanged.
+   *
+   * Ignored by the layouts that seat every node positionally (sankey, chord).
+   */
+  group?: string;
+  /** Node identity — referenced by `NgeGraphLink.source` / `.target`, and the join key. */
+  id: string;
+  /** Display name. Defaults to `id` when unset. */
+  label?: string;
+  /**
+   * Optional per-node label colour — the highest-priority rung of the label-colour chain.
+   * Supplying it opts this node out of the layer-config and theme rungs.
+   */
+  labelColor?: string;
+  /**
+   * Magnitude. Optional on input: a layout that can derive it from the links does, and
+   * writes the result back. Supply it to pin a node larger than its flow warrants.
+   */
+  value?: number;
+}
+
+/**
+ * One weighted, directed edge of a {@link NgeGraph}.
+ *
+ * `source` / `target` are node **ids**, not indices or object references — an index breaks
+ * the moment a caller filters the node list, and a reference is not serializable. Layers
+ * resolve them against the node set.
+ */
+export interface NgeGraphLink {
+  /**
+   * Optional per-link fill override. Unset, a link takes its SOURCE node's colour, which
+   * is what lets a reader follow a flow forward through the diagram.
+   */
+  color?: string;
+  /** Id of the node this edge leaves. */
+  source: string;
+  /** Id of the node this edge enters. */
+  target: string;
+  /** Edge weight — ribbon thickness / arc width / edge strength. Non-negative. */
+  value: number;
+}
+
+/**
+ * A node-link graph: the shared data model for flow and relationship layers, playing the
+ * role {@link NgeHierarchyDatum} plays for the nesting layers.
+ *
+ * `nodes` is OPTIONAL. Most flow datasets arrive as links alone, so a layer derives the
+ * node set from the link endpoints in first-seen order when it is omitted. Supply it to
+ * control node ORDER (which drives the palette and the initial column layout), to give
+ * nodes display labels or colours, or to include a node no link touches.
+ *
+ * ⚠️ Layouts in this family mutate what they are given — `d3-sankey` replaces each link's
+ * `source` / `target` id with a resolved node object and writes geometry onto both. A
+ * render fn therefore works on a COPY; the caller's graph is never touched, so a config
+ * object stays reusable across re-renders and across charts.
+ */
+export interface NgeGraph {
+  /** The weighted edges. Required — the graph's structure lives here. */
+  links: NgeGraphLink[];
+  /** Explicit node set. Omit to derive it from the link endpoints in first-seen order. */
+  nodes?: NgeGraphNode[];
 }
 
 /**
@@ -1553,6 +3093,12 @@ export interface NgeRadialBarDataPoint {
   color?: string;
   /** Angular category (band) — the position around the circle and the bar/area join key. */
   label: string;
+  /**
+   * Optional per-datum label colour — the highest-priority rung of the label-colour chain
+   * (per-datum → layer config → derived from the bar fill → `theme['radial-bar'].label.color`).
+   * Supplying it opts this bar out of automatic on-fill contrast.
+   */
+  labelColor?: string;
   /** Optional series id — groups a multi-series radial line/area and maps to the palette by index. */
   seriesId?: string;
   /** Radial magnitude (non-negative) — bar length / area radius / cell intensity. */
@@ -1564,7 +3110,7 @@ export interface NgeScatterDataPoint {
   /**
    * Optional per-point opacity override (0-1). Falls back to theme.point.opacity.
    * The de-emphasis primitive used by series selection: unlike color math, opacity
-   * composes with unresolved `var(--chart-*)` palette colors.
+   * composes with unresolved `var(--nge-chart-*)` palette colors.
    */
   opacity?: number;
   /** Optional series identifier for multi-series charts */
@@ -1584,6 +3130,13 @@ export interface NgeStackedBarDataPoint {
   category: string;
   /** Optional per-segment color override. */
   color?: string;
+  /**
+   * Optional per-segment in-segment label colour — the highest-priority rung of the
+   * label-colour chain (per-datum → layer config → derived from the segment fill →
+   * `theme['stacked-bar'].label.color`). Supplying it opts this segment out of
+   * automatic on-fill contrast.
+   */
+  labelColor?: string;
   /** Stack-series identifier — points sharing it form one series. */
   seriesId: string;
   /** Segment magnitude. */
@@ -1670,6 +3223,45 @@ export interface NgeTimelineDataPoint {
   rowId: string;
   /** Start of the span (left edge); the marker position when `milestone`. */
   start: Date | number | string;
+}
+
+/**
+ * One word of the word-cloud layer: a `label` drawn at a size proportional to its `value`.
+ *
+ * `label` is the word itself — the enter/update/exit join key, the legend row, and the
+ * default tooltip label — so it must be unique across the data. `value` is its frequency /
+ * weight and is treated as non-negative.
+ *
+ * There is no `labelColor` counterpart to the other layers': in a word cloud the text IS the
+ * mark rather than a label drawn on one, so `color` already names the text's own colour and
+ * the on-fill contrast derivation (`resolveLabelColor`) has nothing to derive against.
+ */
+export interface NgeWordCloudDataPoint {
+  /** Optional per-word text-colour override (wins over the seriesColors / theme palette). */
+  color?: string;
+  /** The word — the join key, legend row, and default tooltip label (unique per datum). */
+  label: string;
+  /** Word magnitude (non-negative) — proportional to its font size. */
+  value: number;
+}
+
+/**
+ * One record's value on one parallel-coordinates axis.
+ *
+ * The data is LONG rather than wide — a record contributes one datum per dimension, tied
+ * together by `seriesId`, rather than arriving as a single row of fields. That is the shape
+ * the radar layer already uses for its own multi-axis data, so one fixture can drive both
+ * chart types and the library keeps a single multi-axis convention.
+ */
+export interface NgeParallelCoordsDataPoint {
+  /** Optional per-record line-colour override (wins over `colorBy` and the palette). */
+  color?: string;
+  /** Dimension (axis) label this value sits on — the axis join key. */
+  label: string;
+  /** Record identity — groups this datum's siblings into one polyline across the axes. */
+  seriesId?: string;
+  /** Value on this dimension: a number for a linear axis, a string for a point axis. */
+  value: NgeParallelCoordsValue;
 }
 
 /**

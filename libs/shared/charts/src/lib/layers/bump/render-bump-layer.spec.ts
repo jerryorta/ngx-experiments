@@ -199,13 +199,13 @@ describe('renderBumpLayer', () => {
 
       // Series order = first-seen in data (A, B, C) → primary / secondary / tertiary.
       expect(styleOf(seriesGroup(g, 'A').querySelector('.nge-bump-line')!, 'stroke')).toBe(
-        'var(--chart-primary)'
+        'var(--nge-chart-primary)'
       );
       expect(styleOf(seriesGroup(g, 'B').querySelector('.nge-bump-line')!, 'stroke')).toBe(
-        'var(--chart-secondary)'
+        'var(--nge-chart-secondary)'
       );
       expect(styleOf(seriesGroup(g, 'C').querySelector('.nge-bump-line')!, 'stroke')).toBe(
-        'var(--chart-tertiary)'
+        'var(--nge-chart-tertiary)'
       );
     });
 
@@ -225,10 +225,10 @@ describe('renderBumpLayer', () => {
 
       // Not all-primary: series cycle the theme palette (matching the legend swatches).
       expect(styleOf(seriesGroup(g, 'A').querySelector('.nge-bump-line')!, 'stroke')).toBe(
-        'var(--chart-primary)'
+        'var(--nge-chart-primary)'
       );
       expect(styleOf(seriesGroup(g, 'B').querySelector('.nge-bump-line')!, 'stroke')).toBe(
-        'var(--chart-secondary)'
+        'var(--nge-chart-secondary)'
       );
     });
 
@@ -313,8 +313,8 @@ describe('renderBumpLayer', () => {
       renderBumpLayer(context);
 
       const point = pointsOf(g, 'A')[0];
-      expect(styleOf(point, 'fill')).toBe('var(--chart-surface)');
-      expect(styleOf(point, 'stroke')).toBe('var(--chart-primary)');
+      expect(styleOf(point, 'fill')).toBe('var(--nge-chart-surface)');
+      expect(styleOf(point, 'stroke')).toBe('var(--nge-chart-primary)');
     });
   });
 
@@ -345,7 +345,7 @@ describe('renderBumpLayer', () => {
       const lastPoint = pointsOf(g, 'A').at(-1)!;
       // Label sits to the RIGHT of the series' last point.
       expect(num(label, 'x')).toBeGreaterThan(num(lastPoint, 'cx'));
-      expect(styleOf(label, 'fill')).toBe('var(--chart-on-surface)');
+      expect(styleOf(label, 'fill')).toBe('var(--nge-chart-on-surface)');
     });
   });
 

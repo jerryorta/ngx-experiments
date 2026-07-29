@@ -1,16 +1,11 @@
-import type { OperatorFunction } from 'rxjs';
-
 import { memoize } from '@nge/rxjs';
-import { select } from 'd3-selection';
 import { isEqual } from 'es-toolkit/compat';
 import { pipe } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import type {
-  NgeChartConfigBase,
   NgeChartDimensions,
   NgeCommonChartConfig,
-  NgeElSizeConfigDimensions,
   NgeJSONDOMRect,
   NgeSizeConfigDimensions,
 } from '../chart.models';
@@ -20,26 +15,6 @@ export function getJSONDOMRectReadOnly(d: DOMRectReadOnly): NgeJSONDOMRect {
 }
 
 export const processConfig = pipe(distinctUntilChanged(isEqual), debounceTime(20), memoize());
-
-const debounceTimeValue = 100;
-
-export const processResizeMap: OperatorFunction<DOMRectReadOnly, NgeJSONDOMRect> = pipe(
-  map(getJSONDOMRectReadOnly),
-  distinctUntilChanged(isEqual),
-  debounceTime(debounceTimeValue),
-  memoize<NgeJSONDOMRect>()
-);
-
-export const processResizeConfig = (_config: NgeChartConfigBase) => {
-  // if (config.heightBasedOnData !== null && config.heightBasedOnData !== undefined && config.heightBasedOnData) {
-  //   /**
-  //    * Only check for width changes
-  //    */
-  //   return pipe(map(getJSONDOMRectReadOnly), distinctUntilKeyChanged('width'), debounceTime(debounceTimeValue), memoize());
-  // }
-
-  return processResizeMap;
-};
 
 /**
  *
@@ -83,16 +58,6 @@ export function calculateDimensions(
     dimensions,
     size,
   };
-}
-
-/**
- *
- * @param config: NgeCommonChartConfig
- */
-export function calculateDimensionsMap(
-  config: NgeCommonChartConfig
-): OperatorFunction<NgeJSONDOMRect, NgeSizeConfigDimensions> {
-  return map((size: NgeJSONDOMRect) => calculateDimensions(config, size));
 }
 
 /**
@@ -142,37 +107,4 @@ export function setToRange(min: number, max: number): SetToRangeFn {
     }
     return _v;
   };
-}
-
-export function resizeBaseLayout(
-  el: HTMLElement,
-  { config, dimensions, size }: NgeSizeConfigDimensions
-): NgeElSizeConfigDimensions {
-  const root = select(el).select('.wrapper');
-  root
-    .attr('width', dimensions.width ? dimensions.width : 0)
-    .attr('height', dimensions.height ? dimensions.height : 0);
-  root
-    .select('.bounds')
-    .attr('transform', `translate(${dimensions.margin.left}, ${dimensions.margin.top})`);
-
-  return <NgeElSizeConfigDimensions>{
-    config,
-    dimensions,
-    el,
-    size,
-  };
-}
-
-export function createBaseLayoutMap() {
-  return map((el: HTMLElement) => {
-    const wrapper = select(el).append('svg').classed('wrapper', true);
-    wrapper.append('g').classed('bounds', true);
-
-    return el;
-  });
-}
-
-export function resizeBaseLayoutMap(el: HTMLElement) {
-  return map((config: NgeSizeConfigDimensions) => resizeBaseLayout(el, config));
 }

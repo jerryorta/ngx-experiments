@@ -1,0 +1,20 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-story-interaction-container">
+    <div class="nge-story-interaction-row">
+      <button
+        type="button"
+        class="nge-story-interaction-btn"
+        (click)="randomizeData()"
+      >
+        Randomize Hierarchy
+      </button>
+    </div>
+    <div class="nge-story-interaction-display">Last clicked: {{ lastClicked() }}</div>
+    <div class="nge-story-chart-wrapper">
+      <nge-chart [config]="config()" />
+    </div>
+  </div>
+</nge-storybook-review-container>

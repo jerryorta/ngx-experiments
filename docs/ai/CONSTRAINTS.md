@@ -51,8 +51,16 @@
 
 - **New apps and all new components do NOT use Angular Material.** Never add `@angular/material` imports, `mat-*` components, or `--mat-sys-*` design tokens to new code.
 - Angular Material remains **only** in the established **evolving-cognition** and **real-estate** apps. That code is legacy and stays as-is — this is a forward-looking policy for new development, **NOT** a directive to remove Material from existing apps (do not tear down working code).
-- **New component architecture** (proven to work without Material — reference: `libs/shared/calendar`): `ViewEncapsulation.None` + `host: { class: '<prefix>-name' }`, Tailwind utility classes, and a self-sufficient **own-namespace CSS-variable token set** — `--<prefix>-*` with **literal fallbacks** (e.g. `var(--giga-calendar-surface, #ffffff)`), centralized as a token map/helper. Consumers theme via `--<prefix>-*` overrides — never `--mat-sys-*`.
+- **New component architecture** (proven to work without Material — reference: `libs/shared/calendar`): `ViewEncapsulation.None` + `host: { class: '<prefix>-name' }`, Tailwind utility classes, and a self-sufficient **own-namespace CSS-variable token set** — `--<prefix>-*` with **literal fallbacks** (e.g. `var(--nge-calendar-surface, #ffffff)`), centralized as a token map/helper. Consumers theme via `--<prefix>-*` overrides — never `--mat-sys-*`.
 - Docs/examples written against `--mat-sys-*` or `mat-*` describe how the **legacy** apps work; do not follow them when building anything new.
+
+## Shared Library Namespacing
+
+- **A shared library declares ZERO un-namespaced CSS custom properties.** Every token it publishes carries the library's own prefix — `--nge-calendar-*` (`libs/shared/calendar`, 28 tokens, none bare), `--nge-chart-*` (`libs/shared/charts`), `--nge-table-*` (`libs/shared/table`). A bare `--surface` or `--primary` is a collision waiting to happen in the host app, and the failure is **silent**: an unresolved custom property yields an unstyled element with a green build.
+- **Every CSS class and component/directive selector a `ViewEncapsulation.None` library emits is prefixed too.** Encapsulation `None` makes the class global, so class naming is correctness work, not cosmetics.
+- **A library that scopes story/demo scaffolding needs a second, disjoint namespace** — charts uses `nge-story-*` for story-internal classes so they can never collide with the `nge-chart-*` classes the runtime emits. See `libs/shared/charts/AGENTS.md` § Naming convention.
+- **TS: prefix the identity surface** — components, directives, services, injection tokens, top-level public types. Supporting option / model types may stay bare (calendar prefixes 29 of 106 deliberately); do not blanket-prefix.
+- Historical note: charts was the one shared library that skipped this and was brought onto the convention by ARCH-252.
 
 ## NgRx Facades & Selectors
 
@@ -73,7 +81,7 @@
 - `input()` / `output()` live ONLY at the root component's public boundary (config in, domain events out). NEVER prop-drill inputs or bubble outputs through ≥ 2 component levels — that is the anti-pattern this rule replaces.
 - The store holds reactive UI state; derived view-models are `withComputed`; algorithms stay in **pure functions** the store calls. State, not logic.
 - Exemptions are by KIND, never size: design-library presentational primitives keep their **intrinsic widget mechanics** (CVA internals — a reveal toggle, an open flag, hover/focus state) as component signals; zero-state components need no store; passing config to presentational leaves via `input()`/`output()` at their public boundary is boundary wiring, not internal state.
-- **This SUPPLEMENTS the global classic `@ngrx/store`; it does NOT replace it.** Different jobs: the global domain store (`@gigasoftware/<domain>-store`, consumed via facades/selectors — see "NgRx Facades & Selectors" above) is the system of record for app-/domain-wide persistent data, `@ngrx/entity`, and Firestore websocket subscriptions; the component-scoped SignalStore holds the *ephemeral, local UI/interaction state* of one component system. A system typically does BOTH — consume global state via its facade AND run its own SignalStore. Never migrate a global slice into a component store, nor promote a component's local UI state into the global store.
+- **This SUPPLEMENTS the global classic `@ngrx/store`; it does NOT replace it.** Different jobs: the global domain store (`@nge/<domain>-store`, consumed via facades/selectors — see "NgRx Facades & Selectors" above) is the system of record for app-/domain-wide persistent data, `@ngrx/entity`, and Firestore websocket subscriptions; the component-scoped SignalStore holds the *ephemeral, local UI/interaction state* of one component system. A system typically does BOTH — consume global state via its facade AND run its own SignalStore. Never migrate a global slice into a component store, nor promote a component's local UI state into the global store.
 - Reference impls: `libs/real-estate/ui/src/lib/cma/store/` (CMA — multi-component system) and `libs/got-you/ui/src/lib/onboarding-shell/steps/create-group/gy-create-group-step.store.ts` + `onboarding-shell/data/with-onboarding-step-form.ts` (single-component form step composing a reusable `signalStoreFeature` — GY-72). Full guide: `docs/ai-instructions/reference/multi-component-signal-store.instructions.md`. Scaffold via the `ngrx-component-state` skill.
 
 ## Testing
@@ -125,6 +133,7 @@ Review-time view of the invariants above — verify each on new/changed code (fo
 - [ ] **App components** — SCSS wrapped in `:host {}` except `@media` (outside, with `:host` nested inside) (§ Application Components)
 - [ ] **Styling** — Tailwind preferred; SCSS only for complex component-specific styles (§ Styling)
 - [ ] **No Angular Material in new code** — no `@angular/material`, `<mat-*>`, or `--mat-sys-*`; use own-namespace `--<prefix>-*` tokens with literal fallbacks (evolving-cognition / real-estate legacy exempt) (§ Angular Material — Legacy Only)
+- [ ] **Shared library namespacing** — zero bare CSS custom properties; every emitted class / selector prefixed; TS identity surface prefixed (§ Shared Library Namespacing)
 - [ ] **Testing** — Jest, never Jasmine; `*.spec.ts` colocated next to source (§ Testing)
 - [ ] **Tooling** — `npx nx run [project]:[target]` format, never `nx [target] [project]` (§ Tooling)
 - [ ] **Security** — no secrets, credentials, or `.env` files committed (§ Security)

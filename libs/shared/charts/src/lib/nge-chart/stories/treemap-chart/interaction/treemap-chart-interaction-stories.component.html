@@ -1,0 +1,37 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-story-interaction-container">
+    <div class="nge-story-interaction-row">
+      <button
+        type="button"
+        class="nge-story-interaction-btn nge-story-interaction-btn--primary"
+        (click)="randomizeData()"
+      >
+        Randomize Data
+      </button>
+    </div>
+    @if (interactiveLegend()) {
+      <!-- Standalone interactive legend placed above the chart: clicking a branch
+           toggles it (and its subtree) in/out of the treemap; a toggled-off branch
+           stays listed but dimmed (opacity 0.4) so it can be toggled back on. -->
+      <div class="nge-story-external-legend-row">
+        <span class="nge-story-external-legend-caption"
+          >Standalone &lt;nge-chart-legend&gt; — click a branch to toggle it in/out of the
+          treemap</span
+        >
+        <nge-chart-legend
+          [items]="legendItems()"
+          [interactive]="true"
+          swatchShape="square"
+          layout="grid"
+          (itemClick)="onLegendItemClick($event)"
+        />
+      </div>
+    }
+    <div class="nge-story-chart-wrapper">
+      <nge-chart [config]="config()" />
+    </div>
+  </div>
+</nge-storybook-review-container>

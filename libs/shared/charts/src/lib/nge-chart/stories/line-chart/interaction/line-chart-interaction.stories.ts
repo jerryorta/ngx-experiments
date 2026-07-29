@@ -2,9 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { LineChartInteractionStoriesComponent } from './line-chart-interaction-stories.component';
+import { NgeLineChartInteractionStoriesComponent } from './line-chart-interaction-stories.component';
 
-const meta: Meta<LineChartInteractionStoriesComponent> = {
+const meta: Meta<NgeLineChartInteractionStoriesComponent> = {
   argTypes: {
     // Layer - Area Options
     areaOpacity: {
@@ -192,7 +192,7 @@ const meta: Meta<LineChartInteractionStoriesComponent> = {
       table: { category: 'Layer - Axis Labels' },
     },
   },
-  component: LineChartInteractionStoriesComponent,
+  component: NgeLineChartInteractionStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -202,13 +202,13 @@ const meta: Meta<LineChartInteractionStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<LineChartInteractionStoriesComponent>;
+type Story = StoryObj<NgeLineChartInteractionStoriesComponent>;
 
 export const Interaction: Story = {
   args: {
     // Layer - Area
     areaOpacity: 0.3,
-    // Theme - Axis Styling (defaults from DEFAULT_CHART_BASE_THEME)
+    // Theme - Axis Styling (defaults from DEFAULT_NGE_CHART_BASE_THEME)
     axisLabelFontSize: 14,
     axisTickFontSize: 12,
     // Layer - Line Style

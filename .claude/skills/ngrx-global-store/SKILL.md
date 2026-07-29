@@ -48,7 +48,7 @@ Continue to Phase 1 regardless.
 
 Ask one at a time when answers shape later questions:
 
-1. **Slice name** (e.g. `+notifications`, `+circles`) and target library (`libs/concierge/store/src/lib/`, `libs/real-estate/store/src/lib/`, etc.). Slice directories are prefixed with `+` in this workspace.
+1. **Slice name** (e.g. `transactions`, `budgets`) and target library (`libs/ledger/store/src/lib/`, or a new `libs/<domain>/store/`). Slice directories are **not** `+`-prefixed in this workspace, and a single-slice store stays flat.
 2. **Data shape** — single doc? Collection? Collection-under-parent? Write-only (no subscription)?
 3. **Firestore path(s)** — where does the data live? Workspace invariant: reads are always `onSnapshot` subscriptions, never `.get()`.
 4. **Writes** — create / update / delete patterns? Optimistic? Debounced?
@@ -124,39 +124,40 @@ Read when setting up a new app's root store or when debugging a specific slice. 
 
 The monorepo has strong conventions. Pick the closest in-repo analogue before scaffolding.
 
-### Canonical classic-slice layout — `libs/concierge/store/src/lib/+<feature>/`
+### Canonical classic-slice layout — `libs/ledger/store/src/lib/`
+
+This repo has ONE global slice and it is **flat**, not folder-per-feature. There is no `+<feature>/`
+directory convention here — that is a gigasoftware workspace convention that deliberately did not
+come across:
 
 ```
-+<feature>/
-  <feature>.model.ts                         ← types + WriteStateSlice if writes involved
-  <feature>.actions.ts                       ← createActionGroup
-  <feature>.reducer.ts                       ← feature key + initial state + handlers
-  <feature>.selectors.ts                     ← createFeature + derived selectors
-  <feature>-write.service.ts                 ← wraps firestoreService.upsertDoc$ / deleteDoc$
-  <feature>-firestore-watch.service.ts       ← implements WebsocketConnectableService (onSnapshot)
-  <feature>.effects.ts                       ← uses firestoreWriteEffect for writes + side-effects
-  <feature>.facade.ts                        ← (optional) ergonomic inject-in-component layer
-  index.ts                                   ← barrel
-  + specs for each
+libs/ledger/store/src/lib/
+  ledger-seed.model.ts        ← types
+  ledger.actions.ts           ← createActionGroup — one load lifecycle
+  ledger.feature.ts           ← createFeature + createEntityAdapter (5 EntityState collections)
+  ledger.effects.ts           ← resolves the @nge/ledger-mocks seed behind an artificial delay
+  ledger.facade.ts            ← the ergonomic inject-in-component layer
+  provide-ledger-store.ts     ← makeEnvironmentProviders(provideState + provideEffects)
+  index.ts                    ← barrel
+  + specs for feature, effects and facade
 ```
 
-Pick your template based on what you're building:
-
-| Template slice | Read when scaffolding… |
-|---|---|
-| `libs/concierge/store/src/lib/+account/` | Single-doc Firestore state + writes + facade. Canonical shape for the rest. |
-| `libs/concierge/store/src/lib/+onboarding-draft/` | Same as +account but with a sub-doc path and a stale-guard in the reducer. Has the clear-on-finalize cross-slice effect pattern. |
-| `libs/concierge/store/src/lib/+brokerage/` | Single-doc with a mutable source key (the active brokerage id) that rewires the subscription when the selected id changes. |
-| `libs/concierge/store/src/lib/+onboarding-write/` | Write-only slice — no subscription, just actions → effect → atomic batched `writeBatch`. |
-| `libs/real-estate/store/src/lib/+brokerages/brokerage-entity.service.ts` | Collection slice with `GigaFirestoreCollectionQuery` + `aggregateUpdates` — entity-style CRUD via snapshots. |
-| `libs/real-estate/store/src/lib/+chat/chat-firestore-watch.service.ts` | Nested collection driven by a parent entity via `QueryEngineCache`. |
+When a SECOND slice arrives, split into `libs/<domain>/store/src/lib/<feature>/` and keep the same
+file names inside it. Do not introduce the `+` prefix.
 
 Always read before scaffolding:
 
-1. The `.actions.ts`, `.reducer.ts`, `.effects.ts` from your chosen template — copy conventions, don't reinvent them.
-2. `libs/concierge/store/src/lib/firestore-write/index.ts` — shared write helpers: `firestoreWriteEffect`, `createWriteId`, `onWriteStarted/Succeeded/Failed`, `WriteStateSlice`, `createWriteStateInitial`, `anyWriteInFlight`, `isWriteInFlight`. Always reuse for new write paths.
-3. `libs/concierge/store/src/lib/+websocket-registry/` — the `WebsocketConnectableService` interface and `WebsocketServiceConnector` contract that every watch service implements.
-4. `libs/concierge/store/src/lib/state.concierge-app.ts` — root state composition; you'll register the new reducer / effects / watch service here.
+1. `libs/ledger/store/src/lib/ledger.feature.ts` — `createFeature` + `createEntityAdapter` shape and where derived selectors go.
+2. `libs/ledger/store/src/lib/ledger.effects.ts` — effect shape, plus the `InjectionToken` latency override that lets specs resolve on the next macrotask instead of waiting out a real delay. **This repo is zoneless — no `fakeAsync` / `tick`.**
+3. `libs/ledger/store/src/lib/ledger.facade.ts` — the layer components actually inject.
+4. `libs/ledger/store/src/lib/provide-ledger-store.ts` — registration via `makeEnvironmentProviders`, called once at the app root.
+
+⚠️ **The Firestore half of this skill does not apply in this repo.** ngx has no Firebase: no
+`onSnapshot` subscriptions, no `WebsocketConnectableService` / `WebsocketServiceConnector` contract, no
+`firestoreWriteEffect` / `WriteStateSlice` write helpers, and no root `state.<app>.ts` composition file.
+Ledger's "backend" is a static seed resolved behind an artificial delay, which exercises the same
+loading / loaded / error state machine a real call would. Read the Firestore-specific sections that
+follow as **background on the pattern this skill was written for**, not as instructions for here.
 
 ### Non-negotiable workspace invariants
 
@@ -192,11 +193,11 @@ Write files in dependency order so each can reference the previous:
 7. `<feature>.effects.ts` — wrap each write in `firestoreWriteEffect({ trigger, work, onSuccess, onFailure })`. Add cross-slice effects (e.g. clear-on-signout) here, not in the reducer.
 8. `<feature>.facade.ts` (optional) — `@Injectable({ providedIn: 'root' })` wrapping the store with ergonomic methods + signals (`toSignal(store.select(...))`). Components inject the facade, not the store directly.
 9. `index.ts` — barrel re-exports.
-10. **Register** in `libs/concierge/store/src/lib/state.concierge-app.ts`: add the reducer to the reducers map, the effects class to the effects array, and provide the watch service so its connector initializes.
-11. **Barrel export** from `libs/concierge/store/src/index.ts` so consumers can `import { ... } from '@gigasoftware/concierge-store'`.
+10. **Register** via a `provide-<feature>-store.ts` returning `makeEnvironmentProviders([provideState(<feature>Feature), provideEffects(<Feature>Effects)])`, called once at the app root (`app.config.ts`). There is no central reducers map to edit — see `provide-ledger-store.ts`.
+11. **Barrel export** from `libs/<domain>/store/src/index.ts` so consumers can `import { ... } from '@nge/<domain>-store'` (e.g. `@nge/ledger-store`).
 12. **Specs** for reducer, effects, watch service, write service, facade (follow existing spec shapes for the template slice).
 
-If sign-out needs to clear this slice: add `OnboardingDraftActions.reset()`-style dispatch to the existing signOut chain in `libs/concierge/store/src/lib/+account/account.effects.ts`.
+There is no sign-out chain in this repo (no auth), so nothing needs a cross-slice reset dispatch. If one is ever added, put the clearing effect in the owning slice's `.effects.ts`, never in a reducer.
 
 ---
 
@@ -205,8 +206,8 @@ If sign-out needs to clear this slice: add `OnboardingDraftActions.reset()`-styl
 1. `npx nx run <project>:lint` — clean on touched files.
 2. `npx nx run <project>:test` — all new specs pass.
 3. Type-check at consumers: `inject(FeatureFacade)`, `store.select(selectX)` resolve cleanly.
-4. Confirm the watch service's connector actually initializes — grep for `provide` / `bootstrap` wiring in `state.concierge-app.ts` and any app module; a silently-unregistered watch service yields a slice that never hydrates.
-5. Confirm the reducer is in the root state config (selectors fail silently if the slice isn't registered under the right feature key).
+4. Confirm `provide<Feature>Store()` is actually called in the app root's `providers` (`apps/<app>/src/app/app.config.ts`). An unregistered slice never hydrates, and the failure is silent.
+5. Confirm the feature is registered under the right key — `provideState(<feature>Feature)` derives it from `createFeature({ name })`, and selectors return `undefined` rather than throwing if it is missing.
 
 If refactoring, delete now-dead code after the new slice takes over.
 

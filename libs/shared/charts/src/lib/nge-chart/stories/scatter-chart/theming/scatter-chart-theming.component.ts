@@ -13,15 +13,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'scatter-chart-theming',
+    class: 'nge-scatter-chart-theming',
   },
   imports: [CommonModule, NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'scatter-chart-theming',
+  selector: 'nge-scatter-chart-theming',
   standalone: true,
   styleUrl: './scatter-chart-theming.component.scss',
   templateUrl: './scatter-chart-theming.component.html',
 })
-export class ScatterChartThemingComponent {
+export class NgeScatterChartThemingComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/scatter-chart/theming';
 

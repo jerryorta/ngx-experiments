@@ -1,8 +1,8 @@
-.crosshair-usage-stories {
+.nge-crosshair-usage-stories {
   display: block;
   padding: 20px;
 
-  .stories-container {
+  .nge-story-container {
     max-width: 900px;
     margin: 0 auto;
   }
@@ -11,32 +11,32 @@
     margin-bottom: 8px;
   }
 
-  .intro-text {
+  .nge-story-intro-text {
     margin-bottom: 32px;
-    color: var(--chart-on-surface-variant, #666);
+    color: var(--nge-chart-on-surface-variant, #666);
     font-size: 15px;
     line-height: 1.5;
   }
 
-  .story-section {
+  .nge-story-section {
     margin-bottom: 48px;
     padding-bottom: 24px;
-    border-bottom: 1px solid var(--chart-outline-variant, #ccc);
+    border-bottom: 1px solid var(--nge-chart-outline-variant, #ccc);
 
     h4 {
       margin-bottom: 8px;
-      color: var(--chart-on-surface, #333);
+      color: var(--nge-chart-on-surface, #333);
     }
 
-    .story-description {
+    .nge-story-description {
       margin-bottom: 16px;
-      color: var(--chart-on-surface-variant, #666);
+      color: var(--nge-chart-on-surface-variant, #666);
       font-size: 14px;
       line-height: 1.5;
     }
 
     code {
-      background: var(--chart-surface-container, #eee);
+      background: var(--nge-chart-surface-container, #eee);
       padding: 2px 6px;
       border-radius: 4px;
       font-family: monospace;
@@ -44,16 +44,16 @@
     }
   }
 
-  .code-block {
+  .nge-story-code-block {
     margin-bottom: 16px;
-    background: var(--chart-inverse-surface, #313033);
+    background: var(--nge-chart-inverse-surface, #313033);
     border-radius: 8px;
     overflow: hidden;
 
     pre {
       margin: 0;
       padding: 16px;
-      color: var(--chart-inverse-on-surface, #f4eff4);
+      color: var(--nge-chart-inverse-on-surface, #f4eff4);
       font-family: "Fira Code", "Consolas", monospace;
       font-size: 13px;
       line-height: 1.5;
@@ -62,26 +62,26 @@
     }
   }
 
-  .chart-container {
+  .nge-story-chart-container {
     height: 360px;
-    border: 1px solid var(--chart-outline-variant, #e0e0e0);
+    border: 1px solid var(--nge-chart-outline-variant, #e0e0e0);
     border-radius: 8px;
     padding: 16px;
-    background: var(--chart-surface, #fff);
+    background: var(--nge-chart-surface, #fff);
     overflow: visible; // let the shared tooltip card sit near the plot edges
   }
 
   // Shared crosshair tooltip card — its OWN chrome (chromeless mode drops the
   // default bubble). Mirrors the reference custom-tooltip card.
-  .crosshair-tip {
+  .nge-story-crosshair-tip {
     box-sizing: border-box;
     width: 176px;
     padding: 8px 12px;
     border-radius: 6px;
-    background: var(--chart-surface, #fff);
-    border: 1px solid var(--chart-outline, #79747e);
+    background: var(--nge-chart-surface, #fff);
+    border: 1px solid var(--nge-chart-outline, #79747e);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
-    color: var(--chart-on-surface, #1d1b20);
+    color: var(--nge-chart-on-surface, #1d1b20);
     font-size: 11px;
 
     &__header {

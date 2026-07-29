@@ -1,0 +1,161 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-story-container">
+    <h2>Funnel Chart - Theming Examples</h2>
+    <p class="nge-story-intro-text">
+      Band colours resolve per-datum <code>color</code> &rarr; the layer's
+      <code>seriesColors</code> &rarr; the theme <code>band.colors</code> palette (by input index).
+      Override <code>theme.funnel.band.colors</code> to reskin the whole cycle, or set
+      <code>stroke</code> / <code>strokeWidth</code> / <code>opacity</code> for separators and
+      transparency. Light / dark is handled by the review container.
+    </p>
+
+    <!-- Default Theme -->
+    <section class="nge-story-section">
+      <h4>Default Theme</h4>
+      <p class="nge-story-description">
+        No theme provided — renders on the chart's built-in <code>--nge-chart-*</code> token
+        defaults, which adapt to the surrounding light / dark surface.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <!-- Palette Overrides Grid -->
+    <section class="nge-story-section">
+      <h4>Palette Overrides</h4>
+      <p class="nge-story-description">
+        Provide a custom <code>theme.funnel.band.colors</code> array. Band input index maps to
+        <code>colors[index % length]</code>, so the palette cycles for any band count.
+      </p>
+      <div class="nge-story-themes-grid">
+        <div class="nge-story-theme-item">
+          <span class="nge-story-theme-label">Green</span>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="greenConfig" />
+          </div>
+        </div>
+        <div class="nge-story-theme-item">
+          <span class="nge-story-theme-label">Blue</span>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="blueConfig" />
+          </div>
+        </div>
+        <div class="nge-story-theme-item">
+          <span class="nge-story-theme-label">Red</span>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="redConfig" />
+          </div>
+        </div>
+        <div class="nge-story-theme-item">
+          <span class="nge-story-theme-label">Purple</span>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="purpleConfig" />
+          </div>
+        </div>
+      </div>
+      <div class="nge-story-code-block">
+        <pre>
+const greenConfig = {{ "{" }}
+  ...createFunnelChartConfig({{ "{" }} data {{ "}" }}),
+  theme: {{ "{" }}
+    funnel: {{ "{" }}
+      band: {{ "{" }}
+        colors: ['#1B5E20', '#2E7D32', '#43A047', '#81C784'],
+      {{ "}" }},
+    {{ "}" }},
+  {{ "}" }},
+{{ "}" }};</pre>
+      </div>
+    </section>
+
+    <!-- Translucent Bands -->
+    <section class="nge-story-section">
+      <h4>Translucent Bands</h4>
+      <p class="nge-story-description"
+        >Lower <code>band.opacity</code> for a softer, layered look.</p
+      >
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="translucentConfig" />
+      </div>
+      <div class="nge-story-code-block">
+        <pre>
+theme: {{ "{" }}
+  funnel: {{ "{" }} band: {{ "{" }} opacity: 0.6 {{ "}" }} {{ "}" }},
+{{ "}" }}</pre>
+      </div>
+    </section>
+
+    <!-- Stroke Separators -->
+    <section class="nge-story-section">
+      <h4>Stroke Separators — Discrete Stages</h4>
+      <p class="nge-story-description">
+        A thicker <code>band.stroke</code> / <code>strokeWidth</code>, paired with a
+        <code>gap</code>, cleanly separates adjacent bands into discrete stages instead of a
+        continuous silhouette.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="strokeConfig" />
+      </div>
+      <div class="nge-story-code-block">
+        <pre>
+createFunnelChartConfig({{ "{" }} data, gap: 4 {{ "}" }});
+
+theme: {{ "{" }}
+  funnel: {{ "{" }} band: {{ "{" }} stroke: '#ffffff', strokeWidth: 3 {{ "}" }} {{ "}" }},
+{{ "}" }}</pre>
+      </div>
+    </section>
+
+    <!-- Label Typography -->
+    <section class="nge-story-section">
+      <h4>Label Typography</h4>
+      <p class="nge-story-description">
+        <code>label.color</code> / <code>fontSize</code> / <code>fontWeight</code> style the in-band
+        labels drawn when <code>showLabels: true</code> — i.e. the default
+        <code>labelPosition: 'inside'</code>. Outside labels (<code>'edge'</code> /
+        <code>'right'</code>) read the separate <code>labelOutside</code> slice instead, because
+        they sit on the plot surface rather than on a band fill.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="typographyConfig" />
+      </div>
+      <div class="nge-story-code-block">
+        <pre>
+createFunnelChartConfig({{ "{" }} data, showLabels: true {{ "}" }});
+
+theme: {{ "{" }}
+  funnel: {{ "{" }} label: {{ "{" }} color: '#ffffff', fontSize: 14, fontWeight: 700 {{ "}" }} {{
+            "}"
+          }},
+{{ "}" }}</pre>
+      </div>
+    </section>
+
+    <!-- Highlight: Funnel vs Pyramid comparison -->
+    <section class="nge-story-section nge-story-section--highlight">
+      <h4>Funnel vs Pyramid</h4>
+      <p class="nge-story-description">
+        The same primitive, two shapes — swap <code>direction</code> (and <code>neckRatio</code>
+        for a pointed apex) to move between a top-down funnel and a bottom-up pyramid.
+      </p>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5>Funnel (direction: 'down')</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="comparisonFunnel" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>Pyramid (direction: 'up', neckRatio: 0)</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="comparisonPyramid" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

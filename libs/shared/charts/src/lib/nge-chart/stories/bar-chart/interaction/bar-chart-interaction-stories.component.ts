@@ -13,15 +13,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'bar-chart-interaction-stories',
+    class: 'nge-bar-chart-interaction-stories',
   },
   imports: [CommonModule, NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'bar-chart-interaction-stories',
+  selector: 'nge-bar-chart-interaction-stories',
   standalone: true,
   styleUrl: './bar-chart-interaction-stories.component.scss',
   templateUrl: './bar-chart-interaction-stories.component.html',
 })
-export class BarChartInteractionStoriesComponent {
+export class NgeBarChartInteractionStoriesComponent {
   reviewStatus = REVIEW_STATUS.FINAL;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/bar-chart/interaction';
 

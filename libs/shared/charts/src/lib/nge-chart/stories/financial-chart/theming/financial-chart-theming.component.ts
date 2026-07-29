@@ -44,22 +44,22 @@ const SAMPLE_OHLC: readonly NgeFinancialDataPoint[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'financial-chart-theming',
+    class: 'nge-financial-chart-theming',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'financial-chart-theming',
+  selector: 'nge-financial-chart-theming',
   standalone: true,
   styleUrl: './financial-chart-theming.component.scss',
   templateUrl: './financial-chart-theming.component.html',
 })
-export class FinancialChartThemingComponent {
+export class NgeFinancialChartThemingComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/financial-chart/theming';
 
   sampleData: NgeFinancialDataPoint[] = [...SAMPLE_OHLC];
 
   // 1. Default — up candles fill green (#4caf50), down candles red (#f44336), and the
-  // wick reads the muted `--chart-on-surface-variant`.
+  // wick reads the muted `--nge-chart-on-surface-variant`.
   defaultConfig = createFinancialChartConfig({
     data: this.sampleData,
     xAxisLabel: 'Session',

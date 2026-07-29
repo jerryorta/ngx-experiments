@@ -1,0 +1,137 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-story-container">
+    <h2>Parallel Coordinates - Theming Examples</h2>
+    <p class="nge-story-intro-text">
+      The layer draws its own axes, so it carries <code>axis</code>, <code>tick</code> and
+      <code>label</code> chrome slices alongside the <code>line</code> slice. Every text it draws
+      sits on the plot surface rather than on a data fill, so there is no
+      <code>labelOutside</code> slice and no on-fill contrast derivation to reason about.
+    </p>
+
+    <section class="nge-story-section">
+      <h4>Default Theme</h4>
+      <p class="nge-story-description">
+        No theme provided — renders on the chart's <code>--nge-chart-*</code> token defaults.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Ocean Palette</h4>
+      <p class="nge-story-description">
+        <code>line.colors</code> drives the <code>colorBy</code> categories — index into the palette
+        is by category, so a category keeps its colour no matter which record draws first.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="oceanConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Warm Palette</h4>
+      <p class="nge-story-description">The same slice with a warm three-entry palette.</p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="warmConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section nge-story-section--highlight">
+      <h4>Density: the knob that decides what the chart says</h4>
+      <p class="nge-story-description">
+        <code>line.opacity</code> and <code>line.width</code> are not cosmetics here. Thin and
+        translucent, overlapping records accumulate and the <em>bunching</em> becomes the reading;
+        thick and opaque, each record reads individually and the mass turns into a solid block. Pick
+        the end that matches the record count.
+      </p>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5>Dense — opacity 0.35, width 1</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="denseConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>Sparse — opacity 1, width 3</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="sparseConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Hover Contrast</h4>
+      <p class="nge-story-description">
+        <code>line.dimmedOpacity</code> sets how far the other records recede while one is traced.
+        Hover either chart: too low and the surrounding context is lost, too high and the traced
+        line does not stand out.
+      </p>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5>Strong dim — 0.04</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="strongDimConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>Soft dim — 0.35</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="softDimConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Bold Chrome</h4>
+      <p class="nge-story-description">
+        Heavier axes and larger dimension names, for a chart read from a distance.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="boldChromeConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Brush Chrome</h4>
+      <p class="nge-story-description">
+        The <code>brush</code> slice styles the per-axis selection window and its two edge grips.
+        Both charts hold the same extents — a <code>Weight</code> range and two
+        <code>Origin</code> categories — set through <code>brushExtents</code> alone, which is
+        enough to draw the chrome; <code>onBrush</code> only arms the drag. Keep
+        <code>fillOpacity</code> low enough that the axis, its ticks and the records still read
+        <em>through</em> the window: a brush that hides what it selects defeats the filter it is
+        driving.
+      </p>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5>Default — primary at 0.18, 18px wide</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="brushDefaultConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>Emphasised — 0.35, 28px wide, 2px edge</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="brushBoldConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Quiet Chrome</h4>
+      <p class="nge-story-description">
+        The opposite: axes and ticks recede so the data lines carry all the contrast.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="quietChromeConfig" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

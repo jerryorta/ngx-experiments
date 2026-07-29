@@ -2,9 +2,9 @@
   [reviewStatus]="reviewStatus"
   [storybookFilePath]="storybookFilePath"
 >
-  <div class="interaction-container">
+  <div class="nge-story-interaction-container">
     @if (rangeAxisX() || rangeAxisY()) {
-      <div class="range-axis-hint">
+      <div class="nge-story-range-axis-hint">
         @if (rangeAxisX()) {
           <span
             >The X axis shows the full range with a brush — drag a handle to zoom the plot to that
@@ -20,10 +20,10 @@
         }
       </div>
     }
-    <div class="interaction-row">
+    <div class="nge-story-interaction-row">
       <button
         type="button"
-        class="interaction-btn interaction-btn--primary"
+        class="nge-story-interaction-btn nge-story-interaction-btn--primary"
         (click)="randomizeData()"
       >
         Randomize Data
@@ -31,12 +31,12 @@
       @if (enableGestures()) {
         <button
           type="button"
-          class="interaction-btn"
+          class="nge-story-interaction-btn"
           (click)="transform.resetZoom()"
         >
           Reset Zoom
         </button>
-        <span class="gesture-hint"
+        <span class="nge-story-gesture-hint"
           >Wheel = zoom at cursor · drag = pan · Shift+drag = zoom to rectangle · double-click =
           reset</span
         >
@@ -45,8 +45,8 @@
     @if (externalLegend() && multiSeries()) {
       <!-- Standalone reusable legend fed by the transform's legendItems signal,
            placed just above the chart (custom placement). -->
-      <div class="external-legend-row">
-        <span class="external-legend-caption"
+      <div class="nge-story-external-legend-row">
+        <span class="nge-story-external-legend-caption"
           >Standalone &lt;nge-chart-legend&gt; — custom placement</span
         >
         <nge-chart-legend
@@ -57,7 +57,7 @@
         />
       </div>
     }
-    <div class="chart-wrapper">
+    <div class="nge-story-chart-wrapper">
       <nge-chart
         [config]="config()"
         (legendItemClick)="transform.onLegendItemClick($event)"

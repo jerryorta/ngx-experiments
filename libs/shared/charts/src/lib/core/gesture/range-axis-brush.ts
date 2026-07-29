@@ -107,7 +107,7 @@ export function attachRangeAxisBrush(
     Math.max(min, Math.min(max, value));
 
   // Along-axis pixel of a pointer in plot-origin coords. Uses the TRUE bounds
-  // translate (dimensions.margin), NOT renderChart's local `margins` — the range
+  // translate (dimensions.margin), NOT renderNgeChart's local `margins` — the range
   // axis is drawn inside `bounds`, which is translated by dimensions.margin.
   const alongPixel = (axis: 'x' | 'y', event: MouseEvent): number => {
     const rect = svgNode.getBoundingClientRect();

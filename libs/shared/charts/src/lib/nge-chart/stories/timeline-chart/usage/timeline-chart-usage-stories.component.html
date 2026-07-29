@@ -2,15 +2,15 @@
   [reviewStatus]="reviewStatus"
   [storybookFilePath]="storybookFilePath"
 >
-  <div class="stories-container">
+  <div class="nge-story-container">
     <h2>Timeline Chart - Usage Examples</h2>
-    <p class="intro-text">Common patterns for building timeline / Gantt charts.</p>
+    <p class="nge-story-intro-text">Common patterns for building timeline / Gantt charts.</p>
 
     <!-- EXAMPLE 1: Basic Gantt -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>1. Basic Gantt</h4>
-      <p class="story-description">The simplest timeline: one span per row.</p>
-      <div class="code-block">
+      <p class="nge-story-description">The simplest timeline: one span per row.</p>
+      <div class="nge-story-code-block">
         <pre>
 data = [
   {{ "{" }} rowId: 'Design', start: '2024-01-01', end: '2024-01-22' {{ "}" }},
@@ -20,36 +20,34 @@ data = [
 
 config = createTimelineChartConfig({{ "{" }} data: this.data {{ "}" }});
 
-&lt;nge-chart [config]="config" /&gt;</pre
-        >
+&lt;nge-chart [config]="config" /&gt;</pre>
       </div>
-      <div class="chart-container">
+      <div class="nge-story-chart-container">
         <nge-chart [config]="basicConfig" />
       </div>
     </section>
 
     <!-- EXAMPLE 2: On-Bar Labels -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>2. On-Bar Labels</h4>
-      <p class="story-description">Draw the task label inside each bar.</p>
-      <div class="code-block">
+      <p class="nge-story-description">Draw the task label inside each bar.</p>
+      <div class="nge-story-code-block">
         <pre>
 config = createTimelineChartConfig({{ "{" }}
   data: this.data,
   showLabels: true,
-{{ "}" }});</pre
-        >
+{{ "}" }});</pre>
       </div>
-      <div class="chart-container">
+      <div class="nge-story-chart-container">
         <nge-chart [config]="labeledConfig" />
       </div>
     </section>
 
     <!-- EXAMPLE 3: Milestones -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>3. Milestones</h4>
-      <p class="story-description">Milestone items render as diamonds.</p>
-      <div class="code-block">
+      <p class="nge-story-description">Milestone items render as diamonds.</p>
+      <div class="nge-story-code-block">
         <pre>
 data = [
   // milestone: true renders a diamond at `start` (end is ignored)
@@ -60,56 +58,55 @@ data = [
           }},
 ];
 
-config = createTimelineChartConfig({{ "{" }} data: this.data, showMilestones: true {{ "}" }});</pre
-        >
+config = createTimelineChartConfig({{ "{" }} data: this.data, showMilestones: true {{ "}" }});</pre>
       </div>
-      <div class="chart-container">
+      <div class="nge-story-chart-container">
         <nge-chart [config]="milestoneConfig" />
       </div>
     </section>
 
     <!-- EXAMPLE 4: Tooltip on Hover -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>4. Tooltip on Hover</h4>
-      <p class="story-description">Show details on hover with a tooltip.</p>
-      <div class="code-block">
+      <p class="nge-story-description">Show details on hover with a tooltip.</p>
+      <div class="nge-story-code-block">
         <pre>
 config = createTimelineChartConfig({{ "{" }}
   data: this.data,
   tooltip: {{ "{" }} enabled: true, position: 'follow-mouse' {{ "}" }},
-{{ "}" }});</pre
-        >
+{{ "}" }});</pre>
       </div>
-      <div class="chart-container">
+      <div class="nge-story-chart-container">
         <nge-chart [config]="tooltipConfig" />
       </div>
     </section>
 
     <!-- EXAMPLE 5: Click Handling -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>5. Click Handling</h4>
-      <p class="story-description">Handle span / milestone clicks via onClick.</p>
-      <div class="code-block">
+      <p class="nge-story-description">Handle span / milestone clicks via onClick.</p>
+      <div class="nge-story-code-block">
         <pre>
 config = createTimelineChartConfig({{ "{" }}
   data: this.data,
   onClick: (event) => {{ "{" }}
     this.lastClicked.set(event.data.label);
   {{ "}" }},
-{{ "}" }});</pre
-        >
+{{ "}" }});</pre>
       </div>
-      <div class="interaction-display"> <strong>Last clicked:</strong> {{ lastClicked() }} </div>
-      <div class="chart-container">
+      <div class="nge-story-interaction-display">
+        <strong>Last clicked:</strong> {{ lastClicked() }}
+      </div>
+      <div class="nge-story-chart-container">
         <nge-chart [config]="clickableConfig" />
       </div>
     </section>
 
     <!-- EXAMPLE 6: Dynamic Data with Signals -->
-    <section class="story-section story-section--highlight">
+    <section class="nge-story-section nge-story-section--highlight">
       <h4>6. Dynamic Data with Signals</h4>
-      <p class="story-description">Rebuild the config from a signal when data changes.</p>
-      <div class="code-block">
+      <p class="nge-story-description">Rebuild the config from a signal when data changes.</p>
+      <div class="nge-story-code-block">
         <pre>
 data = signal&lt;NgeTimelineDataPoint[]&gt;([...]);
 
@@ -117,27 +114,26 @@ config = computed(() =>
   createTimelineChartConfig({{ "{" }} data: this.data(), showLabels: true {{ "}" }})
 );
 
-&lt;nge-chart [config]="config()" /&gt;</pre
-        >
+&lt;nge-chart [config]="config()" /&gt;</pre>
       </div>
-      <div class="interaction-row">
+      <div class="nge-story-interaction-row">
         <button
-          class="action-button"
+          class="nge-story-action-button"
           (click)="randomizeData()"
         >
           Randomize Data
         </button>
       </div>
-      <div class="chart-container">
+      <div class="nge-story-chart-container">
         <nge-chart [config]="dynamicConfig()" />
       </div>
     </section>
 
     <!-- EXAMPLE 7: Time Axis Label + Gridlines -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>7. Time Axis Label + Gridlines</h4>
-      <p class="story-description">Label the time axis and add vertical gridlines.</p>
-      <div class="code-block">
+      <p class="nge-story-description">Label the time axis and add vertical gridlines.</p>
+      <div class="nge-story-code-block">
         <pre>
 config = createTimelineChartConfig({{ "{" }}
   data: this.data,
@@ -146,23 +142,22 @@ config = createTimelineChartConfig({{ "{" }}
   xAxisTickFormat: (d) => new Date(d).toLocaleDateString('en-US', {{ "{" }} month: 'short' {{
             "}"
           }}),
-{{ "}" }});</pre
-        >
+{{ "}" }});</pre>
       </div>
-      <div class="chart-container">
+      <div class="nge-story-chart-container">
         <nge-chart [config]="axisConfig" />
       </div>
     </section>
 
     <!-- EXAMPLE 8: Day-Level Timeline with Gridlines -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>8. Day-Level Timeline with Gridlines</h4>
-      <p class="story-description">
+      <p class="nge-story-description">
         A short-span sprint: daily ticks + vertical gridlines align each task to the day. Pass a
         day-granularity <code>xAxisTickFormat</code> — the default ~monthly tick target suits
         multi-month spans.
       </p>
-      <div class="code-block">
+      <div class="nge-story-code-block">
         <pre>
 config = createTimelineChartConfig({{ "{" }}
   data: this.sprintData, // Apr 1-8
@@ -171,24 +166,23 @@ config = createTimelineChartConfig({{ "{" }}
   xAxisTicks: 8, // daily granularity
   xAxisTickFormat: (d) =>
     new Date(d).toLocaleDateString('en-US', {{ "{" }} day: 'numeric', month: 'short' {{ "}" }}),
-{{ "}" }});</pre
-        >
+{{ "}" }});</pre>
       </div>
-      <div class="chart-container">
+      <div class="nge-story-chart-container">
         <nge-chart [config]="sprintConfig" />
       </div>
     </section>
 
     <!-- EXAMPLE 9: Scrubbable Timeline (range-axis brush) -->
-    <section class="story-section story-section--highlight">
+    <section class="nge-story-section nge-story-section--highlight">
       <h4>9. Scrubbable Timeline (range-axis brush)</h4>
-      <p class="story-description">
+      <p class="nge-story-description">
         A year-long roadmap. The bottom axis is a full-range ruler with a draggable brush window:
         drag a handle to zoom the plot to that slice, or drag the window to scrub across past →
         future. The plot renders just the brushed window while the ruler always shows the full
         range. Use <code>NgeTimelineChartTransform</code> to own the scrub state.
       </p>
-      <div class="code-block">
+      <div class="nge-story-code-block">
         <pre>
 // The transform owns the scrub window + forces the range-axis brush on
 transform = new NgeTimelineChartTransform({{ "{" }} data, showLabels: true {{ "}" }});
@@ -197,18 +191,17 @@ transform = new NgeTimelineChartTransform({{ "{" }} data, showLabels: true {{ "}
   [config]="transform.config()"
   (chartGesture)="transform.onChartGesture($event)"
 /&gt;
-&lt;button (click)="transform.resetZoom()"&gt;Reset view&lt;/button&gt;</pre
-        >
+&lt;button (click)="transform.resetZoom()"&gt;Reset view&lt;/button&gt;</pre>
       </div>
-      <div class="interaction-row">
+      <div class="nge-story-interaction-row">
         <button
-          class="action-button"
+          class="nge-story-action-button"
           (click)="scrubTransform.resetZoom()"
         >
           Reset view
         </button>
       </div>
-      <div class="chart-container">
+      <div class="nge-story-chart-container">
         <nge-chart
           [config]="scrubTransform.config()"
           (chartGesture)="scrubTransform.onChartGesture($event)"

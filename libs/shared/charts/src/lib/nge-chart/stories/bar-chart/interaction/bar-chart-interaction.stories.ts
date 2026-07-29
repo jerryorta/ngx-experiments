@@ -2,9 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { BarChartInteractionStoriesComponent } from './bar-chart-interaction-stories.component';
+import { NgeBarChartInteractionStoriesComponent } from './bar-chart-interaction-stories.component';
 
-const meta: Meta<BarChartInteractionStoriesComponent> = {
+const meta: Meta<NgeBarChartInteractionStoriesComponent> = {
   argTypes: {
     // Theme - Axis Styling
     axisLabelFontSize: {
@@ -181,7 +181,7 @@ const meta: Meta<BarChartInteractionStoriesComponent> = {
       table: { category: 'Layer - Axis Labels' },
     },
   },
-  component: BarChartInteractionStoriesComponent,
+  component: NgeBarChartInteractionStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -191,11 +191,11 @@ const meta: Meta<BarChartInteractionStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<BarChartInteractionStoriesComponent>;
+type Story = StoryObj<NgeBarChartInteractionStoriesComponent>;
 
 export const Interaction: Story = {
   args: {
-    // Theme - Axis Styling (defaults from DEFAULT_CHART_BASE_THEME)
+    // Theme - Axis Styling (defaults from DEFAULT_NGE_CHART_BASE_THEME)
     axisLabelFontSize: 14,
     axisTickFontSize: 12,
     // Theme - Bar Styling (defaults from DEFAULT_BAR_LAYER_THEME)

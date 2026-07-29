@@ -1,0 +1,84 @@
+.nge-network-chart-theming {
+  display: block;
+  padding: 20px;
+
+  .nge-story-container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    margin-bottom: 24px;
+  }
+
+  .nge-story-section {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--nge-chart-outline-variant, #ccc);
+
+    &--highlight {
+      background: var(--nge-chart-surface-variant, #f5f5f5);
+      padding: 20px;
+      border-radius: 8px;
+      border: 2px solid var(--nge-chart-primary, #1976d2);
+    }
+
+    h4 {
+      margin-bottom: 8px;
+      color: var(--nge-chart-on-surface, #333);
+    }
+
+    h5 {
+      margin-bottom: 8px;
+      color: var(--nge-chart-on-surface-variant, #666);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .nge-story-description {
+      margin-bottom: 16px;
+      color: var(--nge-chart-on-surface-variant, #666);
+      font-size: 14px;
+      line-height: 1.5;
+
+      code {
+        background: var(--nge-chart-surface-container, #eee);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 13px;
+      }
+    }
+  }
+
+  .nge-story-chart-container {
+    height: 340px;
+    border: 1px solid var(--nge-chart-outline-variant, #e0e0e0);
+    border-radius: 8px;
+    padding: 16px;
+    background: var(--nge-chart-surface, #fff);
+    overflow: visible;
+
+    // A force-settled graph needs more room than a seated one: nodes spread until their
+    // repulsion balances, so a short box squeezes the whole arrangement into a band.
+    &--tall {
+      height: 420px;
+    }
+
+    &--small {
+      height: 280px;
+      padding: 8px;
+    }
+  }
+
+  .nge-story-chart-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .nge-story-chart-column {
+    flex: 1 1 260px;
+    min-width: 0;
+  }
+}

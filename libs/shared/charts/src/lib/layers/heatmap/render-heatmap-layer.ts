@@ -1,7 +1,6 @@
 import type { ScaleBand } from 'd3-scale';
 import type { Selection } from 'd3-selection';
 
-import { hcl } from 'd3-color';
 import { interpolateHcl } from 'd3-interpolate';
 import { scaleLinear, scaleSequential, scaleSqrt } from 'd3-scale';
 import 'd3-transition';
@@ -17,7 +16,12 @@ import type {
   NgeTooltipHandlers,
 } from '../../core/tooltip';
 
-import { mergeHeatmapLayerTheme } from '../../core/theme';
+import {
+  NGE_CHART_TOKEN_FALLBACKS,
+  mergeHeatmapLayerTheme,
+  resolveNgeChartThemeColor,
+  resolveLabelColor,
+} from '../../core/theme';
 import {
   computeHeatmapValueDomain,
   HEATMAP_SCHEME_INTERPOLATORS,
@@ -34,17 +38,6 @@ const TOOLTIP_HEIGHT = 65;
 
 /** Fallback tooltip bubble width (px) when the config omits one. */
 const TOOLTIP_WIDTH = 120;
-
-/**
- * Concrete fallbacks for the ramp / empty-cell tokens so the in-JS colour
- * interpolation never throws when a `var(--chart-*)` fails to resolve (e.g. under
- * jsdom, where `getComputedStyle` returns '' for a custom property).
- */
-const FALLBACK = {
-  '--chart-primary': '#1976d2',
-  '--chart-surface': '#ffffff',
-  '--chart-surface-container-highest': '#e0e0e0',
-} as const;
 
 /** Fields common to every interactive (hover/click) mark. */
 interface InteractiveMark {
@@ -99,6 +92,8 @@ interface HeatmapRenderParams {
   /** Resolved (concrete) fill for empty (`null`-value) cells. */
   emptyColor: string;
   margins: { bottom: number; left: number; right: number; top: number };
+  /** An element in the chart tree — reads `var(--nge-chart-*)` tokens off the cascade. */
+  node: Element | null;
   theme: ResolvedNgeHeatmapLayerTheme;
   tooltip?: Partial<NgeTooltipConfig<NgeHeatmapDataPoint>>;
   tooltipHandlers?: NgeTooltipHandlers;
@@ -115,12 +110,12 @@ interface HeatmapRenderParams {
  * per cell whose radius is sqrt-scaled to the value (**Bubble-based Heat Map**),
  * double-encoded with the same ramp colour. Colour is resolved in-fn from a named
  * `scheme` (d3-scale-chromatic) or the theme token ramp (`rampFrom → rampMid? →
- * rampTo`, interpolated in HCL) — the `var(--chart-*)` endpoints are resolved to
+ * rampTo`, interpolated in HCL) — the `var(--nge-chart-*)` endpoints are resolved to
  * concrete colours first (an unresolved `var()` fails silently in a JS
  * interpolator). Cells, bubbles and labels are each their own keyed
  * enter/update/exit join: cells fade in at final geometry, bubbles grow from r = 0,
  * and all three joins run every render so a `mark` toggle exits the inactive mark
- * cleanly. All colour is applied via D3 `.style()` on `--chart-*` tokens.
+ * cleanly. All colour is applied via D3 `.style()` on `--nge-chart-*` tokens.
  */
 export function renderHeatmapLayer(
   context: NgeChartLayerContext<
@@ -146,12 +141,13 @@ export function renderHeatmapLayer(
     animation,
     colorScale: buildColorScale(node, config, mergedTheme, domain),
     config,
-    emptyColor: resolveThemeColor(
+    emptyColor: resolveNgeChartThemeColor(
       node,
       mergedTheme.cell.emptyColor,
-      FALLBACK['--chart-surface-container-highest']
+      NGE_CHART_TOKEN_FALLBACKS['--nge-chart-surface-container-highest']
     ),
     margins,
+    node,
     theme: mergedTheme,
     tooltip: config.tooltip,
     tooltipHandlers,
@@ -182,7 +178,7 @@ export function renderHeatmapLayer(
 /**
  * Build the value → colour scale. A named `scheme` selects a d3-scale-chromatic
  * sequential interpolator (no token resolution needed). Otherwise the theme token
- * ramp is used: the `rampFrom` / `rampTo` (+ optional `rampMid`) `var(--chart-*)`
+ * ramp is used: the `rampFrom` / `rampTo` (+ optional `rampMid`) `var(--nge-chart-*)`
  * endpoints are resolved to concrete colours first, then interpolated in HCL across
  * the (clamped) value domain — an unresolved `var()` would fail silently in the JS
  * interpolator.
@@ -198,9 +194,17 @@ function buildColorScale(
     return (value: number) => sequential(value);
   }
 
-  const from = resolveThemeColor(node, theme.cell.rampFrom, FALLBACK['--chart-surface']);
-  const to = resolveThemeColor(node, theme.cell.rampTo, FALLBACK['--chart-primary']);
-  const mid = theme.cell.rampMid ? resolveThemeColor(node, theme.cell.rampMid, from) : '';
+  const from = resolveNgeChartThemeColor(
+    node,
+    theme.cell.rampFrom,
+    NGE_CHART_TOKEN_FALLBACKS['--nge-chart-surface']
+  );
+  const to = resolveNgeChartThemeColor(
+    node,
+    theme.cell.rampTo,
+    NGE_CHART_TOKEN_FALLBACKS['--nge-chart-primary']
+  );
+  const mid = theme.cell.rampMid ? resolveNgeChartThemeColor(node, theme.cell.rampMid, from) : '';
 
   const [min, max] = domain;
   const linear = mid
@@ -211,48 +215,6 @@ function buildColorScale(
   linear.clamp(true).interpolate(interpolateHcl);
 
   return (value: number) => linear(value);
-}
-
-/**
- * Resolve a `var(--chart-*)` token to a concrete colour by reading the custom
- * property off `node` (custom props inherit across the shadow boundary), falling
- * back to a hard-coded hex so the colour maths never throws (e.g. under jsdom, where
- * `getComputedStyle` returns '' for a custom property). A concrete colour or an
- * empty string passes through untouched.
- */
-function resolveThemeColor(node: Element | null, value: string, fallback: string): string {
-  if (!value) {
-    return fallback;
-  }
-  const match = /^var\(\s*(--[\w-]+)\s*(?:,[^)]*)?\)$/.exec(value.trim());
-  if (!match) {
-    return value;
-  }
-  if (node && typeof getComputedStyle === 'function') {
-    const resolved = getComputedStyle(node).getPropertyValue(match[1]).trim();
-    if (resolved) {
-      return resolved;
-    }
-  }
-  return (FALLBACK as Record<string, string>)[match[1]] ?? fallback;
-}
-
-/**
- * Perceptual-lightness threshold (CIE Lab L*, 0–100): a cell fill below this reads as
- * "dark", so its value label flips to the light-on-dark color to stay legible.
- */
-const LABEL_DARK_CELL_LIGHTNESS = 60;
-
-/**
- * Pick a legible value-label color for a cell fill — the light-on-dark color when the
- * fill is perceptually dark (Lab L* < threshold), else the default label color. An
- * unparseable fill (e.g. an unresolved `var()` per-cell override) keeps the default.
- */
-function labelColorForFill(fill: string, theme: ResolvedNgeHeatmapLayerTheme): string {
-  const lightness = hcl(fill).l;
-  return Number.isFinite(lightness) && lightness < LABEL_DARK_CELL_LIGHTNESS
-    ? theme.label.colorOnDark
-    : theme.label.color;
 }
 
 /**
@@ -360,7 +322,7 @@ function buildLabelMarks(
   data: NgeHeatmapDataPoint[],
   params: HeatmapRenderParams
 ): HeatmapLabelMark[] {
-  const { colorScale, config, emptyColor, theme, x, y } = params;
+  const { colorScale, config, emptyColor, node, theme, x, y } = params;
   const width = x.bandwidth();
   const height = y.bandwidth();
   const format = config.labelFormat ?? ((value: number) => String(value));
@@ -378,7 +340,13 @@ function buildLabelMarks(
     }
     const fill = datum.color || (datum.value === null ? emptyColor : colorScale(datum.value));
     marks.push({
-      color: labelColorForFill(fill, theme),
+      color: resolveLabelColor({
+        configColor: config.labelColor,
+        datumColor: datum.labelColor,
+        fill,
+        node,
+        theme: theme.label,
+      }),
       key: cellKey(datum),
       text,
       x: cellX + width / 2,

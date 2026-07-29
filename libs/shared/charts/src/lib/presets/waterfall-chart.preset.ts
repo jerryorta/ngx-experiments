@@ -45,7 +45,7 @@ export interface WaterfallChartPresetOptions {
    */
   cumulative?: boolean;
 
-  /** Color of the cumulative overlay line. Default `var(--chart-secondary)`. */
+  /** Color of the cumulative overlay line. Default `var(--nge-chart-secondary)`. */
   cumulativeColor?: string;
 
   /** Data points in sequence — one bar per point, left to right. */
@@ -134,7 +134,7 @@ export function createWaterfallChartConfig(options: WaterfallChartPresetOptions)
     barRadius,
     connectors,
     cumulative = false,
-    cumulativeColor = 'var(--chart-secondary)',
+    cumulativeColor = 'var(--nge-chart-secondary)',
     data,
     fallColor,
     margin,

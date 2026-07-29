@@ -15,15 +15,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'sparkline-chart-usage-stories',
+    class: 'nge-sparkline-chart-usage-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'sparkline-chart-usage-stories',
+  selector: 'nge-sparkline-chart-usage-stories',
   standalone: true,
   styleUrl: './sparkline-chart-usage-stories.component.scss',
   templateUrl: './sparkline-chart-usage-stories.component.html',
 })
-export class SparklineChartUsageStoriesComponent {
+export class NgeSparklineChartUsageStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/sparkline-chart/usage';
 

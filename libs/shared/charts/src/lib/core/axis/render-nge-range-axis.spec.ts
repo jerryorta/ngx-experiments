@@ -77,7 +77,7 @@ describe('renderNgeRangeAxis', () => {
     expect(windowRect.getAttribute('width')).toBe('150');
     expect(windowRect.getAttribute('y')).toBe('0');
     // Translucent primary fill so the tick numbers read through it.
-    expect(windowRect.getAttribute('fill')).toBe('var(--chart-primary)');
+    expect(windowRect.getAttribute('fill')).toBe('var(--nge-chart-primary)');
     // Window body drags to pan → grab cursor.
     expect(windowRect.getAttribute('cursor')).toBe('grab');
   });
@@ -102,7 +102,7 @@ describe('renderNgeRangeAxis', () => {
     handles.forEach(handle => {
       expect(handle.getAttribute('rx')).toBe('3'); // rounded end-handle
       expect(handle.getAttribute('width')).toBe('6');
-      expect(handle.getAttribute('fill')).toBe('var(--chart-primary)');
+      expect(handle.getAttribute('fill')).toBe('var(--nge-chart-primary)');
       // Bottom (horizontal) axis → handles resize left/right.
       expect(handle.getAttribute('cursor')).toBe('ew-resize');
     });

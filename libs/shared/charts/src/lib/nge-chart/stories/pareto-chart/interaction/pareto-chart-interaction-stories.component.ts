@@ -13,15 +13,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'pareto-chart-interaction-stories',
+    class: 'nge-pareto-chart-interaction-stories',
   },
   imports: [CommonModule, NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'pareto-chart-interaction-stories',
+  selector: 'nge-pareto-chart-interaction-stories',
   standalone: true,
   styleUrl: './pareto-chart-interaction-stories.component.scss',
   templateUrl: './pareto-chart-interaction-stories.component.html',
 })
-export class ParetoChartInteractionStoriesComponent {
+export class NgeParetoChartInteractionStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/pareto-chart/interaction';
 

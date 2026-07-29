@@ -62,10 +62,38 @@ export interface RadialBarChartPresetOptions {
   endAngle?: number;
 
   /**
+   * Format a bar's label (when `showLabels` is set). Receives the bar's own datum, so a
+   * value label is `d => String(d.value)`. Defaults to the datum's own `label`.
+   */
+  formatLabel?: NgeRadialBarLayerConfig['formatLabel'];
+
+  /**
    * Inner radius as a RATIO (0–1) of the self-computed outer radius: `0` → start at the
    * center, e.g. `0.3` carves a center hole. NOT pixels.
    */
   innerRadius?: number;
+
+  /**
+   * Flat label colour for EVERY bar — rung 2 of the label-colour chain. Setting it
+   * disables the automatic on-fill contrast that `labelPosition: 'inside'` applies by
+   * default; a per-datum `labelColor` still wins. Outside labels never derive — they take
+   * `theme['radial-bar'].labelOutside.color`.
+   */
+  labelColor?: string;
+
+  /**
+   * Pixels reserved around the chart for outside labels — the outer radius shrinks by this
+   * much so a label cannot fall outside the clipped plot area. Ignored when `labelPosition`
+   * is `'inside'`. Default 48.
+   */
+  labelGutter?: number;
+
+  /**
+   * Where `showLabels` draws each bar's label. `'inside'` (default) runs it along the
+   * bar's radius with automatic on-fill contrast; `'outside'` puts a horizontal category
+   * ring just beyond the perimeter.
+   */
+  labelPosition?: NgeRadialBarLayerConfig['labelPosition'];
 
   /**
    * Chart margin configuration
@@ -76,6 +104,18 @@ export interface RadialBarChartPresetOptions {
    * Radial shape: `'bar'` arcs (default), `'area'` closed radial area, `'cell'` heatmap grid.
    */
   mark?: NgeRadialBarMark;
+
+  /**
+   * Smallest bar sweep (radians) that still gets a label. Default 0.15 rad inside, 0
+   * outside. A zero-sweep bar is never labelled.
+   */
+  minLabelAngle?: number;
+
+  /**
+   * Smallest extent (px) that still gets a label, measured in whichever direction the text
+   * runs — the thin-bar / short-arc rule. Default 12.
+   */
+  minLabelSize?: number;
 
   /**
    * Click handler for bars / cells / area vertices
@@ -89,10 +129,24 @@ export interface RadialBarChartPresetOptions {
   padAngle?: number;
 
   /**
+   * Scale the self-computed outer radius by a RATIO (0–1): `1` (default) fills the plot,
+   * `0.75` draws it at three-quarters size. Applied AFTER the layer's own label reserves,
+   * and `innerRadius` scales with it, so the chart shrinks without distorting. The knob for
+   * "make the chart smaller in a box I do not control" — not `labelGutter`, which is
+   * measured off the arc and drags the labels inward with it.
+   */
+  radiusRatio?: number;
+
+  /**
    * Fill palette. Datum input index (bar/cell) or series index (area) maps to
    * colors[index % length].
    */
   seriesColors?: string[];
+
+  /**
+   * Draw a label on each bar (`mark: 'bar'` only). Opt-in — default false.
+   */
+  showLabels?: boolean;
 
   /**
    * Start of the angular sweep in radians (semi-circle / gauge). Default 0.
@@ -146,12 +200,20 @@ export function createRadialBarChartConfig(options: RadialBarChartPresetOptions)
     animation,
     data,
     endAngle,
+    formatLabel,
     innerRadius,
+    labelColor,
+    labelGutter,
+    labelPosition,
     margin,
     mark,
+    minLabelAngle,
+    minLabelSize,
     onClick,
     padAngle,
+    radiusRatio,
     seriesColors,
+    showLabels,
     startAngle,
     tooltip,
     wedge,
@@ -183,12 +245,20 @@ export function createRadialBarChartConfig(options: RadialBarChartPresetOptions)
       {
         data,
         endAngle,
+        formatLabel,
         innerRadius,
+        labelColor,
+        labelGutter,
+        labelPosition,
         mark,
+        minLabelAngle,
+        minLabelSize,
         onClick,
         padAngle,
+        radiusRatio,
         renderer: renderRadialBarLayer,
         seriesColors,
+        showLabels,
         startAngle,
         tooltip: tooltipConfig,
         type: 'radial-bar',

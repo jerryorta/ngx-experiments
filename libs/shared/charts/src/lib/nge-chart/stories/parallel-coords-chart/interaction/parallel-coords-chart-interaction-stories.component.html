@@ -1,0 +1,50 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  @let brushingOn = brushing(); @let activeBrushes = brushSummary();
+
+  <div class="nge-story-interaction-container">
+    <div class="nge-story-interaction-row">
+      <button
+        type="button"
+        class="nge-story-interaction-btn"
+        (click)="randomizeData()"
+      >
+        Randomize Data
+      </button>
+      @if (brushingOn) {
+        <button
+          type="button"
+          class="nge-story-interaction-btn"
+          [disabled]="activeBrushes.length === 0"
+          (click)="clearBrushes()"
+        >
+          Clear Brushes
+        </button>
+      }
+    </div>
+
+    @if (brushingOn) {
+      <div class="nge-story-brush-readout">
+        <span class="nge-story-brush-count">
+          {{ matchingCount() }} of {{ recordCount() }} records match
+        </span>
+        @if (activeBrushes.length === 0) {
+          <span class="nge-story-brush-hint">
+            Drag down an axis to select. Drag a window's edge to resize it or its body to move it;
+            click an axis away from its window to clear.
+          </span>
+        } @else {
+          @for (brush of activeBrushes; track brush) {
+            <span class="nge-story-brush-chip">{{ brush }}</span>
+          }
+        }
+      </div>
+    }
+
+    <div class="nge-story-chart-wrapper">
+      <nge-chart [config]="config()" />
+    </div>
+  </div>
+</nge-storybook-review-container>

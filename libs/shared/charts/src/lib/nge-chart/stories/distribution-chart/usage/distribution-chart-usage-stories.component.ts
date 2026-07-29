@@ -33,15 +33,15 @@ function makeValues(count: number, center: number, spread: number, seed: number)
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'distribution-chart-usage-stories',
+    class: 'nge-distribution-chart-usage-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'distribution-chart-usage-stories',
+  selector: 'nge-distribution-chart-usage-stories',
   standalone: true,
   styleUrl: './distribution-chart-usage-stories.component.scss',
   templateUrl: './distribution-chart-usage-stories.component.html',
 })
-export class DistributionChartUsageStoriesComponent {
+export class NgeDistributionChartUsageStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/distribution-chart/usage';
 

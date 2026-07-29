@@ -60,6 +60,30 @@ describe('createPieChartConfig', () => {
     expect(layer.onClick).toBe(onClick);
   });
 
+  it('flows the on-arc label options through to the layer', () => {
+    const formatLabel = (d: NgePieDataPoint): string => `${d.label} (${d.value})`;
+    const layer = pieLayerOf(
+      createPieChartConfig({
+        data: DATA,
+        formatLabel,
+        minLabelAngle: 0.4,
+        showLabels: true,
+      })
+    );
+
+    expect(layer.showLabels).toBe(true);
+    expect(layer.formatLabel).toBe(formatLabel);
+    expect(layer.minLabelAngle).toBe(0.4);
+  });
+
+  it('leaves labels off by default (no visual change for existing pies)', () => {
+    const layer = pieLayerOf(createPieChartConfig({ data: DATA }));
+
+    expect(layer.showLabels).toBeUndefined();
+    expect(layer.formatLabel).toBeUndefined();
+    expect(layer.minLabelAngle).toBeUndefined();
+  });
+
   it('builds a tooltip config with a default formatter when enabled', () => {
     const layer = pieLayerOf(createPieChartConfig({ data: DATA, tooltip: { enabled: true } }));
 

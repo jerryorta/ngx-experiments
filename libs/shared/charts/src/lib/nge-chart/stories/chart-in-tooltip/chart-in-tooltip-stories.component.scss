@@ -1,15 +1,15 @@
-.chart-in-tooltip-stories {
-  .chart-in-tooltip-demo {
+.nge-chart-in-tooltip-stories {
+  .nge-story-chart-in-tooltip-demo {
     display: flex;
     flex-direction: column;
     gap: 12px;
   }
 
-  .hint {
+  .nge-story-hint {
     margin: 0;
     font-size: 13px;
     line-height: 1.4;
-    color: var(--chart-on-surface, #444);
+    color: var(--nge-chart-on-surface, #444);
 
     code {
       font-family: monospace;
@@ -19,7 +19,7 @@
 
   // Tall enough to hold the reserved top margin (~180px, where the 'above' tooltip
   // sits) plus a readable plot area beneath it.
-  .chart-wrapper {
+  .nge-story-chart-wrapper {
     height: 480px;
   }
 
@@ -28,15 +28,15 @@
   // the divot/pointer. It still needs an EXPLICIT box for the chart: <nge-chart>'s
   // shadow style is `:host, svg { width:100%; height:100% }`, so a nested chart in a
   // zero-height parent collapses to nothing.
-  .nested-tooltip {
+  .nge-story-nested-tooltip {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 4px;
     padding: 8px;
-    border: 1px solid var(--chart-outline, #79747e);
+    border: 1px solid var(--nge-chart-outline, #79747e);
     border-radius: 8px;
-    background: var(--chart-surface, #fff);
+    background: var(--nge-chart-surface, #fff);
     box-shadow:
       0 2px 6px rgba(0, 0, 0, 0.15),
       0 1px 3px rgba(0, 0, 0, 0.1);
@@ -44,7 +44,7 @@
     &__title {
       font-size: 12px;
       font-weight: 600;
-      color: var(--chart-on-surface, #1d1b20);
+      color: var(--nge-chart-on-surface, #1d1b20);
     }
 
     &__chart {

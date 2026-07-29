@@ -1,3 +1,6 @@
+@let valuesShown = showValues();
+@let formatItemValue = formatValue();
+
 <div
   class="nge-chart-legend-list"
   [class.nge-chart-legend-list--vertical]="orientation() === 'vertical'"
@@ -19,6 +22,9 @@
           [style.background-color]="item.color"
         ></span>
         <span class="nge-chart-legend-label">{{ item.label }}</span>
+        @if (valuesShown && item.value !== undefined) {
+          <span class="nge-chart-legend-value">{{ formatItemValue(item.value) }}</span>
+        }
       </button>
     } @else {
       <div
@@ -32,7 +38,20 @@
           [style.background-color]="item.color"
         ></span>
         <span class="nge-chart-legend-label">{{ item.label }}</span>
+        @if (valuesShown && item.value !== undefined) {
+          <span class="nge-chart-legend-value">{{ formatItemValue(item.value) }}</span>
+        }
       </div>
     }
   }
 </div>
+
+@if (showClearAction()) {
+  <button
+    type="button"
+    class="nge-chart-legend-clear"
+    (click)="clearAction.emit()"
+  >
+    {{ clearActionLabel() }}
+  </button>
+}

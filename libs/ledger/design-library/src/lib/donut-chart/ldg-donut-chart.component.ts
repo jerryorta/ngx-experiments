@@ -11,7 +11,7 @@ export type { LdgDonutSegment } from './ldg-donut.models';
 
 /**
  * Domain-branded donut/pie chart. A **thin wrapper**: it maps its inputs to a
- * promotable donut *layer* (render fn + config + `--chart-*` theme + preset, in
+ * promotable donut *layer* (render fn + config + `--nge-chart-*` theme + preset, in
  * this folder) and renders it through the shared `<nge-chart [config]>`. All
  * real logic lives in the layer, so the donut can promote into `@nge/charts` by
  * moving those files + registering a `'donut'` layer type — no rewrite. See

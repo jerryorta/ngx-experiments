@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { ParetoChartUsageStoriesComponent } from './pareto-chart-usage-stories.component';
+import { NgeParetoChartUsageStoriesComponent } from './pareto-chart-usage-stories.component';
 
-const meta: Meta<ParetoChartUsageStoriesComponent> = {
-  component: ParetoChartUsageStoriesComponent,
+const meta: Meta<NgeParetoChartUsageStoriesComponent> = {
+  component: NgeParetoChartUsageStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<ParetoChartUsageStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<ParetoChartUsageStoriesComponent>;
+type Story = StoryObj<NgeParetoChartUsageStoriesComponent>;
 
 export const Usage: Story = {
   args: {},

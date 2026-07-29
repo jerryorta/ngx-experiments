@@ -4,7 +4,7 @@ export * from './base-layout';
 export * from './chart.models';
 export * from './config';
 export * from './crosshair';
-export * from './fns/_index';
+export * from './fns';
 export * from './gesture';
 export * from './nge-chart-dimensions-calculator';
 export * from './layer';

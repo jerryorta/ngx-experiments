@@ -1,0 +1,114 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-story-container">
+    <h2>Funnel Chart — Labels</h2>
+    <p class="nge-story-intro-text">
+      Every <code>labelPosition</code> mode side by side. Labels are opt-in via
+      <code>showLabels</code> and formatted with <code>formatLabel</code>. Styling comes from
+      whichever theme slice matches the placement: <code>'inside'</code> reads
+      <code>theme.funnel.label</code> (an absolute black / white pair, picked per band from its own
+      fill), while <code>'edge'</code> and <code>'right'</code> read
+      <code>theme.funnel.labelOutside</code> — those sit on the plot surface, not on a band, so they
+      track <code>--nge-chart-on-surface</code> and never derive.
+    </p>
+
+    <!-- 1 + 2: the two outside modes -->
+    <section class="nge-story-section nge-story-section--highlight">
+      <h4>1. Outside labels — <code>'edge'</code> vs <code>'right'</code></h4>
+      <p class="nge-story-description">
+        <code>'edge'</code> sets each label just outside its <em>own</em> band's right edge, so the
+        labels step inward as the funnel narrows — the classic funnel annotation.
+        <code>'right'</code> pins every label to one x for a straight, aligned column. Both reserve
+        <code>labelGutter</code> px off the funnel's width, because the layers group is clipped to
+        the plot rect and a label past <code>boundedWidth</code> would be cut off.
+      </p>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5><code>labelPosition: 'edge'</code></h5>
+          <div class="nge-story-chart-container">
+            <nge-chart [config]="edgeConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5><code>labelPosition: 'right'</code></h5>
+          <div class="nge-story-chart-container">
+            <nge-chart [config]="rightConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3: the default -->
+    <section class="nge-story-section">
+      <h4>2. <code>labelPosition: 'inside'</code> — the default</h4>
+      <p class="nge-story-description">
+        Labels are centered within each band and no gutter is reserved, so the funnel keeps the full
+        plot width. Legible while bands stay wide — note how the last band already struggles here.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="insideConfig" />
+      </div>
+    </section>
+
+    <!-- 4: the failure case that motivates outside labels -->
+    <section class="nge-story-section nge-story-section--highlight">
+      <h4>3. Long stage names — why outside labels exist</h4>
+      <p class="nge-story-description">
+        Same data and formatter in both charts. Inside labels overflow their bands as soon as the
+        text is wider than the band; the funnel has nowhere to put them. Moving the labels out
+        resolves it without shrinking the type.
+      </p>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5><code>'inside'</code> — text outgrows the bands</h5>
+          <div class="nge-story-chart-container">
+            <nge-chart [config]="longLabelsInsideConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5><code>'edge'</code> — readable at every stage</h5>
+          <div class="nge-story-chart-container">
+            <nge-chart [config]="longLabelsEdgeConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5: pyramid -->
+    <section class="nge-story-section">
+      <h4>4. Pyramid with labels</h4>
+      <p class="nge-story-description">
+        Labels work the same for <code>direction: 'up'</code>. The band order is inverted (widest at
+        the bottom, apex at the top via <code>neckRatio: 0</code>), and each label still tracks its
+        own band's edge.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="pyramidLabelsConfig" />
+      </div>
+    </section>
+
+    <!-- Reference -->
+    <section class="nge-story-section">
+      <h4>Config reference</h4>
+      <div class="nge-story-code-block">
+        <pre>
+config = createFunnelChartConfig({{ "{" }}
+  data: this.data,
+  showLabels: true,                 // opt-in; default false
+  labelPosition: 'edge',            // 'inside' (default) | 'edge' | 'right'
+  labelGutter: 110,                 // px reserved for outside labels; default 96
+  formatLabel: d =&gt; `${{ "{" }}d.label{{ "}" }}  ${{ "{" }}d.value{{ "}" }}%`,
+{{ "}" }});
+
+// Label typography comes from the theme slice that matches the placement.
+// This example is 'edge', so it styles labelOutside — styling `label` here
+// would change nothing, because outside labels never read that slice.
+config.theme = {{ "{" }} funnel: {{ "{" }} labelOutside: {{ "{" }} fontSize: 14, fontWeight: 600 {{
+            "}"
+          }} {{ "}" }} {{ "}" }};</pre>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

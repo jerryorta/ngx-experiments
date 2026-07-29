@@ -2,9 +2,9 @@
   [reviewStatus]="reviewStatus"
   [storybookFilePath]="storybookFilePath"
 >
-  <div class="stories-container">
+  <div class="nge-story-container">
     <h2>Diverging Bar Chart - Theming Examples</h2>
-    <p class="intro-text">
+    <p class="nge-story-intro-text">
       Diverging bar colors are driven by the data point's <code>positiveColor</code> and
       <code>negativeColor</code>. The color matching the value's sign is applied to both the bar and
       the value marker; when omitted, the built-in green (positive) / red (negative) defaults are
@@ -12,50 +12,50 @@
     </p>
 
     <!-- Default Theme -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>Default Theme</h4>
-      <p class="story-description">
+      <p class="nge-story-description">
         The default appearance - green for positive values, red for negative.
       </p>
-      <div class="chart-container">
+      <div class="nge-story-chart-container">
         <nge-chart [config]="defaultConfig" />
       </div>
     </section>
 
     <!-- Color Pairs Grid -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>Color Pairs</h4>
-      <p class="story-description">
+      <p class="nge-story-description">
         Custom <code>positiveColor</code> / <code>negativeColor</code> pairs. Each chart below shows
         a positive value, so the positive color is displayed.
       </p>
-      <div class="themes-grid">
-        <div class="theme-item">
-          <span class="theme-label">Blue / Orange</span>
-          <div class="chart-container">
+      <div class="nge-story-themes-grid">
+        <div class="nge-story-theme-item">
+          <span class="nge-story-theme-label">Blue / Orange</span>
+          <div class="nge-story-chart-container">
             <nge-chart [config]="blueConfig" />
           </div>
         </div>
-        <div class="theme-item">
-          <span class="theme-label">Teal / Rose</span>
-          <div class="chart-container">
+        <div class="nge-story-theme-item">
+          <span class="nge-story-theme-label">Teal / Rose</span>
+          <div class="nge-story-chart-container">
             <nge-chart [config]="tealConfig" />
           </div>
         </div>
-        <div class="theme-item">
-          <span class="theme-label">Purple / Amber</span>
-          <div class="chart-container">
+        <div class="nge-story-theme-item">
+          <span class="nge-story-theme-label">Purple / Amber</span>
+          <div class="nge-story-chart-container">
             <nge-chart [config]="purpleConfig" />
           </div>
         </div>
-        <div class="theme-item">
-          <span class="theme-label">Indigo / Pink</span>
-          <div class="chart-container">
+        <div class="nge-story-theme-item">
+          <span class="nge-story-theme-label">Indigo / Pink</span>
+          <div class="nge-story-chart-container">
             <nge-chart [config]="indigoConfig" />
           </div>
         </div>
       </div>
-      <div class="code-block">
+      <div class="nge-story-code-block">
         <pre>
 const blueConfig = createDivergingBarChartConfig({{ "{" }}
   data: {{ "{" }}
@@ -65,28 +65,29 @@ const blueConfig = createDivergingBarChartConfig({{ "{" }}
     positiveColor: '#1E88E5', // blue
     negativeColor: '#EF6C00', // orange
   {{ "}" }},
-{{ "}" }});</pre
-        >
+{{ "}" }});</pre>
       </div>
     </section>
 
     <!-- Positive vs Negative States -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>Positive vs Negative States</h4>
-      <p class="story-description">
+      <p class="nge-story-description">
         A single color pair renders differently depending on the value's sign - the positive color
         extends right, the negative color extends left.
       </p>
-      <div class="status-grid">
-        <div class="status-item">
-          <span class="status-label status-label--success">Positive (+68)</span>
-          <div class="chart-container">
+      <div class="nge-story-status-grid">
+        <div class="nge-story-status-item">
+          <span class="nge-story-status-label nge-story-status-label--success"
+            >Positive (+68)</span
+          >
+          <div class="nge-story-chart-container">
             <nge-chart [config]="positiveStateConfig" />
           </div>
         </div>
-        <div class="status-item">
-          <span class="status-label status-label--error">Negative (-68)</span>
-          <div class="chart-container">
+        <div class="nge-story-status-item">
+          <span class="nge-story-status-label nge-story-status-label--error">Negative (-68)</span>
+          <div class="nge-story-chart-container">
             <nge-chart [config]="negativeStateConfig" />
           </div>
         </div>
@@ -94,13 +95,15 @@ const blueConfig = createDivergingBarChartConfig({{ "{" }}
     </section>
 
     <!-- Dark Surface -->
-    <section class="story-section story-section--dark">
+    <section class="nge-story-section nge-story-section--dark">
       <h4>Dark Surface</h4>
-      <p class="story-description"> Bright, saturated colors read well on a dark background. </p>
-      <div class="chart-container chart-container--dark">
+      <p class="nge-story-description">
+        Bright, saturated colors read well on a dark background.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--dark">
         <nge-chart [config]="darkConfig" />
       </div>
-      <div class="code-block">
+      <div class="nge-story-code-block">
         <pre>
 data: {{ "{" }}
   min: -100,
@@ -108,21 +111,20 @@ data: {{ "{" }}
   value: 52,
   positiveColor: '#26C6DA', // cyan
   negativeColor: '#EC407A', // pink
-{{ "}" }}</pre
-        >
+{{ "}" }}</pre>
       </div>
     </section>
 
     <!-- Transparency Effects -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>Transparency Effects</h4>
-      <p class="story-description">
+      <p class="nge-story-description">
         Use RGBA colors for a softer, translucent bar over the background track.
       </p>
-      <div class="chart-container">
+      <div class="nge-story-chart-container">
         <nge-chart [config]="transparencyConfig" />
       </div>
-      <div class="code-block">
+      <div class="nge-story-code-block">
         <pre>
 data: {{ "{" }}
   min: -100,
@@ -130,21 +132,20 @@ data: {{ "{" }}
   value: 40,
   positiveColor: 'rgba(76, 175, 80, 0.6)',
   negativeColor: 'rgba(244, 67, 54, 0.55)',
-{{ "}" }}</pre
-        >
+{{ "}" }}</pre>
       </div>
     </section>
 
     <!-- Custom Dimensions -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>Custom Dimensions</h4>
-      <p class="story-description">
+      <p class="nge-story-description">
         Combine a custom color with larger bar and indicator dimensions for a heavier visual weight.
       </p>
-      <div class="chart-container chart-container--tall">
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
         <nge-chart [config]="thickBarConfig" />
       </div>
-      <div class="code-block">
+      <div class="nge-story-code-block">
         <pre>
 createDivergingBarChartConfig({{ "{" }}
   data: {{ "{" }} min: -100, max: 100, value: 54, positiveColor: '#5E35B1' {{ "}" }},
@@ -155,8 +156,7 @@ createDivergingBarChartConfig({{ "{" }}
   centerIndicatorWidth: 4,
   limitIndicatorHeight: 44,
   limitIndicatorWidth: 4,
-{{ "}" }})</pre
-        >
+{{ "}" }})</pre>
       </div>
     </section>
   </div>

@@ -21,15 +21,15 @@ const SERIES_IDS = ['Cloud', 'Licenses', 'Services', 'Support'];
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'stacked-bar-chart-interaction-stories',
+    class: 'nge-stacked-bar-chart-interaction-stories',
   },
   imports: [NgeChartComponent, NgeChartLegendComponent, NgeStorybookReviewContainerComponent],
-  selector: 'stacked-bar-chart-interaction-stories',
+  selector: 'nge-stacked-bar-chart-interaction-stories',
   standalone: true,
   styleUrl: './stacked-bar-chart-interaction-stories.component.scss',
   templateUrl: './stacked-bar-chart-interaction-stories.component.html',
 })
-export class StackedBarChartInteractionStoriesComponent {
+export class NgeStackedBarChartInteractionStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/stacked-bar-chart/interaction';
 
@@ -117,7 +117,7 @@ export class StackedBarChartInteractionStoriesComponent {
     return new Map(
       SERIES_IDS.map((seriesId, i) => [
         seriesId,
-        colors[i % colors.length] ?? 'var(--chart-primary)',
+        colors[i % colors.length] ?? 'var(--nge-chart-primary)',
       ])
     );
   });
@@ -130,7 +130,7 @@ export class StackedBarChartInteractionStoriesComponent {
     return SERIES_IDS.map(seriesId => {
       const isHidden = hidden.has(seriesId);
       return {
-        color: colorById.get(seriesId) ?? 'var(--chart-primary)',
+        color: colorById.get(seriesId) ?? 'var(--nge-chart-primary)',
         id: seriesId,
         label: seriesId,
         opacity: isHidden ? 0.4 : 1,

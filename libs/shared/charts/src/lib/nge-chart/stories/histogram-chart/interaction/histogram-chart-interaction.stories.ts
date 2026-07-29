@@ -2,14 +2,14 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { HistogramChartInteractionStoriesComponent } from './histogram-chart-interaction-stories.component';
+import { NgeHistogramChartInteractionStoriesComponent } from './histogram-chart-interaction-stories.component';
 
-const meta: Meta<HistogramChartInteractionStoriesComponent> = {
+const meta: Meta<NgeHistogramChartInteractionStoriesComponent> = {
   argTypes: {
     // Theme - Bar Styling
     barColor: {
       control: 'color',
-      description: 'Bar fill color (--chart-primary slot)',
+      description: 'Bar fill color (--nge-chart-primary slot)',
       table: { category: 'Theme - Bar Styling' },
     },
     // Layer - Layout
@@ -46,7 +46,7 @@ const meta: Meta<HistogramChartInteractionStoriesComponent> = {
     // Theme - Curve Styling
     curveColor: {
       control: 'color',
-      description: 'Rootogram fitted-curve color (--chart-secondary slot)',
+      description: 'Rootogram fitted-curve color (--nge-chart-secondary slot)',
       if: { arg: 'mode', eq: 'rootogram' },
       table: { category: 'Theme - Curve Styling' },
     },
@@ -59,7 +59,7 @@ const meta: Meta<HistogramChartInteractionStoriesComponent> = {
     // Theme - Label Styling
     labelColor: {
       control: 'color',
-      description: 'Per-bin count label color (--chart-on-surface slot)',
+      description: 'Per-bin count label color (--nge-chart-on-surface slot)',
       if: { arg: 'showLabels' },
       table: { category: 'Theme - Label Styling' },
     },
@@ -100,7 +100,7 @@ const meta: Meta<HistogramChartInteractionStoriesComponent> = {
     // Theme - Node Styling
     nodeColor: {
       control: 'color',
-      description: 'Rootogram curve-node color (--chart-secondary slot)',
+      description: 'Rootogram curve-node color (--nge-chart-secondary slot)',
       if: { arg: 'mode', eq: 'rootogram' },
       table: { category: 'Theme - Node Styling' },
     },
@@ -143,12 +143,12 @@ const meta: Meta<HistogramChartInteractionStoriesComponent> = {
     // Theme - Zero Line Styling
     zeroLineColor: {
       control: 'color',
-      description: 'Rootogram zero-line color (--chart-on-surface-variant slot)',
+      description: 'Rootogram zero-line color (--nge-chart-on-surface-variant slot)',
       if: { arg: 'showZeroLine' },
       table: { category: 'Theme - Zero Line Styling' },
     },
   },
-  component: HistogramChartInteractionStoriesComponent,
+  component: NgeHistogramChartInteractionStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -158,7 +158,7 @@ const meta: Meta<HistogramChartInteractionStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<HistogramChartInteractionStoriesComponent>;
+type Story = StoryObj<NgeHistogramChartInteractionStoriesComponent>;
 
 export const Interaction: Story = {
   args: {

@@ -195,11 +195,11 @@ export const OverviewStore = signalStore(
           },
           yAxisLabel: 'Net worth',
         }),
-        // The point FILL defaults to --chart-surface (the panel bg), which is
+        // The point FILL defaults to --nge-chart-surface (the panel bg), which is
         // near-black in every dark persona → invisible dots. Fill with
-        // --chart-on-surface so markers stay legible in all themes. Safe as a
+        // --nge-chart-on-surface so markers stay legible in all themes. Safe as a
         // .style() var(); a var() in seriesColors would break d3's area color math.
-        theme: { line: { point: { color: 'var(--chart-on-surface)' } } },
+        theme: { line: { point: { color: 'var(--nge-chart-on-surface)' } } },
       })),
 
       /** Spending-by-category donut segments — `CategorySpending` mapped 1:1 to `LdgDonutSegment`. */

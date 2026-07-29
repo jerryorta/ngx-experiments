@@ -2,9 +2,9 @@
   [reviewStatus]="reviewStatus"
   [storybookFilePath]="storybookFilePath"
 >
-  <div class="stories-container">
+  <div class="nge-story-container">
     <h2>Axis Grouping Tiers - Theming Examples</h2>
-    <p class="intro-text">
+    <p class="nge-story-intro-text">
       Every grouping tier is styled through <code>theme.axis.group</code> — independent of the
       tick/label/line styling on <code>theme.axis</code> itself. Each example below pairs a
       light/default group theme with a boldly tinted one so <code>labelColor</code>,
@@ -13,19 +13,19 @@
     </p>
 
     <!-- EXAMPLE 1: Linear Numeric Ranges -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>1. Linear Numeric Ranges</h4>
-      <p class="story-description">Explicit <code>ranges</code> bands on a linear scale.</p>
-      <div class="chart-row">
-        <div class="chart-column">
+      <p class="nge-story-description">Explicit <code>ranges</code> bands on a linear scale.</p>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
           <h5>Light / Default</h5>
-          <div class="chart-container chart-container--small">
+          <div class="nge-story-chart-container nge-story-chart-container--small">
             <nge-chart [config]="linearRangesLightConfig" />
           </div>
         </div>
-        <div class="chart-column">
+        <div class="nge-story-chart-column">
           <h5>Bold Tint</h5>
-          <div class="chart-container chart-container--small">
+          <div class="nge-story-chart-container nge-story-chart-container--small">
             <nge-chart [config]="linearRangesBoldConfig" />
           </div>
         </div>
@@ -33,22 +33,22 @@
     </section>
 
     <!-- EXAMPLE 2: Calendar Interval -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>2. Calendar Interval (Time Scale)</h4>
-      <p class="story-description">
+      <p class="nge-story-description">
         <code>{{ "{" }} interval: 'month' {{ "}" }}</code> tiling a ~3-year domain into 36 month
         bands.
       </p>
-      <div class="chart-row">
-        <div class="chart-column">
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
           <h5>Light / Default</h5>
-          <div class="chart-container chart-container--small">
+          <div class="nge-story-chart-container nge-story-chart-container--small">
             <nge-chart [config]="monthIntervalLightConfig" />
           </div>
         </div>
-        <div class="chart-column">
+        <div class="nge-story-chart-column">
           <h5>Bold Tint</h5>
-          <div class="chart-container chart-container--small">
+          <div class="nge-story-chart-container nge-story-chart-container--small">
             <nge-chart [config]="monthIntervalBoldConfig" />
           </div>
         </div>
@@ -56,22 +56,22 @@
     </section>
 
     <!-- EXAMPLE 3: Custom Ranges on a Continuous Scale -->
-    <section class="story-section story-section--highlight">
+    <section class="nge-story-section nge-story-section--highlight">
       <h4>3. Custom Ranges on a Continuous Scale</h4>
-      <p class="story-description">
+      <p class="nge-story-description">
         Non-uniform price brackets, with <code>base.showXGrid: true</code> also enabled so the
         vertical gridlines, tick positions, and tier separators all visibly line up.
       </p>
-      <div class="chart-row">
-        <div class="chart-column">
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
           <h5>Light / Default</h5>
-          <div class="chart-container chart-container--small">
+          <div class="nge-story-chart-container nge-story-chart-container--small">
             <nge-chart [config]="priceBracketLightConfig" />
           </div>
         </div>
-        <div class="chart-column">
+        <div class="nge-story-chart-column">
           <h5>Bold Tint</h5>
-          <div class="chart-container chart-container--small">
+          <div class="nge-story-chart-container nge-story-chart-container--small">
             <nge-chart [config]="priceBracketBoldConfig" />
           </div>
         </div>
@@ -79,21 +79,21 @@
     </section>
 
     <!-- EXAMPLE 4: Band-Scale Category Grouping -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>4. Band-Scale Category Grouping</h4>
-      <p class="story-description">
+      <p class="nge-story-description">
         <code>groupBy</code> coalescing 12 month categories into 4 quarter bands.
       </p>
-      <div class="chart-row">
-        <div class="chart-column">
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
           <h5>Light / Default</h5>
-          <div class="chart-container chart-container--small">
+          <div class="nge-story-chart-container nge-story-chart-container--small">
             <nge-chart [config]="quarterGroupingLightConfig" />
           </div>
         </div>
-        <div class="chart-column">
+        <div class="nge-story-chart-column">
           <h5>Bold Tint</h5>
-          <div class="chart-container chart-container--small">
+          <div class="nge-story-chart-container nge-story-chart-container--small">
             <nge-chart [config]="quarterGroupingBoldConfig" />
           </div>
         </div>
@@ -101,25 +101,25 @@
     </section>
 
     <!-- EXAMPLE 5: Pill / Bracket Render Style -->
-    <section class="story-section">
+    <section class="nge-story-section">
       <h4>5. Pill / Bracket Render Style</h4>
-      <p class="story-description">
+      <p class="nge-story-description">
         <code>style: 'pill'</code> tiers style the badge through the same
         <code>theme.axis.group</code> block, plus <code>pillBackground</code> (an opaque badge fill,
         so the baseline never strikes through the label) and <code>pillPaddingX</code>. Here a light
         chip pairs with a solid, saturated badge that overrides <code>pillBackground</code> /
         <code>separatorColor</code> for a filled-pill look.
       </p>
-      <div class="chart-row">
-        <div class="chart-column">
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
           <h5>Light Chip</h5>
-          <div class="chart-container chart-container--small">
+          <div class="nge-story-chart-container nge-story-chart-container--small">
             <nge-chart [config]="pillLightConfig" />
           </div>
         </div>
-        <div class="chart-column">
+        <div class="nge-story-chart-column">
           <h5>Solid Badge</h5>
-          <div class="chart-container chart-container--small">
+          <div class="nge-story-chart-container nge-story-chart-container--small">
             <nge-chart [config]="pillBoldConfig" />
           </div>
         </div>

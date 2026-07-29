@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { RadialBarThemingComponent } from './radial-bar-theming.component';
+import { NgeRadialBarThemingComponent } from './radial-bar-theming.component';
 
-const meta: Meta<RadialBarThemingComponent> = {
-  component: RadialBarThemingComponent,
+const meta: Meta<NgeRadialBarThemingComponent> = {
+  component: NgeRadialBarThemingComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<RadialBarThemingComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<RadialBarThemingComponent>;
+type Story = StoryObj<NgeRadialBarThemingComponent>;
 
 export const Theming: Story = {
   args: {},

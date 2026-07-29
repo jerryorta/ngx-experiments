@@ -87,6 +87,14 @@ export interface StackedBarChartPresetOptions {
    */
   data: NgeStackedBarDataPoint[];
 
+  /**
+   * In-segment label colour for EVERY segment. Setting it deliberately disables the
+   * automatic on-fill contrast (which otherwise picks `theme['stacked-bar'].label.color` /
+   * `.colorOnDark` from each segment's own fill), giving one flat label colour. A
+   * per-datum `labelColor` still wins over it.
+   */
+  labelColor?: string;
+
   /** Legend configuration. Set `enabled: true` to auto-generate legend from series. */
   legend?: Partial<NgeChartLegendConfig>;
 
@@ -219,6 +227,7 @@ export function createStackedBarChartConfig(
     barPadding,
     barRadius,
     data,
+    labelColor,
     legend,
     margin,
     onClick,
@@ -276,6 +285,7 @@ export function createStackedBarChartConfig(
         barPadding,
         barRadius,
         data,
+        labelColor,
         onClick,
         orientation,
         renderer: renderStackedBarLayer,

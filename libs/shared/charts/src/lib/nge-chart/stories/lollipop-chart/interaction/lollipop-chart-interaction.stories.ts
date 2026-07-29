@@ -2,9 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { LollipopChartInteractionStoriesComponent } from './lollipop-chart-interaction-stories.component';
+import { NgeLollipopChartInteractionStoriesComponent } from './lollipop-chart-interaction-stories.component';
 
-const meta: Meta<LollipopChartInteractionStoriesComponent> = {
+const meta: Meta<NgeLollipopChartInteractionStoriesComponent> = {
   argTypes: {
     // Layer - Layout
     baseline: {
@@ -123,7 +123,7 @@ const meta: Meta<LollipopChartInteractionStoriesComponent> = {
       table: { category: 'Layer - Axis Labels' },
     },
   },
-  component: LollipopChartInteractionStoriesComponent,
+  component: NgeLollipopChartInteractionStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -133,7 +133,7 @@ const meta: Meta<LollipopChartInteractionStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<LollipopChartInteractionStoriesComponent>;
+type Story = StoryObj<NgeLollipopChartInteractionStoriesComponent>;
 
 export const Interaction: Story = {
   args: {

@@ -119,7 +119,7 @@ export type NgeChartGestureEvent =
     };
 
 /**
- * Gesture handler threaded into renderChart (same pattern as NgeTooltipHandlers).
+ * Gesture handler threaded into renderNgeChart (same pattern as NgeTooltipHandlers).
  */
 export interface NgeChartGestureHandlers {
   onGesture: (event: NgeChartGestureEvent) => void;

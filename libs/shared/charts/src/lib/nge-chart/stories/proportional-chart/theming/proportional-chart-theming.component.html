@@ -1,0 +1,131 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-story-container">
+    <h2>Proportional Area Chart - Theming Examples</h2>
+    <p class="nge-story-intro-text">
+      Every colour comes from the <code>theme.proportional</code> slice: <code>mark</code> for the
+      shapes, <code>emptyCell</code> for a waffle's unfilled remainder, and <code>label</code> for
+      on-mark text.
+    </p>
+
+    <section class="nge-story-section">
+      <h4>Default Theme</h4>
+      <p class="nge-story-description">
+        No theme provided — renders on the chart's <code>--nge-chart-*</code> token defaults.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Green Palette</h4>
+      <p class="nge-story-description">
+        <code>theme.proportional.mark.colors</code> is cycled by top-level input index, so a
+        four-entry palette covers four categories exactly.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="greenConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Blue Palette</h4>
+      <p class="nge-story-description">A monochrome ramp reads the marks as one measure.</p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="blueConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Red Palette</h4>
+      <p class="nge-story-description">
+        Note the label colour flipping to white on the darker marks — that is the automatic on-fill
+        contrast derivation, not a per-datum setting.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="redConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Outlined Marks</h4>
+      <p class="nge-story-description">
+        <code>mark.stroke</code> / <code>mark.strokeWidth</code> / <code>mark.opacity</code> — a
+        heavier outline keeps adjacent shapes legible when they nearly touch.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="outlinedConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Label Typography</h4>
+      <p class="nge-story-description">
+        <code>label.fontSize</code> / <code>label.fontWeight</code>. Size and weight live on the
+        theme rung only — they do not co-vary with the fill, so there is no per-datum equivalent.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="labelTypographyConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Flat Label Colour</h4>
+      <p class="nge-story-description">
+        Setting <code>label.color</code> and <code>label.colorOnDark</code> to the same value opts
+        the whole theme out of contrast derivation — every label takes one flat colour.
+      </p>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="flatLabelConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Waffle — Themed Remainder</h4>
+      <p class="nge-story-description">
+        <code>emptyCell</code> styles the cells between the data's total and
+        <code>rows &times; columns</code>. It is the grid's backdrop rather than a value, which is
+        why it is a separate slice from <code>mark</code>.
+      </p>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5>Default</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="waffleDefaultConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>Themed</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="waffleThemedConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="nge-story-section nge-story-section--highlight">
+      <h4>Multiple Charts with Different Themes</h4>
+      <p class="nge-story-description">
+        The packed mark colours each leaf by its top-level branch, so a two-entry palette themes two
+        clusters however many leaves they hold.
+      </p>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5>Energy (Green)</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="greenConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>Platforms (Packed)</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="packedConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

@@ -22,7 +22,7 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'scatter-chart-interaction-stories',
+    class: 'nge-scatter-chart-interaction-stories',
   },
   imports: [
     CommonModule,
@@ -30,12 +30,12 @@ import { NgeChartComponent } from '../../../nge-chart.component';
     NgeChartLegendComponent,
     NgeStorybookReviewContainerComponent,
   ],
-  selector: 'scatter-chart-interaction-stories',
+  selector: 'nge-scatter-chart-interaction-stories',
   standalone: true,
   styleUrl: './scatter-chart-interaction-stories.component.scss',
   templateUrl: './scatter-chart-interaction-stories.component.html',
 })
-export class ScatterChartInteractionStoriesComponent {
+export class NgeScatterChartInteractionStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/scatter-chart/interaction';
 

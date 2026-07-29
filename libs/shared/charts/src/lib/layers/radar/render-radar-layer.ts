@@ -18,6 +18,7 @@ import type {
   NgeTooltipHandlers,
 } from '../../core/tooltip';
 
+import { applyRadiusRatio } from '../../core/fns';
 import { mergeRadarLayerTheme } from '../../core/theme';
 
 /** Every mark class the layer owns — used for the interrupt + the empty-data stale sweep. */
@@ -124,7 +125,10 @@ export function renderRadarLayer(
   // half-dimension, and read innerRadius as a ratio of it (0 → axes start at the center).
   const cx = dimensions.boundedWidth / 2;
   const cy = dimensions.boundedHeight / 2;
-  const outerRadius = Math.min(dimensions.boundedWidth, dimensions.boundedHeight) / 2;
+  const outerRadius = applyRadiusRatio(
+    Math.min(dimensions.boundedWidth, dimensions.boundedHeight) / 2,
+    config.radiusRatio
+  );
   // `innerRadius` is a 0–1 ratio of the outer radius; clamp into [0, 1) so a stray value
   // ≥ 1 can't invert the radial scale (innerR ≥ outerR).
   const innerRatio = Math.max(0, Math.min(config.innerRadius ?? 0, 1 - 1e-6));

@@ -2,9 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { SparklineChartInteractionStoriesComponent } from './sparkline-chart-interaction-stories.component';
+import { NgeSparklineChartInteractionStoriesComponent } from './sparkline-chart-interaction-stories.component';
 
-const meta: Meta<SparklineChartInteractionStoriesComponent> = {
+const meta: Meta<NgeSparklineChartInteractionStoriesComponent> = {
   argTypes: {
     // Column Sparkline
     barPadding: {
@@ -96,7 +96,7 @@ const meta: Meta<SparklineChartInteractionStoriesComponent> = {
       table: { category: 'Win-Loss Sparkline' },
     },
   },
-  component: SparklineChartInteractionStoriesComponent,
+  component: NgeSparklineChartInteractionStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -106,7 +106,7 @@ const meta: Meta<SparklineChartInteractionStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<SparklineChartInteractionStoriesComponent>;
+type Story = StoryObj<NgeSparklineChartInteractionStoriesComponent>;
 
 export const Interaction: Story = {
   args: {

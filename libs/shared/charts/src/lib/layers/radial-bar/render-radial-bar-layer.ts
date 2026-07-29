@@ -19,10 +19,17 @@ import type {
   NgeTooltipHandlers,
 } from '../../core/tooltip';
 
-import { mergeRadialBarLayerTheme } from '../../core/theme';
+import { applyRadiusRatio } from '../../core/fns';
+import {
+  elideLabelText,
+  mergeRadialBarLayerTheme,
+  resolveLabelColor,
+  toCssFontSize,
+} from '../../core/theme';
 
 /** Every mark class the layer owns — used for the interrupt + the empty-data stale sweep. */
-const RADIAL_BAR_SELECTOR = '.nge-radial-bar-arc, .nge-radial-bar-series, .nge-radial-bar-cell';
+const RADIAL_BAR_SELECTOR =
+  '.nge-radial-bar-arc, .nge-radial-bar-series, .nge-radial-bar-cell, .nge-radial-bar-label';
 
 /** Series bucket key for area points that carry no explicit `seriesId`. */
 const DEFAULT_SERIES_ID = '__default__';
@@ -32,6 +39,58 @@ const KEY_SEP = '';
 
 /** Radius of the invisible per-vertex hover/click targets (area mark). */
 const AREA_HOVER_RADIUS = 8;
+
+/**
+ * Narrowest bar sweep (radians) that still earns an ON-BAR label when no `minLabelAngle`
+ * is supplied — ≈ 8.6°, i.e. ~2.4% of a full turn. The pie / sunburst threshold, shared so
+ * the radial layers suppress narrow marks identically. Outside labels default to `0`
+ * instead: they are not drawn inside the bar, so its width stops being a constraint.
+ */
+const DEFAULT_MIN_LABEL_ANGLE = 0.15;
+
+/**
+ * Smallest extent (px) that still earns a label when no `minLabelSize` is supplied —
+ * roughly one line box at the default label font size. Applied to the bar's radial extent
+ * (the direction an on-bar label runs) and to the arc at its mid-radius (which bounds the
+ * text's cap-height), so a wide-angle bar too short to seat a line stays unlabelled.
+ */
+const DEFAULT_MIN_LABEL_SIZE = 12;
+
+/** Pixels reserved around the chart for outside labels when none is configured. */
+const DEFAULT_OUTSIDE_LABEL_GUTTER = 48;
+
+/** Radial gap (px) from the chart's outer radius out to an outside label's anchor. */
+const OUTSIDE_LABEL_OFFSET = 12;
+
+/**
+ * Where one label sits and how it is turned, in the container's local (center-origin)
+ * coords. Both placements reduce to the same four values, so the label join stays
+ * placement-agnostic: `'inside'` turns the text along the bar's own radius, `'outside'`
+ * leaves it horizontal and points it away from the center.
+ */
+interface RadialBarLabelPlacement {
+  /** `text-anchor` — how the text sits relative to its anchor point. */
+  anchor: 'end' | 'middle' | 'start';
+  /** Rotation about the anchor, in DEGREES, normalised to [0, 360). */
+  rotate: number;
+  /** Anchor x. */
+  x: number;
+  /** Anchor y. */
+  y: number;
+}
+
+/** A label `<text>` node caches its last-drawn placement so the update tween can slide it. */
+type RadialBarLabelNode = SVGTextElement & { _current?: RadialBarLabelPlacement };
+
+/** Compose a {@link RadialBarLabelPlacement} into the `transform` attribute that realises it. */
+function labelTransform(placement: RadialBarLabelPlacement): string {
+  return `translate(${placement.x},${placement.y}) rotate(${placement.rotate})`;
+}
+
+/** Fold an angle in degrees into [0, 360) — `startAngle` is arbitrary, so raw degrees are too. */
+function normaliseDegrees(degrees: number): number {
+  return ((degrees % 360) + 360) % 360;
+}
 
 /** The geometry a `d3.arc()` is drawn from (the tween interpolates over this shape). */
 interface ArcGeom {
@@ -100,6 +159,8 @@ interface RadialBarRenderParams {
   dimensions: NgeChartDimensions;
   domainMax: number;
   endAngle: number;
+  /** An element in the chart's tree — resolves `var(--nge-chart-*)` off the cascade. */
+  host: Element | null;
   innerRadiusPx: number;
   labels: string[];
   margins: { bottom: number; left: number; right: number; top: number };
@@ -132,6 +193,14 @@ interface AngularBand {
  * `mark: 'cell'` a grid of arc cells whose fill opacity encodes value (Circular Heat Map).
  * Only the ACTIVE mark's data is built, and all three joins run every render, so a runtime
  * `mark` toggle exits the inactive marks cleanly.
+ *
+ * Opt-in labels (`showLabels`) ride a FOURTH join on the bar key, drawn either along the
+ * bar's radius (`labelPosition: 'inside'`, styled from `theme.label` with automatic on-fill
+ * contrast) or horizontally on a ring just past the perimeter (`'outside'`, styled from the
+ * surface-tracking `theme.labelOutside`, with `labelGutter` px taken off the outer radius so
+ * the ring stays inside the clipped plot area). `mark: 'bar'` only — an `'area'` has no
+ * per-datum mark to annotate, and a `'cell'` encodes value as fill OPACITY, which the
+ * luminance-based label-colour derivation cannot see.
  */
 export function renderRadialBarLayer(
   context: NgeChartLayerContext<
@@ -156,11 +225,25 @@ export function renderRadialBarLayer(
 
   const theme = mergeRadialBarLayerTheme(context.theme);
 
+  const mark = config.mark ?? 'bar';
+
+  // Outside labels ring the whole chart and are drawn INSIDE the plot area — the layers
+  // group is clipped to it, so the band they occupy has to come off the chart's own radius
+  // (the pie / funnel layers solve the same problem the same way). Keyed off `labelPosition`
+  // and the mark alone, not `showLabels`, so toggling labels never resizes the chart.
+  const outsideLabels = mark === 'bar' && (config.labelPosition ?? 'inside') === 'outside';
+  const labelGutter = outsideLabels
+    ? Math.max(0, config.labelGutter ?? DEFAULT_OUTSIDE_LABEL_GUTTER)
+    : 0;
+
   // Self-scaled geometry: center in the bounded area, size the outer radius to the
   // smaller half-dimension, and read innerRadius as a ratio of it (0 → start at center).
   const cx = dimensions.boundedWidth / 2;
   const cy = dimensions.boundedHeight / 2;
-  const outerRadius = Math.min(dimensions.boundedWidth, dimensions.boundedHeight) / 2;
+  const outerRadius = applyRadiusRatio(
+    Math.max(0, Math.min(dimensions.boundedWidth, dimensions.boundedHeight) / 2 - labelGutter),
+    config.radiusRatio
+  );
   // `innerRadius` is a 0–1 ratio of the outer radius; clamp into [0, 1) so a stray value
   // ≥ 1 can't invert the radial scale (innerR ≥ outerR). Angles stay free (sweeps/gauges).
   const innerRatio = Math.max(0, Math.min(config.innerRadius ?? 0, 1 - 1e-6));
@@ -202,6 +285,7 @@ export function renderRadialBarLayer(
     dimensions,
     domainMax,
     endAngle: config.endAngle ?? 2 * Math.PI,
+    host: bounds.node(),
     innerRadiusPx,
     labels,
     margins,
@@ -214,7 +298,6 @@ export function renderRadialBarLayer(
     tooltipHandlers,
   };
 
-  const mark = config.mark ?? 'bar';
   // Build ONLY the active mark's data so the inactive joins exit cleanly on a mark toggle.
   const barMarks = mark === 'bar' ? buildBarMarks(data, params) : [];
   const cellMarks = mark === 'cell' ? buildCellMarks(data, params) : [];
@@ -223,6 +306,10 @@ export function renderRadialBarLayer(
   renderBars(container, barMarks, params);
   renderCells(container, cellMarks, params);
   renderAreas(container, areaSeries, params);
+  // Last, so the raised label group lands at the end of the container and no freshly
+  // entered mark can paint over a label. A non-bar mark passes an empty set, so switching
+  // away from `mark: 'bar'` exits every label cleanly.
+  renderBarLabels(container, barMarks, params);
 }
 
 /** Distinct values of an array preserving first-seen order. */
@@ -482,6 +569,200 @@ function renderBars(
     .style('opacity', theme.bar.opacity);
 
   wireArcInteraction(merged, params);
+}
+
+/**
+ * Render the opt-in per-bar labels as a SEPARATE keyed join from the arcs (the funnel /
+ * pie / sunburst pattern), on the same `label` key — so a bar and its label keep one
+ * shared identity across data changes while entering, updating and exiting on their own
+ * schedule. Labels live in their own group, raised to the end of the container each render
+ * so a freshly entered arc can never paint over one.
+ *
+ * **Placement — two conventions, picked by `labelPosition`.**
+ * `'inside'` puts the text ON the bar at its mid-radius, running ALONG the radius
+ * (`rotate(mid − 90)`, with the left hemisphere flipped a further 180° so nothing reads
+ * upside-down) — the sunburst convention. A wedge's arc is narrow near the center and its
+ * length is what varies with the data, so running the text radially is the orientation that
+ * survives both. `'outside'` instead leaves the text horizontal on a fixed ring just beyond
+ * the chart's outer radius, anchored away from the center — a category ring, the radar
+ * layer's axis-label convention. The gutter that keeps that ring inside the clipped plot
+ * area is reserved from the outer radius by the caller.
+ *
+ * **Colour + typography come from whichever slice matches the placement**, because the two
+ * have opposite backdrops: an on-bar label sits on a fill drawn from the palette (a RANGE,
+ * so it derives per datum against its own bar), while an outside label sits on the plot
+ * surface and must not derive — `theme.labelOutside` declares no `colorOnDark`, which makes
+ * `resolveLabelColor` short-circuit to its surface-tracking `color`, and the empty `fill`
+ * passed alongside keeps that intent obvious at the call site.
+ *
+ * **Suppression filters the DATA, not visibility**, so a bar that shrinks past a threshold
+ * exits cleanly and re-enters when the data grows it back.
+ */
+function renderBarLabels(
+  container: Selection<SVGGElement, unknown, null, undefined>,
+  marks: RadialBarArcMark[],
+  params: RadialBarRenderParams
+): void {
+  const { animation, config, host, outerRadius, theme } = params;
+
+  const isOutside = (config.labelPosition ?? 'inside') === 'outside';
+  const labelTheme = isOutside ? theme.labelOutside : theme.label;
+
+  let labelGroup = container.select<SVGGElement>('.nge-radial-bar-labels');
+  if (labelGroup.empty()) {
+    labelGroup = container.append('g').classed('nge-radial-bar-labels', true);
+  }
+  labelGroup.raise();
+
+  // The angle threshold only defaults to a non-zero value for ON-BAR labels, where the text
+  // has to fit within the wedge; outside placement removes that constraint. An explicit
+  // config value is honoured in BOTH modes, and the separate `> 0` guard keeps a zero-sweep
+  // bar unlabelled either way — a threshold of 0 must not put text on a bar nobody can see.
+  const minLabelAngle = config.minLabelAngle ?? (isOutside ? 0 : DEFAULT_MIN_LABEL_ANGLE);
+  const minLabelSize = config.minLabelSize ?? DEFAULT_MIN_LABEL_SIZE;
+
+  const labelData = config.showLabels
+    ? marks.filter(mark => {
+        const sweep = mark.a1 - mark.a0;
+        if (sweep <= 0 || sweep < minLabelAngle) {
+          return false;
+        }
+        // Absolute-size rule, in whichever direction the text runs. The arc half bounds the
+        // cap-height in both modes (measured at the label's own radius); the radial half is
+        // the thin-BAR rule and applies only to text drawn along the bar.
+        const labelRadius = isOutside ? outerRadius : (mark.innerR + mark.outerR) / 2;
+        if (sweep * labelRadius < minLabelSize) {
+          return false;
+        }
+        return isOutside || mark.outerR - mark.innerR >= minLabelSize;
+      })
+    : [];
+
+  const placementFor = (mark: RadialBarArcMark): RadialBarLabelPlacement => {
+    const midAngle = (mark.a0 + mark.a1) / 2;
+
+    if (isOutside) {
+      // d3 arc angles start at 12 o'clock and run clockwise, so the outward direction is
+      // (sin, −cos). Anchor by the horizontal component so the text always reads away from
+      // the chart; a label at dead top / bottom centers instead of tipping either way.
+      const radius = outerRadius + OUTSIDE_LABEL_OFFSET;
+      const dx = Math.sin(midAngle);
+      return {
+        anchor: Math.abs(dx) < 1e-6 ? 'middle' : dx > 0 ? 'start' : 'end',
+        rotate: 0,
+        x: radius * dx,
+        y: -radius * Math.cos(midAngle),
+      };
+    }
+
+    // The classic radial label: `rotate(mid − 90) translate(r, 0) rotate(flip)`, folded into
+    // one anchor + rotation so the update tween has plain numbers to interpolate.
+    const deg = normaliseDegrees((midAngle * 180) / Math.PI);
+    const baseline = deg - 90;
+    const flip = deg < 180 ? 0 : 180;
+    const radians = (baseline * Math.PI) / 180;
+    const radius = (mark.innerR + mark.outerR) / 2;
+    return {
+      anchor: 'middle',
+      rotate: normaliseDegrees(baseline + flip),
+      x: radius * Math.cos(radians),
+      y: radius * Math.sin(radians),
+    };
+  };
+
+  // An on-bar label is bounded by the bar it runs along; an outside label sits on open
+  // surface, and a non-positive width opts it out of elision entirely.
+  const maxTextWidthFor = (mark: RadialBarArcMark): number =>
+    isOutside ? 0 : mark.outerR - mark.innerR;
+
+  const labelFillFor = (mark: RadialBarArcMark): string =>
+    resolveLabelColor({
+      configColor: config.labelColor,
+      datumColor: mark.datum.labelColor,
+      fill: isOutside ? '' : mark.color,
+      node: host,
+      theme: labelTheme,
+    });
+
+  // Interrupt in-flight label transitions before joining — same reason the arc join does it
+  // (ARCH-194). Labels fade in from opacity 0, so a re-render landing mid-fade would
+  // otherwise strand one semi-transparent or fully invisible.
+  labelGroup.selectAll('.nge-radial-bar-label').interrupt();
+
+  const labels = labelGroup
+    .selectAll<SVGTextElement, RadialBarArcMark>('.nge-radial-bar-label')
+    .data(labelData, d => d.label);
+
+  labels
+    .exit()
+    .transition()
+    .duration(animation.exitMs)
+    .ease(animation.easing)
+    .style('opacity', 0)
+    .remove();
+
+  const entered = labels
+    .enter()
+    .append('text')
+    .classed('nge-radial-bar-label', true)
+    .attr('data-label', d => d.label)
+    .attr('dominant-baseline', 'middle')
+    // Labels sit on top of their own bar — let hover / click fall through to the arc.
+    .style('pointer-events', 'none')
+    .style('opacity', 0)
+    .each(function (d) {
+      (this as RadialBarLabelNode)._current = placementFor(d);
+    })
+    .attr('transform', d => labelTransform(placementFor(d)));
+
+  entered.transition().duration(animation.enterMs).ease(animation.easing).style('opacity', 1);
+
+  // Survivors re-assert full opacity SYNCHRONOUSLY (entering labels are excluded — they are
+  // still fading in above). Without this, a label whose fade was interrupted by a re-render
+  // keeps whatever partial opacity it was killed at, and never recovers.
+  labels.style('opacity', 1);
+
+  // Re-apply anchor + text + styles on the MERGED selection so a runtime theme /
+  // labelPosition / formatLabel change reaches already-rendered labels, not just freshly
+  // entered ones. The text is set before eliding because elision measures the rendered
+  // string.
+  entered
+    .merge(labels)
+    .attr('text-anchor', d => placementFor(d).anchor)
+    .style('fill', labelFillFor)
+    .style('font-size', toCssFontSize(labelTheme.fontSize))
+    .style('font-weight', labelTheme.fontWeight)
+    .each(function (d) {
+      elideLabelText(this, config.formatLabel?.(d.datum) ?? d.label, maxTextWidthFor(d));
+    });
+
+  /**
+   * Slide a survivor to its new anchor as the bar it names grows or shrinks. Written as an
+   * explicit tween over the anchor's own numbers rather than left to d3's automatic
+   * `transform` interpolator, which decomposes the attribute through
+   * `node.transform.baseVal` — a path that gives an anchor-then-rotate placement a
+   * matrix-decomposed detour, and that jsdom does not implement at all.
+   *
+   * `rotate` snaps to the target instead of interpolating: a label crossing the hemisphere
+   * boundary flips by 180°, and interpolating that would spin the text on its way over.
+   */
+  function placementTween(this: SVGTextElement, d: RadialBarArcMark): (t: number) => string {
+    const node = this as RadialBarLabelNode;
+    const target = placementFor(d);
+    const start = node._current ?? target;
+    const interpolator = interpolate({ x: start.x, y: start.y }, { x: target.x, y: target.y });
+    return (t: number) => {
+      const { x, y } = interpolator(t);
+      node._current = { anchor: target.anchor, rotate: target.rotate, x, y };
+      return labelTransform(node._current);
+    };
+  }
+
+  labels
+    .transition()
+    .duration(animation.updateMs)
+    .ease(animation.easing)
+    .attrTween('transform', placementTween);
 }
 
 /**

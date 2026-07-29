@@ -1,0 +1,253 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-story-container">
+    <h2>Word Cloud Chart - Usage Examples</h2>
+    <p class="nge-story-intro-text">
+      Frequency-sized text placed by a spiral layout. Each word's <code>value</code> maps to a font
+      size, and the words are placed <strong>largest first</strong> along an archimedean spiral out
+      from the centre — each taking the first position whose bounding box clears every word already
+      placed. Placement is <strong>deterministic</strong>: the same data at the same size always
+      draws the same picture, so a resize or theme change reflows rather than reshuffles.
+    </p>
+
+    <!-- EXAMPLE 1: Basic Usage -->
+    <section class="nge-story-section">
+      <h4>1. Basic Usage</h4>
+      <p class="nge-story-description">
+        Simplest way to create a chart using <code>createWordCloudChartConfig()</code>. The word
+        with the highest value is drawn at <code>maxFontSize</code>, the lowest at
+        <code>minFontSize</code>.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+data = [
+  {{ "{" }} label: 'angular', value: 120 {{ "}" }},
+  {{ "{" }} label: 'signals', value: 96 {{ "}" }},
+  // ...
+];
+
+config = createWordCloudChartConfig({{ "{" }}
+  data: this.data,
+  maxFontSize: 52,
+{{ "}" }});
+
+&lt;nge-chart [config]="config" /&gt;</pre>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="basicConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Scale modes -->
+    <section class="nge-story-section">
+      <h4>2. Scale Modes</h4>
+      <p class="nge-story-description">
+        How <code>value</code> maps onto the font-size range. <code>'sqrt'</code> (the default)
+        scales the word's <strong>area</strong> with its value, which stops a high-frequency outlier
+        from swamping the cloud; <code>'linear'</code> scales the height directly and so exaggerates
+        the leader; <code>'log'</code> compresses a long tail and lifts the small terms.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createWordCloudChartConfig({{ "{" }}
+  data: this.data,
+  scale: 'linear',      // or 'sqrt' (default) | 'log'
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5>sqrt (default)</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="sqrtConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>linear</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="linearConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>log</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="logConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Mixed orientation -->
+    <section class="nge-story-section">
+      <h4>3. Mixed Orientation</h4>
+      <p class="nge-story-description">
+        <code>rotations</code> is cycled across the words <strong>by placement order</strong>, never
+        at random — <code>[0, 90]</code> gives the classic mixed cloud while keeping the layout
+        stable across re-renders. A turned word's bounding box is turned with it, so the collision
+        pass stays honest.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createWordCloudChartConfig({{ "{" }}
+  data: this.data,
+  rotations: [0, 90],
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="rotatedConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Font size range -->
+    <section class="nge-story-section">
+      <h4>4. Font Size Range</h4>
+      <p class="nge-story-description">
+        <code>minFontSize</code> and <code>maxFontSize</code> set the span the values are mapped
+        onto. A tight range reads as a uniform tag list; a wide one makes the leading terms dominate
+        — and packs more of the tail in, because small words fit in the gaps.
+      </p>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5>Tight — 14 to 26px</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="tightRangeConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>Wide — 8 to 60px</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="wideRangeConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Colour -->
+    <section class="nge-story-section">
+      <h4>5. Colour</h4>
+      <p class="nge-story-description">
+        <code>seriesColors</code> cycles a palette across the words by placement order. A per-word
+        <code>color</code> beats it outright, which is how a single term is singled out. The text
+        <em>is</em> the mark here, so there is no separate label colour to resolve.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createWordCloudChartConfig({{ "{" }}
+  data: this.data,
+  seriesColors: ['#1B5E20', '#2E7D32', '#4CAF50', '#81C784'],
+{{ "}" }});
+
+// or single one out, per word:
+data = [{{ "{" }} label: 'angular', value: 120, color: '#D32F2F' {{ "}" }}, /* ... */];</pre>
+      </div>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5>Palette</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="paletteConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>Per-word highlight</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="highlightConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Click Handling -->
+    <section class="nge-story-section">
+      <h4>6. Click Handling</h4>
+      <p class="nge-story-description">
+        <code>onClick</code> receives the datum and its placement index.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createWordCloudChartConfig({{ "{" }}
+  data: this.data,
+  onClick: (event) =&gt; this.lastClicked.set(event.data.label),
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-interaction-display">
+        Last clicked: <strong>{{ lastClicked() }}</strong>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="clickableConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7: Tooltips -->
+    <section class="nge-story-section">
+      <h4>7. Tooltips</h4>
+      <p class="nge-story-description">
+        Hover a word for its raw value. The bubble is anchored above the word and clamped to the
+        chart bounds.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createWordCloudChartConfig({{ "{" }}
+  data: this.data,
+  tooltip: {{ "{" }}
+    enabled: true,
+    formatContent: (d) =&gt; ({{ "{" }} label: d.label, value: `${{ "{" }}d.value{{
+            "}"
+          }} mentions` {{ "}" }}),
+  {{ "}" }},
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="tooltipConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 8: Formatted labels -->
+    <section class="nge-story-section">
+      <h4>8. Formatted Labels</h4>
+      <p class="nge-story-description">
+        <code>formatLabel</code> changes the text that is drawn and measured. The datum's own
+        <code>label</code> stays the join key, so the enter/update/exit animation is unaffected.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+config = createWordCloudChartConfig({{ "{" }}
+  data: this.data,
+  formatLabel: (d) =&gt; d.label.toUpperCase(),
+{{ "}" }});</pre>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="formattedConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 9: Dynamic data -->
+    <section class="nge-story-section nge-story-section--highlight">
+      <h4>9. Dynamic Data with Signals</h4>
+      <p class="nge-story-description">
+        Wrap the factory in a <code>computed()</code> over a data signal. Words that survive a
+        change keep their DOM node and slide to their new position; words that leave fade out.
+      </p>
+      <div class="nge-story-code-block">
+        <pre>
+data = signal&lt;NgeWordCloudDataPoint[]&gt;([/* ... */]);
+
+config = computed(() =&gt;
+  createWordCloudChartConfig({{ "{" }} data: this.data() {{ "}" }})
+);</pre>
+      </div>
+      <div class="nge-story-interaction-row">
+        <button
+          type="button"
+          class="nge-story-action-button"
+          (click)="randomizeData()"
+        >
+          Randomize Data
+        </button>
+      </div>
+      <div class="nge-story-chart-container">
+        <nge-chart [config]="dynamicConfig()" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

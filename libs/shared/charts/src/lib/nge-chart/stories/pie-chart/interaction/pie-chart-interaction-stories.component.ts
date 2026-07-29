@@ -15,18 +15,57 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 /** Slice categories driven by the controls (one slice per label). */
 const SLICE_LABELS = ['Rent', 'Food', 'Transit', 'Utilities', 'Savings'];
 
+/**
+ * Olympic gold medals by country — 30 categories spanning three orders of magnitude
+ * (932 down to 36). The outside-label controls need a dataset that actually CROWDS:
+ * on the five-slice budget data nothing ever collides, so `leaderLines: 'displaced'`
+ * (the default) draws no connectors and the feature demos as if it were broken.
+ */
+const GOLD_MEDAL_SLICES: readonly NgePieDataPoint[] = [
+  { label: 'USA 932', value: 932 },
+  { label: 'Soviet Union 397', value: 397 },
+  { label: 'Britain 211', value: 211 },
+  { label: 'France 192', value: 192 },
+  { label: 'Italy 191', value: 191 },
+  { label: 'Germany 189', value: 189 },
+  { label: 'China 163', value: 163 },
+  { label: 'Hungary 160', value: 160 },
+  { label: 'East Germany 153', value: 153 },
+  { label: 'Sweden 140', value: 140 },
+  { label: 'Australia 131', value: 131 },
+  { label: 'Japan 123', value: 123 },
+  { label: 'Russia 109', value: 109 },
+  { label: 'Finland 100', value: 100 },
+  { label: 'Romania 86', value: 86 },
+  { label: 'Netherlands 73', value: 73 },
+  { label: 'South Korea 68', value: 68 },
+  { label: 'Cuba 66', value: 66 },
+  { label: 'Poland 63', value: 63 },
+  { label: 'Canada 56', value: 56 },
+  { label: 'West Germany 56', value: 56 },
+  { label: 'Norway 54', value: 54 },
+  { label: 'Bulgaria 51', value: 51 },
+  { label: 'Czechoslovakia 50', value: 50 },
+  { label: 'Switzerland 45', value: 45 },
+  { label: 'Unified Team 45', value: 45 },
+  { label: 'Denmark 41', value: 41 },
+  { label: 'Belgium 38', value: 38 },
+  { label: 'Turkey 37', value: 37 },
+  { label: 'New Zealand 36', value: 36 },
+];
+
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'pie-chart-interaction-stories',
+    class: 'nge-pie-chart-interaction-stories',
   },
   imports: [NgeChartComponent, NgeChartLegendComponent, NgeStorybookReviewContainerComponent],
-  selector: 'pie-chart-interaction-stories',
+  selector: 'nge-pie-chart-interaction-stories',
   standalone: true,
   styleUrl: './pie-chart-interaction-stories.component.scss',
   templateUrl: './pie-chart-interaction-stories.component.html',
 })
-export class PieChartInteractionStoriesComponent {
+export class NgePieChartInteractionStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/pie-chart/interaction';
 
@@ -38,9 +77,24 @@ export class PieChartInteractionStoriesComponent {
 
   // Layer - Geometry
   readonly innerRadius = input<number>(0);
+  readonly radiusRatio = input<number>(1);
   readonly startAngle = input<number>(0);
   readonly endAngle = input<number>(6.28);
   readonly padAngle = input<number>(0);
+
+  // Layer - Labels
+  readonly showLabels = input<boolean>(false);
+  readonly labelPosition = input<'inside' | 'outside'>('inside');
+  readonly minLabelAngle = input<number>(0.15);
+  readonly labelAsPercent = input<boolean>(false);
+
+  // Layer - Outside Labels
+  readonly leaderLines = input<'all' | 'displaced' | 'none'>('displaced');
+  readonly labelGutter = input<number>(96);
+  readonly labelLayout = input<'columns' | 'perimeter'>('perimeter');
+  readonly labelLineHeight = input<number>(14);
+  readonly labelOffset = input<number>(12);
+  readonly leaderElbowOffset = input<number>(12);
 
   // Layer - Legend
   readonly showLegend = input<boolean>(true);
@@ -70,11 +124,45 @@ export class PieChartInteractionStoriesComponent {
   readonly sliceStrokeWidth = input<number>(1);
   readonly sliceOpacity = input<number>(1);
 
-  // Sample data as a signal so the button can re-roll it.
-  readonly sampleData = signal<NgePieDataPoint[]>(this.buildSlices());
+  // Theme - Label Styling
+  readonly labelColor = input<string>('');
+  readonly labelFontSize = input<number>(10);
+  readonly labelFontWeight = input<number>(600);
+
+  // Theme - Outside Label Styling
+  readonly outsideLabelColor = input<string>('');
+  readonly leaderLineColor = input<string>('');
+  readonly leaderLineWidth = input<number>(1);
+
+  // Which fixture to chart. The five-slice budget is the default because most controls
+  // read best on a handful of wide wedges; the outside-label stories switch to the
+  // 30-category set, where labels genuinely crowd.
+  readonly dataset = input<'budget' | 'goldMedals'>('budget');
+
+  // Bumped by the Randomize button; `sampleData` re-rolls whenever it changes.
+  private readonly reroll = signal(0);
+
+  // Sample data, re-rolled on demand. The gold-medal set shows its REAL figures until the
+  // button is pressed — randomising a recognisable dataset on load would throw away the
+  // three-orders-of-magnitude spread that makes it worth charting.
+  readonly sampleData = computed<NgePieDataPoint[]>(() => {
+    const rolls = this.reroll();
+    if (this.dataset() === 'goldMedals') {
+      return rolls === 0
+        ? [...GOLD_MEDAL_SLICES]
+        : GOLD_MEDAL_SLICES.map(slice => ({
+            ...slice,
+            value: Math.round(20 + Math.random() * 900),
+          }));
+    }
+    return SLICE_LABELS.map(label => ({
+      label,
+      value: Math.round(100 + Math.random() * 1800),
+    }));
+  });
 
   randomizeData(): void {
-    this.sampleData.set(this.buildSlices());
+    this.reroll.update(n => n + 1);
   }
 
   // --- Interactive-legend mode (interactiveLegend control) --------------------
@@ -156,13 +244,32 @@ export class PieChartInteractionStoriesComponent {
   // Computed config rebuilds whenever any control (or the re-rolled data) changes.
   readonly config = computed<NgeChartConfig>(() => {
     const palette = this.palette();
+    const data = this.chartData();
+
+    // Percent labels read against the CURRENTLY VISIBLE total, so toggling a slice off via
+    // the interactive legend re-bases the remaining shares instead of leaving them summing
+    // to less than 100.
+    const total = data.reduce((sum, point) => sum + point.value, 0);
 
     const baseConfig = createPieChartConfig({
-      data: this.chartData(),
+      data,
       endAngle: this.endAngle(),
+      formatLabel: this.labelAsPercent()
+        ? (d: NgePieDataPoint) => `${Math.round((d.value / total) * 100)}%`
+        : undefined,
       innerRadius: this.innerRadius(),
+      labelGutter: this.labelGutter(),
+      labelLayout: this.labelLayout(),
+      labelLineHeight: this.labelLineHeight(),
+      labelOffset: this.labelOffset(),
+      labelPosition: this.labelPosition(),
+      leaderElbowOffset: this.leaderElbowOffset(),
+      leaderLines: this.leaderLines(),
+      minLabelAngle: this.minLabelAngle(),
       padAngle: this.padAngle(),
+      radiusRatio: this.radiusRatio(),
       seriesColors: palette.length ? palette : undefined,
+      showLabels: this.showLabels(),
       startAngle: this.startAngle(),
       tooltip: this.showTooltip()
         ? {
@@ -203,6 +310,22 @@ export class PieChartInteractionStoriesComponent {
           : undefined,
       theme: {
         pie: {
+          label: {
+            color: this.labelColor() || undefined,
+            fontSize: this.labelFontSize(),
+            fontWeight: this.labelFontWeight(),
+          },
+          // A separate slice from `label` — outside labels sit on the plot surface, not on a
+          // slice fill, so they track a surface token instead of deriving a contrast colour.
+          labelOutside: {
+            color: this.outsideLabelColor() || undefined,
+            fontSize: this.labelFontSize(),
+            fontWeight: this.labelFontWeight(),
+          },
+          leaderLine: {
+            stroke: this.leaderLineColor() || undefined,
+            strokeWidth: this.leaderLineWidth(),
+          },
           slice: {
             opacity: this.sliceOpacity(),
             stroke: this.sliceStroke() || undefined,
@@ -212,12 +335,4 @@ export class PieChartInteractionStoriesComponent {
       },
     };
   });
-
-  // Fresh values for every slice.
-  private buildSlices(): NgePieDataPoint[] {
-    return SLICE_LABELS.map(label => ({
-      label,
-      value: Math.round(100 + Math.random() * 1800),
-    }));
-  }
 }

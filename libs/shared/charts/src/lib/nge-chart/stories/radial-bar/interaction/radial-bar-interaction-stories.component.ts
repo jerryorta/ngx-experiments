@@ -51,15 +51,15 @@ function buildCellData(): NgeRadialBarDataPoint[] {
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'radial-bar-interaction-stories',
+    class: 'nge-radial-bar-interaction-stories',
   },
   imports: [NgeChartComponent, NgeChartLegendComponent, NgeStorybookReviewContainerComponent],
-  selector: 'radial-bar-interaction-stories',
+  selector: 'nge-radial-bar-interaction-stories',
   standalone: true,
   styleUrl: './radial-bar-interaction-stories.component.scss',
   templateUrl: './radial-bar-interaction-stories.component.html',
 })
-export class RadialBarInteractionStoriesComponent {
+export class NgeRadialBarInteractionStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/radial-bar/interaction';
 
@@ -76,6 +76,13 @@ export class RadialBarInteractionStoriesComponent {
   readonly startAngle = input<number>(0);
   readonly endAngle = input<number>(6.28);
   readonly padAngle = input<number>(0.02);
+
+  // Layer - Labels (mark: bar only)
+  readonly showLabels = input<boolean>(false);
+  readonly labelPosition = input<'inside' | 'outside'>('inside');
+  readonly minLabelAngle = input<number>(0.15);
+  readonly minLabelSize = input<number>(12);
+  readonly labelGutter = input<number>(48);
 
   // Layer - Legend
   /** Suppress the internal legend and render the standalone interactive <nge-chart-legend> above the chart (mark: area). */
@@ -103,6 +110,12 @@ export class RadialBarInteractionStoriesComponent {
   // Theme - Area Styling
   readonly areaFillOpacity = input<number>(0.3);
   readonly areaLineWidth = input<number>(2);
+
+  // Theme - Label Styling
+  readonly labelFontSize = input<number>(10);
+  readonly labelFontWeight = input<number>(600);
+  /** Flat label colour — empty keeps the automatic on-fill contrast derivation (inside only). */
+  readonly labelColor = input<string>('');
 
   // Per-mark datasets held as signals so the button can re-roll their values. The
   // three marks need different data shapes (bar: label+value, area: +seriesId,
@@ -137,7 +150,7 @@ export class RadialBarInteractionStoriesComponent {
     return new Map(
       SERIES_IDS.map((seriesId, i) => [
         seriesId,
-        colors[i % colors.length] ?? 'var(--chart-primary)',
+        colors[i % colors.length] ?? 'var(--nge-chart-primary)',
       ])
     );
   });
@@ -150,7 +163,7 @@ export class RadialBarInteractionStoriesComponent {
     return SERIES_IDS.map(seriesId => {
       const isHidden = hidden.has(seriesId);
       return {
-        color: colorById.get(seriesId) ?? 'var(--chart-primary)',
+        color: colorById.get(seriesId) ?? 'var(--nge-chart-primary)',
         id: seriesId,
         label: seriesId,
         opacity: isHidden ? 0.4 : 1,
@@ -167,7 +180,7 @@ export class RadialBarInteractionStoriesComponent {
     const colorById = this.seriesColorById();
     const hidden = this.hiddenSeries();
     return SERIES_IDS.filter(seriesId => !hidden.has(seriesId)).map(
-      seriesId => colorById.get(seriesId) ?? 'var(--chart-primary)'
+      seriesId => colorById.get(seriesId) ?? 'var(--nge-chart-primary)'
     );
   });
 
@@ -216,13 +229,19 @@ export class RadialBarInteractionStoriesComponent {
       data: this.chartData(),
       endAngle: this.endAngle(),
       innerRadius: this.innerRadius(),
+      labelColor: this.labelColor() || undefined,
+      labelGutter: this.labelGutter(),
+      labelPosition: this.labelPosition(),
       mark,
+      minLabelAngle: this.minLabelAngle(),
+      minLabelSize: this.minLabelSize(),
       padAngle: this.padAngle(),
       seriesColors: interactiveLegendArea
         ? this.visibleSeriesColors()
         : palette.length
           ? palette
           : undefined,
+      showLabels: this.showLabels(),
       startAngle: this.startAngle(),
       tooltip: this.showTooltip()
         ? {
@@ -261,6 +280,16 @@ export class RadialBarInteractionStoriesComponent {
           cell: {
             color: this.cellColor() || undefined,
             minOpacity: this.cellMinOpacity(),
+          },
+          // Typography is set on BOTH slices so the controls keep working whichever
+          // placement is active — the renderer reads only the one matching labelPosition.
+          label: {
+            fontSize: this.labelFontSize(),
+            fontWeight: this.labelFontWeight(),
+          },
+          labelOutside: {
+            fontSize: this.labelFontSize(),
+            fontWeight: this.labelFontWeight(),
           },
         },
       },

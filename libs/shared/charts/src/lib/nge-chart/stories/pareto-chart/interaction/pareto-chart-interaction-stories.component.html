@@ -2,17 +2,17 @@
   [reviewStatus]="reviewStatus"
   [storybookFilePath]="storybookFilePath"
 >
-  <div class="interaction-container">
-    <div class="interaction-row">
+  <div class="nge-story-interaction-container">
+    <div class="nge-story-interaction-row">
       <button
         type="button"
-        class="interaction-btn interaction-btn--primary"
+        class="nge-story-interaction-btn nge-story-interaction-btn--primary"
         (click)="randomizeData()"
       >
         Randomize Data
       </button>
     </div>
-    <div class="chart-wrapper">
+    <div class="nge-story-chart-wrapper">
       <nge-chart [config]="config()" />
     </div>
   </div>

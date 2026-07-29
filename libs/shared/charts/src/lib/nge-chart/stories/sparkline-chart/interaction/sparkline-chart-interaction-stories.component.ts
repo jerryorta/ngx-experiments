@@ -15,15 +15,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'sparkline-chart-interaction-stories',
+    class: 'nge-sparkline-chart-interaction-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'sparkline-chart-interaction-stories',
+  selector: 'nge-sparkline-chart-interaction-stories',
   standalone: true,
   styleUrl: './sparkline-chart-interaction-stories.component.scss',
   templateUrl: './sparkline-chart-interaction-stories.component.html',
 })
-export class SparklineChartInteractionStoriesComponent {
+export class NgeSparklineChartInteractionStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/sparkline-chart/interaction';
 

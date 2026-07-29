@@ -72,14 +72,14 @@ Services follow the same rules with two differences:
 @Injectable({ providedIn: 'root' })
 export class ExampleService {
   // 1. inject() first
-  private firestore = inject(GigaFirestoreService);
+  private firestore = inject(NgeFirestoreService);
   private store = inject(Store);
 
   /**
    * Collaboration query lifecycle
    * Owns the parent/child query pair for the shared collection.
    */
-  private collaborationQuery!: GigaFirestoreCollectionQuery<Entity>;
+  private collaborationQuery!: NgeFirestoreCollectionQuery<Entity>;
 
   connectCollaboration(uid: string): void { /* … */ }
   disconnectCollaboration(): void { /* … */ }
@@ -88,7 +88,7 @@ export class ExampleService {
    * Private collection query lifecycle
    * Owns the user-private collection query.
    */
-  private privateQuery!: GigaFirestoreCollectionQuery<Entity>;
+  private privateQuery!: NgeFirestoreCollectionQuery<Entity>;
 
   connectPrivate(uid: string): void { /* … */ }
   disconnectPrivate(): void { /* … */ }

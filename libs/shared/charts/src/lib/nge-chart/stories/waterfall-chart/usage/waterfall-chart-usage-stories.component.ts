@@ -23,15 +23,15 @@ const REVENUE: NgeWaterfallDataPoint[] = [
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'waterfall-chart-usage-stories',
+    class: 'nge-waterfall-chart-usage-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'waterfall-chart-usage-stories',
+  selector: 'nge-waterfall-chart-usage-stories',
   standalone: true,
   styleUrl: './waterfall-chart-usage-stories.component.scss',
   templateUrl: './waterfall-chart-usage-stories.component.html',
 })
-export class WaterfallChartUsageStoriesComponent {
+export class NgeWaterfallChartUsageStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/waterfall-chart/usage';
 

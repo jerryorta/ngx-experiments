@@ -208,14 +208,14 @@ describe('renderScatterLayer', () => {
       expect(fillOf(circleForDatum(g, data[0]))).toBe('var(--solo)');
     });
 
-    it('defaults a single series to the theme palette head (var(--chart-primary))', () => {
+    it('defaults a single series to the theme palette head (var(--nge-chart-primary))', () => {
       const data: NgeScatterDataPoint[] = [{ x: 1, y: 1 }];
       const { context, g } = createContext(data);
 
       renderScatterLayer(context);
 
-      // No seriesColors + default theme -> palette[0] === 'var(--chart-primary)'
-      expect(fillOf(circleForDatum(g, data[0]))).toBe('var(--chart-primary)');
+      // No seriesColors + default theme -> palette[0] === 'var(--nge-chart-primary)'
+      expect(fillOf(circleForDatum(g, data[0]))).toBe('var(--nge-chart-primary)');
     });
   });
 

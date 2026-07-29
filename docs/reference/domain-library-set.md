@@ -44,12 +44,12 @@ libs/
 
 | Library          | Nx project name           | Path alias                              | Component prefix | Nx tags                     |
 | ---------------- | ------------------------- | --------------------------------------- | ---------------- | --------------------------- |
-| `models`         | `[domain]-models`         | `@gigasoftware/[domain]/models`         | —                | `models`, `lib`             |
-| `store`          | `[domain]-store`          | `@gigasoftware/[domain]-store`          | —                | `lib`                       |
+| `models`         | `[domain]-models`         | `@nge/[domain]/models`         | —                | `models`, `lib`             |
+| `store`          | `[domain]-store`          | `@nge/[domain]-store`          | —                | `lib`                       |
 | `themes`         | `[domain]-themes`         | — (SCSS only, no TS exports)            | —                | `[domain]`, `themes`, `lib` |
-| `ui`             | `[domain]-ui`             | `@gigasoftware/[domain]/ui`             | `[prefix]`       | `lib`                       |
-| `design-library` | `[domain]-design-library` | `@gigasoftware/[domain]/design-library` | `[prefix]`       | `[domain]`, `lib`           |
-| `utils`          | `[domain]-utils`          | `@gigasoftware/[domain]/utils`          | —                | `lib`                       |
+| `ui`             | `[domain]-ui`             | `@nge/[domain]/ui`             | `[prefix]`       | `lib`                       |
+| `design-library` | `[domain]-design-library` | `@nge/[domain]/design-library` | `[prefix]`       | `[domain]`, `lib`           |
+| `utils`          | `[domain]-utils`          | `@nge/[domain]/utils`          | —                | `lib`                       |
 
 > **Note on `store` path alias:** The store uses a dash separator (`[domain]-store`) rather than a slash, matching the Nx project name convention. All other libs use the slash form (`[domain]/lib-type`).
 
@@ -72,7 +72,7 @@ Domain-specific types, interfaces, enums, and pure reusable functions. No Angula
 - **What goes here:** `+[feature]/` directories (actions, reducer, effects, selectors, facade); query engine services for Firestore sync; state that is consumed by more than one feature
 - **Store-internal shared concerns:** logic used by 2+ slices (but not a slice itself) lives in a named non-`+` folder under `src/lib/<concern>/` with its own `index.ts`, re-exported through the store barrel — e.g. `firestore-write/`, `firestore-timestamp/`. Extract here the moment a helper would otherwise be copied into a second slice.
 - **What does NOT go here:** UI components; feature-local state (Signal Store for local/component state lives next to its component in `ui` or `design-library`)
-- **Depends on:** `models`, shared `@gigasoftware/store`, `@gigasoftware/firebase`
+- **Depends on:** `models`, shared `@nge/store`, `@nge/firebase`
 
 ### `themes` — Design Tokens & SCSS Theme
 
@@ -92,7 +92,7 @@ Angular components specific to this domain that are **container/smart** — they
 - **Animations:** GSAP (`gsap`) for sophisticated animations; Angular animations for simple state transitions
 - **Styling — Tailwind first:** same priority as `design-library` — Tailwind for layout, spacing, typography, and colors; SCSS only for pseudo-selectors, child selectors, and CSS custom property definitions
 - **Tailwind availability:** picked up automatically by the app's `tailwind.config.js` via `createGlobPatternsForDependencies` — no lib-level config needed
-- **Depends on:** `models`, `store`, `design-library`, `@gigasoftware/ui-design-library-deprecated`
+- **Depends on:** `models`, `store`, `design-library`, `@nge/ui-design-library-deprecated`
 
 ### `design-library` — Reusable Presentational Components
 
@@ -113,7 +113,7 @@ Reusable Angular **components, directives, and pipes** that are purely presentat
   - SCSS is used only for: pseudo-selectors (`:hover`, `:focus`, `::placeholder`), child element selectors, and CSS custom property definitions
   - If the `.scss` file contains only the root class wrapper with no rules inside, delete it and remove `styleUrl` from the decorator
 - **Tailwind availability:** Tailwind is configured at the app level via `createGlobPatternsForDependencies` in `apps/[domain]/app/tailwind.config.js` — no lib-level Tailwind config is needed; classes used in lib templates are automatically picked up
-- **Depends on:** `models` (for model types), `themes` (for CSS tokens), `@gigasoftware/ui-design-library-deprecated`
+- **Depends on:** `models` (for model types), `themes` (for CSS tokens), `@nge/ui-design-library-deprecated`
 
 ### `utils` — Pure Utility Functions
 
@@ -132,7 +132,7 @@ A workspace this size has many shared libraries; the failure modes are (a) re-wr
 ### Search before you write
 
 - Grep the codebase for the symbol or behavior first.
-- The authoritative registry of shared libraries is **`tsconfig.base.json`** (`compilerOptions.paths`) — every shared lib is a `@gigasoftware/*` alias there. It is build-maintained, so it never goes stale; prefer it over any hand-kept inventory.
+- The authoritative registry of shared libraries is **`tsconfig.base.json`** (`compilerOptions.paths`) — every shared lib is a `@nge/*` alias there. It is build-maintained, so it never goes stale; prefer it over any hand-kept inventory.
 
 ### Place by altitude (prefer the domain's own libs)
 
@@ -145,7 +145,7 @@ The direction is **self-contained domain apps** — each domain owns its full si
 | Logic shared by 2+ store slices | `libs/<domain>/store/src/lib/<concern>/` (e.g. `firestore-write`, `firestore-timestamp`) |
 | Presentational component / directive / pipe | `libs/<domain>/design-library` first — promote to `libs/shared/ui-design-library` only when shared across apps |
 | Smart / container component | `libs/<domain>/ui` |
-| Cross-domain infra (Firebase, RxJS, dates, charts, …) | the existing `@gigasoftware/*` shared lib — reuse, don't duplicate |
+| Cross-domain infra (Firebase, RxJS, dates, charts, …) | the existing `@nge/*` shared lib — reuse, don't duplicate |
 
 **Design-library components — build here first, share second.** A new presentational primitive (`<prefix>-*`) starts in the **consuming domain's own `libs/<domain>/design-library`**. Promote it to the cross-app **`libs/shared/ui-design-library`** (`dlc-*`) ONLY once a second application genuinely needs it — the domain lib is the default, shared is the exception. Both use the same Material-free, own-namespace `--<prefix>-*` token architecture (see `libs/shared/ui-design-library/COMPONENT-ARCHITECTURE-BEST-PRACTICES.md`).
 
@@ -153,14 +153,14 @@ The direction is **self-contained domain apps** — each domain owns its full si
 
 These cross-domain libs are being **phased out**. Don't treat them as the home for new shared code, and migrate off them when you touch a consumer:
 
-- `@gigasoftware/ui-design-library-deprecated` (`libs/shared/ui-design-library-deprecated`) — **superseded by the shared successor `@gigasoftware/ui-design-library` (`libs/shared/ui-design-library`)**, the go-forward home for cross-app `dlc-*` primitives.
-- `@gigasoftware/material` (`libs/shared/material`) — being phased out as domains become self-contained; its reusable parts are reimplemented in each domain's own `design-library` / `themes` (no shared successor).
+- `@nge/ui-design-library-deprecated` (`libs/shared/ui-design-library-deprecated`) — **superseded by the shared successor `@nge/ui-design-library` (`libs/shared/ui-design-library`)**, the go-forward home for cross-app `dlc-*` primitives.
+- `@nge/material` (`libs/shared/material`) — being phased out as domains become self-contained; its reusable parts are reimplemented in each domain's own `design-library` / `themes` (no shared successor).
 
-> All other `@gigasoftware/*` aliases in `tsconfig.base.json` remain valid shared infrastructure — reuse them rather than duplicating. Two are in transition but still supported:
-> - `@gigasoftware/api` (`libs/shared/api`) — being trimmed of deprecated-app code as those apps are removed, but the library is kept. Reuse is fine.
-> - `@gigasoftware/store` (`libs/shared/store`) — no longer the primary store, but domains may depend on it (e.g. `QueryEngineCache` is consumed by every domain store). Build on it as shared infra; just put NEW domain state slices in `libs/<domain>/store`, not here.
+> All other `@nge/*` aliases in `tsconfig.base.json` remain valid shared infrastructure — reuse them rather than duplicating. Two are in transition but still supported:
+> - `@nge/api` (`libs/shared/api`) — being trimmed of deprecated-app code as those apps are removed, but the library is kept. Reuse is fine.
+> - `@nge/store` (`libs/shared/store`) — no longer the primary store, but domains may depend on it (e.g. `QueryEngineCache` is consumed by every domain store). Build on it as shared infra; just put NEW domain state slices in `libs/<domain>/store`, not here.
 
-> **Worked example (REX-443).** `toIsoTimestamp` had been copied into three concierge store slices. The fix extracted a single helper into `libs/concierge/store/src/lib/firestore-timestamp/` (domain-owned, store-internal concern folder), reusing the existing per-slice pattern (REX-397). The shared `convertToUnixTimestamp` in `@gigasoftware/api` was NOT reusable here anyway — it returns epoch-ms `number` (wrong type for these ISO-`string` fields) and ignores live `Timestamp` instances / already-ISO strings — but the deciding factor was the **"prefer the domain's own libs"** altitude rule: keep domain-specific logic in the domain, not in a cross-domain shared lib.
+> **Worked example (REX-443).** `toIsoTimestamp` had been copied into three concierge store slices. The fix extracted a single helper into `libs/concierge/store/src/lib/firestore-timestamp/` (domain-owned, store-internal concern folder), reusing the existing per-slice pattern (REX-397). The shared `convertToUnixTimestamp` in `@nge/api` was NOT reusable here anyway — it returns epoch-ms `number` (wrong type for these ISO-`string` fields) and ignores live `Timestamp` instances / already-ISO strings — but the deciding factor was the **"prefer the domain's own libs"** altitude rule: keep domain-specific logic in the domain, not in a cross-domain shared lib.
 
 ---
 
@@ -185,8 +185,8 @@ Applications depend on all six. Libraries never depend upward in this list. The 
 | ------------------ | ----------------------------------- | ---------------------------------------------- |
 | Directory          | `libs/[domain]/[lib-type]/`         | `libs/media-workbench/design-library/`         |
 | Nx project name    | `[domain]-[lib-type]`               | `media-workbench-design-library`               |
-| Path alias (most)  | `@gigasoftware/[domain]/[lib-type]` | `@gigasoftware/media-workbench/design-library` |
-| Path alias (store) | `@gigasoftware/[domain]-store`      | `@gigasoftware/media-workbench-store`          |
+| Path alias (most)  | `@nge/[domain]/[lib-type]` | `@nge/media-workbench/design-library` |
+| Path alias (store) | `@nge/[domain]-store`      | `@nge/media-workbench-store`          |
 | Component prefix   | domain initials                     | `mw`                                           |
 | Component selector | `[prefix]-[name]`                   | `mw-chip`                                      |
 
@@ -592,11 +592,11 @@ mkdir -p apps/[domain]/mobile  && touch apps/[domain]/mobile/.gitkeep
 After all libraries are generated, add entries to `tsconfig.base.json`:
 
 ```json
-"@gigasoftware/[domain]/models":         ["libs/[domain]/models/src/index.ts"],
-"@gigasoftware/[domain]-store":          ["libs/[domain]/store/src/index.ts"],
-"@gigasoftware/[domain]/ui":             ["libs/[domain]/ui/src/index.ts"],
-"@gigasoftware/[domain]/design-library": ["libs/[domain]/design-library/src/index.ts"],
-"@gigasoftware/[domain]/utils":          ["libs/[domain]/utils/src/index.ts"]
+"@nge/[domain]/models":         ["libs/[domain]/models/src/index.ts"],
+"@nge/[domain]-store":          ["libs/[domain]/store/src/index.ts"],
+"@nge/[domain]/ui":             ["libs/[domain]/ui/src/index.ts"],
+"@nge/[domain]/design-library": ["libs/[domain]/design-library/src/index.ts"],
+"@nge/[domain]/utils":          ["libs/[domain]/utils/src/index.ts"]
 ```
 
 > Note: `store` uses a dash separator (`[domain]-store`) not a slash — this matches the Nx project name and keeps it consistent with `real-estate-store`, `evolving-cognition-store`, and `media-workbench-store`.

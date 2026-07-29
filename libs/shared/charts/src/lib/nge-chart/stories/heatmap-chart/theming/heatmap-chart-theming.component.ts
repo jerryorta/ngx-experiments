@@ -12,15 +12,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'heatmap-chart-theming',
+    class: 'nge-heatmap-chart-theming',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'heatmap-chart-theming',
+  selector: 'nge-heatmap-chart-theming',
   standalone: true,
   styleUrl: './heatmap-chart-theming.component.scss',
   templateUrl: './heatmap-chart-theming.component.html',
 })
-export class HeatmapChartThemingComponent {
+export class NgeHeatmapChartThemingComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/heatmap-chart/theming';
 
@@ -51,8 +51,8 @@ export class HeatmapChartThemingComponent {
     { col: 'Q4', row: 'Central', value: 58 },
   ];
 
-  // 1. Default — no overrides. The cell ramp runs `--chart-surface` → `--chart-primary`,
-  // empty cells read `--chart-surface-container-highest`, and separators the surface token.
+  // 1. Default — no overrides. The cell ramp runs `--nge-chart-surface` → `--nge-chart-primary`,
+  // empty cells read `--nge-chart-surface-container-highest`, and separators the surface token.
   defaultConfig = createHeatmapChartConfig({
     data: this.sampleData,
     xAxisLabel: 'Quarter',

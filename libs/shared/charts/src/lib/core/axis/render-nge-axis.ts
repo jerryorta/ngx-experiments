@@ -113,7 +113,7 @@ export function renderNgeAxis(
     .attr('fill', 'none')
     .merge(domain)
     .attr('d', baseline)
-    .style('stroke', axisTheme.lineColor ?? 'var(--chart-outline-variant)')
+    .style('stroke', axisTheme.lineColor ?? 'var(--nge-chart-outline-variant)')
     .style('stroke-width', `${axisTheme.lineWidth ?? 1}px`);
 
   // Ticks: keyed join on the domain value so redraws reuse nodes and only the
@@ -140,7 +140,7 @@ export function renderNgeAxis(
     .attr('dx', rotated ? (tickRotation < 0 ? '-0.5em' : '0.5em') : null)
     .attr('text-anchor', tickLabelAnchor(orient, rotated, tickRotation))
     .attr('transform', rotated ? `rotate(${tickRotation})` : null)
-    .style('fill', axisTheme.tickColor ?? 'var(--chart-on-surface)')
+    .style('fill', axisTheme.tickColor ?? 'var(--nge-chart-on-surface)')
     .style('font-size', `${axisTheme.tickFontSize ?? 10}px`)
     .text(tick => (tickFormat ? tickFormat(tick.value) : tick.label));
 }

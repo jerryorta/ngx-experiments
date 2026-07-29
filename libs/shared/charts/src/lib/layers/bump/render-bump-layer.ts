@@ -56,7 +56,7 @@ interface BumpRenderParams {
  * top. Series enter by fading in (line geometry applied synchronously so first paint is
  * smear-free + testable) and survivors morph via named transitions; points grow from
  * radius 0. All colour is applied via D3 `.style()` on the resolved series color /
- * `--chart-*` tokens (never `.attr()`, where a `var()` would fail silently). Every
+ * `--nge-chart-*` tokens (never `.attr()`, where a `var()` would fail silently). Every
  * transition runs off `context.animation` — no hardcoded durations (bar a small hover
  * tween).
  */
@@ -392,7 +392,7 @@ function renderEndLabel(
       .style('pointer-events', 'none');
   }
 
-  // Colour via .style() so a var(--chart-*) resolves (an SVG fill attr would not).
+  // Colour via .style() so a var(--nge-chart-*) resolves (an SVG fill attr would not).
   label
     .style('fill', mergedTheme.label.color)
     .attr('font-size', mergedTheme.label.fontSize)

@@ -41,15 +41,15 @@ function buildBumpData(table: Record<string, number[]>): NgeBumpDataPoint[] {
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'bump-chart-usage-stories',
+    class: 'nge-bump-chart-usage-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'bump-chart-usage-stories',
+  selector: 'nge-bump-chart-usage-stories',
   standalone: true,
   styleUrl: './bump-chart-usage-stories.component.scss',
   templateUrl: './bump-chart-usage-stories.component.html',
 })
-export class BumpChartUsageStoriesComponent {
+export class NgeBumpChartUsageStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/bump-chart/usage';
 

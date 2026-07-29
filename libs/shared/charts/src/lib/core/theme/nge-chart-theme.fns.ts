@@ -5,46 +5,64 @@ import type {
   NgeBumpLayerTheme,
   NgeChartBaseTheme,
   NgeChartTheme,
+  NgeChordLayerTheme,
   NgeDistributionLayerTheme,
   NgeDivergingBarLayerTheme,
   NgeFinancialLayerTheme,
+  NgeFunnelLayerTheme,
   NgeGaugeLayerTheme,
   NgeGroupedBarLayerTheme,
   NgeHeatmapLayerTheme,
   NgeHistogramLayerTheme,
   NgeLineLayerTheme,
   NgeLollipopLayerTheme,
+  NgeNetworkLayerTheme,
   NgeOverlayLayerTheme,
+  NgeParallelCoordsLayerTheme,
   NgePieLayerTheme,
+  NgeProportionalLayerTheme,
   NgeRadarLayerTheme,
   NgeRadialBarLayerTheme,
+  NgeSankeyLayerTheme,
   NgeScatterLayerTheme,
   NgeStackedBarLayerTheme,
   NgeSunburstLayerTheme,
   NgeTimelineLayerTheme,
+  NgeTreeLayerTheme,
+  NgeTreemapLayerTheme,
   NgeWaterfallLayerTheme,
+  NgeWordCloudLayerTheme,
   ResolvedNgeAreaLayerTheme,
   ResolvedNgeBarLayerTheme,
   ResolvedNgeBulletLayerTheme,
   ResolvedNgeBumpLayerTheme,
+  ResolvedNgeChordLayerTheme,
   ResolvedNgeDistributionLayerTheme,
   ResolvedNgeDivergingBarLayerTheme,
   ResolvedNgeFinancialLayerTheme,
+  ResolvedNgeFunnelLayerTheme,
   ResolvedNgeGaugeLayerTheme,
   ResolvedNgeGroupedBarLayerTheme,
   ResolvedNgeHeatmapLayerTheme,
   ResolvedNgeHistogramLayerTheme,
   ResolvedNgeLineLayerTheme,
   ResolvedNgeLollipopLayerTheme,
+  ResolvedNgeNetworkLayerTheme,
   ResolvedNgeOverlayLayerTheme,
+  ResolvedNgeParallelCoordsLayerTheme,
   ResolvedNgePieLayerTheme,
+  ResolvedNgeProportionalLayerTheme,
   ResolvedNgeRadarLayerTheme,
   ResolvedNgeRadialBarLayerTheme,
+  ResolvedNgeSankeyLayerTheme,
   ResolvedNgeScatterLayerTheme,
   ResolvedNgeStackedBarLayerTheme,
   ResolvedNgeSunburstLayerTheme,
   ResolvedNgeTimelineLayerTheme,
+  ResolvedNgeTreeLayerTheme,
+  ResolvedNgeTreemapLayerTheme,
   ResolvedNgeWaterfallLayerTheme,
+  ResolvedNgeWordCloudLayerTheme,
 } from './nge-chart-theme.models';
 
 import {
@@ -52,25 +70,34 @@ import {
   DEFAULT_BAR_LAYER_THEME,
   DEFAULT_BULLET_LAYER_THEME,
   DEFAULT_BUMP_LAYER_THEME,
-  DEFAULT_CHART_BASE_THEME,
+  DEFAULT_CHORD_LAYER_THEME,
   DEFAULT_DISTRIBUTION_LAYER_THEME,
   DEFAULT_DIVERGING_BAR_LAYER_THEME,
   DEFAULT_FINANCIAL_LAYER_THEME,
+  DEFAULT_FUNNEL_LAYER_THEME,
   DEFAULT_GAUGE_LAYER_THEME,
+  DEFAULT_NGE_CHART_BASE_THEME,
   DEFAULT_GROUPED_BAR_LAYER_THEME,
   DEFAULT_HEATMAP_LAYER_THEME,
   DEFAULT_HISTOGRAM_LAYER_THEME,
   DEFAULT_LINE_LAYER_THEME,
   DEFAULT_LOLLIPOP_LAYER_THEME,
+  DEFAULT_NETWORK_LAYER_THEME,
   DEFAULT_OVERLAY_LAYER_THEME,
+  DEFAULT_PARALLEL_COORDS_LAYER_THEME,
   DEFAULT_PIE_LAYER_THEME,
+  DEFAULT_PROPORTIONAL_LAYER_THEME,
   DEFAULT_RADAR_LAYER_THEME,
   DEFAULT_RADIAL_BAR_LAYER_THEME,
+  DEFAULT_SANKEY_LAYER_THEME,
   DEFAULT_SCATTER_LAYER_THEME,
   DEFAULT_STACKED_BAR_LAYER_THEME,
   DEFAULT_SUNBURST_LAYER_THEME,
   DEFAULT_TIMELINE_LAYER_THEME,
+  DEFAULT_TREE_LAYER_THEME,
+  DEFAULT_TREEMAP_LAYER_THEME,
   DEFAULT_WATERFALL_LAYER_THEME,
+  DEFAULT_WORDCLOUD_LAYER_THEME,
 } from './nge-chart-theme.defaults';
 
 /**
@@ -90,19 +117,19 @@ export function mergeBaseTheme(
   userTheme?: Partial<NgeChartBaseTheme>
 ): Required<NgeChartBaseTheme> {
   if (!userTheme) {
-    return DEFAULT_CHART_BASE_THEME;
+    return DEFAULT_NGE_CHART_BASE_THEME;
   }
 
   return {
     axis: {
-      ...DEFAULT_CHART_BASE_THEME.axis,
+      ...DEFAULT_NGE_CHART_BASE_THEME.axis,
       ...filterUndefined(userTheme.axis),
       group: {
-        ...DEFAULT_CHART_BASE_THEME.axis.group,
+        ...DEFAULT_NGE_CHART_BASE_THEME.axis.group,
         ...filterUndefined(userTheme.axis?.group),
       },
     },
-    grid: { ...DEFAULT_CHART_BASE_THEME.grid, ...filterUndefined(userTheme.grid) },
+    grid: { ...DEFAULT_NGE_CHART_BASE_THEME.grid, ...filterUndefined(userTheme.grid) },
   };
 }
 
@@ -280,6 +307,14 @@ export function mergePieLayerTheme(
 
   return {
     label: { ...DEFAULT_PIE_LAYER_THEME.label, ...filterUndefined(userTheme.label) },
+    labelOutside: {
+      ...DEFAULT_PIE_LAYER_THEME.labelOutside,
+      ...filterUndefined(userTheme.labelOutside),
+    },
+    leaderLine: {
+      ...DEFAULT_PIE_LAYER_THEME.leaderLine,
+      ...filterUndefined(userTheme.leaderLine),
+    },
     slice: { ...DEFAULT_PIE_LAYER_THEME.slice, ...filterUndefined(userTheme.slice) },
   } as ResolvedNgePieLayerTheme;
 }
@@ -299,6 +334,27 @@ export function mergeSunburstLayerTheme(
     label: { ...DEFAULT_SUNBURST_LAYER_THEME.label, ...filterUndefined(userTheme.label) },
     segment: { ...DEFAULT_SUNBURST_LAYER_THEME.segment, ...filterUndefined(userTheme.segment) },
   } as ResolvedNgeSunburstLayerTheme;
+}
+
+/**
+ * Deep merge user proportional-area / waffle layer theme with defaults.
+ * Returns a fully resolved theme with all nested properties required.
+ */
+export function mergeProportionalLayerTheme(
+  userTheme?: Partial<NgeProportionalLayerTheme>
+): ResolvedNgeProportionalLayerTheme {
+  if (!userTheme) {
+    return DEFAULT_PROPORTIONAL_LAYER_THEME as ResolvedNgeProportionalLayerTheme;
+  }
+
+  return {
+    emptyCell: {
+      ...DEFAULT_PROPORTIONAL_LAYER_THEME.emptyCell,
+      ...filterUndefined(userTheme.emptyCell),
+    },
+    label: { ...DEFAULT_PROPORTIONAL_LAYER_THEME.label, ...filterUndefined(userTheme.label) },
+    mark: { ...DEFAULT_PROPORTIONAL_LAYER_THEME.mark, ...filterUndefined(userTheme.mark) },
+  } as ResolvedNgeProportionalLayerTheme;
 }
 
 /**
@@ -336,6 +392,10 @@ export function mergeRadialBarLayerTheme(
     bar: { ...DEFAULT_RADIAL_BAR_LAYER_THEME.bar, ...filterUndefined(userTheme.bar) },
     cell: { ...DEFAULT_RADIAL_BAR_LAYER_THEME.cell, ...filterUndefined(userTheme.cell) },
     label: { ...DEFAULT_RADIAL_BAR_LAYER_THEME.label, ...filterUndefined(userTheme.label) },
+    labelOutside: {
+      ...DEFAULT_RADIAL_BAR_LAYER_THEME.labelOutside,
+      ...filterUndefined(userTheme.labelOutside),
+    },
   } as ResolvedNgeRadialBarLayerTheme;
 }
 
@@ -473,6 +533,27 @@ export function mergeFinancialLayerTheme(
 }
 
 /**
+ * Deep merge user funnel / pyramid layer theme with defaults.
+ * Returns a fully resolved theme with all nested properties required.
+ */
+export function mergeFunnelLayerTheme(
+  userTheme?: Partial<NgeFunnelLayerTheme>
+): ResolvedNgeFunnelLayerTheme {
+  if (!userTheme) {
+    return DEFAULT_FUNNEL_LAYER_THEME as ResolvedNgeFunnelLayerTheme;
+  }
+
+  return {
+    band: { ...DEFAULT_FUNNEL_LAYER_THEME.band, ...filterUndefined(userTheme.band) },
+    label: { ...DEFAULT_FUNNEL_LAYER_THEME.label, ...filterUndefined(userTheme.label) },
+    labelOutside: {
+      ...DEFAULT_FUNNEL_LAYER_THEME.labelOutside,
+      ...filterUndefined(userTheme.labelOutside),
+    },
+  } as ResolvedNgeFunnelLayerTheme;
+}
+
+/**
  * Deep merge user gauge (single-value meter) layer theme with defaults.
  * Returns a fully resolved theme with all nested properties required.
  */
@@ -574,50 +655,185 @@ export function mergeTimelineLayerTheme(
 }
 
 /**
+ * Deep merge user word cloud layer theme with defaults.
+ * Returns a fully resolved theme with all nested properties required.
+ */
+export function mergeWordCloudLayerTheme(
+  userTheme?: Partial<NgeWordCloudLayerTheme>
+): ResolvedNgeWordCloudLayerTheme {
+  if (!userTheme) {
+    return DEFAULT_WORDCLOUD_LAYER_THEME as ResolvedNgeWordCloudLayerTheme;
+  }
+
+  return {
+    word: { ...DEFAULT_WORDCLOUD_LAYER_THEME.word, ...filterUndefined(userTheme.word) },
+  } as ResolvedNgeWordCloudLayerTheme;
+}
+
+/**
+ * Deep merge user parallel coordinates layer theme with defaults
+ */
+export function mergeParallelCoordsLayerTheme(
+  userTheme?: Partial<NgeParallelCoordsLayerTheme>
+): ResolvedNgeParallelCoordsLayerTheme {
+  if (!userTheme) {
+    return DEFAULT_PARALLEL_COORDS_LAYER_THEME as ResolvedNgeParallelCoordsLayerTheme;
+  }
+
+  return {
+    axis: { ...DEFAULT_PARALLEL_COORDS_LAYER_THEME.axis, ...filterUndefined(userTheme.axis) },
+    brush: { ...DEFAULT_PARALLEL_COORDS_LAYER_THEME.brush, ...filterUndefined(userTheme.brush) },
+    label: { ...DEFAULT_PARALLEL_COORDS_LAYER_THEME.label, ...filterUndefined(userTheme.label) },
+    line: { ...DEFAULT_PARALLEL_COORDS_LAYER_THEME.line, ...filterUndefined(userTheme.line) },
+    tick: { ...DEFAULT_PARALLEL_COORDS_LAYER_THEME.tick, ...filterUndefined(userTheme.tick) },
+  } as ResolvedNgeParallelCoordsLayerTheme;
+}
+
+/**
+ * Deep merge user treemap layer theme with defaults.
+ * Returns a fully resolved theme with all nested properties required.
+ */
+export function mergeTreemapLayerTheme(
+  userTheme?: Partial<NgeTreemapLayerTheme>
+): ResolvedNgeTreemapLayerTheme {
+  if (!userTheme) {
+    return DEFAULT_TREEMAP_LAYER_THEME as ResolvedNgeTreemapLayerTheme;
+  }
+
+  return {
+    cell: { ...DEFAULT_TREEMAP_LAYER_THEME.cell, ...filterUndefined(userTheme.cell) },
+    label: { ...DEFAULT_TREEMAP_LAYER_THEME.label, ...filterUndefined(userTheme.label) },
+  } as ResolvedNgeTreemapLayerTheme;
+}
+
+/**
+ * Deep merge user sankey layer theme with defaults.
+ * Returns a fully resolved theme with all nested properties required.
+ */
+export function mergeSankeyLayerTheme(
+  userTheme?: Partial<NgeSankeyLayerTheme>
+): ResolvedNgeSankeyLayerTheme {
+  if (!userTheme) {
+    return DEFAULT_SANKEY_LAYER_THEME as ResolvedNgeSankeyLayerTheme;
+  }
+
+  return {
+    label: { ...DEFAULT_SANKEY_LAYER_THEME.label, ...filterUndefined(userTheme.label) },
+    link: { ...DEFAULT_SANKEY_LAYER_THEME.link, ...filterUndefined(userTheme.link) },
+    node: { ...DEFAULT_SANKEY_LAYER_THEME.node, ...filterUndefined(userTheme.node) },
+  } as ResolvedNgeSankeyLayerTheme;
+}
+
+/**
+ * Deep merge user chord layer theme with defaults.
+ * Returns a fully resolved theme with all nested properties required.
+ */
+export function mergeChordLayerTheme(
+  userTheme?: Partial<NgeChordLayerTheme>
+): ResolvedNgeChordLayerTheme {
+  if (!userTheme) {
+    return DEFAULT_CHORD_LAYER_THEME as ResolvedNgeChordLayerTheme;
+  }
+
+  return {
+    label: { ...DEFAULT_CHORD_LAYER_THEME.label, ...filterUndefined(userTheme.label) },
+    link: { ...DEFAULT_CHORD_LAYER_THEME.link, ...filterUndefined(userTheme.link) },
+    node: { ...DEFAULT_CHORD_LAYER_THEME.node, ...filterUndefined(userTheme.node) },
+  } as ResolvedNgeChordLayerTheme;
+}
+
+/**
+ * Deep merge user network layer theme with defaults.
+ * Returns a fully resolved theme with all nested properties required.
+ */
+export function mergeNetworkLayerTheme(
+  userTheme?: Partial<NgeNetworkLayerTheme>
+): ResolvedNgeNetworkLayerTheme {
+  if (!userTheme) {
+    return DEFAULT_NETWORK_LAYER_THEME as ResolvedNgeNetworkLayerTheme;
+  }
+
+  return {
+    axis: { ...DEFAULT_NETWORK_LAYER_THEME.axis, ...filterUndefined(userTheme.axis) },
+    label: { ...DEFAULT_NETWORK_LAYER_THEME.label, ...filterUndefined(userTheme.label) },
+    link: { ...DEFAULT_NETWORK_LAYER_THEME.link, ...filterUndefined(userTheme.link) },
+    node: { ...DEFAULT_NETWORK_LAYER_THEME.node, ...filterUndefined(userTheme.node) },
+  } as ResolvedNgeNetworkLayerTheme;
+}
+
+/**
+ * Deep merge user tree layer theme with defaults.
+ * Returns a fully resolved theme with all nested properties required.
+ */
+export function mergeTreeLayerTheme(
+  userTheme?: Partial<NgeTreeLayerTheme>
+): ResolvedNgeTreeLayerTheme {
+  if (!userTheme) {
+    return DEFAULT_TREE_LAYER_THEME as ResolvedNgeTreeLayerTheme;
+  }
+
+  return {
+    label: { ...DEFAULT_TREE_LAYER_THEME.label, ...filterUndefined(userTheme.label) },
+    link: { ...DEFAULT_TREE_LAYER_THEME.link, ...filterUndefined(userTheme.link) },
+    node: { ...DEFAULT_TREE_LAYER_THEME.node, ...filterUndefined(userTheme.node) },
+  } as ResolvedNgeTreeLayerTheme;
+}
+
+/**
  * Deep merge complete chart theme with defaults
  */
-export function mergeChartTheme(userTheme?: Partial<NgeChartTheme>): NgeChartTheme {
+export function mergeNgeChartTheme(userTheme?: Partial<NgeChartTheme>): NgeChartTheme {
   if (!userTheme) {
     return {
-      ...DEFAULT_CHART_BASE_THEME,
+      ...DEFAULT_NGE_CHART_BASE_THEME,
       area: DEFAULT_AREA_LAYER_THEME,
       bar: DEFAULT_BAR_LAYER_THEME,
       bullet: DEFAULT_BULLET_LAYER_THEME,
       bump: DEFAULT_BUMP_LAYER_THEME,
+      chord: DEFAULT_CHORD_LAYER_THEME,
       distribution: DEFAULT_DISTRIBUTION_LAYER_THEME,
       'diverging-bar': DEFAULT_DIVERGING_BAR_LAYER_THEME,
       financial: DEFAULT_FINANCIAL_LAYER_THEME,
+      funnel: DEFAULT_FUNNEL_LAYER_THEME,
       gauge: DEFAULT_GAUGE_LAYER_THEME,
       'grouped-bar': DEFAULT_GROUPED_BAR_LAYER_THEME,
       heatmap: DEFAULT_HEATMAP_LAYER_THEME,
       histogram: DEFAULT_HISTOGRAM_LAYER_THEME,
       line: DEFAULT_LINE_LAYER_THEME,
       lollipop: DEFAULT_LOLLIPOP_LAYER_THEME,
+      network: DEFAULT_NETWORK_LAYER_THEME,
       overlay: DEFAULT_OVERLAY_LAYER_THEME,
+      'parallel-coords': DEFAULT_PARALLEL_COORDS_LAYER_THEME,
       pie: DEFAULT_PIE_LAYER_THEME,
+      proportional: DEFAULT_PROPORTIONAL_LAYER_THEME,
       radar: DEFAULT_RADAR_LAYER_THEME,
       'radial-bar': DEFAULT_RADIAL_BAR_LAYER_THEME,
+      sankey: DEFAULT_SANKEY_LAYER_THEME,
       scatter: DEFAULT_SCATTER_LAYER_THEME,
       'stacked-bar': DEFAULT_STACKED_BAR_LAYER_THEME,
       sunburst: DEFAULT_SUNBURST_LAYER_THEME,
       timeline: DEFAULT_TIMELINE_LAYER_THEME,
+      tree: DEFAULT_TREE_LAYER_THEME,
+      treemap: DEFAULT_TREEMAP_LAYER_THEME,
       waterfall: DEFAULT_WATERFALL_LAYER_THEME,
+      wordcloud: DEFAULT_WORDCLOUD_LAYER_THEME,
     };
   }
 
   return {
     area: userTheme.area ? mergeAreaLayerTheme(userTheme.area) : DEFAULT_AREA_LAYER_THEME,
     axis: {
-      ...DEFAULT_CHART_BASE_THEME.axis,
+      ...DEFAULT_NGE_CHART_BASE_THEME.axis,
       ...filterUndefined(userTheme.axis),
       group: {
-        ...DEFAULT_CHART_BASE_THEME.axis.group,
+        ...DEFAULT_NGE_CHART_BASE_THEME.axis.group,
         ...filterUndefined(userTheme.axis?.group),
       },
     },
     bar: mergeBarLayerTheme(userTheme.bar),
     bullet: userTheme.bullet ? mergeBulletLayerTheme(userTheme.bullet) : DEFAULT_BULLET_LAYER_THEME,
     bump: userTheme.bump ? mergeBumpLayerTheme(userTheme.bump) : DEFAULT_BUMP_LAYER_THEME,
+    chord: userTheme.chord ? mergeChordLayerTheme(userTheme.chord) : DEFAULT_CHORD_LAYER_THEME,
     distribution: userTheme.distribution
       ? mergeDistributionLayerTheme(userTheme.distribution)
       : DEFAULT_DISTRIBUTION_LAYER_THEME,
@@ -627,8 +843,9 @@ export function mergeChartTheme(userTheme?: Partial<NgeChartTheme>): NgeChartThe
     financial: userTheme.financial
       ? mergeFinancialLayerTheme(userTheme.financial)
       : DEFAULT_FINANCIAL_LAYER_THEME,
+    funnel: userTheme.funnel ? mergeFunnelLayerTheme(userTheme.funnel) : DEFAULT_FUNNEL_LAYER_THEME,
     gauge: userTheme.gauge ? mergeGaugeLayerTheme(userTheme.gauge) : DEFAULT_GAUGE_LAYER_THEME,
-    grid: { ...DEFAULT_CHART_BASE_THEME.grid, ...filterUndefined(userTheme.grid) },
+    grid: { ...DEFAULT_NGE_CHART_BASE_THEME.grid, ...filterUndefined(userTheme.grid) },
     'grouped-bar': userTheme['grouped-bar']
       ? mergeGroupedBarLayerTheme(userTheme['grouped-bar'])
       : DEFAULT_GROUPED_BAR_LAYER_THEME,
@@ -642,14 +859,24 @@ export function mergeChartTheme(userTheme?: Partial<NgeChartTheme>): NgeChartThe
     lollipop: userTheme.lollipop
       ? mergeLollipopLayerTheme(userTheme.lollipop)
       : DEFAULT_LOLLIPOP_LAYER_THEME,
+    network: userTheme.network
+      ? mergeNetworkLayerTheme(userTheme.network)
+      : DEFAULT_NETWORK_LAYER_THEME,
     overlay: userTheme.overlay
       ? mergeOverlayLayerTheme(userTheme.overlay)
       : DEFAULT_OVERLAY_LAYER_THEME,
+    'parallel-coords': userTheme['parallel-coords']
+      ? mergeParallelCoordsLayerTheme(userTheme['parallel-coords'])
+      : DEFAULT_PARALLEL_COORDS_LAYER_THEME,
     pie: userTheme.pie ? mergePieLayerTheme(userTheme.pie) : DEFAULT_PIE_LAYER_THEME,
+    proportional: userTheme.proportional
+      ? mergeProportionalLayerTheme(userTheme.proportional)
+      : DEFAULT_PROPORTIONAL_LAYER_THEME,
     radar: userTheme.radar ? mergeRadarLayerTheme(userTheme.radar) : DEFAULT_RADAR_LAYER_THEME,
     'radial-bar': userTheme['radial-bar']
       ? mergeRadialBarLayerTheme(userTheme['radial-bar'])
       : DEFAULT_RADIAL_BAR_LAYER_THEME,
+    sankey: userTheme.sankey ? mergeSankeyLayerTheme(userTheme.sankey) : DEFAULT_SANKEY_LAYER_THEME,
     scatter: userTheme.scatter
       ? mergeScatterLayerTheme(userTheme.scatter)
       : DEFAULT_SCATTER_LAYER_THEME,
@@ -662,8 +889,15 @@ export function mergeChartTheme(userTheme?: Partial<NgeChartTheme>): NgeChartThe
     timeline: userTheme.timeline
       ? mergeTimelineLayerTheme(userTheme.timeline)
       : DEFAULT_TIMELINE_LAYER_THEME,
+    tree: userTheme.tree ? mergeTreeLayerTheme(userTheme.tree) : DEFAULT_TREE_LAYER_THEME,
+    treemap: userTheme.treemap
+      ? mergeTreemapLayerTheme(userTheme.treemap)
+      : DEFAULT_TREEMAP_LAYER_THEME,
     waterfall: userTheme.waterfall
       ? mergeWaterfallLayerTheme(userTheme.waterfall)
       : DEFAULT_WATERFALL_LAYER_THEME,
+    wordcloud: userTheme.wordcloud
+      ? mergeWordCloudLayerTheme(userTheme.wordcloud)
+      : DEFAULT_WORDCLOUD_LAYER_THEME,
   };
 }

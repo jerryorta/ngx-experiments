@@ -101,15 +101,15 @@ function makeRandomWalkOhlc(seed: number, count = 24): NgeFinancialDataPoint[] {
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'financial-chart-interaction-stories',
+    class: 'nge-financial-chart-interaction-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'financial-chart-interaction-stories',
+  selector: 'nge-financial-chart-interaction-stories',
   standalone: true,
   styleUrl: './financial-chart-interaction-stories.component.scss',
   templateUrl: './financial-chart-interaction-stories.component.html',
 })
-export class FinancialChartInteractionStoriesComponent {
+export class NgeFinancialChartInteractionStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/financial-chart/interaction';
 

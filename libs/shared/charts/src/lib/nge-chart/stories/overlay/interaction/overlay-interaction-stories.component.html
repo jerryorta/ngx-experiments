@@ -2,16 +2,16 @@
   [reviewStatus]="reviewStatus"
   [storybookFilePath]="storybookFilePath"
 >
-  <div class="interaction-container">
-    <div class="interaction-row">
+  <div class="nge-story-interaction-container">
+    <div class="nge-story-interaction-row">
       <button
         type="button"
-        class="interaction-btn interaction-btn--primary"
+        class="nge-story-interaction-btn nge-story-interaction-btn--primary"
         (click)="randomizeData()"
       >
         Randomize Data
       </button>
-      <span class="interaction-hint">
+      <span class="nge-story-interaction-hint">
         Mode: <strong>{{ mode() }}</strong> — the overlay composes on a line host and shares its
         scales. Trendline and fan need a continuous (numeric) x.
       </span>
@@ -20,8 +20,8 @@
       <!-- Standalone interactive legend above the chart: clicking a series toggles
            its line + trend in/out; a toggled-off series stays listed but dimmed
            (opacity 0.4) so it can be toggled back on. -->
-      <div class="external-legend-row">
-        <span class="external-legend-caption"
+      <div class="nge-story-external-legend-row">
+        <span class="nge-story-external-legend-caption"
           >Standalone &lt;nge-chart-legend&gt; — click a series to toggle its line + trend
           on/off</span
         >
@@ -34,7 +34,7 @@
         />
       </div>
     }
-    <div class="chart-wrapper">
+    <div class="nge-story-chart-wrapper">
       <nge-chart [config]="config()" />
     </div>
   </div>

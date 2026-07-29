@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { CrosshairThemingStoriesComponent } from './crosshair-theming-stories.component';
+import { NgeCrosshairThemingStoriesComponent } from './crosshair-theming-stories.component';
 
-const meta: Meta<CrosshairThemingStoriesComponent> = {
-  component: CrosshairThemingStoriesComponent,
+const meta: Meta<NgeCrosshairThemingStoriesComponent> = {
+  component: NgeCrosshairThemingStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<CrosshairThemingStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<CrosshairThemingStoriesComponent>;
+type Story = StoryObj<NgeCrosshairThemingStoriesComponent>;
 
 export const Theming: Story = {
   args: {},

@@ -1,4 +1,4 @@
-import type { ChartTooltipConfig } from '../charts-tooltip/charts-tooltip.model';
+import type { NgeChartTooltipConfig } from '../nge-chart-tooltip/nge-chart-tooltip.model';
 
 export interface NgeD3CanvasMargins {
   bottom: number;
@@ -27,7 +27,7 @@ export interface NgeChartConfigBase {
     right?: number;
     top?: number;
   };
-  tooltipConfig?: Partial<ChartTooltipConfig>;
+  tooltipConfig?: Partial<NgeChartTooltipConfig>;
 
   /**
    * Height is calculated based data

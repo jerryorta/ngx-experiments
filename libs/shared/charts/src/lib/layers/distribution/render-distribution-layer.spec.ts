@@ -344,7 +344,7 @@ describe('renderDistributionLayer', () => {
 
       renderDistributionLayer(context);
 
-      expect(styleOf(boxRect(g, 'A'), 'fill')).toBe('var(--chart-primary)');
+      expect(styleOf(boxRect(g, 'A'), 'fill')).toBe('var(--nge-chart-primary)');
     });
 
     it('honours a theme box color override', () => {
@@ -364,10 +364,10 @@ describe('renderDistributionLayer', () => {
 
       const points = Array.from(g.querySelectorAll<SVGCircleElement>('.nge-distribution-point'));
       // Category 'A' (index 0) → palette[0] = primary.
-      expect(styleOf(points[0], 'fill')).toBe('var(--chart-primary)');
+      expect(styleOf(points[0], 'fill')).toBe('var(--nge-chart-primary)');
       // Category 'B' (index 1) → palette[1] = secondary.
-      const bPoint = points.find(point => styleOf(point, 'fill') !== 'var(--chart-primary)');
-      expect(styleOf(bPoint!, 'fill')).toBe('var(--chart-secondary)');
+      const bPoint = points.find(point => styleOf(point, 'fill') !== 'var(--nge-chart-primary)');
+      expect(styleOf(bPoint!, 'fill')).toBe('var(--nge-chart-secondary)');
     });
   });
 

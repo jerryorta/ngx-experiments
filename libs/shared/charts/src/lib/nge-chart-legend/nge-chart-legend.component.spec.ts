@@ -119,4 +119,87 @@ describe('NgeChartLegendComponent', () => {
       expect(list(fixture).classList.contains('nge-chart-legend-list--grid')).toBe(false);
     });
   });
+
+  // ARCH-284 — what lets a chart drop its on-mark labels and let the legend carry the numbers.
+  describe('values', () => {
+    const valued: NgeLegendItem[] = [
+      { color: '#111111', id: 'A', label: 'USA', value: 932 },
+      { color: '#222222', id: 'B', label: 'Britain', value: 211 },
+      { color: '#333333', id: 'C', label: 'Unmeasured' },
+    ];
+
+    const valueTexts = (fixture: ComponentFixture<NgeChartLegendComponent>): string[] =>
+      Array.from(
+        fixture.nativeElement.querySelectorAll<HTMLElement>('.nge-chart-legend-value')
+      ).map(node => node.textContent?.trim() ?? '');
+
+    // The guard on populating `value` upstream: every pie legend in the workspace already
+    // carries one now, and none of them may start showing it uninvited.
+    it('renders nothing by default, even when the items carry values', async () => {
+      const fixture = await setup({ items: valued });
+      expect(valueTexts(fixture)).toEqual([]);
+    });
+
+    it('renders each value once showValues is set', async () => {
+      const fixture = await setup({ items: valued });
+      fixture.componentRef.setInput('showValues', true);
+      fixture.detectChanges();
+
+      // 'Unmeasured' has no value, so it contributes no span rather than an empty one.
+      expect(valueTexts(fixture)).toEqual(['932', '211']);
+    });
+
+    it('renders values in interactive mode too', async () => {
+      const fixture = await setup({ interactive: true, items: valued });
+      fixture.componentRef.setInput('showValues', true);
+      fixture.detectChanges();
+
+      expect(valueTexts(fixture)).toEqual(['932', '211']);
+    });
+
+    it('formats through formatValue', async () => {
+      const fixture = await setup({ items: valued });
+      fixture.componentRef.setInput('showValues', true);
+      fixture.componentRef.setInput('formatValue', (value: number) => `${value} gold`);
+      fixture.detectChanges();
+
+      expect(valueTexts(fixture)).toEqual(['932 gold', '211 gold']);
+    });
+  });
+
+  describe('clear action', () => {
+    const clearButton = (
+      fixture: ComponentFixture<NgeChartLegendComponent>
+    ): HTMLButtonElement | null =>
+      fixture.nativeElement.querySelector<HTMLButtonElement>('.nge-chart-legend-clear');
+
+    it('is absent by default', async () => {
+      const fixture = await setup({ items });
+      expect(clearButton(fixture)).toBeNull();
+    });
+
+    it('emits clearAction when pressed', async () => {
+      const fixture = await setup({ items });
+      fixture.componentRef.setInput('showClearAction', true);
+      fixture.detectChanges();
+      const cleared = jest.fn();
+      fixture.componentInstance.clearAction.subscribe(cleared);
+
+      clearButton(fixture)?.click();
+
+      expect(cleared).toHaveBeenCalledTimes(1);
+    });
+
+    it('labels itself "Clear highlight" — nothing was ever hidden to "show all"', async () => {
+      const fixture = await setup({ items });
+      fixture.componentRef.setInput('showClearAction', true);
+      fixture.detectChanges();
+
+      expect(clearButton(fixture)?.textContent?.trim()).toBe('Clear highlight');
+
+      fixture.componentRef.setInput('clearActionLabel', 'Reset');
+      fixture.detectChanges();
+      expect(clearButton(fixture)?.textContent?.trim()).toBe('Reset');
+    });
+  });
 });

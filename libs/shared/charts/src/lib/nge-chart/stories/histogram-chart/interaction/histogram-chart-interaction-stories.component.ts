@@ -36,15 +36,15 @@ function makeSamples(
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'histogram-chart-interaction-stories',
+    class: 'nge-histogram-chart-interaction-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'histogram-chart-interaction-stories',
+  selector: 'nge-histogram-chart-interaction-stories',
   standalone: true,
   styleUrl: './histogram-chart-interaction-stories.component.scss',
   templateUrl: './histogram-chart-interaction-stories.component.html',
 })
-export class HistogramChartInteractionStoriesComponent {
+export class NgeHistogramChartInteractionStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/histogram-chart/interaction';
 

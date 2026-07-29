@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { SparklineChartThemingComponent } from './sparkline-chart-theming.component';
+import { NgeSparklineChartThemingComponent } from './sparkline-chart-theming.component';
 
-const meta: Meta<SparklineChartThemingComponent> = {
-  component: SparklineChartThemingComponent,
+const meta: Meta<NgeSparklineChartThemingComponent> = {
+  component: NgeSparklineChartThemingComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<SparklineChartThemingComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<SparklineChartThemingComponent>;
+type Story = StoryObj<NgeSparklineChartThemingComponent>;
 
 export const Theming: Story = {
   args: {},

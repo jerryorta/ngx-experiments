@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { RadarThemingComponent } from './radar-theming.component';
+import { NgeRadarThemingComponent } from './radar-theming.component';
 
-const meta: Meta<RadarThemingComponent> = {
-  component: RadarThemingComponent,
+const meta: Meta<NgeRadarThemingComponent> = {
+  component: NgeRadarThemingComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<RadarThemingComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<RadarThemingComponent>;
+type Story = StoryObj<NgeRadarThemingComponent>;
 
 export const Theming: Story = {
   args: {},

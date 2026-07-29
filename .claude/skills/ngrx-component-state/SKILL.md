@@ -7,7 +7,7 @@ description: Place a component's reactive state and property/method logic in its
 
 Get a component's state and logic **out of the component** and into its correct home, so the class keeps only `input()`/`output()`, the injected store/facade, and template glue. The home is decided per concern (see **Routing** below): a colocated component-scoped SignalStore for local UI/interaction state, the domain **facade** for global/persistent data, or pure functions for algorithms — a component system often needs more than one. This skill owns the **component side** (the decision, the local SignalStore, the facade wiring); it delegates global-slice authoring to the `ngrx-global-store` skill.
 
-Hybrid skill: authoritative signalStore API docs live in a local NgRx clone (kept current via `git pull`). Layout + composition conventions come from `libs/real-estate/ui/src/lib/cma/store/`.
+Hybrid skill: authoritative signalStore API docs live in a local NgRx clone (kept current via `git pull`). Layout + composition conventions come from `libs/shared/calendar/src/lib/nge-calendar/store/` (multi-file, `features/` split) and `libs/ledger/ui/src/lib/*/**.store.ts` (single-file).
 
 ---
 
@@ -88,7 +88,7 @@ Whatever happens, continue to Phase 1. A stale-but-working clone is always bette
 
 Ask the user one at a time when answers shape later questions:
 
-1. **Store name** (e.g. `OnboardingContactOrgStore`) and target directory (e.g. `libs/concierge/ui/src/lib/onboarding-shell/data/`).
+1. **Store name** (e.g. `TransactionsStore`) and target directory (e.g. `libs/ledger/ui/src/lib/transactions/`, colocated with the component it serves).
 2. **`providedIn` scope** — default **component-scoped**: omit `providedIn`, provide via `providers: [Store]` on the component (or, for a system, its root component). NEVER `providedIn: 'root'` for component/feature state. Reserve `'root'` for genuinely app-global *signal* state — and note that app-/domain-wide *persistent* data is not that; it belongs in the global `@ngrx/store` (recommend the `ngrx-global-store` skill).
 3. **State shape** — list the fields and their types. Distinguish persistent state (computed from a classic-store source) from transient UI state (owned here).
 4. **Features** — the cohesive concerns to split into `with-*` files. If the user doesn't know, propose a split based on state groupings (form fields vs async channel vs submit orchestration).
@@ -141,30 +141,37 @@ When unsure which primitive fits (`rxMethod` vs `signalMethod`, `linkedSignal` v
 
 ## Phase 3 — Read the workspace template
 
-The Real-Estate CMA store is the canonical pattern in this monorepo:
+The Nge calendar store is the canonical multi-file pattern in this repo:
 
 ```
-libs/real-estate/ui/src/lib/cma/store/
-  cma.store.ts                ← 54-line composition root
-  cma-store.state.ts          ← state shape + initialCmaState
+libs/shared/calendar/src/lib/nge-calendar/store/
+  nge-calendar-store.ts         ← 31-line composition root
+  nge-calendar-store.state.ts   ← state shape + initial state
+  nge-calendar-store.types.ts
   features/
-    with-cma-selection.ts     ← one cohesive concern per file
-    with-cma-pricing.ts
-    with-cma-filters.ts       ← 93 lines, largest feature
-    with-cma-search.ts
-    with-cma-view-mode.ts
-    with-cma-storage.ts
+    with-calendar-selection.ts  ← one cohesive concern per file
+    with-calendar-navigation.ts
+    with-calendar-filter.ts
+    with-calendar-drag.ts
+    with-calendar-popover.ts
+    with-calendar-viewmodel.ts
 ```
 
 Always read before scaffolding:
 
-1. `libs/real-estate/ui/src/lib/cma/store/cma.store.ts` — composition root shape: `signalStore(withState, withProps, withFeature × 6, withHooks)`.
-2. `libs/real-estate/ui/src/lib/cma/store/cma-store.state.ts` — state declaration convention.
+1. `libs/shared/calendar/src/lib/nge-calendar/store/nge-calendar-store.ts` — composition root shape: `signalStore(withState, withFeature × 6)`.
+2. `libs/shared/calendar/src/lib/nge-calendar/store/nge-calendar-store.state.ts` — state declaration convention.
 3. One matching feature file, picked by concern type:
-   - Form fields / filters → `with-cma-filters.ts`
-   - Async backend interaction → `with-cma-search.ts` or `with-cma-storage.ts`
-   - Selection / toggleable items → `with-cma-selection.ts`
-   - Pure computed views → `with-cma-pricing.ts`
+   - Form fields / filters → `with-calendar-filter.ts`
+   - Selection / toggleable items → `with-calendar-selection.ts`
+   - Pointer / drag interaction → `with-calendar-drag.ts`
+   - Pure computed views → `with-calendar-viewmodel.ts`
+
+**The `features/` split is not a requirement for correctness.** The three ledger stores are the
+single-file case and are equally canonical at their size — `libs/ledger/ui/src/lib/overview/overview.store.ts`
+(356 lines), `transactions/transactions.store.ts` (201), `budgets/budgets.store.ts` (144), each
+`withState` + `withProps` + `withComputed` + `withMethods` in one file. Split into `features/` when
+the concerns stop reading well together, never on a line count.
 
 Conventions pulled from these files:
 
@@ -174,7 +181,9 @@ Conventions pulled from these files:
 - `withHooks` last for lifecycle cleanup.
 - Composition root stays thin: imports + service props + feature composition + hooks. Heavy logic lives in the feature files.
 
-Shared signalStore building block: `libs/shared/store/src/lib/custom-store/entity-store/giga-signal-store.ts`. Evaluate whether it applies before reinventing its features.
+This repo has **no shared signalStore building block** — there is no `libs/shared/store`. Compose from
+`@ngrx/signals` primitives directly, and factor a reusable `signalStoreFeature` into the owning
+library's own `features/` folder (as `nge-calendar-store` does) rather than reaching for a central one.
 
 ---
 

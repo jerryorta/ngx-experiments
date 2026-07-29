@@ -1,0 +1,112 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-story-container">
+    <h2>Sankey Chart - Theming Examples</h2>
+    <p class="nge-story-intro-text">
+      The <code>theme.sankey</code> slice carries three sub-slices — <code>node</code>,
+      <code>link</code> and <code>label</code>. Every default is a <code>--nge-chart-*</code> token
+      with a literal fallback, so a chart renders correctly with no theme applied at all.
+    </p>
+
+    <section class="nge-story-section">
+      <h4>Default Theme</h4>
+      <p class="nge-story-description">
+        No theme provided — renders on the chart's <code>--nge-chart-*</code> token defaults.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Forest</h4>
+      <p class="nge-story-description">
+        A green <code>node.colors</code> palette. Links inherit their source node's colour, so
+        recolouring the nodes recolours the whole diagram.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="greenConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Ocean</h4>
+      <p class="nge-story-description">
+        A blue palette with <code>node.strokeWidth: 2</code> — a heavier outline separates rects
+        that share a column.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="blueConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Ember</h4>
+      <p class="nge-story-description">
+        A warm palette at a higher resting opacity, so the flows read heavier.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="emberConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Monochrome</h4>
+      <p class="nge-story-description">
+        A single-entry palette. Every node takes the same grey, so the flow geometry alone carries
+        the reading.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="monochromeConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Label Typography</h4>
+      <p class="nge-story-description">
+        <code>label.color</code> / <code>fontSize</code> / <code>fontWeight</code>, with a wider
+        <code>labelPadding</code>. The slice is theme-relative and has no <code>colorOnDark</code>:
+        a sankey label never sits on a mark, so it takes no on-fill contrast derivation.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="typographyConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Parallel Sets, Themed</h4>
+      <p class="nge-story-description">
+        <code>linkShape</code> is geometry, not theme — the straight-sided bands take exactly the
+        same <code>theme.sankey</code> slice as the curved ones.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="parallelSetsConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section nge-story-section--highlight">
+      <h4>Link Opacity Is the Load-Bearing Knob</h4>
+      <p class="nge-story-description">
+        Ribbons overlap wherever flows cross. Near-opaque, the diagram collapses into whichever
+        ribbon paints last; too translucent and the individual flows go faint. The default
+        <code>0.4</code> is the compromise.
+      </p>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5>opacity: 0.9 — crossings lost</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="denseConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>opacity: 0.2 — flows faint</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="sparseConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

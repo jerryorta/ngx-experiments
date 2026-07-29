@@ -21,15 +21,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'overlay-theming',
+    class: 'nge-overlay-theming',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'overlay-theming',
+  selector: 'nge-overlay-theming',
   standalone: true,
   styleUrl: './overlay-theming.component.scss',
   templateUrl: './overlay-theming.component.html',
 })
-export class OverlayThemingComponent {
+export class NgeOverlayThemingComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/overlay/theming';
 
@@ -79,8 +79,8 @@ export class OverlayThemingComponent {
     { x: 12, y: 70 },
   ];
 
-  // Default theme — no overrides; the overlay reads its `--chart-*` token defaults
-  // (fit line = --chart-secondary).
+  // Default theme — no overrides; the overlay reads its `--nge-chart-*` token defaults
+  // (fit line = --nge-chart-secondary).
   defaultTrendConfig = addOverlay(
     createLineChartConfig({
       data: this.trendData,

@@ -430,14 +430,75 @@ export interface NgeLollipopLayerTheme {
  * since `renderLayers` looks up `theme[layer.type]`).
  */
 export interface NgePieLayerTheme {
-  /** Per-slice label styling (reserved for on-arc labels). */
+  /**
+   * Per-slice ON-ARC label styling — `labelPosition: 'inside'` only. Outside labels have
+   * their own slice (`labelOutside`) because their backdrop is the plot surface, not a
+   * slice fill.
+   */
   label?: {
-    /** Label color */
+    /**
+     * Label color on a LIGHT slice fill — and the flat fallback when the fill cannot be
+     * measured. Defaults to the absolute `--nge-chart-black` token. Paired with
+     * `colorOnDark`, this is one endpoint of the automatic on-fill contrast derivation.
+     */
     color?: string;
-    /** Label font size (px) */
-    fontSize?: number;
-    /** Label font weight */
-    fontWeight?: number;
+    /**
+     * Label color on a perceptually DARK slice fill. Defaults to the absolute
+     * `--nge-chart-white` token. Set it to the same value as `color` to opt the whole
+     * theme out of contrast derivation.
+     */
+    colorOnDark?: string;
+    /**
+     * Label font size. A `number` is treated as px; a string is passed to CSS verbatim,
+     * so a token reference (`var(--nge-chart-label-font-size, 10px)` — the default) or
+     * any CSS length works.
+     */
+    fontSize?: number | string;
+    /**
+     * Label font weight — a numeric weight, or a string passed to CSS verbatim so a
+     * token reference (`var(--nge-chart-label-font-weight, 600)` — the default) works.
+     */
+    fontWeight?: number | string;
+  };
+  /**
+   * Per-slice OUTSIDE label styling — `labelPosition: 'outside'` only.
+   *
+   * A separate slice from `label`, not a variant of it, because the two have opposite
+   * colour rules: an on-arc label sits on a saturated slice fill and needs the ABSOLUTE
+   * black/white contrast pair, while an outside label sits on the page surface and must
+   * track `--nge-chart-on-surface` instead. Deliberately declares NO `colorOnDark` — the
+   * absence of the pair is what switches automatic on-fill contrast off
+   * (`resolveLabelColor` short-circuits to `color`), so an outside label can never derive
+   * from a fill it is not drawn on. Per-datum and layer-config `labelColor` still win.
+   */
+  labelOutside?: {
+    /**
+     * Outside label color. Defaults to `--nge-chart-on-surface` — theme-relative,
+     * because the backdrop is the plot surface.
+     */
+    color?: string;
+    /**
+     * Label font size. A `number` is treated as px; a string is passed to CSS verbatim,
+     * so a token reference (`var(--nge-chart-label-font-size, 10px)` — the default) or
+     * any CSS length works. Raise the layer's `labelLineHeight` to match.
+     */
+    fontSize?: number | string;
+    /**
+     * Label font weight — a numeric weight, or a string passed to CSS verbatim so a
+     * token reference (`var(--nge-chart-label-font-weight, 600)` — the default) works.
+     */
+    fontWeight?: number | string;
+  };
+  /**
+   * Leader-line styling — the polyline joining a COLLISION-DISPLACED outside label back to
+   * its slice. A label resting at its natural anchor draws no leader, so this slice only
+   * shows up on crowded pies.
+   */
+  leaderLine?: {
+    /** Leader stroke color. Defaults to the muted `--nge-chart-outline` token. */
+    stroke?: string;
+    /** Leader stroke width (px). Default 1. */
+    strokeWidth?: number;
   };
   /** Slice (arc) styling. */
   slice?: {
@@ -445,6 +506,12 @@ export interface NgePieLayerTheme {
     color?: string;
     /** Multi-slice fill palette. Slice input index maps to colors[index % length]. */
     colors?: string[];
+    /**
+     * Opacity (0-1) for slices NOT named in `highlightedLabels` — how far a slice recedes
+     * when something else is selected. Only consulted while a selection is active; with no
+     * selection every slice uses `opacity`.
+     */
+    dimmedOpacity?: number;
     /** Slice fill opacity (0-1) */
     opacity?: number;
     /** Slice outline stroke color (separates adjacent slices) */
@@ -455,19 +522,118 @@ export interface NgePieLayerTheme {
 }
 
 /**
+ * Funnel / pyramid chart layer theme.
+ * Namespaced under 'funnel' in composite themes (the key MUST equal the layer `type`,
+ * since `renderLayers` looks up `theme[layer.type]`).
+ */
+export interface NgeFunnelLayerTheme {
+  /** Band (trapezoid) styling. */
+  band?: {
+    /** Single-band fill color (fallback when the palette is exhausted / unset). */
+    color?: string;
+    /** Multi-band fill palette. Band input index maps to colors[index % length]. */
+    colors?: string[];
+    /** Band fill opacity (0-1) */
+    opacity?: number;
+    /** Band outline stroke color (separates adjacent bands) */
+    stroke?: string;
+    /** Band outline stroke width (px) */
+    strokeWidth?: number;
+  };
+  /** Per-band IN-BAND label styling — `labelPosition: 'inside'` only. */
+  label?: {
+    /**
+     * Label color on a LIGHT band fill — and the flat fallback when the fill cannot be
+     * measured. Paired with `colorOnDark` for on-fill contrast.
+     */
+    color?: string;
+    /** Label color on a perceptually DARK band fill. */
+    colorOnDark?: string;
+    /**
+     * Label font size. A `number` is treated as px; a string is passed to CSS verbatim,
+     * so a token reference (`var(--nge-chart-label-font-size, 10px)`) or any CSS length
+     * works.
+     */
+    fontSize?: number | string;
+    /**
+     * Label font weight — a numeric weight, or a string passed to CSS verbatim so a
+     * token reference (`var(--nge-chart-label-font-weight, 600)`) works.
+     */
+    fontWeight?: number | string;
+  };
+  /**
+   * Per-band OUTSIDE label styling — `labelPosition: 'edge' | 'right'` only.
+   *
+   * A separate slice from `label` for the same reason as the pie's `labelOutside`: an
+   * in-band label sits on a saturated band fill and needs the ABSOLUTE black/white
+   * contrast pair, while an outside label sits on the page surface and must track
+   * `--nge-chart-on-surface`. Before ARCH-267 both read `label`, so an outside label fell
+   * through to the absolute black — invisible on a dark surface. Declares NO `colorOnDark`:
+   * the absence of the pair is what switches on-fill derivation off.
+   */
+  labelOutside?: {
+    /**
+     * Outside label color. Defaults to `--nge-chart-on-surface` — theme-relative,
+     * because the backdrop is the plot surface.
+     */
+    color?: string;
+    /**
+     * Label font size. A `number` is treated as px; a string is passed to CSS verbatim,
+     * so a token reference (`var(--nge-chart-label-font-size, 10px)`) or any CSS length
+     * works.
+     */
+    fontSize?: number | string;
+    /**
+     * Label font weight — a numeric weight, or a string passed to CSS verbatim so a
+     * token reference (`var(--nge-chart-label-font-weight, 600)`) works.
+     */
+    fontWeight?: number | string;
+  };
+}
+
+/**
  * Sunburst / icicle (multi-level hierarchy) chart layer theme.
  * Namespaced under 'sunburst' in composite themes (the key MUST equal the layer `type`,
  * since `renderLayers` looks up `theme[layer.type]`).
  */
 export interface NgeSunburstLayerTheme {
-  /** Per-node label styling (reserved for on-arc / on-rect labels). */
+  /**
+   * Per-node ON-ARC / ON-RECT label styling.
+   *
+   * The label sits on the node's own fill — a value drawn from the segment palette, i.e. a
+   * RANGE — so one flat colour cannot read on every node. `color` / `colorOnDark` are the
+   * two endpoints `resolveLabelColor()` derives between per node, which is why they are the
+   * ABSOLUTE black / white tokens rather than theme-relative ones.
+   *
+   * There is no `labelOutside` counterpart: this layer only draws labels inside the mark.
+   * A future outside placement must add that second slice (no `colorOnDark`, tracking
+   * `--nge-chart-on-surface`) rather than reuse this one — see
+   * `docs/architecture/charts.md` § *A placement that leaves the mark needs its OWN theme slice*.
+   */
   label?: {
-    /** Label color */
+    /**
+     * Label color on a LIGHT node fill — and the flat fallback when the fill cannot be
+     * measured. Defaults to the absolute `--nge-chart-black` token. Paired with
+     * `colorOnDark`, this is one endpoint of the automatic on-fill contrast derivation.
+     */
     color?: string;
-    /** Label font size (px) */
-    fontSize?: number;
-    /** Label font weight */
-    fontWeight?: number;
+    /**
+     * Label color on a perceptually DARK node fill. Defaults to the absolute
+     * `--nge-chart-white` token. Set it to the same value as `color` to opt the whole
+     * theme out of contrast derivation.
+     */
+    colorOnDark?: string;
+    /**
+     * Label font size. A `number` is treated as px; a string is passed to CSS verbatim,
+     * so a token reference (`var(--nge-chart-label-font-size, 10px)` — the default) or
+     * any CSS length works.
+     */
+    fontSize?: number | string;
+    /**
+     * Label font weight — a numeric weight, or a string passed to CSS verbatim so a
+     * token reference (`var(--nge-chart-label-font-weight, 600)` — the default) works.
+     */
+    fontWeight?: number | string;
   };
   /** Segment (a node's arc in radial / rect in linear) styling. */
   segment?: {
@@ -485,6 +651,80 @@ export interface NgeSunburstLayerTheme {
 }
 
 /**
+ * Proportional-area / waffle chart layer theme.
+ * Namespaced under 'proportional' in composite themes (the key MUST equal the layer `type`,
+ * since `renderLayers` looks up `theme[layer.type]`).
+ *
+ * `mark` styles every area-encoded shape — a circle, half-circle, square, waffle cell or
+ * packed leaf are one mark family drawn from one palette. `emptyCell` styles the waffle's
+ * unfilled remainder, which is chrome rather than data and so reads a muted surface token.
+ */
+export interface NgeProportionalLayerTheme {
+  /**
+   * Unfilled waffle cell styling (`mark: 'grid'` only) — the remainder between the data's
+   * total and `rows × columns`. It is the grid's backdrop rather than a value, so it reads a
+   * muted surface token instead of a palette entry.
+   */
+  emptyCell?: {
+    /** Unfilled cell fill color. */
+    color?: string;
+    /** Unfilled cell fill opacity (0-1). */
+    opacity?: number;
+  };
+  /**
+   * Per-datum ON-MARK label styling.
+   *
+   * The label sits on the mark's own fill — a value drawn from the mark palette, i.e. a
+   * RANGE — so one flat colour cannot read on every mark. `color` / `colorOnDark` are the
+   * two endpoints `resolveLabelColor()` derives between per mark, which is why they are the
+   * ABSOLUTE black / white tokens rather than theme-relative ones.
+   *
+   * There is no `labelOutside` counterpart: this layer only draws labels inside the mark.
+   * A future outside placement must add that second slice (no `colorOnDark`, tracking
+   * `--nge-chart-on-surface`) rather than reuse this one — see
+   * `docs/architecture/charts.md` § *A placement that leaves the mark needs its OWN theme slice*.
+   */
+  label?: {
+    /**
+     * Label color on a LIGHT mark fill — and the flat fallback when the fill cannot be
+     * measured. Defaults to the absolute `--nge-chart-black` token. Paired with
+     * `colorOnDark`, this is one endpoint of the automatic on-fill contrast derivation.
+     */
+    color?: string;
+    /**
+     * Label color on a perceptually DARK mark fill. Defaults to the absolute
+     * `--nge-chart-white` token. Set it to the same value as `color` to opt the whole
+     * theme out of contrast derivation.
+     */
+    colorOnDark?: string;
+    /**
+     * Label font size. A `number` is treated as px; a string is passed to CSS verbatim,
+     * so a token reference (`var(--nge-chart-label-font-size, 10px)` — the default) or
+     * any CSS length works.
+     */
+    fontSize?: number | string;
+    /**
+     * Label font weight — a numeric weight, or a string passed to CSS verbatim so a
+     * token reference (`var(--nge-chart-label-font-weight, 600)` — the default) works.
+     */
+    fontWeight?: number | string;
+  };
+  /** Mark (circle / half-circle / square / waffle cell / packed leaf) styling. */
+  mark?: {
+    /** Single-mark fill color (fallback when the palette is exhausted / unset). */
+    color?: string;
+    /** Multi-mark fill palette. Top-level input index maps to colors[index % length]. */
+    colors?: string[];
+    /** Mark fill opacity (0-1) */
+    opacity?: number;
+    /** Mark outline stroke color (separates adjacent marks) */
+    stroke?: string;
+    /** Mark outline stroke width (px) */
+    strokeWidth?: number;
+  };
+}
+
+/**
  * Radar / polar (spider / star) chart layer theme.
  * Namespaced under 'radar' in composite themes (the key MUST equal the layer `type`,
  * since `renderLayers` looks up `theme[layer.type]`).
@@ -492,7 +732,7 @@ export interface NgeSunburstLayerTheme {
  * `series` styles the per-series radar polygons (fill + outline + vertex dots) and carries
  * the shared multi-series fill/stroke palette; `axis` styles the radial spokes (one per
  * dimension, center → rim); `grid` styles the concentric value rings; `label` styles the
- * per-dimension category labels drawn at each spoke tip. All colors read `--chart-*`
+ * per-dimension category labels drawn at each spoke tip. All colors read `--nge-chart-*`
  * tokens — never `--mat-sys-*`.
  */
 export interface NgeRadarLayerTheme {
@@ -544,8 +784,8 @@ export interface NgeRadarLayerTheme {
  * `bar` styles the radial arcs (`mark: 'bar'`) and doubles as the shared fill palette
  * for the area/cell marks; `area` tunes the radial area fill opacity + outline width
  * (`mark: 'area'`); `cell` styles the circular-heatmap grid (`mark: 'cell'`), whose
- * value intensity is encoded as fill OPACITY of a single `--chart-*` token (opacity, not
- * color math, so it composes with an unresolved `var(--chart-*)` fill).
+ * value intensity is encoded as fill OPACITY of a single `--nge-chart-*` token (opacity, not
+ * color math, so it composes with an unresolved `var(--nge-chart-*)` fill).
  */
 export interface NgeRadialBarLayerTheme {
   /** Radial area fill + outline styling (`mark: 'area'`). Fill color comes from the `bar` palette by series. */
@@ -579,14 +819,67 @@ export interface NgeRadialBarLayerTheme {
     /** Cell outline stroke width (px). */
     strokeWidth?: number;
   };
-  /** Per-datum label styling (reserved for on-arc labels). */
+  /**
+   * Per-bar ON-BAR label styling — `labelPosition: 'inside'` only (`mark: 'bar'`).
+   *
+   * The label sits on the bar's own fill — a value drawn from the `bar` palette, i.e. a
+   * RANGE — so one flat colour cannot read on every bar. `color` / `colorOnDark` are the
+   * two endpoints `resolveLabelColor()` derives between per datum, which is why they are
+   * the ABSOLUTE black / white tokens rather than theme-relative ones.
+   */
   label?: {
-    /** Label color */
+    /**
+     * Label color on a LIGHT bar fill — and the flat fallback when the fill cannot be
+     * measured. Defaults to the absolute `--nge-chart-black` token. Paired with
+     * `colorOnDark`, this is one endpoint of the automatic on-fill contrast derivation.
+     */
     color?: string;
-    /** Label font size (px) */
-    fontSize?: number;
-    /** Label font weight */
-    fontWeight?: number;
+    /**
+     * Label color on a perceptually DARK bar fill. Defaults to the absolute
+     * `--nge-chart-white` token. Set it to the same value as `color` to opt the whole
+     * theme out of contrast derivation.
+     */
+    colorOnDark?: string;
+    /**
+     * Label font size. A `number` is treated as px; a string is passed to CSS verbatim,
+     * so a token reference (`var(--nge-chart-label-font-size, 10px)` — the default) or
+     * any CSS length works.
+     */
+    fontSize?: number | string;
+    /**
+     * Label font weight — a numeric weight, or a string passed to CSS verbatim so a
+     * token reference (`var(--nge-chart-label-font-weight, 600)` — the default) works.
+     */
+    fontWeight?: number | string;
+  };
+  /**
+   * Per-bar OUTSIDE label styling — `labelPosition: 'outside'` only.
+   *
+   * A separate slice from `label` for the same reason as the pie's `labelOutside`: an
+   * on-bar label sits on a saturated bar fill and needs the ABSOLUTE black/white contrast
+   * pair, while an outside label sits at the chart perimeter on the plot surface and must
+   * track `--nge-chart-on-surface`. Deliberately declares NO `colorOnDark` — the absence
+   * of the pair is what switches automatic on-fill contrast off (`resolveLabelColor`
+   * short-circuits to `color`), so an outside label can never derive from a fill it is
+   * not drawn on. Per-datum and layer-config `labelColor` still win.
+   */
+  labelOutside?: {
+    /**
+     * Outside label color. Defaults to `--nge-chart-on-surface` — theme-relative,
+     * because the backdrop is the plot surface.
+     */
+    color?: string;
+    /**
+     * Label font size. A `number` is treated as px; a string is passed to CSS verbatim,
+     * so a token reference (`var(--nge-chart-label-font-size, 10px)` — the default) or
+     * any CSS length works.
+     */
+    fontSize?: number | string;
+    /**
+     * Label font weight — a numeric weight, or a string passed to CSS verbatim so a
+     * token reference (`var(--nge-chart-label-font-weight, 600)` — the default) works.
+     */
+    fontWeight?: number | string;
   };
 }
 
@@ -795,7 +1088,7 @@ export interface NgeDivergingBarLayerTheme {
  *
  * Following the waterfall precedent, up / down use LITERAL semantic green / red (a
  * rising vs falling period reads the same regardless of the app theme); the neutral
- * candlestick wick reads the muted `--chart-*` token, and the kagi yang / yin lines
+ * candlestick wick reads the muted `--nge-chart-*` token, and the kagi yang / yin lines
  * read the primary / error tokens with distinct thick / thin widths.
  */
 export interface NgeFinancialLayerTheme {
@@ -848,7 +1141,7 @@ export interface NgeFinancialLayerTheme {
  *
  * `track` styles the background arc / rail; `value` the filled value arc / progress fill;
  * `needle` the angular-gauge needle; `threshold` the optional colored-band palette; and
- * `label` the center numeric value text. All colors read `--chart-*` tokens — never
+ * `label` the center numeric value text. All colors read `--nge-chart-*` tokens — never
  * `--mat-sys-*`.
  */
 export interface NgeGaugeLayerTheme {
@@ -931,12 +1224,23 @@ export interface NgeStackedBarLayerTheme {
     strokeWidth?: number;
   };
   label?: {
-    /** Value label color */
+    /**
+     * Value label color on a LIGHT segment fill — and the flat fallback when the fill
+     * cannot be measured. Paired with `colorOnDark` for automatic on-fill contrast.
+     */
     color?: string;
-    /** Value label font size (px) */
-    fontSize?: number;
-    /** Value label font weight */
-    fontWeight?: number;
+    /** Value label color on a perceptually DARK segment fill. */
+    colorOnDark?: string;
+    /**
+     * Value label font size. A `number` is treated as px; a string is passed to CSS
+     * verbatim, so a token reference or any CSS length works.
+     */
+    fontSize?: number | string;
+    /**
+     * Value label font weight — a numeric weight, or a string passed to CSS verbatim so
+     * a token reference works.
+     */
+    fontWeight?: number | string;
   };
 }
 
@@ -1021,6 +1325,462 @@ export interface NgeTimelineLayerTheme {
 }
 
 /**
+ * Word cloud layer theme.
+ *
+ * Namespaced under 'wordcloud' in composite themes (the key MUST equal the layer `type`,
+ * which is how `renderLayers` hands a layer its slice).
+ *
+ * ONE slice, `word`, because the text IS the mark here. Every other text-bearing layer
+ * declares a separate `label` slice for text drawn on a data fill, resolved through
+ * `resolveLabelColor()`'s on-fill contrast derivation — a word cloud has no fill under its
+ * text, so it takes its colour straight from the categorical palette like any other mark.
+ */
+export interface NgeWordCloudLayerTheme {
+  /** Word (text mark) styling. */
+  word?: {
+    /** Single-word text color (fallback when the palette is exhausted / unset). */
+    color?: string;
+    /** Multi-word text palette. Placement order maps to colors[index % length]. */
+    colors?: string[];
+    /**
+     * Font family the words are drawn AND measured in. Defaults to `'inherit'` — there is
+     * no `--nge-chart-font-family` token, so the chart's own typography is the sane base.
+     */
+    fontFamily?: string;
+    /**
+     * Word font weight — a numeric weight, or a string passed to CSS verbatim so a token
+     * reference works.
+     */
+    fontWeight?: number | string;
+    /** Word text opacity (0-1) */
+    opacity?: number;
+  };
+}
+
+/**
+ * Parallel coordinates layer theme.
+ *
+ * Namespaced under 'parallel-coords' in composite themes (the key MUST equal the layer
+ * `type`, which is how `renderLayers` hands a layer its slice).
+ *
+ * The layer draws its own axes, so it carries the `axis` / `tick` / `label` chrome slices a
+ * cartesian layer would otherwise inherit from the shared axis renderer. There is no
+ * `labelOutside` counterpart to the pie's and funnel's: every text this layer draws sits on
+ * the plot surface rather than on a data fill, so nothing goes through `resolveLabelColor()`
+ * and there is no absolute-black rung to disambiguate.
+ */
+export interface NgeParallelCoordsLayerTheme {
+  /** Vertical dimension-axis line styling — one per dimension, spanning the plot height. */
+  axis?: {
+    /** Axis stroke color. */
+    color?: string;
+    /** Axis stroke width (px). */
+    width?: number;
+  };
+  /** Per-axis brush chrome: the selection window and its two edge handles. */
+  brush?: {
+    /** Selection-window fill. */
+    fill?: string;
+    /** Selection-window fill opacity (0-1) — the axis and its ticks read through it. */
+    fillOpacity?: number;
+    /** Window + handle stroke color. */
+    stroke?: string;
+    /** Window + handle stroke width (px). */
+    strokeWidth?: number;
+    /**
+     * Drawn window width (px), centred on the axis. The invisible grab band is at least this
+     * wide, so a narrow window can never leave the drag target smaller than what is painted.
+     */
+    width?: number;
+  };
+  /** Dimension-name label styling (drawn above each axis). */
+  label?: {
+    /** Label color. */
+    color?: string;
+    /** Label font size (px). */
+    fontSize?: number;
+    /** Label font weight. */
+    fontWeight?: number;
+  };
+  /** Record polyline styling. */
+  line?: {
+    /** Single-record stroke color (fallback when the palette is exhausted / unset). */
+    color?: string;
+    /** Multi-record stroke palette. Record (or `colorBy` category) index maps to colors[index % length]. */
+    colors?: string[];
+    /**
+     * Opacity the OTHER lines drop to while one is hovered (0-1). The point of the highlight
+     * is to trace one record through a thicket of overlapping ones, so this wants to be low
+     * enough to read as background but not invisible.
+     */
+    dimmedOpacity?: number;
+    /**
+     * Resting line opacity (0-1). Below 1 by default: this chart type overplots heavily, and
+     * partial transparency is what turns a mass of lines into readable density.
+     */
+    opacity?: number;
+    /** Line stroke width (px). */
+    width?: number;
+  };
+  /** Per-axis tick label styling (the value scale printed alongside each axis). */
+  tick?: {
+    /** Tick label color. */
+    color?: string;
+    /** Tick label font size (px). */
+    fontSize?: number;
+  };
+}
+
+/**
+ * Treemap (nested proportional rectangles / convex polygons) chart layer theme.
+ * Namespaced under 'treemap' in composite themes (the key MUST equal the layer `type`,
+ * since `renderLayers` looks up `theme[layer.type]`).
+ */
+export interface NgeTreemapLayerTheme {
+  /** Cell (a node's rectangle, or its convex polygon under `tiling: 'voronoi'`) styling. */
+  cell?: {
+    /** Single-cell fill color (fallback when the palette is exhausted / unset). */
+    color?: string;
+    /** Multi-cell fill palette. Top-level branch index maps to colors[index % length]. */
+    colors?: string[];
+    /**
+     * How much lighter each level of nesting draws, as an HCL luminance step per depth.
+     *
+     * A treemap's whole structure is nesting, and nesting is invisible when every
+     * descendant of a branch shares one flat fill — the stroke alone cannot carry it once
+     * cells get small. Fading by depth keeps a branch reading as one family while still
+     * separating its levels. `0` disables the derivation and paints every depth the
+     * branch's base color.
+     *
+     * Applies only to palette-derived fills. A node carrying its own `color` is returned
+     * untouched — an explicitly named colour opts out, the same way a per-datum
+     * `labelColor` opts out of automatic on-fill contrast.
+     */
+    depthFade?: number;
+    /** Cell fill opacity (0-1) */
+    opacity?: number;
+    /** Cell outline stroke color (separates adjacent cells) */
+    stroke?: string;
+    /** Cell outline stroke width (px) */
+    strokeWidth?: number;
+  };
+  /**
+   * Per-cell IN-CELL label styling.
+   *
+   * The label sits on the cell's own fill — a value drawn from the palette and then
+   * depth-faded, i.e. a RANGE — so one flat colour cannot read on every cell.
+   * `color` / `colorOnDark` are the two endpoints `resolveLabelColor()` derives between
+   * per cell, which is why they are the ABSOLUTE black / white tokens rather than
+   * theme-relative ones.
+   *
+   * There is no `labelOutside` counterpart: a treemap label is always inside its cell.
+   * A future outside placement must add that second slice (no `colorOnDark`, tracking
+   * `--nge-chart-on-surface`) rather than reuse this one — see
+   * `docs/architecture/charts.md` § *A placement that leaves the mark needs its OWN theme slice*.
+   */
+  label?: {
+    /**
+     * Label color on a LIGHT cell fill — and the flat fallback when the fill cannot be
+     * measured. Defaults to the absolute `--nge-chart-black` token.
+     */
+    color?: string;
+    /**
+     * Label color on a perceptually DARK cell fill. Defaults to the absolute
+     * `--nge-chart-white` token. Set it to the same value as `color` to opt the whole
+     * theme out of contrast derivation.
+     */
+    colorOnDark?: string;
+    /**
+     * Label font size. A `number` is treated as px; a string is passed to CSS verbatim,
+     * so a token reference (`var(--nge-chart-label-font-size, 10px)` — the default) or
+     * any CSS length works.
+     */
+    fontSize?: number | string;
+    /**
+     * Label font weight — a numeric weight, or a string passed to CSS verbatim so a
+     * token reference (`var(--nge-chart-label-font-weight, 600)` — the default) works.
+     */
+    fontWeight?: number | string;
+  };
+}
+
+/**
+ * Sankey (weighted flow between staged nodes) chart layer theme.
+ * Namespaced under 'sankey' in composite themes (the key MUST equal the layer `type`,
+ * since `renderLayers` looks up `theme[layer.type]`).
+ */
+export interface NgeSankeyLayerTheme {
+  /**
+   * Node label styling.
+   *
+   * A node rect is `nodeWidth` wide — 16px by default — so a label never fits inside one
+   * and always sits on the plot surface beside it. One placement means nothing to
+   * disambiguate, so this slice is theme-relative and carries NO `colorOnDark`: the
+   * missing pair is what switches on-fill contrast derivation off, the same shape bar
+   * value labels use. See `docs/architecture/charts.md` § *A placement that leaves the
+   * mark needs its OWN theme slice*.
+   */
+  label?: {
+    /** Label color. Defaults to `--nge-chart-on-surface` — the backdrop is the plot surface. */
+    color?: string;
+    /**
+     * Label font size. A `number` is treated as px; a string is passed to CSS verbatim,
+     * so a token reference (`var(--nge-chart-label-font-size, 10px)` — the default) or
+     * any CSS length works.
+     */
+    fontSize?: number | string;
+    /**
+     * Label font weight — a numeric weight, or a string passed to CSS verbatim so a
+     * token reference (`var(--nge-chart-label-font-weight, 600)` — the default) works.
+     */
+    fontWeight?: number | string;
+  };
+  /** Link (the flow ribbon between two node rects) styling. */
+  link?: {
+    /**
+     * Ribbon fill used when a link names no `color` AND its source node has none either
+     * — the flat fallback for an unpalettised graph.
+     */
+    color?: string;
+    /**
+     * Resting ribbon opacity. Ribbons overlap heavily wherever flows cross, so this sits
+     * well below 1: translucency is what lets a reader see the crossings rather than
+     * whichever ribbon happens to paint last.
+     */
+    opacity?: number;
+    /**
+     * Ribbon opacity under the pointer. Raising opacity rather than changing hue is what
+     * keeps a hovered flow identifiable while still reading as the same colour it had at
+     * rest.
+     */
+    opacityHover?: number;
+  };
+  /** Node (the rect at each end of a flow) styling. */
+  node?: {
+    /** Single-node fill color (fallback when the palette is exhausted / unset). */
+    color?: string;
+    /** Multi-node fill palette. Node index maps to colors[index % length]. */
+    colors?: string[];
+    /** Node fill opacity (0-1). */
+    opacity?: number;
+    /** Node outline stroke color. */
+    stroke?: string;
+    /** Node outline stroke width (px). */
+    strokeWidth?: number;
+  };
+}
+
+/**
+ * Chord (circular / linear relationship diagram) chart layer theme.
+ * Namespaced under 'chord' in composite themes (the key MUST equal the layer `type`,
+ * since `renderLayers` looks up `theme[layer.type]`).
+ */
+export interface NgeChordLayerTheme {
+  /**
+   * Node label styling.
+   *
+   * A chord label always sits off the mark — past the ring in the circular layout, beneath
+   * the node circle in the linear layout — so one placement means nothing to disambiguate.
+   * This slice is theme-relative and carries NO `colorOnDark`: the missing pair is what
+   * switches on-fill contrast derivation off, the same shape the sankey layer's node label
+   * uses. See `docs/architecture/charts.md` § *A placement that leaves the mark needs its
+   * OWN theme slice*.
+   */
+  label?: {
+    /** Label color. Defaults to `--nge-chart-on-surface` — the backdrop is the plot surface. */
+    color?: string;
+    /**
+     * Label font size. A `number` is treated as px; a string is passed to CSS verbatim,
+     * so a token reference (`var(--nge-chart-label-font-size, 10px)` — the default) or
+     * any CSS length works.
+     */
+    fontSize?: number | string;
+    /**
+     * Label font weight — a numeric weight, or a string passed to CSS verbatim so a
+     * token reference (`var(--nge-chart-label-font-weight, 600)` — the default) works.
+     */
+    fontWeight?: number | string;
+  };
+  /** Link (the ribbon or edge connecting two node arcs / circles) styling. */
+  link?: {
+    /**
+     * Ribbon / edge color used when a link names no `color` AND its source node has none
+     * either — the flat fallback for an unpalettised graph.
+     */
+    color?: string;
+    /**
+     * Resting link opacity. Ribbons overlap heavily wherever relationships cross, so this
+     * sits well below 1: translucency is what lets a reader see the crossings rather than
+     * whichever ribbon happens to paint last.
+     */
+    opacity?: number;
+    /**
+     * Link opacity under the pointer. Raising opacity rather than changing hue is what
+     * keeps a hovered connection identifiable while still reading as the same link it had
+     * at rest.
+     */
+    opacityHover?: number;
+  };
+  /** Node (the ring arc in the circular layout, or the baseline circle in the linear layout) styling. */
+  node?: {
+    /** Single-node fill color (fallback when the palette is exhausted / unset). */
+    color?: string;
+    /** Multi-node fill palette. Node index maps to colors[index % length]. */
+    colors?: string[];
+    /** Node fill opacity (0-1). */
+    opacity?: number;
+    /** Node outline stroke color. */
+    stroke?: string;
+    /** Node outline stroke width (px). */
+    strokeWidth?: number;
+  };
+}
+
+/**
+ * Network (force / clustered / hive node-link graph) chart layer theme.
+ * Namespaced under 'network' in composite themes (the key MUST equal the layer `type`,
+ * since `renderLayers` looks up `theme[layer.type]`).
+ */
+export interface NgeNetworkLayerTheme {
+  /**
+   * Hive axis styling — the straight spokes the `'hive'` layout radiates from the centre and
+   * seats its nodes along. Chrome the layer draws itself, so unlike the shared x/y axes it
+   * takes its colour from here rather than from `theme.axis`. Inert in the force layouts,
+   * which draw no axes at all.
+   */
+  axis?: {
+    /** Axis line color. Defaults to `--nge-chart-outline` — structural chrome, not data. */
+    color?: string;
+    /** Axis line width (px). */
+    width?: number;
+  };
+  /**
+   * Node label styling.
+   *
+   * A network label always sits BESIDE its node circle, never on it, so there is one placement
+   * and nothing to disambiguate. This slice is theme-relative and carries NO `colorOnDark`:
+   * the missing pair is what switches on-fill contrast derivation off, the same shape the
+   * sankey and chord layers' node labels use. See `docs/architecture/charts.md` § *A placement
+   * that leaves the mark needs its OWN theme slice*.
+   */
+  label?: {
+    /** Label color. Defaults to `--nge-chart-on-surface` — the backdrop is the plot surface. */
+    color?: string;
+    /**
+     * Label font size. A `number` is treated as px; a string is passed to CSS verbatim,
+     * so a token reference (`var(--nge-chart-label-font-size, 10px)` — the default) or
+     * any CSS length works.
+     */
+    fontSize?: number | string;
+    /**
+     * Label font weight — a numeric weight, or a string passed to CSS verbatim so a
+     * token reference (`var(--nge-chart-label-font-weight, 600)` — the default) works.
+     */
+    fontWeight?: number | string;
+  };
+  /** Link (the edge connecting two nodes) styling. */
+  link?: {
+    /**
+     * Edge color used when a link names no `color` AND its source node has none either —
+     * the flat fallback for an unpalettised graph.
+     */
+    color?: string;
+    /**
+     * Resting link opacity. A network's edges cross far more often than a flow diagram's, so
+     * this sits below 1: translucency is what keeps a dense interior readable instead of
+     * matting into a single block of colour.
+     */
+    opacity?: number;
+    /**
+     * Link opacity under the pointer. Raising opacity rather than changing hue is what keeps
+     * a hovered connection identifiable while still reading as the same link it had at rest.
+     */
+    opacityHover?: number;
+    /** Edge stroke width (px). Flat, not data-driven — a graph's weight reads as layout distance. */
+    width?: number;
+  };
+  /** Node (the circle seated by the layout) styling. */
+  node?: {
+    /** Single-node fill color (fallback when the palette is exhausted / unset). */
+    color?: string;
+    /** Multi-node fill palette. Node index maps to colors[index % length]. */
+    colors?: string[];
+    /** Node fill opacity (0-1). */
+    opacity?: number;
+    /** Node outline stroke color. */
+    stroke?: string;
+    /** Node outline stroke width (px). */
+    strokeWidth?: number;
+  };
+}
+
+/**
+ * Tree / dendrogram (hierarchy link-diagram) chart layer theme.
+ * Namespaced under 'tree' in composite themes (the key MUST equal the layer `type`,
+ * since `renderLayers` looks up `theme[layer.type]`).
+ */
+export interface NgeTreeLayerTheme {
+  /**
+   * Node label styling.
+   *
+   * A tree label always sits BESIDE its node circle, never on it, so there is one placement
+   * and nothing to disambiguate. This slice is theme-relative and carries NO `colorOnDark`:
+   * the missing pair is what switches on-fill contrast derivation off, the same shape the
+   * sankey, chord and network layers' node labels use. See `docs/architecture/charts.md`
+   * § *A placement that leaves the mark needs its OWN theme slice*.
+   */
+  label?: {
+    /** Label color. Defaults to `--nge-chart-on-surface` — the backdrop is the plot surface. */
+    color?: string;
+    /**
+     * Label font size. A `number` is treated as px; a string is passed to CSS verbatim,
+     * so a token reference (`var(--nge-chart-label-font-size, 10px)` — the default) or
+     * any CSS length works.
+     */
+    fontSize?: number | string;
+    /**
+     * Label font weight — a numeric weight, or a string passed to CSS verbatim so a
+     * token reference (`var(--nge-chart-label-font-weight, 600)` — the default) works.
+     */
+    fontWeight?: number | string;
+  };
+  /** Link (the parent→child edge) styling. */
+  link?: {
+    /**
+     * Edge color used when the child node names no `color` — the flat fallback for an
+     * unpalettised tree.
+     */
+    color?: string;
+    /**
+     * Resting link opacity. A tree's edges never cross, so this sits well above the
+     * network layer's 0.35: translucency buys nothing here and only weakens the structure
+     * the layer exists to show.
+     */
+    opacity?: number;
+    /**
+     * Link opacity under the pointer. Raising opacity rather than changing hue is what keeps
+     * a hovered edge identifiable while still reading as the same edge it had at rest.
+     */
+    opacityHover?: number;
+    /** Edge stroke width (px). Flat, not data-driven — a tree encodes structure, not weight. */
+    width?: number;
+  };
+  /** Node (the circle seated by the layout) styling. */
+  node?: {
+    /** Single-node fill color (fallback when the palette is exhausted / unset). */
+    color?: string;
+    /** Multi-node fill palette. Top-level branch index maps to colors[index % length]. */
+    colors?: string[];
+    /** Node fill opacity (0-1). */
+    opacity?: number;
+    /** Node outline stroke color. */
+    stroke?: string;
+    /** Node outline stroke width (px). */
+    strokeWidth?: number;
+  };
+}
+
+/**
  * Complete chart theme combining base and layer-specific themes.
  */
 export interface NgeChartTheme extends NgeChartBaseTheme {
@@ -1032,12 +1792,16 @@ export interface NgeChartTheme extends NgeChartBaseTheme {
   bullet?: NgeBulletLayerTheme;
   /** Bump chart layer theme */
   bump?: NgeBumpLayerTheme;
+  /** Chord / arc diagram (circular or linear relationship) chart layer theme */
+  chord?: NgeChordLayerTheme;
   /** Distribution chart layer theme */
   distribution?: NgeDistributionLayerTheme;
   /** Diverging bar chart layer theme */
   'diverging-bar'?: NgeDivergingBarLayerTheme;
   /** Financial chart layer theme */
   financial?: NgeFinancialLayerTheme;
+  /** Funnel / pyramid chart layer theme */
+  funnel?: NgeFunnelLayerTheme;
   /** Gauge (single-value meter) chart layer theme */
   gauge?: NgeGaugeLayerTheme;
   /** Grouped bar chart layer theme */
@@ -1050,14 +1814,22 @@ export interface NgeChartTheme extends NgeChartBaseTheme {
   line?: NgeLineLayerTheme;
   /** Lollipop chart layer theme */
   lollipop?: NgeLollipopLayerTheme;
+  /** Network (force / clustered / hive node-link graph) chart layer theme */
+  network?: NgeNetworkLayerTheme;
   /** Overlay (analytical-annotation) chart layer theme */
   overlay?: NgeOverlayLayerTheme;
+  /** Parallel coordinates chart layer theme */
+  'parallel-coords'?: NgeParallelCoordsLayerTheme;
   /** Pie / donut / semi-circle chart layer theme */
   pie?: NgePieLayerTheme;
+  /** Proportional-area / waffle chart layer theme */
+  proportional?: NgeProportionalLayerTheme;
   /** Radar / polar (spider / star) chart layer theme */
   radar?: NgeRadarLayerTheme;
   /** Radial-bar (polar) chart layer theme */
   'radial-bar'?: NgeRadialBarLayerTheme;
+  /** Sankey / alluvial / parallel-sets (weighted flow) chart layer theme */
+  sankey?: NgeSankeyLayerTheme;
   /** Scatter chart layer theme */
   scatter?: NgeScatterLayerTheme;
   /** Stacked bar chart layer theme */
@@ -1066,8 +1838,14 @@ export interface NgeChartTheme extends NgeChartBaseTheme {
   sunburst?: NgeSunburstLayerTheme;
   /** Timeline / Gantt chart layer theme */
   timeline?: NgeTimelineLayerTheme;
+  /** Tree / dendrogram (hierarchy link-diagram) chart layer theme */
+  tree?: NgeTreeLayerTheme;
+  /** Treemap (nested proportional) chart layer theme */
+  treemap?: NgeTreemapLayerTheme;
   /** Waterfall chart layer theme */
   waterfall?: NgeWaterfallLayerTheme;
+  /** Word cloud chart layer theme */
+  wordcloud?: NgeWordCloudLayerTheme;
 }
 
 /**
@@ -1145,6 +1923,27 @@ export interface ResolvedNgeLollipopLayerTheme {
 }
 
 /**
+ * Deep required version of NgeNetworkLayerTheme.
+ * All nested properties are required.
+ */
+export interface ResolvedNgeNetworkLayerTheme {
+  axis: Required<NonNullable<NgeNetworkLayerTheme['axis']>>;
+  label: Required<NonNullable<NgeNetworkLayerTheme['label']>>;
+  link: Required<NonNullable<NgeNetworkLayerTheme['link']>>;
+  node: Required<NonNullable<NgeNetworkLayerTheme['node']>>;
+}
+
+/**
+ * Deep required version of NgeTreeLayerTheme.
+ * All nested properties are required.
+ */
+export interface ResolvedNgeTreeLayerTheme {
+  label: Required<NonNullable<NgeTreeLayerTheme['label']>>;
+  link: Required<NonNullable<NgeTreeLayerTheme['link']>>;
+  node: Required<NonNullable<NgeTreeLayerTheme['node']>>;
+}
+
+/**
  * Deep required version of NgeOverlayLayerTheme.
  * All nested properties are required.
  */
@@ -1186,6 +1985,8 @@ export interface ResolvedNgeDistributionLayerTheme {
  */
 export interface ResolvedNgePieLayerTheme {
   label: Required<NonNullable<NgePieLayerTheme['label']>>;
+  labelOutside: Required<NonNullable<NgePieLayerTheme['labelOutside']>>;
+  leaderLine: Required<NonNullable<NgePieLayerTheme['leaderLine']>>;
   slice: Required<NonNullable<NgePieLayerTheme['slice']>>;
 }
 
@@ -1196,6 +1997,16 @@ export interface ResolvedNgePieLayerTheme {
 export interface ResolvedNgeSunburstLayerTheme {
   label: Required<NonNullable<NgeSunburstLayerTheme['label']>>;
   segment: Required<NonNullable<NgeSunburstLayerTheme['segment']>>;
+}
+
+/**
+ * Deep required version of NgeProportionalLayerTheme.
+ * All nested properties are required.
+ */
+export interface ResolvedNgeProportionalLayerTheme {
+  emptyCell: Required<NonNullable<NgeProportionalLayerTheme['emptyCell']>>;
+  label: Required<NonNullable<NgeProportionalLayerTheme['label']>>;
+  mark: Required<NonNullable<NgeProportionalLayerTheme['mark']>>;
 }
 
 /**
@@ -1218,6 +2029,7 @@ export interface ResolvedNgeRadialBarLayerTheme {
   bar: Required<NonNullable<NgeRadialBarLayerTheme['bar']>>;
   cell: Required<NonNullable<NgeRadialBarLayerTheme['cell']>>;
   label: Required<NonNullable<NgeRadialBarLayerTheme['label']>>;
+  labelOutside: Required<NonNullable<NgeRadialBarLayerTheme['labelOutside']>>;
 }
 
 /**
@@ -1271,6 +2083,16 @@ export interface ResolvedNgeFinancialLayerTheme {
 }
 
 /**
+ * Deep required version of NgeFunnelLayerTheme.
+ * All nested properties are required.
+ */
+export interface ResolvedNgeFunnelLayerTheme {
+  band: Required<NonNullable<NgeFunnelLayerTheme['band']>>;
+  label: Required<NonNullable<NgeFunnelLayerTheme['label']>>;
+  labelOutside: Required<NonNullable<NgeFunnelLayerTheme['labelOutside']>>;
+}
+
+/**
  * Deep required version of NgeGaugeLayerTheme.
  * All nested properties are required.
  */
@@ -1302,4 +2124,53 @@ export interface ResolvedNgeTimelineLayerTheme {
   bar: Required<NonNullable<NgeTimelineLayerTheme['bar']>>;
   label: Required<NonNullable<NgeTimelineLayerTheme['label']>>;
   milestone: Required<NonNullable<NgeTimelineLayerTheme['milestone']>>;
+}
+
+/**
+ * Deep required version of NgeWordCloudLayerTheme.
+ * All nested properties are required.
+ */
+export interface ResolvedNgeWordCloudLayerTheme {
+  word: Required<NonNullable<NgeWordCloudLayerTheme['word']>>;
+}
+
+/**
+ * Deep required version of NgeParallelCoordsLayerTheme.
+ * All nested properties are required.
+ */
+export interface ResolvedNgeParallelCoordsLayerTheme {
+  axis: Required<NonNullable<NgeParallelCoordsLayerTheme['axis']>>;
+  brush: Required<NonNullable<NgeParallelCoordsLayerTheme['brush']>>;
+  label: Required<NonNullable<NgeParallelCoordsLayerTheme['label']>>;
+  line: Required<NonNullable<NgeParallelCoordsLayerTheme['line']>>;
+  tick: Required<NonNullable<NgeParallelCoordsLayerTheme['tick']>>;
+}
+
+/**
+ * Deep required version of NgeTreemapLayerTheme.
+ * All nested properties are required.
+ */
+export interface ResolvedNgeTreemapLayerTheme {
+  cell: Required<NonNullable<NgeTreemapLayerTheme['cell']>>;
+  label: Required<NonNullable<NgeTreemapLayerTheme['label']>>;
+}
+
+/**
+ * Deep required version of NgeSankeyLayerTheme.
+ * All nested properties are required.
+ */
+export interface ResolvedNgeSankeyLayerTheme {
+  label: Required<NonNullable<NgeSankeyLayerTheme['label']>>;
+  link: Required<NonNullable<NgeSankeyLayerTheme['link']>>;
+  node: Required<NonNullable<NgeSankeyLayerTheme['node']>>;
+}
+
+/**
+ * Deep required version of NgeChordLayerTheme.
+ * All nested properties are required.
+ */
+export interface ResolvedNgeChordLayerTheme {
+  label: Required<NonNullable<NgeChordLayerTheme['label']>>;
+  link: Required<NonNullable<NgeChordLayerTheme['link']>>;
+  node: Required<NonNullable<NgeChordLayerTheme['node']>>;
 }

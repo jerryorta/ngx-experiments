@@ -62,7 +62,7 @@ function drawCenter(group: DonutGroup, config: LdgDonutLayerConfig, theme: LdgDo
  * Draws arcs into `context.bounds`, deriving `center` / `radius` from
  * `context.dimensions` and ignoring the shared `scales` (a radial layer builds
  * its own geometry, like the bullet layer). Slice colors come from each
- * segment's `color` or the theme's `--chart-*` palette; hover pops the slice
+ * segment's `color` or the theme's `--nge-chart-*` palette; hover pops the slice
  * out; a native `<title>` supplies the tooltip; Enter/Space/click emit
  * `config.onSegmentClick`. Zero/negative values are dropped; an all-empty
  * dataset draws a placeholder ring.

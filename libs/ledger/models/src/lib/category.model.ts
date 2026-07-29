@@ -8,7 +8,7 @@ export type CategoryKind = 'income' | 'expense';
 export interface Category {
   /**
    * Color token/key for this category's chip and donut slice (e.g. a
-   * `--chart-series-*` token name, or a literal color). Finalized once the
+   * `--nge-chart-series-*` token name, or a literal color). Finalized once the
    * `ldg-*` design-library components land.
    */
   accent: string;

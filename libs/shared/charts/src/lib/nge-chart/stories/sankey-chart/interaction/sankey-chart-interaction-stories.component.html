@@ -1,0 +1,38 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-story-interaction-container">
+    <div class="nge-story-interaction-row">
+      <button
+        type="button"
+        class="nge-story-interaction-btn nge-story-interaction-btn--primary"
+        (click)="randomizeData()"
+      >
+        Randomize Flows
+      </button>
+    </div>
+    @if (interactiveLegend()) {
+      <!-- Standalone interactive legend above the chart: clicking a node toggles it, and every
+           link touching it, in and out of the diagram. A toggled-off node stays listed but
+           dimmed (opacity 0.4) so it can be brought back. Survivors keep the colour they had
+           before the toggle — the story stamps each visible node with a stable `color`, which
+           wins over the index-assigned palette. -->
+      <div class="nge-story-external-legend-row">
+        <span class="nge-story-external-legend-caption"
+          >Standalone &lt;nge-chart-legend&gt; — click a node to toggle it in/out of the flow</span
+        >
+        <nge-chart-legend
+          [items]="legendItems()"
+          [interactive]="true"
+          swatchShape="square"
+          layout="grid"
+          (itemClick)="onLegendItemClick($event)"
+        />
+      </div>
+    }
+    <div class="nge-story-chart-wrapper">
+      <nge-chart [config]="config()" />
+    </div>
+  </div>
+</nge-storybook-review-container>

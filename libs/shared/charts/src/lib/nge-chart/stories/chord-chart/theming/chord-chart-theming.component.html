@@ -1,0 +1,104 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="nge-story-container">
+    <h2>Chord Chart - Theming Examples</h2>
+    <p class="nge-story-intro-text">
+      The <code>theme.chord</code> slice carries three sub-slices — <code>node</code>,
+      <code>link</code> and <code>label</code>. Every default is a <code>--nge-chart-*</code>
+      token with a literal fallback, so a chart renders correctly with no theme applied at all.
+    </p>
+
+    <section class="nge-story-section">
+      <h4>Default Theme</h4>
+      <p class="nge-story-description">
+        No theme provided — renders on the chart's <code>--nge-chart-*</code> token defaults.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="defaultConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Custom Regional Palette</h4>
+      <p class="nge-story-description">
+        <code>seriesColors</code> assigns one colour per node by index. A link with no colour of its
+        own inherits its SOURCE node's, so recolouring the nodes recolours every ribbon that leaves
+        them.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="customPaletteConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Node Outline &amp; Opacity</h4>
+      <p class="nge-story-description">
+        <code>node.stroke</code> / <code>node.strokeWidth</code> separate arcs that sit close
+        together on the ring; <code>node.opacity</code> lets the arcs themselves read slightly
+        translucent.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="nodeStyledConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Label Typography</h4>
+      <p class="nge-story-description">
+        <code>label.color</code> / <code>fontSize</code> / <code>fontWeight</code>, with a wider
+        <code>labelPadding</code>. The slice is theme-relative and has no <code>colorOnDark</code>:
+        a chord label never sits on a mark, so it takes no on-fill contrast derivation.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="typographyConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Non-ribbon Chord, Themed</h4>
+      <p class="nge-story-description">
+        The straight-edge reading takes exactly the same <code>theme.chord</code> slice as the
+        filled ribbons — only <code>linkMark</code> (geometry, not theme) differs.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="nonRibbonThemedConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section">
+      <h4>Arc Diagram, Themed</h4>
+      <p class="nge-story-description">
+        A cooler palette under the linear layout — <code>layout</code> is geometry, not theme, so
+        the same <code>theme.chord</code> shape composes with either reading.
+      </p>
+      <div class="nge-story-chart-container nge-story-chart-container--tall">
+        <nge-chart [config]="arcDiagramThemedConfig" />
+      </div>
+    </section>
+
+    <section class="nge-story-section nge-story-section--highlight">
+      <h4>Link Opacity Is the Load-Bearing Knob</h4>
+      <p class="nge-story-description">
+        Ribbons overlap wherever flows cross. Near-opaque, the diagram collapses into whichever
+        ribbon paints last; too translucent and the individual flows go faint. The default
+        <code>0.4</code> is the compromise.
+      </p>
+      <div class="nge-story-chart-row">
+        <div class="nge-story-chart-column">
+          <h5>opacity: 0.95 — crossings lost</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="denseConfig" />
+          </div>
+        </div>
+        <div class="nge-story-chart-column">
+          <h5>opacity: 0.15 — flows faint</h5>
+          <div class="nge-story-chart-container nge-story-chart-container--small">
+            <nge-chart [config]="sparseConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

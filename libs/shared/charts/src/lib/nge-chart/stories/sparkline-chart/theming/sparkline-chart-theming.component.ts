@@ -15,15 +15,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'sparkline-chart-theming',
+    class: 'nge-sparkline-chart-theming',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'sparkline-chart-theming',
+  selector: 'nge-sparkline-chart-theming',
   standalone: true,
   styleUrl: './sparkline-chart-theming.component.scss',
   templateUrl: './sparkline-chart-theming.component.html',
 })
-export class SparklineChartThemingComponent {
+export class NgeSparklineChartThemingComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/sparkline-chart/theming';
 
@@ -58,7 +58,7 @@ export class SparklineChartThemingComponent {
     { label: 'G8', value: 1 },
   ];
 
-  // Default configs — colours resolve entirely from the ambient --chart-* tokens,
+  // Default configs — colours resolve entirely from the ambient --nge-chart-* tokens,
   // so the same config re-themes just by overriding tokens on a wrapper (below).
   lineConfig = createSparklineChartConfig({ data: this.lineData });
   columnConfig = createColumnSparklineChartConfig({ data: this.columnData });

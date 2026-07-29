@@ -42,15 +42,15 @@ const MARKET_SHARE: NgeLollipopDataPoint[] = [
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'lollipop-chart-usage-stories',
+    class: 'nge-lollipop-chart-usage-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'lollipop-chart-usage-stories',
+  selector: 'nge-lollipop-chart-usage-stories',
   standalone: true,
   styleUrl: './lollipop-chart-usage-stories.component.scss',
   templateUrl: './lollipop-chart-usage-stories.component.html',
 })
-export class LollipopChartUsageStoriesComponent {
+export class NgeLollipopChartUsageStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/lollipop-chart/usage';
 

@@ -2,9 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { RadarInteractionStoriesComponent } from './radar-interaction-stories.component';
+import { NgeRadarInteractionStoriesComponent } from './radar-interaction-stories.component';
 
-const meta: Meta<RadarInteractionStoriesComponent> = {
+const meta: Meta<NgeRadarInteractionStoriesComponent> = {
   argTypes: {
     // Theme - Web Styling
     axisColor: {
@@ -152,7 +152,7 @@ const meta: Meta<RadarInteractionStoriesComponent> = {
       table: { category: 'Layer - Tooltip' },
     },
   },
-  component: RadarInteractionStoriesComponent,
+  component: NgeRadarInteractionStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -162,7 +162,7 @@ const meta: Meta<RadarInteractionStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<RadarInteractionStoriesComponent>;
+type Story = StoryObj<NgeRadarInteractionStoriesComponent>;
 
 export const Interaction: Story = {
   args: {

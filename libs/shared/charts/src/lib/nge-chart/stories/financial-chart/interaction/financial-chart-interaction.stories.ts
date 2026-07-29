@@ -2,9 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { FinancialChartInteractionStoriesComponent } from './financial-chart-interaction-stories.component';
+import { NgeFinancialChartInteractionStoriesComponent } from './financial-chart-interaction-stories.component';
 
-const meta: Meta<FinancialChartInteractionStoriesComponent> = {
+const meta: Meta<NgeFinancialChartInteractionStoriesComponent> = {
   argTypes: {
     // Layer - Financial
     brickSize: {
@@ -112,7 +112,7 @@ const meta: Meta<FinancialChartInteractionStoriesComponent> = {
       table: { category: 'Theme - Financial Styling' },
     },
   },
-  component: FinancialChartInteractionStoriesComponent,
+  component: NgeFinancialChartInteractionStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -122,7 +122,7 @@ const meta: Meta<FinancialChartInteractionStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<FinancialChartInteractionStoriesComponent>;
+type Story = StoryObj<NgeFinancialChartInteractionStoriesComponent>;
 
 export const Interaction: Story = {
   args: {

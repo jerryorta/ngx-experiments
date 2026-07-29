@@ -137,9 +137,9 @@ export function renderNgeRangeAxis(
       .attr('class', 'nge-chart-range-axis-window')
       // Dragging the window body pans the focus — hint it with a grab cursor.
       .attr('cursor', 'grab')
-      .attr('fill', 'var(--chart-primary)')
+      .attr('fill', 'var(--nge-chart-primary)')
       .attr('fill-opacity', WINDOW_FILL_OPACITY)
-      .attr('stroke', 'var(--chart-primary)')
+      .attr('stroke', 'var(--nge-chart-primary)')
       .attr('stroke-opacity', WINDOW_STROKE_OPACITY)
       .attr('stroke-width', 1);
   }
@@ -168,7 +168,7 @@ export function renderNgeRangeAxis(
     // Resize cursor by axis orientation: a vertical (Y/left) axis resizes up/down,
     // a horizontal (X/bottom) axis resizes left/right.
     .attr('cursor', isVertical ? 'ns-resize' : 'ew-resize')
-    .attr('fill', 'var(--chart-primary)')
+    .attr('fill', 'var(--nge-chart-primary)')
     .attr('rx', HANDLE_RADIUS)
     .attr('ry', HANDLE_RADIUS)
     .merge(handleSelection);

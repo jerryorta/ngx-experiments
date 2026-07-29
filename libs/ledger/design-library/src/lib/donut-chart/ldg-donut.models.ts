@@ -3,7 +3,7 @@ import type { NgeChartLayerRenderFn } from '@nge/charts';
 /**
  * One slice of a donut — a labeled value and, optionally, the exact color to
  * fill it with. When `color` is omitted the render fn falls back to the theme's
- * `--chart-*` series palette (see {@link LdgDonutLayerTheme}).
+ * `--nge-chart-*` series palette (see {@link LdgDonutLayerTheme}).
  */
 export interface LdgDonutSegment {
   color?: string;
@@ -12,7 +12,7 @@ export interface LdgDonutSegment {
 }
 
 /**
- * Theme slice for the donut layer. Defaults live in `--chart-*` tokens (NOT
+ * Theme slice for the donut layer. Defaults live in `--nge-chart-*` tokens (NOT
  * domain `--ldg-*`) so the layer is promotion-ready into `@nge/charts` — a
  * consumer that wants domain colors passes them per-segment via
  * {@link LdgDonutSegment.color}.

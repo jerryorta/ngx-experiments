@@ -1,13 +1,21 @@
-.pie-chart-interaction-stories {
+.nge-pie-chart-interaction-stories {
   display: block;
   padding: 20px;
 
-  .interaction-container {
+  .nge-story-interaction-container {
     max-width: 800px;
     margin: 0 auto;
+
+    // Outside labels are drawn INSIDE the plot rect (the layers group is clipped to it),
+    // so the gutter they need is taken off the pie's own radius. At 800px the 30-category
+    // set leaves the pie too small to read; widening the story gives the radius back
+    // instead of shrinking the text.
+    &--wide {
+      max-width: 1180px;
+    }
   }
 
-  .interaction-row {
+  .nge-story-interaction-row {
     margin-bottom: 12px;
     display: flex;
     gap: 12px;
@@ -15,12 +23,12 @@
     flex-wrap: wrap;
   }
 
-  .interaction-btn {
+  .nge-story-interaction-btn {
     padding: 6px 14px;
-    border: 1px solid var(--chart-outline-variant, #d0d0d0);
+    border: 1px solid var(--nge-chart-outline-variant, #d0d0d0);
     border-radius: 6px;
     background: transparent;
-    color: var(--chart-on-surface, #1a1a1a);
+    color: var(--nge-chart-on-surface, #1a1a1a);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
@@ -31,24 +39,24 @@
 
     &--primary {
       border-color: transparent;
-      background: var(--chart-primary, #2f6f6a);
-      color: var(--chart-on-primary, #ffffff);
+      background: var(--nge-chart-primary, #2f6f6a);
+      color: var(--nge-chart-on-primary, #ffffff);
 
       &:hover {
-        background: var(--chart-primary, #2f6f6a);
+        background: var(--nge-chart-primary, #2f6f6a);
         filter: brightness(1.08);
       }
     }
   }
 
-  .external-legend-row {
+  .nge-story-external-legend-row {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     gap: 12px;
     margin-bottom: 12px;
     padding: 8px 12px;
-    border: 1px dashed var(--chart-outline-variant, #e0e0e0);
+    border: 1px dashed var(--nge-chart-outline-variant, #e0e0e0);
     border-radius: 8px;
 
     // Give the legend a definite width so its `layout="grid"` resolves to a
@@ -60,17 +68,31 @@
     }
   }
 
-  .external-legend-caption {
+  .nge-story-external-legend-caption {
     font-size: 12px;
-    color: var(--chart-on-surface-variant, #666666);
+    color: var(--nge-chart-on-surface-variant, #666666);
   }
 
-  .chart-wrapper {
+  .nge-story-chart-wrapper {
     height: 400px;
-    border: 1px solid var(--chart-outline-variant, #e0e0e0);
+    border: 1px solid var(--nge-chart-outline-variant, #e0e0e0);
     border-radius: 8px;
     padding: 16px;
-    background: var(--chart-surface, #fff);
+    background: var(--nge-chart-surface, #fff);
     overflow: visible; // Allow tooltips to extend beyond the container
+
+    // A 30-category pie needs vertical room for its label columns, not for the pie: past
+    // ~900px the WIDTH is the binding constraint on the radius, so extra height goes
+    // entirely to the labels. That is what it is for here — the columns get room to breathe
+    // above and below the arc instead of crowding against it.
+    //
+    // On crossings specifically (ARCH-279): height is the only lever that moves the count —
+    // 84 at 506px of plot, 58 at 620, 40 at 760, 34 at 900, then flat. But crossings are a
+    // DENSITY ceiling, not a height problem: the ring is at 0 crossings through 20
+    // categories and only tangles past ~25. Neither a smaller pie nor a larger labelOffset
+    // changes the count at all (crossings are scale-invariant).
+    &--outside-labels {
+      height: 1100px;
+    }
   }
 }

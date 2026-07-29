@@ -52,11 +52,11 @@
       background-color 150ms ease;
 
     &:hover {
-      background-color: var(--chart-surface-container-highest, rgba(128, 128, 128, 0.12));
+      background-color: var(--nge-chart-surface-container-highest, rgba(128, 128, 128, 0.12));
     }
 
     &:focus-visible {
-      outline: 2px solid var(--chart-primary, #1976d2);
+      outline: 2px solid var(--nge-chart-primary, #1976d2);
       outline-offset: 1px;
     }
   }
@@ -82,7 +82,45 @@
 
   .nge-chart-legend-label {
     font-size: 12px;
-    color: var(--chart-on-surface, #333);
+    color: var(--nge-chart-on-surface, #333);
     white-space: nowrap;
+  }
+
+  // The magnitude, when the legend is carrying the numbers for a chart that has
+  // dropped its on-mark labels. Tabular figures so the column reads as a table
+  // rather than a ragged list; pushed to the row's end so labels stay left-aligned
+  // and the values line up under each other in the grid layout.
+  .nge-chart-legend-value {
+    margin-left: auto;
+    padding-left: 8px;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: var(--nge-chart-on-surface-variant, #666);
+    white-space: nowrap;
+  }
+
+  // Releases whatever selection the caller tracks. Sits outside the entry list so it
+  // never becomes a flow item or a grid cell among the entries.
+  .nge-chart-legend-clear {
+    display: block;
+    margin: 8px auto 0;
+    padding: 2px 8px;
+    background: none;
+    border: 1px solid var(--nge-chart-outline, #79747e);
+    border-radius: 4px;
+    font: inherit;
+    font-size: 12px;
+    color: var(--nge-chart-on-surface-variant, #666);
+    cursor: pointer;
+    transition: background-color 150ms ease;
+
+    &:hover {
+      background-color: var(--nge-chart-surface-container-highest, rgba(128, 128, 128, 0.12));
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--nge-chart-primary, #1976d2);
+      outline-offset: 1px;
+    }
   }
 }

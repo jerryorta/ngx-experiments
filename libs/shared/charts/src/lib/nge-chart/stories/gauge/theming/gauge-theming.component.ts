@@ -12,15 +12,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'gauge-theming',
+    class: 'nge-gauge-theming',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'gauge-theming',
+  selector: 'nge-gauge-theming',
   standalone: true,
   styleUrl: './gauge-theming.component.scss',
   templateUrl: './gauge-theming.component.html',
 })
-export class GaugeThemingComponent {
+export class NgeGaugeThemingComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/gauge/theming';
 
@@ -33,7 +33,7 @@ export class GaugeThemingComponent {
     value: 68,
   };
 
-  // Default theme — no overrides. Uses the built-in `--chart-*` token palette,
+  // Default theme — no overrides. Uses the built-in `--nge-chart-*` token palette,
   // which adapts to the container's light / dark surface.
   defaultConfig = createGaugeChartConfig({
     data: this.sampleData,

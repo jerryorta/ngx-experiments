@@ -2,10 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { BarChartUsageStoriesComponent } from './bar-chart-usage-stories.component';
+import { NgeBarChartUsageStoriesComponent } from './bar-chart-usage-stories.component';
 
-const meta: Meta<BarChartUsageStoriesComponent> = {
-  component: BarChartUsageStoriesComponent,
+const meta: Meta<NgeBarChartUsageStoriesComponent> = {
+  component: NgeBarChartUsageStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -15,7 +15,7 @@ const meta: Meta<BarChartUsageStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<BarChartUsageStoriesComponent>;
+type Story = StoryObj<NgeBarChartUsageStoriesComponent>;
 
 export const Usage: Story = {
   args: {},

@@ -17,4 +17,4 @@ Workflow for a new component / layout:
 2. Reuse the matching `<prefix>-*` primitive — never re-style a raw `<button>` / `<input>`, even with Tailwind.
 3. If a primitive is missing, STOP and surface the gap: propose a new `<prefix>-*` component (or a new input on an existing one). Do NOT fall back to Material and do NOT hand-roll it inline.
 
-**Global state** is consumed from `@gigasoftware/<domain>-store` via its **facades** (signals for reads, methods for dispatch) — never `Store` / selectors directly.
+**Global state** is consumed from `@nge/<domain>-store` via its **facades** (signals for reads, methods for dispatch) — never `Store` / selectors directly.

@@ -45,6 +45,14 @@ export interface HeatmapChartPresetOptions {
   /** Explicit color domain [min, max]. Defaults to the data's non-null value extent. */
   domain?: [number, number];
 
+  /**
+   * In-cell label colour for EVERY cell. Setting it deliberately disables the automatic
+   * on-fill contrast (which otherwise picks `theme.heatmap.label.color` / `.colorOnDark`
+   * from each cell's own fill), giving one flat label colour. A per-cell `labelColor`
+   * still wins over it.
+   */
+  labelColor?: string;
+
   /** Format the in-cell / tooltip value. Default String(value). */
   labelFormat?: (value: number) => string;
 
@@ -128,6 +136,7 @@ export function createHeatmapChartConfig(options: HeatmapChartPresetOptions): Ng
     colPadding,
     data,
     domain,
+    labelColor,
     labelFormat,
     margin,
     mark,
@@ -157,6 +166,7 @@ export function createHeatmapChartConfig(options: HeatmapChartPresetOptions): Ng
     bubbleMaxRatio,
     data,
     domain,
+    labelColor,
     labelFormat,
     mark,
     onClick,

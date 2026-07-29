@@ -4,16 +4,23 @@ import {
   REVIEW_STATUS,
 } from '@nge/storybook';
 
-import type { NgeLineDataPoint } from '../../../../core/config';
+import type { NgeChartConfig, NgeLineDataPoint } from '../../../../core/config';
 import type { NgeTooltipContent, NgeTooltipRow } from '../../../../core/tooltip';
 
-import { createAreaChartConfig, createLineChartConfig } from '../../../../presets';
+import {
+  createAreaChartConfig,
+  createLineChartConfig,
+  createScatterChartConfig,
+} from '../../../../presets';
 import { NgeChartComponent } from '../../../nge-chart.component';
 import {
+  buildContinuousCrosshairData,
   buildCrosshairData,
+  buildScatterCrosshairData,
   CROSSHAIR_PALETTE,
   withCrosshair,
   withInsetPointX,
+  withXAxisTicks,
 } from '../crosshair-demo-data';
 
 /**
@@ -27,15 +34,15 @@ import {
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'crosshair-usage-stories',
+    class: 'nge-crosshair-usage-stories',
   },
   imports: [NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'crosshair-usage-stories',
+  selector: 'nge-crosshair-usage-stories',
   standalone: true,
   styleUrl: './crosshair-usage-stories.component.scss',
   templateUrl: './crosshair-usage-stories.component.html',
 })
-export class CrosshairUsageStoriesComponent {
+export class NgeCrosshairUsageStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/crosshair/usage';
 
@@ -103,6 +110,88 @@ export class CrosshairUsageStoriesComponent {
     ),
     { shared: true, snap: 'datum', x: true, y: false }
   );
+
+  /** 3-series dataset on a CONTINUOUS numeric x — ticks and data deliberately disagree. */
+  private readonly continuousData = buildContinuousCrosshairData(3);
+
+  /**
+   * A fresh continuous-x LINE config for the snapping comparison. Built per call so
+   * the two charts below differ ONLY by `crosshair.snap`, sharing no object identity.
+   */
+  private continuousLineConfig(): NgeChartConfig {
+    return withXAxisTicks(
+      createLineChartConfig({
+        curveType: 'monotone',
+        data: this.continuousData,
+        legend: { enabled: true, position: 'bottom' },
+        seriesColors: CROSSHAIR_PALETTE,
+        showPoints: true,
+        showXAxis: true,
+        showXGrid: true,
+        showYAxis: true,
+        xAxisLabel: 'Day',
+        yAxisLabel: 'Value',
+      }),
+      10
+    );
+  }
+
+  /** `snap: 'datum'` on a continuous x — the guide lands BETWEEN the gridlines. */
+  readonly snapDatumConfig = withCrosshair(this.continuousLineConfig(), {
+    shared: true,
+    snap: 'datum',
+    x: true,
+    y: false,
+  });
+
+  /** `snap: 'tick'` on the SAME data — the guide locks onto the gridlines instead. */
+  readonly snapTickConfig = withCrosshair(this.continuousLineConfig(), {
+    shared: true,
+    snap: 'tick',
+    x: true,
+    y: false,
+  });
+
+  /** 3-series 2-D cloud on a continuous x/y — no two series share an x. */
+  private readonly scatterData = buildScatterCrosshairData(3);
+
+  /**
+   * A fresh scatter config for the two 2-D demos.
+   *
+   * ⚠️ `tooltip: { enabled: false }` is load-bearing, not a style choice. The scatter
+   * layer's own Voronoi overlay is built only when its tooltip is enabled, and it
+   * writes to the SAME Angular tooltip host the crosshair uses — leave both on and
+   * the two fight over the card.
+   */
+  private scatterConfig(): NgeChartConfig {
+    return createScatterChartConfig({
+      data: this.scatterData,
+      legend: { enabled: true, position: 'bottom' },
+      pointRadius: 4,
+      seriesColors: CROSSHAIR_PALETTE,
+      showXAxis: true,
+      showXGrid: true,
+      showYAxis: true,
+      showYGrid: true,
+      tooltip: { enabled: false },
+      xAxisLabel: 'Day',
+      yAxisLabel: 'Value',
+    });
+  }
+
+  /** SCATTER host — the anchor is the nearest POINT in 2-D, not the nearest x. */
+  readonly scatterConfigX = withCrosshair(this.scatterConfig(), {
+    shared: true,
+    x: true,
+    y: false,
+  });
+
+  /** The same host with both guides on, so the full crosshair rides the point. */
+  readonly scatterConfigXY = withCrosshair(this.scatterConfig(), {
+    shared: true,
+    x: true,
+    y: true,
+  });
 
   /** Type-safe accessor for the shared tooltip rows in the `#ngeChartTooltip` template. */
   rowsOf(content: NgeTooltipContent | null): NgeTooltipRow[] {

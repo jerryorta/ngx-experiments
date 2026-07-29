@@ -13,15 +13,15 @@ import { NgeChartComponent } from '../../../nge-chart.component';
 @Component({
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: 'timeline-chart-interaction-stories',
+    class: 'nge-timeline-chart-interaction-stories',
   },
   imports: [CommonModule, NgeChartComponent, NgeStorybookReviewContainerComponent],
-  selector: 'timeline-chart-interaction-stories',
+  selector: 'nge-timeline-chart-interaction-stories',
   standalone: true,
   styleUrl: './timeline-chart-interaction-stories.component.scss',
   templateUrl: './timeline-chart-interaction-stories.component.html',
 })
-export class TimelineChartInteractionStoriesComponent {
+export class NgeTimelineChartInteractionStoriesComponent {
   reviewStatus = REVIEW_STATUS.DRAFT;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/timeline-chart/interaction';
 

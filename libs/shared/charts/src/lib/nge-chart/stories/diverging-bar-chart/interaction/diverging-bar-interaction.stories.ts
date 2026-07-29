@@ -2,9 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { DivergingBarInteractionStoriesComponent } from './diverging-bar-interaction-stories.component';
+import { NgeDivergingBarInteractionStoriesComponent } from './diverging-bar-interaction-stories.component';
 
-const meta: Meta<DivergingBarInteractionStoriesComponent> = {
+const meta: Meta<NgeDivergingBarInteractionStoriesComponent> = {
   argTypes: {
     // Layer - Dimensions
     barHeight: {
@@ -156,7 +156,7 @@ const meta: Meta<DivergingBarInteractionStoriesComponent> = {
       table: { category: 'Layer - Dimensions' },
     },
   },
-  component: DivergingBarInteractionStoriesComponent,
+  component: NgeDivergingBarInteractionStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -166,7 +166,7 @@ const meta: Meta<DivergingBarInteractionStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<DivergingBarInteractionStoriesComponent>;
+type Story = StoryObj<NgeDivergingBarInteractionStoriesComponent>;
 
 export const Interaction: Story = {
   args: {

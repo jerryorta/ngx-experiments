@@ -17,6 +17,7 @@ type BarContext = NgeChartLayerContext<
 >;
 
 interface ContextOptions {
+  labelColor?: string;
   orientation?: 'horizontal' | 'vertical';
   showLabels?: boolean;
   showZeroLine?: boolean;
@@ -48,6 +49,7 @@ function createContext(
 
   const config: NgeBarLayerConfig = {
     data,
+    labelColor: options.labelColor,
     orientation,
     renderer: renderBarLayer,
     showLabels: options.showLabels ?? false,
@@ -313,6 +315,65 @@ describe('renderBarLayer', () => {
       expect(lossLabel).toBeDefined();
       expect(numAttr(winLabel!, 'y')).toBeLessThan(zeroY);
       expect(numAttr(lossLabel!, 'y')).toBeGreaterThan(zeroY);
+    });
+  });
+
+  describe('label colour resolution (ARCH-266)', () => {
+    // Bar value labels are drawn on the PLOT SURFACE just outside the bar, not on its
+    // fill, so this layer deliberately has no derived on-fill contrast rung — only the
+    // two explicit ones over the theme default.
+    const DARK = '#101820';
+    const LIGHT = '#fff3c4';
+
+    function labelWithText(g: SVGGElement, text: string): SVGTextElement {
+      const match = Array.from(g.querySelectorAll<SVGTextElement>('.nge-bar-label')).find(
+        node => node.textContent === text
+      );
+      if (!match) {
+        throw new Error(`No bar label with text "${text}"`);
+      }
+      return match;
+    }
+
+    it('rung 1 — a per-datum labelColor wins over the layer config', () => {
+      const { context, g } = createContext([{ label: 'A', labelColor: '#ff0000', value: 1 }], {
+        labelColor: '#00ff00',
+        showLabels: true,
+      });
+
+      renderBarLayer(context);
+
+      expect(labelWithText(g, '1').getAttribute('fill')).toBe('#ff0000');
+    });
+
+    it('rung 2 — a layer-config labelColor applies to every bar', () => {
+      const { context, g } = createContext(
+        [
+          { color: DARK, label: 'A', value: 1 },
+          { color: LIGHT, label: 'B', value: 0.5 },
+        ],
+        { labelColor: '#00ff00', showLabels: true }
+      );
+
+      renderBarLayer(context);
+
+      expect(labelWithText(g, '1').getAttribute('fill')).toBe('#00ff00');
+      expect(labelWithText(g, '0.5').getAttribute('fill')).toBe('#00ff00');
+    });
+
+    it('does NOT derive from the bar fill — opposite-luminance bars share one label colour', () => {
+      const { context, g } = createContext(
+        [
+          { color: DARK, label: 'A', value: 1 },
+          { color: LIGHT, label: 'B', value: 0.5 },
+        ],
+        { showLabels: true, theme: { label: { color: '#0000ff' } } }
+      );
+
+      renderBarLayer(context);
+
+      expect(labelWithText(g, '1').getAttribute('fill')).toBe('#0000ff');
+      expect(labelWithText(g, '0.5').getAttribute('fill')).toBe('#0000ff');
     });
   });
 });

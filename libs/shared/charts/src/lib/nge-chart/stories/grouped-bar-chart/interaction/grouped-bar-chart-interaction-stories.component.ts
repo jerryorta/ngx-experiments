@@ -44,7 +44,7 @@ const GROUP_SHADES: Record<string, string[]> = {
   styleUrl: './grouped-bar-chart-interaction-stories.component.scss',
   templateUrl: './grouped-bar-chart-interaction-stories.component.html',
 })
-export class GroupedBarChartInteractionStoriesComponent {
+export class NgeGroupedBarChartInteractionStoriesComponent {
   reviewStatus = REVIEW_STATUS.FINAL;
   storybookFilePath = 'libs/shared/charts/src/lib/nge-chart/stories/grouped-bar-chart/interaction';
 
@@ -119,7 +119,7 @@ export class GroupedBarChartInteractionStoriesComponent {
     return GROUP_IDS.map(groupId => {
       const isHidden = hidden.has(groupId);
       return {
-        color: this.groupColorById.get(groupId) ?? 'var(--chart-primary)',
+        color: this.groupColorById.get(groupId) ?? 'var(--nge-chart-primary)',
         id: groupId,
         label: groupId,
         opacity: isHidden ? 0.4 : 1,

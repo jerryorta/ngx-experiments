@@ -2,9 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
 
-import { GaugeInteractionStoriesComponent } from './gauge-interaction-stories.component';
+import { NgeGaugeInteractionStoriesComponent } from './gauge-interaction-stories.component';
 
-const meta: Meta<GaugeInteractionStoriesComponent> = {
+const meta: Meta<NgeGaugeInteractionStoriesComponent> = {
   argTypes: {
     // Layer - Geometry
     endAngle: {
@@ -180,7 +180,7 @@ const meta: Meta<GaugeInteractionStoriesComponent> = {
       table: { category: 'Theme - Value' },
     },
   },
-  component: GaugeInteractionStoriesComponent,
+  component: NgeGaugeInteractionStoriesComponent,
   decorators: [
     applicationConfig({
       providers: [provideHttpClient(), provideAnimationsAsync()],
@@ -190,7 +190,7 @@ const meta: Meta<GaugeInteractionStoriesComponent> = {
 };
 
 export default meta;
-type Story = StoryObj<GaugeInteractionStoriesComponent>;
+type Story = StoryObj<NgeGaugeInteractionStoriesComponent>;
 
 /**
  * Solid Gauge — the default arc + fill readout. Drag `value` to watch the arc grow, or flip
