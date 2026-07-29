@@ -27,7 +27,7 @@ import type {
   NgeCalendarFilterContext,
 } from '../../core/models/nge-calendar-filter.model';
 
-import { DEFAULT_GIGA_CALENDAR_FILTER } from '../../core/models/nge-calendar-filter.model';
+import { DEFAULT_NGE_CALENDAR_FILTER } from '../../core/models/nge-calendar-filter.model';
 import { NgeCalendarStore } from '../store';
 import { NgeCalendarDefaultFilterComponent } from './nge-calendar-default-filter.component';
 
@@ -73,7 +73,7 @@ export class NgeCalendarFilterComponent<T = unknown> {
   protected readonly isOpen = signal(false);
 
   /** Transient draft, seeded from `store.filter()` on open and edited in-popover. */
-  protected readonly draft = signal<NgeCalendarFilter>(DEFAULT_GIGA_CALENDAR_FILTER);
+  protected readonly draft = signal<NgeCalendarFilter>(DEFAULT_NGE_CALENDAR_FILTER);
 
   /**
    * Typed render context handed to a host `#ngeCalendarFilter` template. The
@@ -82,7 +82,7 @@ export class NgeCalendarFilterComponent<T = unknown> {
    * `$implicit` / `filter` snapshot the current filter for the panel's controls.
    */
   protected readonly panelContext: NgeCalendarFilterContext<T> = {
-    $implicit: DEFAULT_GIGA_CALENDAR_FILTER,
+    $implicit: DEFAULT_NGE_CALENDAR_FILTER,
     apply: (predicate: NgeCalendarEventPredicate<T> | null) => {
       // Store stays payload-agnostic (`unknown`); the predicate is invoked with
       // the same runtime event object, so narrowing `T` here is sound.
@@ -90,7 +90,7 @@ export class NgeCalendarFilterComponent<T = unknown> {
       this.close();
     },
     close: () => this.close(),
-    filter: DEFAULT_GIGA_CALENDAR_FILTER,
+    filter: DEFAULT_NGE_CALENDAR_FILTER,
     setFilter: (partial: Partial<NgeCalendarFilter>) => {
       this.store.setFilter(partial);
       this.syncContext(this.store.filter());
@@ -135,7 +135,7 @@ export class NgeCalendarFilterComponent<T = unknown> {
 
   /** Reset the draft + clear the store filter (Clear), leaving the popover open. */
   protected clearDraft(): void {
-    this.draft.set(DEFAULT_GIGA_CALENDAR_FILTER);
+    this.draft.set(DEFAULT_NGE_CALENDAR_FILTER);
     this.store.clearFilter();
   }
 

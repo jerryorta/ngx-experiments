@@ -10,7 +10,7 @@ import type { NgeCalendarBaseStore } from '../nge-calendar-store.types';
 import {
   compileFilterPredicate,
   countActiveFacets,
-  DEFAULT_GIGA_CALENDAR_FILTER,
+  DEFAULT_NGE_CALENDAR_FILTER,
   isDefaultFilter,
 } from '../../../core/models/nge-calendar-filter.model';
 
@@ -77,7 +77,7 @@ export function withCalendarFilter(store: NgeCalendarBaseStore) {
 
     withMethods(() => ({
       clearFilter(): void {
-        patchState(store, { filter: DEFAULT_GIGA_CALENDAR_FILTER, hostPredicate: null });
+        patchState(store, { filter: DEFAULT_NGE_CALENDAR_FILTER, hostPredicate: null });
       },
 
       setFilter(partial: Partial<NgeCalendarFilter>): void {

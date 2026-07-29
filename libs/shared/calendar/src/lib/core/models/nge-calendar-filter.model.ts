@@ -15,7 +15,7 @@ export interface NgeCalendarFilter {
 }
 
 /** The empty (pass-through) default filter: no facet narrows anything. */
-export const DEFAULT_GIGA_CALENDAR_FILTER: NgeCalendarFilter = {
+export const DEFAULT_NGE_CALENDAR_FILTER: NgeCalendarFilter = {
   colors: [],
   query: '',
   timing: 'all',

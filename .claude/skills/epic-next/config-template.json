@@ -1,7 +1,7 @@
 {
   "_template": "Template only — NOT a board. `/epic-next`, `/epic-config`, `/epic-plan`, `/epic-pipeline` and `/epic-triage` glob `epic.*.json`, so this filename is deliberately outside that pattern. To create a board: copy to `epic.<board>.json` (e.g. `epic.nge.json`), fill in the epic key + workspace paths, and delete this key. `/epic-plan <EPIC-KEY>` writes the same file automatically and should be preferred — hand-authoring is the fallback. Jira project for this repo is NGE ('Ngx Exp'). Ticket CONTENT lives in ~/Dev/gigasoftware-plans/nge/<KEY>.md; Jira holds status only.",
   "_workspaceShapes": "Library/Storybook epic (the common case here): app=apps/storybook-app, libraries.ui=libs/shared/<lib>, buildCommand='npx nx run storybook-app:build-storybook'. Ledger demo-app epic: app=apps/ledger, libraries.ui=libs/ledger/ui, libraries.store=libs/ledger/store, libraries.designLibrary=libs/ledger/design-library, routingFiles=['apps/ledger/app/src/app/app.routes.ts'], buildCommand='npm run b.app.ledger'.",
-  "name": "<epic summary, e.g. GigaChart layer expansion>",
+  "name": "<epic summary, e.g. NgeChart layer expansion>",
   "epicKey": "NGE-<n>",
   "jql": "parent = NGE-<n> AND status = \"To Do\"",
   "storyOrdering": "epic-description",
