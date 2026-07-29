@@ -14,6 +14,21 @@
     --dlc-primary-container: #0a1e2b;
     --dlc-on-primary: #e8f4fc;
     --dlc-on-primary-container: #e8f4fc;
+    // The brand hue lifted until it survives as a GRAPHIC on this persona's dark
+    // ground — chart series, sparklines, any 1px stroke or small fill.
+    //
+    // ⚠️ It exists because `--dlc-primary` is mode-INVARIANT: the same #0f2b3c in
+    // light and dark. Against the light surface that is 13.92:1 and ideal; against
+    // this one it is 1.28:1, and WCAG 1.4.11 asks 3:1 of a graphical object. At
+    // 1.28:1 a chart line is not dim, it is absent. Same hue, lightness raised until
+    // it clears 4.5:1 on --dlc-surface and 4:1 on --dlc-surface-container-high (the
+    // shell a chart cell sits on).
+    //
+    // ⚠️ Dark personas only — the light ones keep bridging `--dlc-primary`, which
+    // already passes. And NOT a substitute for `--dlc-on-primary`: that is the
+    // foreground for content drawn INSIDE a primary-filled shape, so collapsing the
+    // two would trade a missing line for missing text.
+    --dlc-primary-graphic: #5fa5cf;
 
     // --- Accent ---
     --dlc-secondary: #d4921f;
@@ -95,7 +110,11 @@
     --nge-chart-on-surface-variant: var(--dlc-on-surface-variant);
     --nge-chart-outline: var(--dlc-outline);
     --nge-chart-outline-variant: var(--dlc-outline-variant);
-    --nge-chart-primary: var(--dlc-primary);
+    // ⚠️ `--dlc-primary-graphic`, NOT `--dlc-primary` — the one line here that departs
+    // from the light persona's bridge. A chart series is a stroke on this dark ground,
+    // and the brand primary is mode-invariant, so it lands at 1.28:1 and vanishes. See
+    // the token's own note in the Primary block above.
+    --nge-chart-primary: var(--dlc-primary-graphic);
     --nge-chart-primary-container: var(--dlc-primary-container);
     --nge-chart-on-primary: var(--dlc-on-primary);
     --nge-chart-secondary: var(--dlc-secondary);

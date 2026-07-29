@@ -14,6 +14,12 @@
     --dlc-primary-container: #1e3327;
     --dlc-on-primary: #d4ede2;
     --dlc-on-primary-container: #d4ede2;
+    // The brand hue lifted until it survives as a GRAPHIC on this persona's dark
+    // ground — chart series, sparklines, any 1px stroke or small fill. `--dlc-primary`
+    // is mode-invariant, so on this surface it reads 1.89:1 where WCAG 1.4.11 asks
+    // 3:1 of a graphical object. Dark personas only; see the fuller note in
+    // `professional/_dlc-professional-dark.scss`.
+    --dlc-primary-graphic: #619a79;
 
     // --- Accent ---
     --dlc-secondary: #d4805a;
@@ -88,7 +94,10 @@
     --nge-chart-on-surface-variant: var(--dlc-on-surface-variant);
     --nge-chart-outline: var(--dlc-outline);
     --nge-chart-outline-variant: var(--dlc-outline-variant);
-    --nge-chart-primary: var(--dlc-primary);
+    // ⚠️ `--dlc-primary-graphic`, NOT `--dlc-primary` — a chart series is a stroke on
+    // this dark ground, and the brand primary is mode-invariant, so it vanishes there.
+    // See the token's note in the Primary block above.
+    --nge-chart-primary: var(--dlc-primary-graphic);
     --nge-chart-primary-container: var(--dlc-primary-container);
     --nge-chart-on-primary: var(--dlc-on-primary);
     --nge-chart-secondary: var(--dlc-secondary);
