@@ -169,7 +169,7 @@
   // The same token the sort indicator takes, rather than one of its own: both are
   // a small monochrome glyph beside content, so a theme that has an opinion about
   // one has the same opinion about the other. A new colour token here would mean
-  // ten bridge entries teaching nothing this one does not already say.
+  // six bridge entries teaching nothing this one does not already say.
   color: var(--nge-table-on-surface-variant, #5f5f66);
   font: inherit;
   line-height: 1;
@@ -231,6 +231,11 @@
   //
   // The rule is on the CLOSED selector because a transition is chosen from the
   // style the element is moving TO: removing `--open` lands here.
+  //
+  // ⚠️ This is a DECISION, not a gap to be closed. Animating the close was taken
+  // up and declined in ARCH-302 — the measurements, the `transitionend` deadlock
+  // that sinks the obvious fix, and the two rejected alternatives are in
+  // `AGENTS.md` § The close under virtualization.
   .nge-table__row-detail {
     transition: none;
   }
@@ -517,6 +522,16 @@
 // resized the content instead — `grid-template-rows: 0fr → 1fr`, the usual
 // animate-to-auto trick — stretches the item into a collapsing track and re-lays
 // the chart out on every frame, which for a chart is thrash rather than motion.
+//
+// ⚠️ Off virtualization the definite height is PLATFORM-GATED, not preferred.
+// `interpolate-size: allow-keywords` would make `height: auto` interpolable and
+// restore the growth honestly; ARCH-303 checked it and found Baseline `limited`
+// (Chromium only — Firefox and Safari have not shipped it), so the growth waits
+// on support rather than on appetite. ⚠️ Do NOT reach for `@supports` here: a
+// fork would make band growth depend on the reader's browser, which is a worse
+// split than the one converging the regimes just retired. The support state, the
+// re-check trigger, and that refusal are in `AGENTS.md`
+// § The growth affordance: blocked, not declined.
 .nge-table__row-detail {
   width: 100%;
   height: 0;

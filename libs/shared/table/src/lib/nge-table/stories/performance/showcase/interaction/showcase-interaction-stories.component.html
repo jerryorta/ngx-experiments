@@ -1,0 +1,543 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  @let report = latest();
+  @let drift = p95Drift();
+  @let running = isRunning();
+  @let history = runs();
+  @let failureMessage = failure();
+  @let tableState = state();
+
+  <div class="stories-container">
+    <h2>NgeTable — Showcase (Performance)</h2>
+    <p class="intro-text">
+      ⚠️⚠️
+      <strong
+        >This reading is a CEILING, not a cost — and it is never attributable to any one
+        feature.</strong
+      >
+      Every feature below is switched on at once, so whatever the benchmark reports is "a
+      fully-loaded table, on this machine" and nothing more precise than that. It is not "row
+      selection costs X" or "the chart costs Y minus the baseline" — a single feature's own cost is
+      a controlled comparison against a same-session baseline re-run, which is exactly what each
+      <code>Performance/&lt;feature&gt;/Interaction</code>
+      story exists for. This story does not replace any of them.
+    </p>
+    <p class="intro-text"> What is on, all twelve at once: </p>
+    <ul class="story-description-list">
+      @for (feature of features; track feature.token) {
+        <li>{{ feature.label }}</li>
+      }
+    </ul>
+    <p class="intro-text">
+      ⚠️ <strong>The row is 96px here, not the baseline's 40px</strong> — the same figure and the
+      same reason <code>Performance/Chart Cells</code> uses it: the chart column needs room a plain
+      text row does not, and every other feature in this table is equally happy at either height.
+      That alone moves the rows-per-step geometry away from the baseline's 714 — see section 3 for
+      this story's own number, and never read the two <code>rowsAdded</code> figures as comparable.
+    </p>
+    <p class="intro-text">
+      ⚠️ <strong>Only works in a real browser, and only in the foreground.</strong> A hidden tab
+      suspends <code>requestAnimationFrame</code>, so both measurements below refuse to start — or
+      abandon a run already in flight — rather than hang on a promise that can never settle.
+    </p>
+
+    <section class="story-section">
+      <h4>1. Run the benchmark</h4>
+      <p class="story-description">
+        {{ counted(totalRowCount) }} rows, virtualized, over <strong>eleven</strong> columns (the
+        chart, the editable shared seven, and the trailing long-text column) plus the injected
+        chevron and checkbox. Pressing <strong>Run</strong> resets the scroll to the top, lets a few
+        frames settle, then advances <code>{{ stepPx() }}px</code> per frame for
+        <code>{{ steps() }}</code> frames and times every one — the identical fixed-schedule shape
+        the baseline and chart-cells stories use.
+      </p>
+      <p class="story-description">
+        ⚠️ <strong>A scripted, uninterrupted scroll never lets the chart settle</strong> — every
+        measured frame resets the 150ms quiet window, so the scroll benchmark below times the
+        chart's shell branch throughout, never the chart itself. That is expected, not a gap: the
+        <strong>settle burst</strong> further down is what measures the one deferred feature this
+        table has, by flicking, stopping, and timing the moment the window's charts mount.
+      </p>
+
+      <div class="benchmark-controls">
+        <button
+          type="button"
+          class="benchmark-run"
+          [disabled]="running"
+          (click)="runBenchmark()"
+        >
+          {{ running ? "Running…" : "Run benchmark" }}
+        </button>
+        <button
+          type="button"
+          class="benchmark-clear"
+          [disabled]="running || history.length === 0"
+          (click)="clearRuns()"
+        >
+          Clear runs
+        </button>
+        <button
+          type="button"
+          class="benchmark-run"
+          [disabled]="running"
+          (click)="runSettleBurst()"
+        >
+          {{ running ? "Running…" : "Measure settle burst" }}
+        </button>
+        <span class="benchmark-meta">runs: {{ history.length }}</span>
+      </div>
+
+      @if (failureMessage) {
+        <p class="benchmark-failure">⚠️ {{ failureMessage }}</p>
+      }
+
+      @let burstReport = burst();
+
+      <p class="story-description">
+        <strong>Measure settle burst</strong> flicks the table hard enough to clear every chart,
+        stops dead, and times every frame from there: the 150ms <code>isScrolling</code> reset, then
+        a window's worth of charts mounting in one frame — each attaching a shadow root,
+        constructing a <code>ResizeObserver</code> and running a full render. Read one long frame
+        here as the expected shape of the result, not a regression — the settle signal moves this
+        cost off the scroll and onto the moment nothing else is moving.
+      </p>
+
+      @if (burstReport) {
+        <dl class="benchmark-readout">
+          <div class="benchmark-metric">
+            <dt>Charts mounted</dt>
+            <dd>{{ burstReport.chartsMounted }}</dd>
+          </div>
+          <div class="benchmark-metric">
+            <dt>To first chart</dt>
+            <dd>{{ burstReport.msToFirstChart }}ms</dd>
+          </div>
+          <div class="benchmark-metric">
+            <dt>Worst frame</dt>
+            <dd>{{ burstReport.worstFrameMs }}ms</dd>
+          </div>
+          <div
+            class="benchmark-metric"
+            [class.benchmark-metric--over]="burstReport.droppedFrames > 0"
+          >
+            <dt>Dropped</dt>
+            <dd>{{ burstReport.droppedFrames }}</dd>
+          </div>
+          <div class="benchmark-metric">
+            <dt>Idle frame</dt>
+            <dd>{{ burstReport.idleFrameMs }}ms</dd>
+          </div>
+        </dl>
+
+        <div class="benchmark-copy">
+          <div class="benchmark-copy__head">
+            <span class="benchmark-copy__label">Paste-ready — settle burst</span>
+            <button
+              type="button"
+              class="benchmark-copy__button"
+              aria-label="Copy the settle-burst report to the clipboard"
+              (click)="copyBurstReport()"
+            >
+              {{ justCopiedBurst() ? "Copied ✓" : "Copy burst report" }}
+            </button>
+          </div>
+          <pre class="benchmark-copy__text">{{ burstReportText() }}</pre>
+        </div>
+      }
+
+      <div
+        class="table-container"
+        (mousedown)="captureModifier($event)"
+      >
+        <nge-table
+          [config]="config"
+          [state]="tableState"
+          (ngeTableEvent)="onNgeTableEvent($event)"
+          (stateChange)="onStateChange($event)"
+        >
+          <ng-template
+            ngeCell="series"
+            [ngeCellOf]="rows"
+            let-cell
+          >
+            @if (cell.isSettled()) {
+              <div class="chart-cell">
+                <nge-chart [config]="chartFor(cell.row)" />
+              </div>
+            } @else {
+              <nge-cell-shell />
+            }
+          </ng-template>
+
+          <!--
+            ⚠️ All three cell-marking components in ONE `cell-overlay` template. The slot
+            resolves to one template per column plus one shared fallback, so a second
+            `ngeTableSlot="cell-overlay"` registration would silently REPLACE this one
+            rather than compose with it.
+          -->
+          <ng-template
+            ngeTableSlot="cell-overlay"
+            [ngeTableSlotOf]="rows"
+            let-cell
+          >
+            <nge-highlight-overlay
+              [cell]="cell"
+              [state]="tableState"
+            />
+            <nge-range-overlay
+              [cell]="cell"
+              [state]="tableState"
+            />
+            <nge-fill-handle
+              [cell]="cell"
+              [state]="tableState"
+            />
+          </ng-template>
+
+          <ng-template
+            ngeTableSlot="header-overlay"
+            [ngeTableSlotOf]="rows"
+            let-header
+          >
+            <nge-range-column-handle
+              [header]="header"
+              [state]="tableState"
+            />
+          </ng-template>
+
+          <ng-template
+            ngeTableSlot="row-detail"
+            [ngeTableSlotOf]="rows"
+            let-detail
+          >
+            @if (detail.isExpanded) {
+              <div class="detail-body">
+                <p>{{ detail.row.description }}</p>
+                <span>owner: {{ detail.row.owner.name }} ({{ detail.row.owner.email }})</span>
+                <button
+                  type="button"
+                  (click)="detail.toggleExpanded()"
+                >
+                  Close
+                </button>
+              </div>
+            }
+          </ng-template>
+        </nge-table>
+      </div>
+
+      <p class="story-description">
+        ⚠️ Every affordance above is real: click a cell to highlight it (shift-click to extend),
+        drag out a rectangle to select a range, drag the corner grip to fill, click a header's edge
+        to resize it, click a header to sort, expand a row for its detail band, tick a row to select
+        it. This table is not a static mock-up assembled to look busy for the numbers below.
+      </p>
+
+      <dl class="benchmark-readout">
+        <div class="benchmark-metric">
+          <dt>Selected rows</dt>
+          <dd>{{ selectedRowCount() }}</dd>
+        </div>
+        <div class="benchmark-metric">
+          <dt>Expanded rows</dt>
+          <dd>{{ expandedRowCount() }}</dd>
+        </div>
+        <div class="benchmark-metric">
+          <dt>Highlight marks</dt>
+          <dd>{{ hasHighlightMarks() ? "present" : "none" }}</dd>
+        </div>
+        <div class="benchmark-metric">
+          <dt>Cell range</dt>
+          <dd>{{ hasRangeSelection() ? "present" : "none" }}</dd>
+        </div>
+      </dl>
+      <div class="benchmark-controls">
+        <button
+          type="button"
+          [disabled]="!hasHighlightMarks()"
+          (click)="clearHighlight()"
+        >
+          Clear highlight marks
+        </button>
+        <button
+          type="button"
+          [disabled]="!hasRangeSelection()"
+          (click)="clearCellRange()"
+        >
+          Clear cell range
+        </button>
+        <span class="benchmark-meta">or press <kbd>Esc</kbd> to clear both</span>
+      </div>
+
+      @if (report) {
+        <dl class="benchmark-readout">
+          <div class="benchmark-metric">
+            <dt>Frames</dt>
+            <dd>{{ report.summary.frames }}</dd>
+          </div>
+          <div
+            class="benchmark-metric"
+            [class.benchmark-metric--over]="report.droppedFrames > 0"
+          >
+            <dt>Dropped</dt>
+            <dd>
+              {{ report.droppedFrames }}
+              <small>missed a vsync</small>
+            </dd>
+          </div>
+          <div class="benchmark-metric">
+            <dt>Display</dt>
+            <dd>
+              {{ rounded(report.estimatedRefreshHz) }}Hz
+              <small>{{ rounded(report.idleFrameMs) }}ms idle frame</small>
+            </dd>
+          </div>
+          <div
+            class="benchmark-metric"
+            [class.benchmark-metric--over]="report.summary.p95FrameMs > report.droppedThresholdMs"
+          >
+            <dt>p95 frame</dt>
+            <dd>{{ rounded(report.summary.p95FrameMs) }}ms</dd>
+          </div>
+          <div class="benchmark-metric">
+            <dt>Worst frame</dt>
+            <dd>{{ rounded(report.summary.worstFrameMs) }}ms</dd>
+          </div>
+          <div class="benchmark-metric">
+            <dt>Rows built</dt>
+            <dd
+              >{{ report.rowsAdded }} <small>/ {{ report.rowsRemoved }} torn down</small></dd
+            >
+          </div>
+          <div class="benchmark-metric">
+            <dt>Rows in DOM</dt>
+            <dd>
+              {{ report.renderedRowCount }} <small>of {{ counted(totalRowCount) }}</small>
+            </dd>
+          </div>
+          <div class="benchmark-metric">
+            <dt>Scrolled</dt>
+            <dd>{{ counted(report.scrolledPx) }}px</dd>
+          </div>
+        </dl>
+
+        <div class="benchmark-copy">
+          <div class="benchmark-copy__head">
+            <span class="benchmark-copy__label">Paste-ready</span>
+            <button
+              type="button"
+              class="benchmark-copy__button"
+              aria-label="Copy the benchmark report to the clipboard"
+              (click)="copyReport()"
+            >
+              {{ justCopied() ? "Copied ✓" : "Copy report" }}
+            </button>
+          </div>
+          <pre class="benchmark-copy__text">{{ reportText() }}</pre>
+          <p class="benchmark-copy__note">
+            The header line enumerates all twelve active features, so a pasted run identifies itself
+            without the reader having to guess which of this epic's stories produced it.
+          </p>
+        </div>
+      } @else {
+        <p class="benchmark-empty">No run yet.</p>
+      }
+    </section>
+
+    <section class="story-section">
+      <h4>2. Run it twice before quoting it</h4>
+      <p class="story-description">
+        A single run is an anecdote. The second run establishes whether the instrument can detect
+        anything at all: if its own run-to-run spread is wider than the regression a later story
+        would watch for, it reports noise with a straight face. Press <strong>Run</strong> again and
+        compare.
+      </p>
+
+      @if (hasMixedOptions()) {
+        <p class="benchmark-failure">
+          ⚠️ Runs in this session used <strong>different options</strong>, so they are not
+          comparable — drift and spread are withheld rather than reported as a tolerance. Press
+          <strong>Clear runs</strong> and re-run with the controls held still.
+        </p>
+      }
+
+      @if (drift !== null) {
+        <p
+          class="benchmark-drift"
+          [class.benchmark-drift--wide]="drift > 0.2"
+        >
+          p95 drift between the last two runs: <strong>{{ rounded(drift * 100) }}%</strong>
+        </p>
+      } @else if (history.length > 1) {
+        <p class="benchmark-empty">Drift withheld — the last two runs are not comparable.</p>
+      } @else {
+        <p class="benchmark-empty">Needs two runs.</p>
+      }
+
+      @if (history.length > 0) {
+        <table class="benchmark-history">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Frames</th>
+              <th>Dropped</th>
+              <th>p95</th>
+              <th>Worst</th>
+              <th>Display</th>
+              <th>Rows built</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (run of history; track $index) {
+              <tr>
+                <td>{{ $index + 1 }}</td>
+                <td>{{ run.summary.frames }}</td>
+                <td>{{ run.droppedFrames }}</td>
+                <td>{{ rounded(run.summary.p95FrameMs) }}ms</td>
+                <td>{{ rounded(run.summary.worstFrameMs) }}ms</td>
+                <td>{{ rounded(run.estimatedRefreshHz) }}Hz</td>
+                <td>{{ run.rowsAdded }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </section>
+
+    <section class="story-section">
+      <h4>3. Compare against the baseline, back to back</h4>
+      <p class="story-description">
+        This story carries <strong>no hardcoded reference figure</strong>, exactly like
+        <code>Performance/Chart Cells</code> and <code>Performance/Cell Editors</code> — a
+        plausible-looking invented number would be worse than none. What follows: two facts that are
+        <strong>machine-independent</strong> and checked live below, and a reminder for the two that
+        are not.
+      </p>
+
+      @if (report) {
+        @let expectedRows = expectedRowsBuilt();
+        @let rowsOk = rowsBuiltMatches();
+
+        <table class="benchmark-compare">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>This run</th>
+              <th>Expected</th>
+              <th>Holds anywhere?</th>
+            </tr>
+          </thead>
+          <tbody>
+            @let dropped = droppedVerdict();
+            <tr [class.benchmark-compare__row--bad]="dropped === 'problem'">
+              <td>Dropped frames</td>
+              <td>
+                <strong>{{ report.droppedFrames }}</strong>
+                @switch (dropped) {
+                  @case ("clean") {
+                    ✓
+                  }
+                  @case ("tolerable") {
+                    ✓ <small>an isolated miss is ordinary</small>
+                  }
+                  @default {
+                    ⚠️ <small>sustained — investigate</small>
+                  }
+                }
+              </td>
+              <td>0, occasionally 1</td>
+              <td>Mostly — a stray miss is the machine, not the table</td>
+            </tr>
+            <tr [class.benchmark-compare__row--bad]="rowsOk === false">
+              <td>Rows built</td>
+              <td>
+                <strong>{{ report.rowsAdded }}</strong>
+                @if (rowsOk !== null) {
+                  {{ rowsOk ? "✓" : "⚠️" }}
+                }
+              </td>
+              <td>
+                @if (expectedRows !== null) {
+                  {{ expectedRows }} exactly
+                } @else {
+                  n/a — step is not a whole number of rows
+                }
+              </td>
+              <td>
+                Yes — <code>({{ steps() }} − 1) × ({{ stepPx() }}px ÷ {{ rowHeightPx }}px)</code> is
+                geometry, not speed, and has no opinion on how many of the twelve features are
+                switched on. <strong>Not</strong> the baseline's 714 — this story's rows are 96px,
+                not 40px.
+              </td>
+            </tr>
+            <tr>
+              <td>p95 frame</td>
+              <td>{{ rounded(report.summary.p95FrameMs) }}ms</td>
+              <td>— run the baseline story now, in this session</td>
+              <td
+                >No — compare against a <strong>live</strong> baseline run, never a stored
+                figure</td
+              >
+            </tr>
+            <tr>
+              <td>Worst frame</td>
+              <td>{{ rounded(report.summary.worstFrameMs) }}ms</td>
+              <td>— see the baseline story's own reading</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td>Display</td>
+              <td>{{ rounded(report.estimatedRefreshHz) }}Hz</td>
+              <td>should match the baseline run's Display figure</td>
+              <td>No — a mismatch here means the two runs are not comparable at all</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="story-description benchmark-reference-note">
+          Open <code>Table/NgeTable/Performance/Baseline/Interaction</code> in another tab (or
+          straight after this one), run it with the machine otherwise idle, and read its
+          <strong>p95</strong>, <strong>Worst frame</strong> and <strong>Display</strong> tiles
+          against this run's. ⚠️ The noise floor is not a constant — the baseline's own runs spread
+          1.8% warm and 4.2–4.8% shortly after a cold rebuild — so the only sound comparison is one
+          taken in this same session, never against a figure written down on an earlier day. And
+          remember what is being compared: the baseline is a <em>plain</em>
+          40px-row table with none of these twelve features: this run is the fully-loaded 96px
+          ceiling. The gap between them is interesting, but it is not any one feature's cost.
+        </p>
+      } @else {
+        <p class="benchmark-empty">Run the benchmark to compare.</p>
+      }
+    </section>
+
+    <section class="story-section">
+      <h4>4. What each number is for</h4>
+      <p class="story-description">
+        <strong>Dropped</strong> is the one that means "it stuttered": frames past 1.5× this
+        display's own measured frame interval, so a missed vsync rather than an assumed 60Hz.
+        <strong>p95</strong> sits beside <strong>worst frame</strong> because one stall is ordinary
+        — a collection, the browser doing something else — while a p95 well above the frame interval
+        means most frames are late, which is what a person actually perceives.
+      </p>
+      <p class="story-description">
+        <strong>Rows built</strong> is the one to watch, exactly as in the baseline. It counts row
+        elements the browser had to construct during the run, and a window slide pays that cost
+        whatever eleven columns and twelve features a row happens to carry — that is the whole
+        reason it holds at 357 regardless of which of the twelve are switched on.
+      </p>
+      <p class="story-description">
+        <strong>To first chart</strong> and <strong>worst frame</strong> in the settle-burst readout
+        are the numbers the scroll benchmark structurally cannot produce: the moment the one
+        deferred feature — the chart — actually pays its cost, which is at rest, never mid- scroll.
+      </p>
+      <p class="story-description">
+        ⚠️ <strong>None of the above says which of the twelve features costs what.</strong> That
+        question belongs to the eleven sibling stories under <code>Performance/</code>, each
+        measured against the same baseline the same way. This story only answers: with everything
+        on, does the table still fit inside a frame budget.
+      </p>
+    </section>
+  </div>
+</nge-storybook-review-container>

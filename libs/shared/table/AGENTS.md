@@ -14,7 +14,7 @@
 Every other `AGENTS.md` in this repo is written here from scratch, because a copy from the source
 repo names the wrong libraries, prefixes and personas. This one is the exception: at ~2,100 lines it
 is the library's **design record**, not a thin pointer, and re-authoring it would throw away the
-reasoning behind every locked decision. So it is copied, put through the `giga`→`nge` transform, and
+reasoning behind every locked decision. So it is copied, put through the `nge`→`nge` transform, and
 then hand-corrected wherever the source repo's own shape leaked through — the theme-bridge table,
 the design-library component names used as examples, and a Storybook secrets warning that has no
 meaning here. If you re-port it after an upstream change, redo those corrections; the transform
@@ -62,17 +62,26 @@ alone will not.
   **Wave 3 is editing**, where the library first proposes a change to *data* and still never writes
   it: the fill handle exists (ARCH-271), and it is the first story since Wave 1 to need a core edit —
   a real finding, because extension axis 4 turned out to be closed to addons. **Wave 4 bridged the
-  tokens** into all six persona files (ARCH-277) and **Wave 5 honoured the last unconsumed one** with
-  zebra striping (ARCH-286). **Wave 6 — rich cells — is in flight**: the scroll baseline harness
+  tokens** into all six persona themes (ARCH-277) and **Wave 5 honoured the last unconsumed one** with
+  zebra striping (ARCH-286). **Wave 6 — rich cells — is complete**: the scroll baseline harness
   exists (ARCH-289), the fixture carries the rich-cell fields (ARCH-290), and charts in cells plus
   the scroll-settle signal exist (ARCH-291, which needed no charts-library change and no scroll
   listener of its own), as does inline editing as a cell pattern (ARCH-292 — the activation model,
   the `edit-intent` kind, a role-based interactive-element guard and the keyboard containment, with
   no editor components) and the first two of the table's own editors (ARCH-293 — an input and a
   checkbox behind a third entry point, plus the route that lets a library editor be a default a
-  consumer's template shadows), the select over a CDK overlay (ARCH-294), and the store's composition
+  consumer's template shadows), the select over a CDK overlay (ARCH-294), the store's composition
   root regrouped into six `signalStoreFeature` units so the next concern has somewhere to go
-  (ARCH-297). The textarea editor (ARCH-296) is still to come. Do not invent a seam ahead of its
+  (ARCH-297), and the textarea editor closing the wave with the library's first explicit-commit
+  control, because every implicit moment the other three editors use is unavailable to it
+  (ARCH-296). **Wave 7 — row expansion — is complete**: a disclosure column and `state.expanded`
+  for a detail band (ARCH-298), rich content in the open band needing no library code at all
+  (ARCH-299), the band animating open with the close deliberately suppressed under virtualization
+  (ARCH-300) and confirmed rather than assumed (ARCH-302), and the platform-gated growth affordance
+  found still blocked, with an `@supports` fork refused on principle (ARCH-303) — ARCH-281 fixed a
+  re-sort defect shared by both cell-marking overlays along the way. **Wave 8 is the showcase**:
+  every shipped feature composed onto one table rather than demonstrated in isolation, and the
+  composition defects only a full table surfaces (ARCH-304). Do not invent a seam ahead of its
   story, and do not put per-story detail in the epic.
 
 ### Non-negotiables (each was argued and settled — see the guide for the reasoning)
@@ -143,7 +152,7 @@ second is obvious:
 2. **Each theme declares a bridge.** Six files carry a `// --- Table token bridge ---` block,
    the same six that carry a chart bridge:
 
-| Persona | Files |
+| Domain | Files |
 | --- | --- |
 | professional | `libs/shared/themes/src/lib/styles/professional/_dlc-professional-{light,dark}.scss` |
 | home | `libs/shared/themes/src/lib/styles/home/_dlc-home-{light,dark}.scss` |
@@ -562,13 +571,15 @@ not**, and the way it failed is the part worth remembering.
   persistable-view property, not merely the frame budget. ⚠️ **A range's membership follows the
   current view order**, so a re-sort re-shapes the block; the endpoints follow their records.
   ARCH-269 and ARCH-270 inherit this reading.
-  ⚠️ **That is the intended reading, and it is NOT what highlighting currently does in a browser —
-  see ARCH-281.** `isNgeCellHighlighted` re-derives correctly per call, but
-  `NgeHighlightOverlayComponent`'s `computed` depends on `cell` and `highlight`, and a sort changes
-  neither: the slice is untouched, `getSortedRowModel` reorders the *same* `Row` instances, and the
-  `@for`s track by id so the DOM moves rather than rebuilds. The paint therefore stays as it was when
-  the marks were made. ARCH-269 hit this, reproduced it in the browser, and fixed it by binding the
-  whole `NgeTableState` instead of the slice; highlighting still needs the same one-line change.
+  ⚠️ **Re-deriving the membership is only half of it — the thing that PAINTS it has to re-run, and
+  binding the addon's own slice is the intuitive choice that does not.** `isNgeCellHighlighted`
+  re-derives correctly on every call, so an overlay whose `computed` depends on `cell` plus the
+  `ngeHighlight` slice still freezes: a sort leaves the slice untouched, `getSortedRowModel`
+  reorders the *same* `Row` instances, and the `@for`s track by id so the DOM moves rather than
+  rebuilds — no input changes identity and the paint stays as it stood when the marks were made.
+  `<nge-highlight-overlay>` therefore takes the **whole `NgeTableState`** (`[state]`, not the
+  slice), which makes the dependency true by construction. ⚠️ Only a **re-sort** discriminates this
+  in a test; see the range entry below for why a column reorder passes either way.
 - ⚠️ **`config.getRowId` stops being optional** once anything marks a cell — without it the engine
   keys rows by array index and a sort moves every mark onto a different record.
 - **A projected slot template cannot reach the table, and that is by design.** `cell-overlay` hands
@@ -746,7 +757,7 @@ What bites in this directory:
 
 The native checkbox is the **default**, not the only option. A consuming app projects
 `selection-cell` / `selection-header` templates and the table renders that domain's control —
-`dlc-checkbox`, or a domain's own — instead. What bites:
+`dlc-checkbox`, `dlc-checkbox` — instead. What bites:
 
 - ⚠️ **A slot method that calls a sibling store method needs its OWN `withMethods` block.** A
   `signalStore` feature's `store` argument carries only what *previous* features added, so
@@ -897,8 +908,11 @@ everything with cmd/ctrl-A, drop it with `Escape`. The descriptor and the pure m
   Regression-test it with a **re-sort**, asserting on painted DOM, with no `store.table` read between
   the sort and the assertion.
   ⚠️ **No unit spec catches it.** `cell.isNgeInRange()` re-derives correctly per call and always did;
-  the defect is entirely at the component layer, and it took a real browser to see. Same shape,
-  unfixed, in ARCH-250's overlay — see ARCH-281.
+  the defect is entirely at the component layer, and it took a real browser to see.
+  ⚠️ **This is a CLASS, not an incident — it has been found in two independently-written overlays**
+  (this one and ARCH-250's highlight overlay), so treat it as the default failure mode of any new
+  one: **an overlay's `computed` must depend on something a sort actually changes.** Both bind
+  `[state]`. Every future addon that paints a mark inherits the rule and does not get to re-decide it.
 - ⚠️ **`config.getRowId` is mandatory, and the check has to sit on the WRITE.** ARCH-268 can throw
   from `buildTableOptions` because `enableRowSelection` is a config field it already reads; an addon
   has no such moment — the feature registers inside `createTable`, where a throw escapes through the
@@ -1405,7 +1419,7 @@ Reasoning in the guide (`docs/architecture/table.md` § Cell editors). What bite
   no touched/dirty. That per-instance saving is the whole justification for owning them rather than
   reaching for `dlc-input`. ⚠️ And they are **not** ARCH-268's selection checkbox, which is a pointer
   affordance (`tabindex="-1"`, `aria-hidden`) announced by its row.
-- **`--nge-table-editor-*` is a token family of its own, bridged in all six persona files.** A field must
+- **`--nge-table-editor-*` is a token family of its own, bridged in all six themes.** A field must
   read as sitting ON the row: on a themed table `--nge-table-surface` and the row routinely resolve
   to the same colour, so inheriting it would leave the field with only its border to say it is a
   control. Colour members are bridged; geometry and `font-size` (which defaults to `inherit`) are
@@ -1789,6 +1803,13 @@ Reopening this needs a ticket of its own, not a quiet addition.
   nothing — both sides look bridged, and the section reads as proving the opposite of its point.
   `stories/row-detail-content/theming` § 2 restates the charts library's own literal fallbacks
   instead. The same trap waits for any story contrasting a *second* library's tokens.
+  ⚠️ **It is not confined to a second library's tokens, and ARCH-304 hit it with the table's own.**
+  Since ARCH-277 all six persona themes bridge `--nge-table-*` too, so a wrapper class omitting
+  *this* family inherits the toolbar's values exactly as one omitting `--nge-chart-*` does — the
+  showcase's "Default (light)" column rendered at `--nge-table-surface: #090b0d` under `dlc-professional-dark`.
+  The general rule: **a theming section contrasting unthemed against themed writes the unthemed
+  values out by hand, whichever family it is about**, and is checked by reading the resolved token
+  rather than by looking at the page, since both sides look plausibly themed either way.
 - **A band has no `isSettled`.** `NgeCellContext` carries the scroll-settle signal (ARCH-291);
   `NgeRowContext` deliberately does not, because a band renders once per *open* row inside the
   window rather than once per cell down a column, which is a different order of cost. If a case ever
@@ -1815,13 +1836,27 @@ regimes therefore take a definite `height` and taller content scrolls in both �
 window already did. It is a real reversal of an ARCH-298 decision, and it pays for itself twice: the
 regimes now agree, which retires the trap ARCH-299 had to write down about percentage children.
 
+**Why giving up the growth was safe, which is the half worth stating.** Losing an affordance is
+normally where a convergence goes wrong, and this one does not, for three reasons that hold
+together rather than separately. The overflowing content is **reachable, not lost** — the band
+scrolls, so nothing is hidden without a way to get at it. The regime it converged *onto* is the one
+a window already had, so the change is confined to un-virtualized tables and no consumer's windowed
+table moved. And the failure mode it inherits is ARCH-298's **honest-and-visible** one: content that
+does not fit is seen not to fit, rather than silently overlapping the row beneath — which is the
+failure the declared height exists to prevent, and the reason the height is declared rather than
+measured. A `min-height` is the *unsafe* shape here even before the animation argument, because off
+virtualization it made the two regimes disagree about what a band's height means, and ARCH-299 had
+to write a trap down about exactly that. Taking the growth back is ARCH-303, and it is gated on the
+platform rather than on appetite — see below.
+
 ⚠️ **It CLIPS, it does not squash**, and `height` + `overflow` is the only mechanism that does. The
 content keeps its own height inside a shorter box, so a `<nge-chart>` in the band is laid out once
 and progressively revealed. `grid-template-rows: 0fr → 1fr` — the animate-to-auto trick, and the one
 way to keep the growth affordance — was **rejected for exactly this**: it stretches the item into the
 collapsing track, which for a chart is thrash rather than motion, and charts collapse in a zero-height
-parent. `interpolate-size: allow-keywords` would restore growth-with-animation honestly; it is not
-portable enough for a shared library yet, and is the thing to reach for when it is.
+parent. `interpolate-size: allow-keywords` would restore growth-with-animation honestly, and is the
+thing to reach for when the platform allows — it is **Baseline limited as of 2026-07-29** and
+therefore not usable here yet; the gate and its re-check trigger are recorded below.
 
 ⚠️ **The `overflow` flip is delayed by exactly the duration, and it is load-bearing.** ARCH-299's
 contract has band content pitched at the declared height, so mid-animation it always exceeds the
@@ -1847,10 +1882,116 @@ closing band would go on painting through the row that has already moved over it
 collapse. Opening has the opposite shape: the rows make the space in one frame and the band grows into
 it. Making the close animate means holding the row's declared size until the animation ends, which
 puts the geometry and the state out of agreement for the duration — a much larger change than it
-looks, and one that needs its own ticket.
+looks. ARCH-302 took that question and declined it; see below.
 
 The rule is written on the CLOSED selector because a transition is chosen from the style the element
 is moving **to**.
+
+#### The close under virtualization: evaluated and declined (ARCH-302)
+
+**The `transition: none` above is a decision, not an omission.** ARCH-302 asked whether the close can
+animate in a window too, and the answer is no. Two measurements settle it, both taken in a browser
+because neither is visible to jsdom.
+
+**1. Every pixel the band still has is a pixel it paints through the row beneath.** With the row
+collapsed — so the virtualizer has already placed the row beneath at its closed `top` — sweeping the
+band through the heights a closing transition passes, on Example 9's two tables side by side:
+
+| band height | overlap, virtualized | overlap, normal flow |
+| --- | --- | --- |
+| 140px | 141px | 0px |
+| 105px | 106px | 0px |
+| 70px | 71px | 0px |
+| 35px | 36px | 0px |
+| 0px | 1px | 0px |
+
+Overlap is the band's height plus the 1px row border, exactly, at every step. In flow it is zero at
+every step, because the rows beneath reflow to whatever height the band has. That is the asymmetry
+above as a number rather than an assertion.
+
+**2. ⚠️ The mechanism that would end the hold is the one the escapes remove.** A fix has to keep the
+row's declared size at `rowHeight + rowDetailHeight` until the band finishes collapsing, and
+something has to decide when that is. The only DOM-native answer is `transitionend` — and a
+suppressed transition is never *created*, so it never fires:
+
+| `transition` | transitions created |
+| --- | --- |
+| `height 1s ease` | 1 |
+| `height 0s ease` | 0 |
+| `height 0ms ease` | 0 |
+| `none` | 0 |
+
+Both escapes this library already ships land in the zero row: `prefers-reduced-motion: reduce`
+applies `transition: none`, and `--nge-table-row-detail-duration: 0ms` is the `0ms` case. So a hold
+keyed to `transitionend` never drains **for exactly the two users who asked for no motion**, and the
+row stays budgeted one band taller than it renders — permanently, silently, and looking like success.
+That is expanded rows overlapping their neighbours, the failure ARCH-298's declared height exists to
+prevent. Draining it anyway means the store reading `matchMedia` and `getComputedStyle` to learn what
+the CSS already decided, which is TypeScript duplicating a number kept only in CSS — and the duration
+is kept only in CSS (`styles/_table-tokens.scss`, never `NGE_TABLE_DEFAULTS`) precisely so it cannot
+drift. A row that scrolls out of the window mid-collapse has its element destroyed and fires nothing
+at all, so the same leak is reachable with no setting changed.
+
+**Two alternatives that avoid the geometry hold, and why neither works:**
+
+- **An opaque row.** Give rows a solid background and the row that moved up hides the collapsing
+  band. It removes the smear but not the snap — the cover arrives in the same frame, so the animation
+  runs invisibly underneath it. It also spends the transparent-row default that zebra striping is
+  layered over.
+- **A ghost band**, an out-of-flow copy left painting at the old coordinates. To avoid smearing it has
+  to paint *over* the rows that already moved up, so the gesture reads as the band sliding across the
+  content beneath it rather than closing. It also re-instantiates the consumer's band template —
+  for ARCH-299's case a second `<nge-chart>` built to be thrown away — and it keeps the same
+  lifetime problem while adding a stacking context.
+
+**What would change the answer**, so this is a dated decision rather than a verdict: a virtualizer
+that accepts a transient per-row size override with a lifetime of its own, which would leave the
+library nothing to hold. `interpolate-size: allow-keywords` (ARCH-303) would **not** — it restores
+growth-to-content, and this is about the rows beneath.
+
+#### The growth affordance: blocked, not declined (ARCH-303)
+
+**Read this against the section above, because the two outcomes look alike and are not.** ARCH-302 is
+a *decision*: the close will not animate under virtualization, and what would change the answer is a
+different virtualizer. ARCH-303 is a *date*: growth-to-content off virtualization is wanted, the
+mechanism is known and sound, and the only thing missing is browser support. Nothing about it needs
+re-deciding when the platform moves — it needs re-checking.
+
+**The mechanism, so it is not re-derived.** `interpolate-size: allow-keywords` makes `height: auto`
+interpolable, which is precisely the second endpoint a transition needs and the one the un-virtualized
+`min-height` never had. With it the open band off virtualization becomes `height: auto` +
+`min-height: var(--nge-table-row-detail-height)` and still animates, scoped to the band rather than
+declared at `:root`. **The windowed regime would not move at all** — the virtualizer is told the row
+is `rowHeight + rowDetailHeight` tall and the DOM has to agree with it, so a definite height there is
+not a limitation to be lifted. ARCH-299's contract (band content declaring
+`height: var(--nge-table-row-detail-height)` on its own root) is untouched either way; this only
+ever concerned content that declares no height.
+
+**The support state, checked 2026-07-29.** Baseline **limited** — short of *widely available*, and
+short of *newly* available too:
+
+| Source | Result |
+| --- | --- |
+| `api.webstatus.dev/v1/features/interpolate-size` | `baseline.status: "limited"`, no `low_date`, no `high_date` |
+| MDN browser-compat-data (`css/properties/interpolate-size.json`, `main`) | Chrome 129 · Edge mirror · **Firefox `false`** · **Safari `false`** · experimental |
+| caniuse `mdn-css_properties_interpolate-size_allow-keywords` | Chromium only — Chrome/Edge 129+, Opera 115+, Samsung Internet 28+ |
+
+Two engines of the Baseline core set have not shipped it at all (Firefox `bugzil.la/1945962`, WebKit
+`webkit.org/b/295132`), and *widely available* is **newly available + 30 months**. So the earliest the
+gate could open is roughly thirty months after the later of those two bugs closes — 2029 on today's
+information, and no sooner.
+
+⚠️ **`@supports` is refused, and this is the load-bearing part.** Progressive enhancement is the
+reflex for a CSS feature with partial support, and it is the wrong reflex here: this feature decides a
+**layout contract**, not a decoration. Behind an `@supports` fork the same table with the same data
+grows its band on one engine and scrolls it on another — which is the regime split ARCH-300 just
+retired, re-introduced along a worse axis, because a consumer can at least see which regime they
+asked for and cannot see which engine a user brought. The convergence's second dividend was that the
+two regimes finally agree. Ship this unconditionally or not at all.
+
+**Re-check trigger**, so the next check is cheap: both tracking bugs closed *and* thirty months
+elapsed since the later ship. Until then the definite height off virtualization stays, and the story
+is re-minted as a fresh ticket rather than left open — see ARCH-239's "Later — not yet ticketed" list.
 
 #### Why the rows beneath do not animate — and why GSAP is not the answer
 
@@ -1899,6 +2040,191 @@ transition only runs when the property changes — never during a scroll. ARCH-2
 against it anyway, because "should not move" and "did not move" are different claims: p95 median
 **17.4ms** over 2 runs (0.6% spread), worst **17.7ms**, **0 dropped**, 714 rows built — all inside the
 band recorded on 2026-07-28 (17ms / 17.6ms / 0 / 714).
+
+### The showcase table (ARCH-304)
+
+One `<nge-table>` with every shipped feature switched on at once, over the 10,000-row fixture,
+virtualized — `stories/showcase/showcase-demo-table.component.*` plus its three facets
+(`stories/showcase/{interaction,usage,theming}`, titled `Table/NgeTable/Showcase/<Facet>`) and a
+fourth, `stories/performance/showcase/interaction`
+(`Table/NgeTable/Performance/Showcase/Interaction`), reusing `runNgeScrollBenchmark`. No new
+mechanism ships here — every feature already existed in isolation and several in pairs, and none
+had ever shared one table. That is what this story is for: a composition test that can fail, with
+the demo as only its visible half. The reasoning is in the guide (`docs/architecture/table.md` §
+The showcase table). What composing all of them settled:
+
+⚠️ **This story DOES modify core, and the distinction matters when reading it as gate evidence.**
+The *composition* needed no core edit — every seam absorbed the full feature set as designed, which
+is the result § below records. What needed one was a pair of **gesture gaps in ARCH-269 / ARCH-270
+that only a person driving the composed table would find**: neither a lone selected cell nor a
+selected column could be deselected. Three files under `src/lib/range/` changed for that (§ Plain-click
+deselect below). So the honest reading is **composition clean, gestures not** — and quoting a bare
+"zero core files" for ARCH-304, the way ARCH-251's result can be quoted, would be wrong.
+
+- **The three `cell-overlay` claimants — highlighting, the range, the fill handle — share ONE
+  wrapper template and compose with no core edit.** Verified in the browser on the 10,000-row
+  showcase: 143 rendered cells each carry all three components. At rest `<nge-highlight-overlay>`
+  and `<nge-range-overlay>` are `display: none` and `<nge-fill-handle>`'s host is
+  `display: contents`; none declares a `z-index`, so all three are zero-sized with no stacking
+  contest, and `elementFromPoint` at a cell's centre lands on the **cell** — exactly what
+  `NgeRangeBridge`'s delegated hit-test against the stamped `data-nge-range-cell` needs. ARCH-271
+  recorded the slot resolving to one template per column plus a shared fallback for **two**
+  claimants; this is the first table to put a third one in it, and the registry did not need to
+  change to hold it.
+- **Six pointerdown claimants — select the row, start a cell range, toggle a highlight, activate an
+  editor, grab the fill handle, hit the expansion toggle — inherit the guard shape unchanged.** Each
+  was designed against a subset of the others, never against all six. `NGE_INTERACTIVE_SELECTOR`
+  stays roles-plus-tags-plus-`data-nge-interactive`; `[tabindex]` is still never added, because it
+  would resolve every cell in a selectable table to the row and kill cell dragging table-wide;
+  ARCH-268's `shiftKey`-gated `preventDefault` on a row's `mousedown` stays gated, so a click still
+  lands in an `<input>`. ⚠️ **Arbitration among the six is NOT verified by this story — do not read
+  the unchanged guard as a passing test.** It needs a foregrounded, trusted pointer session; see §
+  The verification limits below.
+- **`Escape` clears both addons — both keep `clearOnEscape: true`.** One `Escape` puts everything
+  down, which is what a user means by pressing it with nothing else focused. An active edit is
+  unaffected regardless: ARCH-292 contains `Escape` at the cell, so neither document-level listener
+  ever sees a keystroke an editor is still handling. The per-table opt-out ARCH-250 / ARCH-269 both
+  carry exists for *several tables on one page*; a single table with two addons is not that case,
+  and this story did not need to reach for it.
+- **cmd/ctrl-`A` means all CELLS — `selectAllOnModifierA: true`.** There is no code collision: row
+  selection never claims the key, and the range scopes its own select-all by engagement, so the two
+  cannot fire on the same press. The ambiguity is conceptual, not mechanical, and it resolves by what
+  each affordance already has: rows keep the header's select-all checkbox, a visible and discoverable
+  route to "every row"; the cell range has no other gesture that means "everything", so the key goes
+  to the one that would otherwise have none.
+- **Row height 96px, `stepPx` 288 for the performance story.** 96px is what lets a chart cell render
+  at all (`nge-cell-shell.component.scss:25`); 288 = 3 × 96 keeps `expectedRowsBuilt` an exact
+  integer — `(120 − 1) × 3 = 357`, the same discipline `Performance/Chart Cells` established. ⚠️
+  **The showcase's scroll figure is therefore comparable to `Performance/Chart Cells` and NOT to the
+  40px `Performance/Baseline` figure** — the baseline builds 714 rows over the same 120 frames,
+  nearly double. Verified in the browser: computed cell height 96px, `--nge-table-row-height: 96px`
+  on the host, viewport `scrollHeight` ≈ 10,000 × 96 plus the header.
+- **Both marking addons are ALWAYS provided; only the config-gated capabilities are controls.**
+  `provideNgeCellHighlighting()` / `provideNgeCellRange()` sit in
+  `NgeTableShowcaseDemoComponent`'s own `providers`, construction-time and therefore fixed — so
+  addon *presence* cannot be a Storybook argType, and only `enableRowSelection`,
+  `enableVirtualization`, `enableStriping`, `enableRowExpansion` and the rest of `NgeTableConfig`'s
+  flags are exposed as one. The rejected alternative was a control that recreates the component to
+  add or drop an addon, which would reset every other control's state on a toggle nobody meant to
+  touch the rest of — the wrong price for one addon changing.
+- **A chart column exports `"N points"`, reusing `chart-cells/usage`'s existing answer rather than
+  minting a second.** `meta.ngeExport.format: value => Array.isArray(value) ? \`${value.length}
+  points\` : ''`, plus `enableSorting: false` (ordering a `number[]` answers no question a user
+  asked) and `meta.ngeFill.enabled: false` (a series is a fine fill source and a meaningless fill
+  target). The decision worth keeping is the **reuse**: two stories independently answering "what
+  does an array-valued column export" differently is exactly the drift the shared fixture exists to
+  prevent, and the showcase is the first table carrying both stories' columns at once.
+- **The detail band carries TWO charts, the pair `stories/row-detail-content` established** — a
+  monotone line of the row's twelve numbers, and a scatter of the same series against itself at lags
+  1/2/3, each point `(series[i], series[i + lag])` with both axes pinned to the fixture's own
+  `[0, 100]` bound so one row stays comparable to the next. One plot never makes the band's point:
+  the band is the only surface as wide as the table, and two side-by-side columns are what
+  demonstrate that rather than assert it. Both are pure functions of the row and memoised in their
+  own `WeakMap`s keyed by the **row object** — the ARCH-291 / ARCH-299 rule inherited, not
+  re-decided. `.detail-band` is `flex-direction: row` with `.detail-band__chart { flex: 1 1 0;
+  min-width: 0 }`, and the `min-width` is load-bearing: a flex item's automatic minimum size is its
+  content and an SVG's is not small, so without it the two refuse to halve. Verified in the browser
+  with a row open: equal 788px columns inside a 260px band, and real marks at 786×214 and 786×158
+  read through `.nge-chart-container.shadowRoot` — ⚠️ a light-DOM `svg` query returns the tooltip's
+  0×0 arrow instead and reads as a collapsed chart (ARCH-291's probe trap, still live).
+
+⚠️ **THE FINDING — pinning strands the injected control columns, and it is the composition defect
+this story existed to produce.** `applyInjectedColumnOrder` (ARCH-298) puts expansion then
+selection at the front of the **column order**; pinning is a separate axis resolved afterwards, and
+the two know nothing about each other. Pin any data column left with expansion or selection switched
+on, and the row's **own** chevron and checkbox land in the scrolling **centre** lane while a data
+column stays sticky — exactly backwards, and silent: the table renders perfectly, every control is
+present, and it becomes unreachable only once a user scrolls right. **No core edit was needed.**
+`NGE_TABLE_EXPANSION_COLUMN_ID` / `NGE_TABLE_SELECTION_COLUMN_ID` are already reachable from the
+public barrel (`@nge/table` → `./lib/nge-table` → `./store`), so a host names them in its
+own `columnPinning.left` — exactly what
+`stories/showcase/interaction/showcase-interaction-stories.component.ts` does:
+`columnPinning.left: [NGE_TABLE_EXPANSION_COLUMN_ID, NGE_TABLE_SELECTION_COLUMN_ID, 'name']`.
+Verified in the browser after the fix: pinned-left holds expansion, selection, `name`, in that
+order. **Whether the library should do this itself is a live question worth naming rather than
+answering** — a host having to know the library's own internal column ids to keep its own checkbox
+on screen is a seam worth revisiting — but that is not this story's to change under the epic's gate
+discipline. The rule to carry forward: **any table combining pinning with selection or expansion
+must pin the injected columns explicitly, every time.**
+
+⚠️ **THE SECOND FINDING — a theming story's unthemed side must RESTATE the literal defaults, and
+`--nge-table-*` is now exposed to this exactly as `--nge-chart-*` was.** The showcase's
+light-vs-dark section put `.theme-dark` (fifteen tokens declared) beside a column that declared
+none, on the assumption that declaring nothing yields the library's defaults. It does not.
+Storybook's theme toolbar puts a domain theme class on **`<body>`** — `dlc-professional-dark` when this was
+measured — and all six of those bridge `--nge-table-*` (ARCH-277), so the undeclared column
+inherited the bridge and resolved `--nge-table-surface: #090b0d` under a heading reading "Default
+(light)". Both halves rendered dark and the section demonstrated the opposite of its claim, with
+nothing logged. The fix is an explicit `.theme-light` restating the fourteen values `.theme-dark`
+sets; re-verified with `dlc-professional-dark` still on `<body>`, the two columns now resolve `#ffffff` against
+`#16161a`.
+
+⚠️ **Found by reading computed styles off the rendered tables, not by looking at the page** — both
+columns looked plausibly "themed", so a visual check passes. Assert on the resolved token.
+
+This is the trap § Rich content in a row-detail band records for `--nge-chart-*`, and the entry
+there frames it as a charts-token quirk. **It is a property of the toolbar plus any bridged family**,
+and the table's own tokens have been bridged in all six themes since ARCH-277 — so the rule is
+general: *a theming section contrasting unthemed against themed must write the unthemed values out
+by hand, whichever family it is about.*
+
+⚠️ **Plain-click deselect — the core edit this story made, and why a composed table is what
+surfaced it.** Neither a lone selected cell nor a selected column could be put down again by the
+gesture that selected it. Both were reachable only by `Escape` or by selecting something else, and
+in isolation neither reads as missing: a feature story selects, demonstrates, and moves on. It is
+someone *using* the table who tries to undo a click.
+
+- **A cell.** `startNgeRange` short-circuits when the pressed cell is already the whole selection —
+  a deliberate identity guard, so a repeat click wrote nothing. `clearNgeCellIfSole` now clears in
+  that one case. Only that case: with a block selected, a plain click inside it already collapses the
+  block to that cell, and widening the clear to any covered cell would make a click inside a block
+  ambiguous between re-anchoring and clearing.
+- **A column.** `toggleNgeColumnRange` already deselected correctly and was wired to cmd/ctrl only;
+  the plain path replaced unconditionally. `selectOrClearNgeColumnRange` clears when that column is
+  already the whole selection and replaces otherwise, so a plain click still means "just this".
+- ⚠️ **The clear happens on RELEASE, and the candidate is armed from the state BEFORE the press.**
+  Both halves are load-bearing and each was found by a failing spec rather than by reasoning.
+  Release, because the press may be a drag's first frame — clearing at `pointerdown` leaves the drag
+  nothing to extend and `extendTo` silently re-anchors at whichever cell the pointer reached first.
+  Before-the-press, because `startNgeRange` makes the pressed cell the sole selection either way, so
+  a release-time test cannot tell *already alone* from *just became alone* — **a first click would
+  select and then instantly clear itself, selecting nothing.** `nge-cell-range.spec.ts`'s
+  entry-point agreement block caught exactly that.
+- **`isNgeCellSoleSelection` is allowed to be a pre-read**, which the ARCH-269 finding otherwise
+  forbids, and the asymmetry is the reason: it arms a *gesture flag*, while the write still re-decides
+  inside `clearNgeCellIfSole`'s own updater. A stale answer therefore costs a missed clear and can
+  never produce a wrong one.
+- ⚠️ **`typecheck` caught a missing import that all 1,034 Jest specs passed straight through.** Jest
+  transpiles rather than type-checks — the standing reason the target is not optional, demonstrated
+  again here.
+
+**The convention this story leaves behind: a new feature story either adds itself to the showcase,
+or records here why it does not.** A measurement control (`always-chart`, `withEditors: false`) or a
+feature that genuinely conflicts with something already on are both legitimate reasons to stay off;
+"nobody got to it yet" is not. Without the rule the showcase rots into a snapshot of the library as
+it stood on 2026-07-29; with it, the composition test re-runs on every future feature rather than
+only on this one's.
+
+**The verification limits, stated plainly rather than implied.** What the browser confirmed: the
+three-overlay composition above and their inertness at rest; the hit-test landing on the cell; the
+three-lane structure with sticky pinning on both edges, and the pinning fix; 96px rows and
+10,000-row virtualization (`scrollHeight` 960,045); 13 charts and 0 shells at rest; 13 checkboxes,
+13 comboboxes, 11 column handles, 9 resize grips; `Trend`'s `aria-sort` reading `null`
+(`enableSorting: false` honoured); zero console errors; all four stories registered under their
+titles. ⚠️ **What it could NOT confirm, and why: gesture arbitration across the six pointerdown
+claimants, `Escape` and cmd-`A` with every addon live, and the ARCH-281 re-sort regression check all
+need a real, trusted, foregrounded pointer or keyboard event.** An automation tab is
+`visibilityState: 'hidden'`, which suspends `requestAnimationFrame` — measured here as **0** rAF
+frames in 400ms — so zoneless change detection never flushes; a scripted click on the `Status`
+header left `aria-sort` at `none` with the row order unchanged, which is not evidence the sort is
+broken, only that automation cannot exercise it. This generalises ARCH-291's and ARCH-296's recorded
+limit to a third story rather than adding a chart-cells or an editor quirk, and a human in a
+foregrounded tab still owes this table the arbitration check, the two document-level keys, and the
+re-sort verification before those AC lines are more than "not yet contradicted."
+
+The Storybook dev-server log's own blind spot for template diagnostics — found while planning this
+verification, not a showcase composition finding — is corrected in § Repo-specific gotchas below
+rather than restated here.
 
 ### The store's composition root (ARCH-297)
 
@@ -2121,10 +2447,34 @@ const rows = createNgeTableFixture({ rows: NGE_TABLE_FIXTURE_SIZES.large });
   Since ARCH-246 the story wrappers project `ng-template`s into `<nge-table>`, so their templates
   are the only place the slot **context guards** are exercised against real `let-` bindings —
   `tsc -p tsconfig.lib.json` checks the TypeScript but not the templates, and `shared-table` has no
-  build target to run `ngtsc` over them. Storybook's own compile is that check. The failure it
-  catches in practice: a projected template missing its `[ngeCellOf]` / `[ngeTableSlotOf]` type
-  carrier leaves `TRow` as `unknown`, so `let-cell` / `let-detail` field access does not compile —
-  and lint, test, and `tsc` all stay green.
+  build target to run `ngtsc` over them. A projected template missing its `[ngeCellOf]` /
+  `[ngeTableSlotOf]` type carrier leaves `TRow` as `unknown`, so `let-cell` / `let-detail` field
+  access does not compile — and lint, test, and `tsc` all stay green.
+  ⚠️ **Correction (ARCH-304): "Storybook's own compile is that check" is not true of the dev-server
+  LOG, and this was falsifiability-tested rather than assumed.** An injected `.ts` source error
+  (`const x: number = "s"`) surfaced in the `npm run storybook` log in ~4s —
+  `ERROR in <file>:103:7 - error TS2322: …` plus `preview compiled with 1 error`. An injected
+  **template** error — a `strictTemplates` violation (`{{ detail.row.thisFieldDoesNotExist }}`) on a
+  `let-` binding, with `strictTemplates: true` confirmed on in `apps/storybook-app/tsconfig.json` —
+  stayed silent across **482** incremental webpack rebuilds, a full `nx reset` plus cold boot, and an
+  explicit `iframe.html` request that returned **200**. A prior session's log corroborates it
+  independently: 31 error verdicts, every one naming a `.ts` file with a `TS####` code, not one a
+  template. The documented wait-loop (`until … grep -qE "compiled (successfully|with)"`) never
+  terminates on success here either, because this launch emits no success verdict at all — a monitor
+  greping `ERROR in` has the right polarity for a **source** error and is blind to a template one.
+  `tsc` does not run `ngtsc`, lint and Jest do not type-check templates, and the dev-server log
+  reports neither a pass nor a fail on one — so during development a story template is checked by
+  nothing automated, and the only positive check is loading the story and reading it, and its
+  console, by eye.
+
+  ⚠️ **In THIS repo that gap is closed at the workspace level, and the difference matters.** The
+  source repo notes that a `build-storybook` target *would* close it; here that target exists
+  (`npx nx run storybook-app:build-storybook`) and the port procedure runs it, which makes it the
+  one `ngtsc` pass over every story template. Treat a clean `build-storybook` as the real template
+  check and the dev-server log as development-time convenience only. The failure it catches in
+  practice: a projected template missing its `[ngeCellOf]` / `[ngeTableSlotOf]` type carrier leaves
+  `TRow` as `unknown`, so `let-cell` / `let-detail` field access does not compile — while lint,
+  test and `tsc` all stay green.
 - **jsdom does not lay out.** `nge-table.component.spec.ts` can assert row counts, cell
   text, emitted state, and `aria-sort`, but never a width, an offset, or a sticky position.
 - Test: `npx nx run shared-table:test` · Lint: `npx nx run shared-table:lint`

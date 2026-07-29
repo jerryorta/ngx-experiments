@@ -2,6 +2,7 @@
 // integer cents) and transaction/budget aggregations.
 export * from './lib/budget-vs-actual';
 export * from './lib/cashflow';
+export * from './lib/category-trend-series';
 export * from './lib/date-range.model';
 export * from './lib/money';
 export * from './lib/net-worth-series';

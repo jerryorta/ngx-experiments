@@ -1,0 +1,200 @@
+@let tableState = state();
+
+@if (showControls()) {
+  <div class="nge-table-showcase-demo__controls">
+    <button
+      type="button"
+      (click)="downloadEverything()"
+      >Download CSV — everything</button
+    >
+    <button
+      type="button"
+      (click)="downloadHighlighted()"
+      >Download CSV — highlighted cells</button
+    >
+    <button
+      type="button"
+      [disabled]="!hasMarks()"
+      (click)="clearMarks()"
+      >Clear marks</button
+    >
+    <span class="nge-table-showcase-demo__hint">
+      drag a cell to range-select, shift-click extends, cmd/ctrl-click adds a block, cmd/ctrl-A
+      takes every cell · click a cell to highlight, shift-click extends · drag the corner square to
+      fill · click the strip on a header's leading edge to select a column · <kbd>Esc</kbd> drops
+      every mark
+    </span>
+  </div>
+}
+
+<!--
+  The `mousedown` listener lives on this wrapper, never on `nge-table` itself,
+  so it never competes with the table's own gesture handling — it only reads the
+  modifier before the table's `cell-click` fires.
+-->
+<div
+  class="nge-table-showcase-demo__viewport"
+  (mousedown)="captureModifier($event)"
+>
+  <nge-table
+    [config]="config()"
+    [state]="tableState"
+    [style.max-height.px]="maxHeight()"
+    (ngeTableEvent)="onNgeTableEvent($event)"
+    (stateChange)="state.set($event)"
+  >
+    <!--
+      ⚠️ ONE `cell-overlay` template hosts all THREE claimants — the slot
+      resolves to one template per column plus one shared fallback, so a SECOND
+      `ngeTableSlot="cell-overlay"` registration would silently REPLACE this
+      one rather than compose with it (`toNgeTableSlotRegistry` sets
+      `entry.shared` once). With three cell-marking components in the library
+      that limit is load-bearing.
+
+      ⚠️ Both overlays bind the WHOLE `[state]="tableState"`, never their own
+      slice (ARCH-269 / ARCH-281). A slice-bound `computed` has no dependency a
+      re-sort changes — the sort reorders the SAME `Row` instances and the
+      `@for`s track by id, so the paint would freeze at the state it held when
+      the marks were made.
+    -->
+    <ng-template
+      ngeTableSlot="cell-overlay"
+      [ngeTableSlotOf]="rows()"
+      let-cell
+    >
+      <nge-highlight-overlay
+        [cell]="cell"
+        [state]="tableState"
+      />
+      <nge-range-overlay
+        [cell]="cell"
+        [state]="tableState"
+      />
+      <nge-fill-handle
+        [cell]="cell"
+        [state]="tableState"
+      />
+    </ng-template>
+
+    <!-- The header's leading-edge strip that selects a whole column (ARCH-270). -->
+    <ng-template
+      ngeTableSlot="header-overlay"
+      let-header
+    >
+      <nge-range-column-handle
+        [header]="header"
+        [state]="tableState"
+      />
+    </ng-template>
+
+    <!--
+      A local stand-in for a consuming domain's own control (ARCH-278) — this
+      library must never import one. A real consumer projects `dlc-checkbox` /
+      `dlc-checkbox` here; what is under demonstration is the context and the
+      callback, which the pill exercises identically.
+    -->
+    <ng-template
+      ngeTableSlot="selection-cell"
+      [ngeTableSlotOf]="rows()"
+      let-selection
+    >
+      <button
+        class="nge-table-showcase-demo__pill"
+        type="button"
+        [attr.aria-pressed]="selection.isSelected"
+        [disabled]="!selection.canSelect"
+        (click)="$event.stopPropagation(); selection.toggle($event)"
+      >
+        {{ selection.isSelected ? "✓" : "" }}
+      </button>
+    </ng-template>
+    <ng-template
+      ngeTableSlot="selection-header"
+      let-selection
+    >
+      <button
+        class="nge-table-showcase-demo__pill nge-table-showcase-demo__pill--header"
+        type="button"
+        [attr.aria-pressed]="selection.allSelected"
+        (click)="$event.stopPropagation(); selection.toggleAll()"
+      >
+        {{ selection.selectedCount }}
+      </button>
+    </ng-template>
+
+    <!-- The chart cell, gated behind the scroll-settle signal (ARCH-291). -->
+    <ng-template
+      ngeCell="series"
+      [ngeCellOf]="rows()"
+      let-cell
+    >
+      @if (cell.isSettled()) {
+        <div class="chart-cell">
+          <nge-chart [config]="sparklineFor(cell.row)" />
+        </div>
+      } @else {
+        <nge-cell-shell />
+      }
+    </ng-template>
+
+    <!--
+      The detail band: TWO charts side by side, animating open (ARCH-298/299/300)
+      — the same pair `stories/row-detail-content` establishes, because the band is
+      the only surface as wide as the table and a single plot never makes that
+      point. Both are pure functions of the row and memoised by the row object.
+    -->
+    <ng-template
+      ngeTableSlot="row-detail"
+      [ngeTableSlotOf]="rows()"
+      let-detail
+    >
+      @if (detail.isExpanded) {
+        <div class="detail-band">
+          <div class="detail-band__chart">
+            <div class="detail-band__header">
+              <h5 class="detail-band__title">{{ detail.row.name }} — trend over 12 days</h5>
+            </div>
+            <div class="detail-band__plot">
+              <nge-chart [config]="trendFor(detail.row)" />
+            </div>
+          </div>
+
+          <div class="detail-band__chart">
+            <div class="detail-band__header">
+              <h5 class="detail-band__title">Same series against itself, at three lags</h5>
+              <button
+                class="detail-band__collapse"
+                type="button"
+                (click)="$event.stopPropagation(); detail.toggleExpanded()"
+              >
+                Collapse
+              </button>
+            </div>
+            <div class="detail-band__plot">
+              <nge-chart [config]="lagFor(detail.row)" />
+            </div>
+          </div>
+        </div>
+      }
+    </ng-template>
+  </nge-table>
+</div>
+
+@if (showEventLog()) {
+  <div class="nge-table-showcase-demo__readouts">
+    <div class="nge-table-showcase-demo__readout">
+      <h5>status</h5>
+      <p>{{ statusSummary() }}</p>
+    </div>
+    <div class="nge-table-showcase-demo__readout">
+      <h5>(ngeTableEvent) — most recent first</h5>
+      <ul>
+        @for (line of eventLog(); track $index) {
+          <li>{{ line }}</li>
+        } @empty {
+          <li class="nge-table-showcase-demo__empty">nothing yet — drive the table above</li>
+        }
+      </ul>
+    </div>
+  </div>
+}

@@ -35,7 +35,7 @@ const rows = createNgeTableFixture({ rows: NGE_TABLE_FIXTURE_SIZES.small });
  * band, the loading scrim — need a config of their own.
  *
  * No `themeGroup` parameter and no dependency on the Storybook theme toolbar.
- * Ten domain themes do bridge `--nge-table-*` (ARCH-277), so the toolbar moves
+ * Six persona themes do bridge `--nge-table-*` (ARCH-277), so the toolbar moves
  * these tokens — but the subject here is the contract itself rather than any one
  * domain's mapping of it. Each section re-declares the properties from a scoped
  * selector, which is exactly what a consumer overriding them writes.

@@ -140,13 +140,13 @@ onEvent(event: NgeTableEvent&lt;Row&gt;): void {{ "{" }}
       <p class="story-description">
         Project a <code>[ngeCell]</code> template for the column and it wins. The store consults
         the projected templates first and only then the editor a column named, so a domain dropping
-        its own <code>cg-input</code> into a cell never has to remove the <code>meta</code> entry.
+        its own <code>dlc-input</code> into a cell never has to remove the <code>meta</code> entry.
       </p>
       <div class="code-block">
         <pre>
 &lt;nge-table [config]="config" [(state)]="state"&gt;
   &lt;ng-template ngeCell="name" [ngeCellOf]="rows" let-cell&gt;
-    &#64;if (cell.isEditing()) {{ "{" }} &lt;cg-input [value]="cell.value" … /&gt; {{ "}" }}
+    &#64;if (cell.isEditing()) {{ "{" }} &lt;dlc-input [value]="cell.value" … /&gt; {{ "}" }}
     &#64;else {{ "{" }} {{ "{" }}{{ "{" }} cell.value {{ "}" }}{{ "}" }} {{ "}" }}
   &lt;/ng-template&gt;
 &lt;/nge-table&gt;</pre>

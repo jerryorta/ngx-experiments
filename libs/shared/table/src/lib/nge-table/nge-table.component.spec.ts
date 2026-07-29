@@ -165,7 +165,7 @@ describe('NgeTableComponent lane substrate', () => {
   });
 
   // The defect this substrate exists to fix, in the form jsdom can see it:
-  // cg-data-table supported exactly one sticky column because each pinned cell
+  // the earlier data table supported exactly one sticky column because each pinned cell
   // carried its own `left: 0`. Here three pinned columns are three flex children
   // of ONE sticky wrapper — there is no per-cell offset at all.
   it('puts three pinned-left columns in one lane, with no per-cell offset', () => {
@@ -1682,7 +1682,7 @@ describe('NgeTableComponent row selection', () => {
   // ─── A consumer's own control (ARCH-278) ───────────────────────────────────
   //
   // The library ships a native checkbox as the DEFAULT; a consuming app projects
-  // its own — `cg-checkbox`, `gy-checkbox` — through two named slots. The stand-in
+  // its own — `dlc-checkbox`, `dlc-checkbox` — through two named slots. The stand-in
   // below is a plain <button> rather than a real design-library component
   // deliberately: `libs/shared/table` must not depend on a domain library, and the
   // seam being exercised is the context and the callback, not the control.

@@ -1,0 +1,220 @@
+// One fully-loaded table, every shipped feature at once. Nested under the
+// component's own root wrapper, never `:host` — the library is
+// `ViewEncapsulation.None`, so an unnested rule would leak into every other
+// story in the Storybook bundle. Nothing here targets `.nge-table__*`: that
+// would be styling the library rather than theming or composing with it.
+.nge-table-showcase-demo {
+  display: block;
+  margin-bottom: 16px;
+
+  .nge-table-showcase-demo__controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+
+    button {
+      padding: 6px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      background: var(--nge-table-surface, #ffffff);
+      border: 1px solid var(--nge-table-border-color, #e0e0e0);
+      border-radius: 4px;
+
+      &:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+      }
+    }
+  }
+
+  .nge-table-showcase-demo__hint {
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 12px;
+
+    kbd {
+      padding: 1px 5px;
+      font-family: inherit;
+      font-size: 11px;
+      background: var(--nge-table-surface-variant, #f5f5f5);
+      border: 1px solid var(--nge-table-border-color, #e0e0e0);
+      border-radius: 3px;
+    }
+  }
+
+  // No sizing here. The bound goes on `nge-table` itself via
+  // `[style.max-height.px]` — the host is a flex column whose viewport is
+  // `flex: 1 1 auto; min-height: 0`, so a `max-height` on this wrapper would
+  // simply be overflowed: nothing would scroll and virtualization would have
+  // no window to compute.
+  .nge-table-showcase-demo__viewport {
+    display: block;
+  }
+
+  // Side by side where there is room — "what state says" next to "what just
+  // happened" is one thought, and stacking them puts a scroll between its halves.
+  .nge-table-showcase-demo__readouts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .nge-table-showcase-demo__readout {
+    padding: 12px 16px;
+    overflow: auto;
+    background: var(--nge-table-surface-variant, #f5f5f5);
+    border-radius: 6px;
+
+    h5 {
+      margin: 0 0 8px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    p {
+      margin: 0;
+      font-size: 13px;
+    }
+
+    ul {
+      max-height: 220px;
+      margin: 0;
+      padding-left: 18px;
+      overflow-y: auto;
+      font-size: 12px;
+      line-height: 1.7;
+    }
+  }
+
+  .nge-table-showcase-demo__empty {
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    list-style: none;
+  }
+
+  // ─── The swappable selection control (ARCH-278) ────────────────────────────
+  //
+  // A stand-in for a consuming domain's own checkbox (`dlc-checkbox`,
+  // `dlc-checkbox`), styled so the swap from the native control reads as
+  // deliberate. This library must never import a real one.
+  .nge-table-showcase-demo__pill {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    font-size: 12px;
+    line-height: 1;
+    color: #ffffff;
+    cursor: pointer;
+    background: var(--nge-table-selection-accent, #1565c0);
+    border: none;
+    border-radius: 999px;
+
+    &[aria-pressed="false"] {
+      color: transparent;
+      background: transparent;
+      border: 2px solid var(--nge-table-border-color, #e0e0e0);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.35;
+    }
+
+    &--header {
+      width: auto;
+      min-width: 22px;
+      padding: 0 6px;
+      color: #ffffff;
+    }
+  }
+
+  // ─── The chart cell (ARCH-291) ──────────────────────────────────────────────
+  //
+  // The exact geometry AND surface `<nge-cell-shell>` uses against this same
+  // cell, matched rather than reinvented: `align-self: stretch` turns the
+  // cell's definite height into a definite height here, which is what
+  // `<nge-chart>`'s own `height: 100%` then resolves against, and the shared
+  // inset/surface tokens are what keep the shell → chart handoff from reading
+  // as a size jump or a flash.
+  .chart-cell {
+    flex: 1 1 auto;
+    align-self: stretch;
+    min-width: 0;
+    margin: var(--nge-table-shell-inset, 6px) 0;
+    background: var(--nge-table-shell-surface, var(--nge-table-surface-variant, #f5f5f5));
+    border-radius: var(--nge-table-shell-radius, 4px);
+  }
+
+  // ─── The row-detail band (ARCH-298/299/300) ────────────────────────────────
+  //
+  // The one rule the band's content owes: it claims the height by reading the
+  // SAME token the table was sized by. `align-self: stretch` — the chart
+  // cell's answer above — does not generalise here: a cell is a flex item on a
+  // row of definite height, but this band is a plain block on its own line,
+  // so there is no flex line to stretch against.
+  // The band reads the same custom property the virtualizer was sized by, so it
+  // is correct in both regimes and duplicates no number between SCSS and config.
+  .detail-band {
+    box-sizing: border-box;
+    display: flex;
+    gap: 20px;
+    height: var(--nge-table-row-detail-height, 120px);
+    padding: 12px 16px;
+  }
+
+  // A column per chart, sharing the band's width evenly. `min-width: 0` is what
+  // lets them actually halve: a flex item's automatic minimum size is its
+  // content, and an SVG's is not small.
+  .detail-band__chart {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .detail-band__header {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+
+  .detail-band__title {
+    margin: 0;
+    overflow: hidden;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+  }
+
+  .detail-band__collapse {
+    flex: 0 0 auto;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: var(--nge-table-on-surface, #1d1b20);
+    cursor: pointer;
+    background: var(--nge-table-surface, #ffffff);
+    border: 1px solid var(--nge-table-border-color, #e0e0e0);
+    border-radius: 4px;
+  }
+
+  // `min-height: 0` is load-bearing, not tidiness: a flex item's automatic
+  // minimum size is its content, and an SVG's is not small — without it the
+  // plot refuses to shrink and pushes the band's fixed height into a
+  // scrollbar instead of fitting inside it.
+  .detail-band__plot {
+    flex: 1 1 auto;
+    min-height: 0;
+    background: var(--nge-chart-surface, #ffffff);
+    border: 1px solid var(--nge-table-border-color, #e0e0e0);
+    border-radius: 6px;
+  }
+}

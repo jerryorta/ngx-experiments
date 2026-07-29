@@ -74,7 +74,11 @@ describe('LdgOverviewComponent', () => {
 
   it('renders the recent-transactions data table', () => {
     const el: HTMLElement = fixture.nativeElement;
-    expect(el.querySelector('dlc-data-table')).toBeTruthy();
+    expect(el.querySelector('nge-table')).toBeTruthy();
+    // Not virtualized, so every recent transaction is in the DOM.
+    expect(el.querySelectorAll('.nge-table__row').length).toBe(
+      fixture.componentInstance['store'].recentTransactions().length
+    );
   });
 
   it('switches the active trend-range button on click', () => {

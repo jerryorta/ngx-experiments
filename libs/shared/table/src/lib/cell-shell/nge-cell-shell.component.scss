@@ -6,7 +6,7 @@
 //
 // ⚠️ It adds NOTHING to `_table-tokens.scss`, and that is a decision rather than
 // an oversight. The surface falls through to `--nge-table-surface-variant` — a
-// token all ten domain themes already bridge (ARCH-277) — so a shell wears the
+// token all six persona themes already bridge (ARCH-277) — so a shell wears the
 // host's theme for free, with no eleventh bridge entry and no new member of the
 // public contract for a theme to get wrong. `--nge-table-shell-surface` sits
 // above it for a consumer who wants the shell to differ from the header band, and

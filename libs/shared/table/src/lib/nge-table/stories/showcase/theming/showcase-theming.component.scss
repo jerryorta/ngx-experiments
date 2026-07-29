@@ -1,0 +1,208 @@
+// Nested under the component's own root wrapper, never `:host` — the library
+// is `ViewEncapsulation.None`, so an unnested rule would leak into every other
+// story in the bundle. Nothing here targets `.nge-table__*`: that would be
+// styling the library rather than theming it.
+.nge-table-showcase-theming {
+  display: block;
+  padding: 20px;
+  color: var(--nge-table-on-surface, #1d1b20);
+  background: var(--nge-table-surface, #ffffff);
+
+  .stories-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    margin-bottom: 8px;
+  }
+
+  .intro-text {
+    margin-bottom: 32px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 16px;
+  }
+
+  .story-section {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+
+    h4 {
+      margin-bottom: 8px;
+      color: var(--nge-table-on-surface, #1d1b20);
+    }
+
+    h5 {
+      margin-bottom: 8px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .story-description {
+      margin-bottom: 16px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 14px;
+    }
+  }
+
+  // The table owns its own scrolling; the story only bounds the box. The
+  // height goes on `nge-table` itself (via the demo's `maxHeight` input),
+  // never on this wrapper — a max-height here would simply be overflowed.
+  .table-container {
+    margin-bottom: 8px;
+
+    // Nine of the showcase's own columns plus the two injected leads comfortably
+    // overflow this box, which is the point: the pinning section needs a real
+    // horizontal scroll to demonstrate anything about the pinned lanes at all.
+    &--narrow {
+      max-width: 640px;
+    }
+  }
+
+  .theme-row {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+
+    .theme-column {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+  }
+
+  .token-notes {
+    margin: 0;
+    padding-left: 20px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 14px;
+    line-height: 1.7;
+
+    li + li {
+      margin-top: 10px;
+    }
+
+    strong {
+      color: var(--nge-table-on-surface, #1d1b20);
+    }
+  }
+
+  // ===========================================================================
+  // The themes themselves — each is the ENTIRE mechanism: a scoped selector
+  // re-declaring `--nge-table-*` (and, where a band holds a chart, the
+  // separate `--nge-chart-*` family that chart reads and knows nothing about
+  // the table for). `--nge-table-internal-*` never appears below: that
+  // family carries live lane geometry the component measures for itself, and
+  // setting it would break layout rather than restyle it.
+  // ===========================================================================
+
+  // ─── Dark ──────────────────────────────────────────────────────────────────
+  //
+  // The shape a domain's bridge takes once a consumer adopts the library.
+  // Every surface is restated rather than inherited, the pinned ones and the
+  // row-detail band included — a pinned lane is sticky and opaque by
+  // requirement, so a value left on the light default is a pale rectangle
+  // punched through a dark table.
+  // ⚠️ The light side RESTATES the library's literal defaults rather than
+  // omitting the family, and the omission is a real trap rather than a tidier
+  // alternative. Storybook's theme toolbar puts a domain theme class on `<body>`
+  // (`dlc-professional-dark`, `dlc-home-light`, …) and all ten of them bridge
+  // `--nge-table-*` (ARCH-277) — so a wrapper that declares nothing inherits
+  // the toolbar's values and renders DARK while labelled light. Both halves of
+  // the comparison then look the same and the section proves the opposite of its
+  // claim. Same trap ARCH-299 records for `--nge-chart-*` in the row-detail
+  // theming story; it is a property of the toolbar, not of one token family.
+  .theme-light {
+    --nge-table-surface: #ffffff;
+    --nge-table-surface-variant: #f5f5f5;
+    --nge-table-row-surface: transparent;
+    --nge-table-row-surface-alt: #fafafa;
+    --nge-table-row-surface-hover: #f0f0f0;
+    --nge-table-on-surface: #1d1b20;
+    --nge-table-on-surface-variant: #5f5f66;
+    --nge-table-header-on-surface: #1d1b20;
+    --nge-table-border-color: #e0e0e0;
+    --nge-table-header-border-color: #cfcfcf;
+    --nge-table-pinned-surface: #ffffff;
+    --nge-table-pinned-surface-hover: #f0f0f0;
+    --nge-table-pinned-header-surface: #f5f5f5;
+    --nge-table-selection-accent: #1565c0;
+  }
+
+  .theme-dark {
+    --nge-table-surface: #16161a;
+    --nge-table-surface-variant: #202027;
+    --nge-table-row-surface: transparent;
+    --nge-table-row-surface-alt: #1c1c22;
+    --nge-table-row-surface-hover: #26262e;
+    --nge-table-on-surface: #e8e8ed;
+    --nge-table-on-surface-variant: #9a9aa5;
+    --nge-table-header-on-surface: #f2f2f7;
+    --nge-table-border-color: #303038;
+    --nge-table-header-border-color: #43434e;
+    --nge-table-pinned-surface: #16161a;
+    --nge-table-pinned-surface-hover: #26262e;
+    --nge-table-pinned-header-surface: #202027;
+    --nge-table-pinned-left-shadow: 2px 0 6px rgb(0 0 0 / 55%);
+    --nge-table-pinned-right-shadow: -2px 0 6px rgb(0 0 0 / 55%);
+    --nge-table-selection-accent: #6ea8fe;
+    --nge-table-resize-handle-color-hover: #5a5a68;
+    --nge-table-resize-handle-color-active: #6ea8fe;
+    --nge-table-focus-ring-color: #6ea8fe;
+    --nge-table-row-detail-surface: #202027;
+    --nge-table-editor-accent: #6ea8fe;
+    --nge-table-editor-on-accent: #0b0b0d;
+
+    // ⚠️ Two token contracts meet in the row-detail band: the band's chrome is
+    // the table's, but the chart on it reads `--nge-chart-*` and has never
+    // heard of the table. Storybook bridges `--nge-chart-*` globally for its
+    // own theme toolbar, so leaving this out would make the "before" and
+    // "after" indistinguishable — both would already look bridged. Restating
+    // the charts library's own literal fallbacks here is what makes the
+    // contrast real.
+    --nge-chart-surface: #16161a;
+    --nge-chart-on-surface: #e8e8ed;
+    --nge-chart-on-surface-variant: #9a9aa5;
+    --nge-chart-outline-variant: #303038;
+  }
+
+  // ─── Pinning & lane tokens ───────────────────────────────────────────────────
+  //
+  // A distinct colour from the surrounding surfaces, so the pinned-lane
+  // boundary is unmistakable while scrolling rather than merely correct.
+  .theme-pinned {
+    --nge-table-pinned-surface: #eef7ee;
+    --nge-table-pinned-surface-hover: #dcefdc;
+    --nge-table-pinned-header-surface: #d6ead6;
+    --nge-table-pinned-left-shadow: 4px 0 8px rgb(27 94 32 / 28%);
+    --nge-table-pinned-right-shadow: -4px 0 8px rgb(27 94 32 / 28%);
+  }
+
+  // ─── A brand accent — interaction tokens ────────────────────────────────────
+  //
+  // The grip stays `transparent` at rest by design, so only its hover and
+  // active colours are worth moving here alongside the tokens a gesture
+  // actually reveals: the selection accent and the focus ring.
+  .theme-brand {
+    --nge-table-selection-accent: #6a3de8;
+    --nge-table-resize-handle-width: 8px;
+    --nge-table-resize-handle-color: transparent;
+    --nge-table-resize-handle-color-hover: #b085f5;
+    --nge-table-resize-handle-color-active: #6a3de8;
+    --nge-table-focus-ring-color: #6a3de8;
+    --nge-table-focus-ring-width: 3px;
+  }
+
+  // ─── Editor panel tokens ─────────────────────────────────────────────────────
+  //
+  // The Apply-style accent an editor's own affordance is filled with — a
+  // colour, so it is bridged in all six persona themes, unlike the panel's
+  // geometry (padding, min-width), which stays a literal because a dropdown is
+  // sized to its trigger and a select's panel has no comparable "content" to
+  // size against.
+  .theme-editor {
+    --nge-table-editor-accent: #b3541e;
+    --nge-table-editor-on-accent: #ffffff;
+  }
+}

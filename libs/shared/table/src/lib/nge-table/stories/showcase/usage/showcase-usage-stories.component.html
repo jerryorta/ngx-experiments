@@ -1,0 +1,238 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Showcase (Usage)</h2>
+    <p class="intro-text">
+      <code>NgeTableShowcaseDemoComponent</code> is one table wearing every shipped feature —
+      virtualization, both-edge pinning with resize, sorting and striping, row selection behind a
+      swappable control, cell range with column selection and the fill handle, cell highlighting
+      with CSV export, a chart cell behind the settle gate, all four inline editors, and row
+      expansion into a chart that animates open. No example below imports
+      <code>&#64;tanstack/*</code>.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. Adopting the composed table — 10,000 rows, virtualized</h4>
+      <p class="story-description">
+        A consumer wires exactly what a caller of <code>&lt;nge-table&gt;</code> would: rows and
+        state, two-way. The six config-gated flags below all default <code>true</code>, so this is
+        the whole of it.
+      </p>
+      <p class="story-description">
+        This one carries the full fixture — <strong>ten thousand rows</strong> — so the scroll is a
+        real virtualization window rather than a claim about one. Only the rows near the viewport
+        exist in the DOM; they position with <code>top</code> and never a <code>transform</code>,
+        which is what keeps the pinned lanes sticky while you scroll.
+        <strong>Open a row's chevron</strong> and its detail band draws two charts of that row's own
+        series. Every section below this one runs on a small fixture instead — each teaches a single
+        seam, and scale would only get in the way.
+      </p>
+      <div class="code-block">
+        <pre>
+&lt;nge-table-showcase-demo
+  [maxHeight]="840"
+  [(rows)]="rows"
+  [(state)]="state"
+/&gt;</pre>
+      </div>
+      <div class="table-container">
+        <nge-table-showcase-demo
+          [maxHeight]="840"
+          [(rows)]="basicRows"
+          [(state)]="basicState"
+        />
+      </div>
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. Both addons are ALWAYS provided</h4>
+      <p class="story-description">
+        Cell highlighting and cell range are construction-time providers, not a runtime toggle — an
+        addon's <em>presence</em> cannot come and go with an <code>&#64;if</code>. Only the
+        config-gated capabilities become <code>input()</code> signals feeding a
+        <code>computed()</code> config.
+      </p>
+      <div class="code-block">
+        <pre>providers: [provideNgeCellHighlighting(), provideNgeCellRange()],</pre>
+      </div>
+      <p class="story-description">
+        In the table above, drag out a cell range <strong>and</strong> shift-click to build a
+        highlight — both marks coexist regardless of which config flags are on, because neither
+        addon was ever conditional.
+      </p>
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. One <code>cell-overlay</code> template, three claimants</h4>
+      <p class="story-description">
+        The slot resolves to one template per column plus one shared fallback, so a
+        <strong>second</strong> <code>ngeTableSlot="cell-overlay"</code> registration would
+        silently REPLACE the first rather than compose with it. All three components that mark a
+        cell ride the one template instead.
+      </p>
+      <div class="code-block">
+        <pre>
+&lt;ng-template ngeTableSlot="cell-overlay" [ngeTableSlotOf]="rows()" let-cell&gt;
+  &lt;nge-highlight-overlay [cell]="cell" [state]="tableState" /&gt;
+  &lt;nge-range-overlay [cell]="cell" [state]="tableState" /&gt;
+  &lt;nge-fill-handle [cell]="cell" [state]="tableState" /&gt;
+&lt;/ng-template&gt;</pre>
+      </div>
+      <p class="story-description">
+        ⚠️ Both overlays bind the <strong>whole</strong> <code>state</code>, never their own slice —
+        a slice-bound <code>computed</code> has no dependency a re-sort changes, so the paint would
+        freeze at the state it held when the marks were made.
+      </p>
+    </section>
+
+    <!-- 4 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>4. The swappable selection control</h4>
+      <p class="story-description">
+        The native checkbox is the <strong>default</strong>, not the only option. Projecting
+        <code>selection-cell</code> / <code>selection-header</code> replaces it with whatever a
+        consuming domain ships — <code>dlc-checkbox</code>, <code>dlc-checkbox</code>. The pill in the
+        leading column above is a <strong>local stand-in</strong>, never a real design-library
+        import: this library must never depend on one.
+      </p>
+      <div class="code-block">
+        <pre>
+&lt;ng-template ngeTableSlot="selection-cell" [ngeTableSlotOf]="rows()" let-selection&gt;
+  &lt;button
+    [attr.aria-pressed]="selection.isSelected"
+    [disabled]="!selection.canSelect"
+    (click)="$event.stopPropagation(); selection.toggle($event)"
+  &gt;{{ "{" }}{{ "{" }} selection.isSelected ? '✓' : '' {{ "}" }}{{ "}" }}&lt;/button&gt;
+&lt;/ng-template&gt;</pre>
+      </div>
+    </section>
+
+    <!-- 5 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>5. The chart column's opt-outs, reused verbatim</h4>
+      <p class="story-description">
+        The <strong>Trend</strong> column is exactly the shape
+        <code>chart-cells/usage</code> establishes, not a second answer to the same question:
+        <code>enableSorting: false</code> (ordering a <code>number[]</code> is meaningless), the
+        export seam's own formatter (the default <code>String(value)</code> comma-joins the array),
+        and <code>meta.ngeFill.enabled: false</code> — a series is a fine fill SOURCE and a
+        meaningless fill TARGET.
+      </p>
+      <div class="code-block">
+        <pre>
+const seriesColumn: NgeTableColumn&lt;Row&gt; = {{ "{" }}
+  accessorKey: 'series',
+  enableSorting: false,
+  header: 'Trend',
+  id: 'series',
+  meta: {{ "{" }}
+    ngeExport: {{
+            "{"
+          }} format: value =&gt; (Array.isArray(value) ? value.length + ' points' : '') {{ "}" }},
+    ngeFill: {{ "{" }} enabled: false {{ "}" }},
+  {{ "}" }},
+  size: 200,
+{{ "}" }};</pre>
+      </div>
+    </section>
+
+    <!-- 6 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>6. <code>rowHeight: 96</code> is structural, not a preference</h4>
+      <p class="story-description">
+        <code>&lt;nge-chart&gt;</code>'s shadow root resolves its height as a percentage of the
+        cell, which is always definite — never <code>auto</code>. The library's 40px default would
+        still render the sparkline, only squeezed into a sliver; 96px is what gives it room to
+        actually read as a trend. It is fixed in this table's config rather than a Storybook control
+        for exactly that reason.
+      </p>
+      <div class="code-block">
+        <pre>
+createNgeTableConfig({{ "{" }} columns, data, getRowId, rowHeight: 96 {{ "}" }});</pre>
+      </div>
+    </section>
+
+    <!-- 7 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>7. Editors need no template</h4>
+      <p class="story-description">
+        <strong>Status</strong>, <strong>Quantity</strong>, <strong>Amount</strong>,
+        <strong>Active</strong> and <strong>Description</strong> each name a library editor in
+        <code>meta.ngeEdit</code>; the table resolves it through the same render-slot registry a
+        <code>[ngeCell]</code> template goes through, and there is nothing else to write. Click a
+        row's status to activate the select, or its quantity/amount to activate the input; the
+        checkbox and the textarea are one click each too.
+      </p>
+      <div class="code-block">
+        <pre
+          >{{ "{" }}
+  ...amountColumn,
+  meta: {{ "{" }}
+    ...amountColumn.meta,                          // keeps the fixture's ngeExport.format
+    ngeEdit: {{ "{" }} editor: NgeCellInputComponent, editorInputs: {{ "{" }} type: 'number' {{
+            "}"
+          }}, enabled: true {{ "}" }},
+  {{ "}" }},
+{{ "}" }}</pre>
+      </div>
+      <p class="story-description">
+        ⚠️ Merging <code>meta</code> rather than replacing it is the whole trick above:
+        <code>amount</code> already carries <code>ngeExport.format</code>, and a bare
+        <code>{{ "{" }} ...column, meta: {{ "{" }} ngeEdit {{ "}" }} {{ "}" }}</code> would
+        silently drop it.
+      </p>
+    </section>
+
+    <!-- 8 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>8. Row expansion into a chart, animating open</h4>
+      <p class="story-description">
+        Expand any row above: the band opens over <code>--nge-table-row-detail-duration</code>
+        and draws a second, larger chart of the same twelve numbers. The one rule its content owes
+        is reading the band's own height token — never
+        <code>align-self: stretch</code>, which is a cell's answer and does not generalise to a
+        block on its own line.
+      </p>
+      <div class="code-block">
+        <pre>
+.detail-band {{ "{" }}
+  height: var(--nge-table-row-detail-height, 120px);
+{{ "}" }}
+.detail-band__plot {{ "{" }} flex: 1 1 auto; min-height: 0; {{ "}" }}</pre>
+      </div>
+    </section>
+
+    <!-- 9 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>9. Exporting exactly what you marked</h4>
+      <p class="story-description">
+        Mark a few cells (click to highlight, shift-click to extend), then compare the two
+        downloads: one reads the whole table, the other reads only the cells the predicate matches.
+        Neither the export seam nor the CSV formatter has ever heard of highlighting — they meet on
+        the table instance alone.
+      </p>
+      <div class="code-block">
+        <pre>
+downloadHighlighted(): void {{ "{" }}
+  this.download(
+    this.table().readNgeExportData({{ "{" }} cellPredicate: this.highlight.predicate() {{ "}" }}),
+    'nge-table-showcase-highlighted.csv'
+  );
+{{ "}" }}</pre>
+      </div>
+      <div class="table-container">
+        <nge-table-showcase-demo
+          [enableVirtualization]="false"
+          [maxHeight]="360"
+          [(rows)]="exportRows"
+          [(state)]="exportState"
+        />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

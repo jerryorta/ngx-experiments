@@ -6,17 +6,21 @@ import type { NgeCalendarConfig } from '../../../core/models/nge-calendar-config
 
 import { NgeCalendarComponent } from '../../nge-calendar.component';
 
-// Consumer-theme previews — prove the per-app `--nge-calendar-*` token bridges
-//   • libs/concierge/themes/src/lib/styles/_cg-nge-calendar-tokens.scss
-//   • libs/got-you/themes/src/lib/styles/_gy-nge-calendar-tokens.scss
-// drive the shared calendar ENTIRELY from each app's own --cg-* / --gy-* design
+// Consumer-theme previews — prove the `--nge-calendar-*` token bridge
+//   • libs/shared/themes/src/lib/styles/_dlc-calendar-tokens.scss
+// drives the shared calendar ENTIRELY from the persona's own --dlc-* design
 // tokens — no inline `--nge-calendar-*` overrides anywhere.
 //
-// This shared Storybook (storybook-app) applies BOTH `cg-theme-mixin()` and
-// `gy-theme-mixin()` in its `styles.scss`, so wrapping <nge-calendar> in a
-// persona / brand theme class is all it takes: the class sets the app's --cg-* /
-// --gy-* values AND (via the bridge) the matching --nge-calendar-* tokens, which
-// the calendar inside inherits.
+// storybook-app applies `dlc-theme-mixin()` in its `styles.scss`, so wrapping
+// <nge-calendar> in a persona theme class is all it takes: the class sets the
+// persona's --dlc-* values AND (via the bridge) the matching --nge-calendar-*
+// tokens, which the calendar inside inherits.
+//
+// ⚠️ The theme class must be one this repo actually emits. There are exactly six
+// (`.dlc-{professional,home,service-provider}-{light,dark}`), and they are the same
+// six the Storybook theme switcher sets. A class that matches nothing fails
+// silently: the wrapper still renders, the bridge never applies, and every token
+// falls back to the `:root` default — so the story looks fine while proving nothing.
 
 const ANCHOR = new Date(2026, 5, 15); // Mon Jun 15 2026
 
@@ -77,25 +81,14 @@ const consumerStory = (themeClass: string): Story => ({
   }),
 });
 
-// ── Concierge personas ──────────────────────────────────────────────────────
-export const ConciergeProfessionalLight: Story = consumerStory('cg-professional-light');
-export const ConciergeProfessionalDark: Story = consumerStory('cg-professional-dark');
-export const ConciergeHomeLight: Story = consumerStory('cg-home-light');
-export const ConciergeHomeDark: Story = consumerStory('cg-home-dark');
-export const ConciergeServiceProviderLight: Story = consumerStory('cg-service-provider-light');
-export const ConciergeServiceProviderDark: Story = consumerStory('cg-service-provider-dark');
+// ── Professional ────────────────────────────────────────────────────────────
+export const ProfessionalLight: Story = consumerStory('dlc-professional-light');
+export const ProfessionalDark: Story = consumerStory('dlc-professional-dark');
 
-// ── Got You ─────────────────────────────────────────────────────────────────
-export const GotYouLight: Story = consumerStory('gy-light');
-export const GotYouDark: Story = consumerStory('gy-dark');
+// ── Home ────────────────────────────────────────────────────────────────────
+export const HomeLight: Story = consumerStory('dlc-home-light');
+export const HomeDark: Story = consumerStory('dlc-home-dark');
 
-// ── Cognition ───────────────────────────────────────────────────────────────
-export const CognitionDark: Story = consumerStory('cog-dark');
-export const CognitionLight: Story = consumerStory('cog-light');
-
-// ── Giga Marketing (light-only) ───────────────────────────────────────────────
-export const NgeMarketing: Story = consumerStory('nge-light');
-
-// ── Media Workbench ───────────────────────────────────────────────────────────
-export const MediaWorkbenchDark: Story = consumerStory('mw-dark');
-export const MediaWorkbenchLight: Story = consumerStory('mw-light');
+// ── Service Provider ────────────────────────────────────────────────────────
+export const ServiceProviderLight: Story = consumerStory('dlc-service-provider-light');
+export const ServiceProviderDark: Story = consumerStory('dlc-service-provider-dark');

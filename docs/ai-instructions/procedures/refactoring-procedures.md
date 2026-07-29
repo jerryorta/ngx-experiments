@@ -1,6 +1,6 @@
 # Refactoring Procedures
 
-This document contains standardized procedures for refactoring Angular code in the Ngesoftware workspace.
+This document contains standardized procedures for refactoring Angular code in the Gigasoftware workspace.
 
 ## Inject Refactoring
 

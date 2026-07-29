@@ -9,15 +9,17 @@ import type {
 } from './nge-range-state';
 
 import {
+  clearNgeCellIfSole,
   clearNgeRange,
   createNgeRangeState,
   extendNgeColumnRangeTo,
   extendNgeRangeTo,
   isNgeCellInRange,
+  isNgeCellSoleSelection,
   isNgeColumnSelected,
   normalizeNgeRangeState,
+  selectOrClearNgeColumnRange,
   setNgeRange,
-  startNgeColumnRange,
   startNgeRange,
   stepNgeRangeFocus,
   toggleNgeColumnRange,
@@ -149,6 +151,15 @@ declare module '@tanstack/table-core' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface Cell<TData extends RowData, TValue> {
     /**
+     * Clear the selection when it is exactly this one cell — the plain click that
+     * lands on a lone selected cell and never becomes a drag.
+     *
+     * A no-op in every other case. With a block selected, a plain click inside it
+     * already collapses the block to that cell through `startNgeRange`; only the
+     * already-alone cell has anywhere further to go.
+     */
+    clearNgeRangeIfSole: () => void;
+    /**
      * Move the active rectangle's focus to this cell — the shift-click, drag, and
      * keyboard-extend path.
      *
@@ -158,6 +169,14 @@ declare module '@tanstack/table-core' {
     extendNgeRange: () => void;
     /** Whether this cell falls inside any selected rectangle. */
     isNgeInRange: () => boolean;
+    /**
+     * Whether the selection is exactly this one cell and nothing else.
+     *
+     * The gesture layer reads it BEFORE a press, to tell a click on an
+     * already-alone cell from a click on a fresh one — by release the two look
+     * identical, because the press has made this cell the sole selection either way.
+     */
+    isNgeSoleSelection: () => boolean;
     /**
      * Begin a rectangle at this cell — the plain-click path.
      *
@@ -309,8 +328,10 @@ export const ngeCellRange: TableFeature = {
     table: Table<TData>
   ): void => {
     const target = cell as {
+      clearNgeRangeIfSole: () => void;
       extendNgeRange: () => void;
       isNgeInRange: () => boolean;
+      isNgeSoleSelection: () => boolean;
       startNgeRange: (options?: { additive?: boolean }) => void;
     };
 
@@ -323,12 +344,23 @@ export const ngeCellRange: TableFeature = {
         ngeRangeColumnOrder(table)
       );
 
+    target.isNgeSoleSelection = () =>
+      isNgeCellSoleSelection(table.readNgeRangeState(), row.id, column.id);
+
     target.startNgeRange = (options = {}) => {
       table.writeNgeRange(state => startNgeRange(state, row.id, column.id, options));
     };
 
     target.extendNgeRange = () => {
       table.writeNgeRange(state => extendNgeRangeTo(state, row.id, column.id));
+    };
+
+    // Resolved INSIDE the updater rather than from a `readNgeRangeState()` guard:
+    // the bridge holds the raw engine instance, whose `options.state` refreshes only
+    // when the adapter's proxy is read, so a decision taken from a pre-read is the
+    // silently-swallowed write ARCH-269 records.
+    target.clearNgeRangeIfSole = () => {
+      table.writeNgeRange(state => clearNgeCellIfSole(state, row.id, column.id));
     };
   },
 
@@ -354,7 +386,7 @@ export const ngeCellRange: TableFeature = {
       table.writeNgeRange(state =>
         options.additive
           ? toggleNgeColumnRange(state, column.id)
-          : startNgeColumnRange(state, column.id)
+          : selectOrClearNgeColumnRange(state, column.id)
       );
     };
 

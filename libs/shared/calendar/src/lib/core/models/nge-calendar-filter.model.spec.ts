@@ -3,7 +3,7 @@ import type { NormalizedCalendarEvent } from './nge-calendar-event.model';
 import {
   compileFilterPredicate,
   countActiveFacets,
-  DEFAULT_GIGA_CALENDAR_FILTER,
+  DEFAULT_NGE_CALENDAR_FILTER,
   type NgeCalendarFilter,
   isDefaultFilter,
 } from './nge-calendar-filter.model';
@@ -20,13 +20,13 @@ function baseEvent(overrides: Partial<NormalizedCalendarEvent> = {}): Normalized
 }
 
 function filter(overrides: Partial<NgeCalendarFilter> = {}): NgeCalendarFilter {
-  return { ...DEFAULT_GIGA_CALENDAR_FILTER, ...overrides };
+  return { ...DEFAULT_NGE_CALENDAR_FILTER, ...overrides };
 }
 
 describe('nge-calendar-filter.model', () => {
-  describe('DEFAULT_GIGA_CALENDAR_FILTER', () => {
+  describe('DEFAULT_NGE_CALENDAR_FILTER', () => {
     it('is the empty pass-through filter', () => {
-      expect(DEFAULT_GIGA_CALENDAR_FILTER).toEqual({ colors: [], query: '', timing: 'all' });
+      expect(DEFAULT_NGE_CALENDAR_FILTER).toEqual({ colors: [], query: '', timing: 'all' });
     });
   });
 

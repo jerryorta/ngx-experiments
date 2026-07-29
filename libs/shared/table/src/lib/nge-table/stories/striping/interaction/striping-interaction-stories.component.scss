@@ -1,9 +1,9 @@
 // The story panel takes its surface from the same `--nge-table-surface` /
 // `--nge-table-on-surface` the tables read, matching `core/`, so prose and
-// tables always move together. Ten domain themes bridge `--nge-table-*`
+// tables always move together. Six persona themes bridge `--nge-table-*`
 // (ARCH-277), so the striping contrast on show is whichever the toolbar's
-// current theme defines — pick a theme that does not bridge them (`nge-*`,
-// `gy-*`) to judge the library's own defaults.
+// current theme defines — clear the persona class to judge the library's own
+// defaults.
 .nge-table-striping-interaction-stories {
   display: block;
   padding: 20px;

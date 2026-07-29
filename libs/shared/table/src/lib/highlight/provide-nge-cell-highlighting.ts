@@ -19,7 +19,7 @@ import { NGE_HIGHLIGHT_OPTIONS } from './nge-highlight-options';
  * ```html
  * <nge-table [config]="config" [(state)]="state">
  *   <ng-template ngeTableSlot="cell-overlay" let-cell>
- *     <nge-highlight-overlay [cell]="cell" [highlight]="state().ngeHighlight" />
+ *     <nge-highlight-overlay [cell]="cell" [state]="state()" />
  *   </ng-template>
  * </nge-table>
  * ```

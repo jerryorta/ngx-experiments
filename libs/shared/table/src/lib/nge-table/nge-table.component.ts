@@ -42,6 +42,27 @@ const ARIA_SORT_BY_DIRECTION: Record<SortDirection, 'ascending' | 'descending'> 
  */
 const KEYBOARD_RESIZE_STEP_PX = 16;
 
+// ─── Why every key handler in this class takes `Event`, not `KeyboardEvent` ───
+//
+// ⚠️ The compiler's call rather than a preference. Angular's template type-checker
+// types `$event` by looking the binding name up in `HTMLElementEventMap` and falling
+// back to `Event` when it misses. A KEY PSEUDO-EVENT — `keydown.space`,
+// `keydown.escape`, `keydown.shift.arrowleft` — is not a DOM event name but Angular's
+// own key-modifier syntax, resolved at runtime by `KeyEventsPlugin`, so it always
+// misses. A handler declaring `KeyboardEvent` therefore fails `strictTemplates` with
+// "Argument of type 'Event' is not assignable".
+//
+// ⚠️ It fails only under **AOT template type-checking**, which is what makes it worth
+// stating here rather than leaving to be rediscovered: `tsc --noEmit` never opens a
+// template, so the library's own `typecheck` target is structurally incapable of
+// seeing it, and the first consuming APPLICATION build is where it surfaces.
+//
+// The narrowing costs nothing in practice — not one of these handlers reads a
+// key-specific member. They ask for `preventDefault`, `stopPropagation` and `target`,
+// all of which are `Event`'s own; which key arrived is already decided by the binding.
+// `$any($event)` would silence it instead, at the price of turning off checking for
+// the whole expression.
+
 /**
  * `<nge-table>` — the entry point, and the only public boundary of the library.
  *
@@ -360,7 +381,7 @@ export class NgeTableComponent<TRow> {
    * belongs to the later a11y story, and half of it now would be something that
    * story has to unpick.
    */
-  protected onRowSelectKey(event: KeyboardEvent, row: Row<unknown>): void {
+  protected onRowSelectKey(event: Event, row: Row<unknown>): void {
     // ⚠️ A `Space` typed into a cell editor is a space, not a selection toggle
     // (ARCH-292). The row is the editor's ancestor, so without this the keystroke
     // bubbles out of the field and both `preventDefault()` and the toggle land.
@@ -385,7 +406,7 @@ export class NgeTableComponent<TRow> {
    * Ignored from inside a control, so `Enter` committing an open editor does not
    * bubble out and immediately re-activate the same row.
    */
-  protected onRowEditKey(event: KeyboardEvent, row: Row<unknown>): void {
+  protected onRowEditKey(event: Event, row: Row<unknown>): void {
     if (!this.store.editEnabled() || isNgeInteractiveElement(event.target)) {
       return;
     }
@@ -428,7 +449,7 @@ export class NgeTableComponent<TRow> {
    * `preventDefault()` is deliberately NOT called: `Escape` belongs to whatever is
    * on top, and a dialog or a menu above the table must still receive it.
    */
-  protected onCellEscape(event: KeyboardEvent): void {
+  protected onCellEscape(event: Event): void {
     if (!this.store.editEnabled()) {
       return;
     }
@@ -513,13 +534,13 @@ export class NgeTableComponent<TRow> {
    * column; `Shift` keeps the plain arrows free for the grid navigation a later
    * a11y story will add.
    */
-  protected onResizeKey(event: KeyboardEvent, columnId: string, direction: number): void {
+  protected onResizeKey(event: Event, columnId: string, direction: number): void {
     event.preventDefault();
     this.store.nudgeColumnSize(columnId, direction * KEYBOARD_RESIZE_STEP_PX);
   }
 
   /** `Shift`+Home — the keyboard equivalent of double-clicking a grip. */
-  protected onResetKey(event: KeyboardEvent, columnId: string): void {
+  protected onResetKey(event: Event, columnId: string): void {
     event.preventDefault();
     this.store.resetColumnSize(columnId);
   }

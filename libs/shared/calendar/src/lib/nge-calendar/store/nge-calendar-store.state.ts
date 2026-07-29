@@ -8,7 +8,7 @@ import type {
   NgeCalendarFilter,
 } from '../../core/models/nge-calendar-filter.model';
 
-import { DEFAULT_GIGA_CALENDAR_FILTER } from '../../core/models/nge-calendar-filter.model';
+import { DEFAULT_NGE_CALENDAR_FILTER } from '../../core/models/nge-calendar-filter.model';
 
 /**
  * In-flight drag/resize interaction state. Deltas are captured raw while the
@@ -83,7 +83,7 @@ export const initialNgeCalendarStoreState: NgeCalendarStoreState = {
   config: null,
   currentTime: null,
   drag: null,
-  filter: DEFAULT_GIGA_CALENDAR_FILTER,
+  filter: DEFAULT_NGE_CALENDAR_FILTER,
   focusedDate: null,
   hostPredicate: null,
   hoveredEventId: null,

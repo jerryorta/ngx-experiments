@@ -4,12 +4,12 @@ import { TestBed } from '@angular/core/testing';
 
 import type { NgeCalendarFilter } from '../../core/models/nge-calendar-filter.model';
 
-import { DEFAULT_GIGA_CALENDAR_FILTER } from '../../core/models/nge-calendar-filter.model';
+import { DEFAULT_NGE_CALENDAR_FILTER } from '../../core/models/nge-calendar-filter.model';
 import { NgeCalendarDefaultFilterComponent } from './nge-calendar-default-filter.component';
 
 describe('NgeCalendarDefaultFilterComponent', () => {
   function setup(
-    filter: NgeCalendarFilter = DEFAULT_GIGA_CALENDAR_FILTER,
+    filter: NgeCalendarFilter = DEFAULT_NGE_CALENDAR_FILTER,
     availableColors: string[] = ['#ff0000', '#00ff00']
   ): {
     changes: Partial<NgeCalendarFilter>[];
@@ -27,13 +27,13 @@ describe('NgeCalendarDefaultFilterComponent', () => {
   }
 
   it('renders a colour swatch per available colour', () => {
-    const { el } = setup(DEFAULT_GIGA_CALENDAR_FILTER, ['#ff0000', '#00ff00', '#0000ff']);
+    const { el } = setup(DEFAULT_NGE_CALENDAR_FILTER, ['#ff0000', '#00ff00', '#0000ff']);
     const swatches = el.querySelectorAll('[data-testid^="nge-calendar-filter-color-"]');
     expect(swatches.length).toBe(3);
   });
 
   it('hides the colour facet when no colours are available', () => {
-    const { el } = setup(DEFAULT_GIGA_CALENDAR_FILTER, []);
+    const { el } = setup(DEFAULT_NGE_CALENDAR_FILTER, []);
     expect(el.querySelector('[data-testid^="nge-calendar-filter-color-"]')).toBeNull();
   });
 
@@ -57,7 +57,7 @@ describe('NgeCalendarDefaultFilterComponent', () => {
   });
 
   it('adds a colour to the active set when an unselected swatch is clicked', () => {
-    const { changes, el } = setup(DEFAULT_GIGA_CALENDAR_FILTER, ['#ff0000', '#00ff00']);
+    const { changes, el } = setup(DEFAULT_NGE_CALENDAR_FILTER, ['#ff0000', '#00ff00']);
     el.querySelector<HTMLButtonElement>(
       '[data-testid="nge-calendar-filter-color-#ff0000"]'
     )?.click();
@@ -66,7 +66,7 @@ describe('NgeCalendarDefaultFilterComponent', () => {
 
   it('removes a colour from the active set when a selected swatch is clicked', () => {
     const { changes, el } = setup(
-      { ...DEFAULT_GIGA_CALENDAR_FILTER, colors: ['#ff0000', '#00ff00'] },
+      { ...DEFAULT_NGE_CALENDAR_FILTER, colors: ['#ff0000', '#00ff00'] },
       ['#ff0000', '#00ff00']
     );
     el.querySelector<HTMLButtonElement>(
@@ -76,7 +76,7 @@ describe('NgeCalendarDefaultFilterComponent', () => {
   });
 
   it('marks a selected colour swatch with aria-pressed', () => {
-    const { el } = setup({ ...DEFAULT_GIGA_CALENDAR_FILTER, colors: ['#ff0000'] }, ['#ff0000']);
+    const { el } = setup({ ...DEFAULT_NGE_CALENDAR_FILTER, colors: ['#ff0000'] }, ['#ff0000']);
     const swatch = el.querySelector('[data-testid="nge-calendar-filter-color-#ff0000"]');
     expect(swatch?.getAttribute('aria-pressed')).toBe('true');
   });
@@ -90,7 +90,7 @@ describe('NgeCalendarDefaultFilterComponent', () => {
   });
 
   it('reflects the active timing segment via aria-pressed', () => {
-    const { el } = setup({ ...DEFAULT_GIGA_CALENDAR_FILTER, timing: 'allDay' });
+    const { el } = setup({ ...DEFAULT_NGE_CALENDAR_FILTER, timing: 'allDay' });
     const segment = el.querySelector('[data-testid="nge-calendar-filter-timing-allDay"]');
     expect(segment?.getAttribute('aria-pressed')).toBe('true');
   });
