@@ -1,0 +1,230 @@
+// Everything below is nested under the component's own root wrapper, never
+// `:host`. The library is `ViewEncapsulation.None`, so an unnested rule would
+// leak into every other story in the Storybook bundle.
+//
+// No rule here targets `.nge-table__*`. The band's own chrome is the library's
+// (`--nge-table-row-detail-surface`, `--nge-table-row-detail-height`); what a
+// band CONTAINS is the consumer's markup, and this is that markup.
+.nge-table-row-detail-content-interaction-stories {
+  display: block;
+  padding: 20px;
+  color: var(--nge-table-on-surface, #1d1b20);
+  background: var(--nge-table-surface, #ffffff);
+
+  .stories-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    margin-bottom: 8px;
+  }
+
+  .intro-text {
+    margin-bottom: 12px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 16px;
+  }
+
+  .story-section {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+
+    h4 {
+      margin-bottom: 8px;
+      color: var(--nge-table-on-surface, #1d1b20);
+    }
+
+    .story-description {
+      margin-bottom: 16px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 14px;
+    }
+  }
+
+  .hint {
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 13px;
+    background: var(--nge-table-surface-variant, #f5f5f5);
+    border-radius: 6px;
+  }
+
+  // ⚠️ The bound goes on `nge-table` itself, never on this wrapper. The host is
+  // a flex column whose viewport is `flex: 1 1 auto; min-height: 0`; a max-height
+  // on an ancestor is simply overflowed, so nothing scrolls, the sticky header
+  // has nothing to stick against, and virtualization has no window to compute.
+  .table-container {
+    nge-table {
+      max-height: 620px;
+    }
+
+    &--flow nge-table {
+      max-height: none;
+    }
+  }
+
+  // ─── The band's content (ARCH-299) ─────────────────────────────────────────
+  //
+  // ⚠️ **This rule is the whole height contract, and it is the one thing a
+  // consumer putting a chart in a band has to write.**
+  //
+  // `<nge-chart>` is `:host { height: 100% }`, and a percentage resolves against
+  // nothing when its parent's height is `auto` — so a chart in a band with no
+  // declared height collapses to a 0px-tall nothing, silently and with no error.
+  //
+  // The band HAS a height since ARCH-298, but the band does not hand it down:
+  // `.nge-table__row-detail--open` is a plain block taking the token as a definite
+  // `height` in both regimes. So content reads the same custom property the table
+  // was sized by, and one declaration covers every case.
+  //
+  // ⚠️ `align-self: stretch` — what a chart CELL uses (`chart-cells`) — does not
+  // substitute for this, and the difference is why the pattern needed restating
+  // rather than copying. A cell is a flex ITEM on a row whose height is already
+  // definite, so stretching resolves it. A band is a block on its own line: there
+  // is no flex line to stretch against and nothing to inherit a height from.
+  .detail-band {
+    box-sizing: border-box;
+    display: flex;
+    height: var(--nge-table-row-detail-height, 120px);
+    padding: 12px 16px;
+  }
+
+  // A column per chart, sharing the band's width evenly. `min-width: 0` is what
+  // lets them actually halve: a flex item's automatic minimum size is its content,
+  // and an SVG's is not small.
+  .detail-band__chart {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .detail-band__title {
+    margin: 0 0 6px;
+    overflow: hidden;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+  }
+
+  // ⚠️ `min-height: 0` is load-bearing. A flex item's automatic minimum size is
+  // its content, so without it the plot refuses to shrink below whatever the SVG
+  // reports and pushes the band's fixed height into a scrollbar instead of
+  // fitting inside it. With it, the height the flex layout computes here is
+  // DEFINITE (the container's is), which is what `<nge-chart>`'s `height: 100%`
+  // then resolves against.
+  // The horizontal padding keeps the chart's own chrome — rotated axis titles on
+  // the left, the last tick label on the right — off the panel's border. It is
+  // only half the gutter: padding shrinks the SVG but does not move anything
+  // inside it, so a tick label centred on the plot's right edge still overflows
+  // the chart's own `margin.right`. Both configs widen that margin to match.
+  .detail-band__plot {
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 0 12px;
+    background: var(--nge-chart-surface, #ffffff);
+    border: 1px solid var(--nge-table-border-color, #e0e0e0);
+    border-radius: 6px;
+  }
+
+  // ─── The crosshair's shared card ───────────────────────────────────────────
+  //
+  // Rendered through the chart's chromeless `#ngeChartTooltip` slot, so the
+  // card is entirely this story's markup — the same arrangement the charts
+  // library's own crosshair story uses.
+  .crosshair-tip {
+    min-width: 150px;
+    padding: 8px 10px;
+    color: var(--nge-chart-on-surface, #1d1b20);
+    font-size: 12px;
+    background: var(--nge-chart-surface, #ffffff);
+    border: 1px solid var(--nge-chart-outline-variant, #e0e0e0);
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 18%);
+
+    &__header {
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    &__row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      line-height: 18px;
+    }
+
+    &__swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+    }
+
+    &__label {
+      flex: 1 1 auto;
+      color: var(--nge-chart-on-surface-variant, #5f5f66);
+    }
+
+    &__value {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+  }
+
+  // ─── State readout + host controls ─────────────────────────────────────────
+  .state-row {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+  }
+
+  .state-readout {
+    flex: 0 0 320px;
+
+    &__label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    pre {
+      max-height: 200px;
+      margin: 0;
+      padding: 12px;
+      overflow: auto;
+      font-size: 12px;
+      background: var(--nge-table-surface-variant, #f5f5f5);
+      border-radius: 6px;
+    }
+  }
+
+  .host-controls {
+    flex: 1 1 auto;
+
+    button {
+      margin: 0 8px 8px 0;
+      padding: 6px 12px;
+      color: var(--nge-table-on-surface, #1d1b20);
+      font-size: 13px;
+      background: var(--nge-table-surface-variant, #f5f5f5);
+      border: 1px solid var(--nge-table-border-color, #e0e0e0);
+      border-radius: 6px;
+      cursor: pointer;
+
+      &:hover {
+        background: var(--nge-table-row-surface-hover, #ededed);
+      }
+    }
+  }
+}

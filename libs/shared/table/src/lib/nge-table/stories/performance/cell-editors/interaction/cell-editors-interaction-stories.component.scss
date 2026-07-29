@@ -1,0 +1,273 @@
+// The story panel takes its surface from the same `--nge-table-surface` /
+// `--nge-table-on-surface` the tables read, matching `core/`, so prose and
+// tables always move together. Every token is paired with a literal fallback:
+// the partial guarantees the token exists once imported, the fallback guarantees
+// the panel still renders if a host forgets to import it.
+.nge-table-cell-editors-performance-stories {
+  display: block;
+  padding: 20px;
+  color: var(--nge-table-on-surface, #1d1b20);
+  background: var(--nge-table-surface, #ffffff);
+
+  .stories-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    margin-bottom: 8px;
+  }
+
+  .intro-text {
+    margin-bottom: 16px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 16px;
+  }
+
+  .story-section {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+
+    h4 {
+      margin-bottom: 8px;
+      color: var(--nge-table-on-surface, #1d1b20);
+    }
+
+    .story-description {
+      margin-bottom: 16px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 14px;
+    }
+  }
+
+  .benchmark-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 16px;
+
+    button {
+      padding: 6px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      background: var(--nge-table-surface, #ffffff);
+      border: 1px solid var(--nge-table-border-color, #e0e0e0);
+      border-radius: 4px;
+
+      &:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+      }
+    }
+  }
+
+  .benchmark-meta {
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 12px;
+  }
+
+  // The height belongs on `nge-table` itself, not on this wrapper: the host is a
+  // flex column whose scroller shrinks to fit, whereas a max-height here is simply
+  // overflowed — the scroller grows to every row, nothing scrolls, and the
+  // virtualizer has no window to compute. Without this the benchmark measures a
+  // table that cannot move.
+  .table-container {
+    margin-bottom: 16px;
+
+    nge-table {
+      max-height: 420px;
+    }
+
+    &--tall nge-table {
+      max-height: 520px;
+    }
+  }
+
+  .benchmark-readout {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin: 0;
+  }
+
+  .benchmark-metric {
+    padding: 10px 12px;
+    background: var(--nge-table-row-surface-alt, #f7f7f8);
+    border: 1px solid var(--nge-table-border-color, #e0e0e0);
+    border-radius: 4px;
+
+    dt {
+      margin-bottom: 4px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    dd {
+      margin: 0;
+      font-size: 20px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    small {
+      font-size: 12px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+    }
+
+    // A metric past its budget is the whole point of the readout, so it is called
+    // out rather than left for the reader to compare by eye.
+    &--over dd {
+      color: #b3261e;
+    }
+
+    // Kept visible but visibly secondary: the over-budget count is jitter rather
+    // than signal (29%-48% across eight runs of identical work), and the story
+    // says so directly beneath the readout.
+    &--muted {
+      opacity: 0.55;
+    }
+  }
+
+  // A refused run has to say why. Its most common cause — a hidden tab, where the
+  // browser suspends requestAnimationFrame — otherwise looks exactly like the
+  // table having hung.
+  .benchmark-failure {
+    margin-bottom: 16px;
+    padding: 10px 12px;
+    color: #b3261e;
+    font-size: 13px;
+    background: var(--nge-table-row-surface-alt, #f7f7f8);
+    border: 1px solid #b3261e;
+    border-radius: 4px;
+  }
+
+  // The paste-ready block is rendered rather than hidden behind the button on
+  // purpose: a blocked clipboard API would otherwise leave no way to get the
+  // numbers out, and these numbers exist to be pasted into a ticket.
+  .benchmark-copy {
+    margin-top: 16px;
+    border: 1px solid var(--nge-table-border-color, #e0e0e0);
+    border-radius: 4px;
+    overflow: hidden;
+
+    &__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 10px;
+      background: var(--nge-table-row-surface-alt, #f7f7f8);
+      border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+    }
+
+    &__label {
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    &__button {
+      padding: 4px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      background: var(--nge-table-surface, #ffffff);
+      border: 1px solid var(--nge-table-border-color, #e0e0e0);
+      border-radius: 4px;
+    }
+
+    &__text {
+      margin: 0;
+      padding: 10px 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      white-space: pre;
+      overflow-x: auto;
+      color: var(--nge-table-on-surface, #1d1b20);
+      background: var(--nge-table-surface, #ffffff);
+    }
+  }
+
+  // Two rows here are checked live and two are context only, so the table says
+  // which is which in its own last column rather than relying on the prose above.
+  .benchmark-compare {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 12px;
+    font-size: 13px;
+
+    th,
+    td {
+      padding: 7px 8px;
+      text-align: left;
+      border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+    }
+
+    th {
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    td:nth-child(2),
+    td:nth-child(3) {
+      font-variant-numeric: tabular-nums;
+    }
+
+    td:last-child {
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 12px;
+    }
+
+    &__row--bad td {
+      color: #b3261e;
+    }
+  }
+
+  .benchmark-reference-note {
+    padding: 10px 12px;
+    background: var(--nge-table-row-surface-alt, #f7f7f8);
+    border-left: 3px solid var(--nge-table-border-color, #e0e0e0);
+    border-radius: 3px;
+  }
+
+  .benchmark-empty {
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 13px;
+    font-style: italic;
+  }
+
+  .benchmark-drift {
+    font-size: 14px;
+
+    &--wide {
+      color: #b3261e;
+    }
+  }
+
+  .benchmark-history {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+
+    th,
+    td {
+      padding: 6px 8px;
+      text-align: left;
+      border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+    }
+
+    th {
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+  }
+}

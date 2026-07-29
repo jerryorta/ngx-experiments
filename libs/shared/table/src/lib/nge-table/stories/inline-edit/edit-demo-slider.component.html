@@ -1,0 +1,35 @@
+@let current = displayValue();
+
+<!--
+  ⚠️ The roles and the ARIA values are not decoration — `role="slider"` is precisely
+  what `NGE_INTERACTIVE_SELECTOR` matches on, and it is the whole reason a drag here
+  moves the thumb instead of sweeping a cell range. Remove the role and the control
+  still looks identical and behaves completely differently.
+-->
+<div
+  class="nge-table-edit-demo-slider__track"
+  role="slider"
+  tabindex="0"
+  [attr.aria-label]="label()"
+  [attr.aria-valuemax]="max()"
+  [attr.aria-valuemin]="0"
+  [attr.aria-valuenow]="current"
+  (keydown.arrowdown)="onStep($event, -1)"
+  (keydown.arrowleft)="onStep($event, -1)"
+  (keydown.arrowright)="onStep($event, 1)"
+  (keydown.arrowup)="onStep($event, 1)"
+  (pointerdown)="onPointerDown($event)"
+  (pointermove)="onPointerMove($event)"
+  (pointerup)="onPointerUp($event)"
+>
+  <span
+    class="nge-table-edit-demo-slider__fill"
+    [style.width.%]="percent()"
+  ></span>
+  <span
+    class="nge-table-edit-demo-slider__thumb"
+    [style.left.%]="percent()"
+  ></span>
+</div>
+
+<span class="nge-table-edit-demo-slider__value">{{ current }}</span>

@@ -1,0 +1,165 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Export &amp; CSV (Theming)</h2>
+    <p class="intro-text">
+      <strong>A CSV has no rendered surface, so it has nothing to theme.</strong> It reads no CSS
+      custom property and carries no <code>--nge-table-*</code> token, and a section demonstrating
+      a token nothing consumes would render as a no-op and teach a false contract. This page
+      therefore does the opposite of the usual theming story: it shows that theming reaches the
+      pixels and stops there.
+    </p>
+    <p class="intro-text">
+      What <em>is</em> themeable here is the surface a user exports <strong>from</strong> — the
+      table and the highlight tint that picks the cells. Both already have their own token tables in
+      <code>Core/Theming</code> and <code>Highlight/Theming</code>; this page does not restate them.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. Three themes, one CSV</h4>
+      <p class="story-description">
+        The same config, the same seeded marks, three scoped wrapper classes re-declaring
+        <code>--nge-table-*</code>. Press the button and read the three outputs: they are
+        <strong>byte-identical</strong>, because the formatter reads host-owned state and column
+        values and never asks the DOM what anything looked like.
+      </p>
+      <p class="story-description">
+        That is not a happy accident — it is the same property that makes a cell an arbitrary render
+        target. A cell may be a chart or an input, so there is no general way to ask one what it
+        displayed; exported text comes from <code>meta.ngeExport.format</code> instead. Styling has
+        nowhere to enter.
+      </p>
+
+      <div class="controls">
+        <button
+          type="button"
+          (click)="exportAll()"
+          >Export from all three</button
+        >
+      </div>
+
+      <p class="verdict">{{ verdict() }}</p>
+
+      <div class="theme-grid">
+        <div class="theme-panel">
+          <h5>Default (light)</h5>
+          <div class="theme-light">
+            <nge-table-highlight-demo
+              #lightDemo
+              [config]="themedConfig"
+              [maxHeight]="260"
+              [showClear]="false"
+              [rows]="themedRows"
+              [(state)]="lightState"
+            />
+          </div>
+          @if (lightCsv()) {
+            <div class="state-readout">
+              <pre>{{ lightCsv() }}</pre>
+            </div>
+          }
+        </div>
+
+        <div class="theme-panel">
+          <h5>Dark</h5>
+          <div class="theme-dark">
+            <nge-table-highlight-demo
+              #darkDemo
+              [config]="themedConfig"
+              [maxHeight]="260"
+              [showClear]="false"
+              [rows]="themedRows"
+              [(state)]="darkState"
+            />
+          </div>
+          @if (darkCsv()) {
+            <div class="state-readout">
+              <pre>{{ darkCsv() }}</pre>
+            </div>
+          }
+        </div>
+
+        <div class="theme-panel">
+          <h5>High contrast</h5>
+          <div class="theme-contrast">
+            <nge-table-highlight-demo
+              #denseDemo
+              [config]="themedConfig"
+              [maxHeight]="260"
+              [showClear]="false"
+              [rows]="themedRows"
+              [(state)]="denseState"
+            />
+          </div>
+          @if (denseCsv()) {
+            <div class="state-readout">
+              <pre>{{ denseCsv() }}</pre>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. Where an export's appearance actually comes from</h4>
+      <p class="story-description">
+        Three knobs decide how an export reads, and none of them is a CSS token. Reaching for a
+        stylesheet to change any of these is the mistake this section exists to prevent.
+      </p>
+
+      <div class="token-table">
+        <div class="token-row token-row--head">
+          <span>What you want to change</span>
+          <span>Where it lives</span>
+        </div>
+        <div class="token-row">
+          <span>How a column's text reads (currency, dates)</span>
+          <span><code>columnDef.meta.ngeExport.format</code> — TypeScript, on the column</span>
+        </div>
+        <div class="token-row">
+          <span>Human text vs machine values</span>
+          <span
+            ><code>toNgeCsv(data, {{ "{" }} values {{ "}" }})</code> — a formatter option</span
+          >
+        </div>
+        <div class="token-row">
+          <span>Delimiter, header, line ending, byte-order mark</span>
+          <span><code>NgeCsvOptions</code> — a formatter option</span>
+        </div>
+        <div class="token-row">
+          <span>Which cells are included</span>
+          <span><code>cellPredicate</code> / <code>slice</code> — the export seam</span>
+        </div>
+        <div class="token-row">
+          <span>How the table and its highlights <em>look</em></span>
+          <span><code>--nge-table-*</code> — and it stops there, as section 1 demonstrates</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. The dark section is the shape a real bridge takes</h4>
+      <p class="story-description">
+        The three dlc personas bridge <code>--nge-table-*</code> in light and dark, so the Storybook
+        theme toolbar does move this table — switch between the professional, home and
+        service-provider personas to watch it follow. A real bridge looks exactly like the
+        <code>.theme-dark</code> wrapper class in this story's SCSS, only scoped to the persona's
+        theme class instead.
+      </p>
+      <p class="story-description">
+        ⚠️ Restate <strong>every</strong> surface in a dark bridge rather than letting any inherit —
+        the pinned surfaces especially, which are opaque by requirement, so a missed one shows up as
+        a pale rectangle punched through a dark table. ⚠️ And note the two geometry tokens
+        <code>--nge-table-row-height</code> / <code>-header-height</code> are unreachable from a
+        wrapper class whenever the config carries them: <code>createNgeTableConfig()</code> always
+        fills them in and the component writes them <strong>inline on the host</strong>, where they
+        outrank any class.
+      </p>
+    </section>
+  </div>
+</nge-storybook-review-container>

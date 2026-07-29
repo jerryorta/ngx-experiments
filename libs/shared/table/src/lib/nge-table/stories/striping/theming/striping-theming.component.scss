@@ -1,0 +1,160 @@
+// The substance of a table theming story lives here rather than in TypeScript:
+// `NgeTableConfig` has no `theme` field, so each section is a scoped wrapper
+// class re-declaring `--nge-table-*` — exactly what a consumer writes.
+//
+// The panel takes its surface from the same `--nge-table-surface` /
+// `--nge-table-on-surface` the tables read, so prose and tables always move
+// together under whichever theme the toolbar has selected.
+.nge-table-striping-theming {
+  display: block;
+  padding: 20px;
+  color: var(--nge-table-on-surface, #1d1b20);
+  background: var(--nge-table-surface, #ffffff);
+
+  .stories-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    margin-bottom: 8px;
+  }
+
+  .intro-text {
+    margin-bottom: 32px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 16px;
+  }
+
+  .story-section {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+
+    h4 {
+      margin-bottom: 8px;
+      color: var(--nge-table-on-surface, #1d1b20);
+    }
+
+    .story-description {
+      margin-bottom: 16px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 14px;
+    }
+  }
+
+  .code-block {
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    background: var(--nge-table-surface-variant, #f5f5f5);
+    border-radius: 6px;
+
+    pre {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+  }
+
+  // ⚠️ The height belongs on `nge-table` itself, NEVER on this wrapper — the
+  // host's viewport is `flex: 1 1 auto; min-height: 0`, so a bound on an ancestor
+  // is simply overflowed and nothing scrolls.
+  .table-container {
+    margin-bottom: 16px;
+
+    nge-table {
+      max-height: 420px;
+    }
+
+    &--short nge-table {
+      max-height: 260px;
+    }
+
+    // The fixture's seven columns come to ~1120px and fit the panel, so section 6
+    // has nothing to scroll sideways unless the viewport is narrowed — and a
+    // pinning section that cannot scroll demonstrates none of what it claims.
+    &--narrow {
+      max-width: 720px;
+    }
+  }
+
+  .theme-comparison {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+
+    &__item h5 {
+      margin: 0 0 8px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+  }
+
+  .token-tiers {
+    margin: 0;
+    padding-left: 20px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 14px;
+    line-height: 1.7;
+
+    li + li {
+      margin-top: 8px;
+    }
+
+    strong {
+      color: var(--nge-table-on-surface, #1d1b20);
+    }
+  }
+
+  // ─── Section themes ────────────────────────────────────────────────────────
+  //
+  // Every one of these is a plain wrapper class setting `--nge-table-*`. None
+  // targets a `.nge-table__*` selector: that would be styling the library
+  // rather than theming it, and under `ViewEncapsulation.None` such a rule would
+  // actually land.
+
+  .theme-strong {
+    --nge-table-row-surface-alt: #eceff4;
+  }
+
+  .theme-tinted {
+    --nge-table-row-surface-alt: #f2f6fc;
+  }
+
+  .theme-marked {
+    --nge-table-row-surface-alt: #eceff4;
+    --nge-table-row-surface-selected: #d7e8fb;
+    --nge-table-selection-accent: #1565c0;
+  }
+
+  // An OPAQUE alternate surface. A pinned lane is sticky and scrolls over the
+  // center lane, and it takes the row's resolved surface by inheritance — so a
+  // translucent value here would let the center cells bleed through the pinned
+  // lanes as they pass over.
+  .theme-pinned {
+    --nge-table-row-surface-alt: #eef2f7;
+    --nge-table-pinned-surface: #ffffff;
+  }
+
+  // The shape a domain bridge takes. Every surface is restated rather than left
+  // to inherit — a pinned surface left on the light default reads as a pale
+  // rectangle punched through the table. In dark themes the alternate row goes
+  // lighter than the base surface, the reverse of the light-mode direction.
+  .theme-dark {
+    --nge-table-surface: #16181d;
+    --nge-table-surface-variant: #22252c;
+    --nge-table-row-surface-alt: #1c1f25;
+    --nge-table-row-surface-hover: #262a32;
+    --nge-table-pinned-surface: #16181d;
+    --nge-table-pinned-surface-hover: #262a32;
+    --nge-table-pinned-header-surface: #22252c;
+    --nge-table-on-surface: #e4e6ea;
+    --nge-table-on-surface-variant: #a4a9b4;
+    --nge-table-header-on-surface: #e4e6ea;
+    --nge-table-border-color: #2c3038;
+    --nge-table-header-border-color: #3a3f49;
+  }
+}

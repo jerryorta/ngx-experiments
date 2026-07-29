@@ -1,0 +1,650 @@
+@let headerRows = store.headerRows();
+@let columnIndexById = store.columnIndexById();
+@let tableSlotContext = store.tableSlotContext();
+
+<!--
+  The named render slots (ARCH-246). Every anchor below reads the same way: ask
+  the store for the template registered at a name, and render it through one
+  `ngTemplateOutlet` with that slot's context. Nothing here interprets a name, so
+  a ninth slot is an entry in `NGE_TABLE_SLOT_NAMES`, its context, and one more
+  anchor — never a change to the directive, the registry, or a resolver.
+
+  A slot is a PLACE, not a state: its template renders whenever one is
+  registered, and whether anything appears is the consumer's decision, taken from
+  the context they are handed. That is why `loading` needs no `config.loading`
+  flag and `row-detail` needs no expansion feature.
+-->
+@let toolbarSlot = store.slotTemplate("toolbar");
+@if (toolbarSlot) {
+  <div
+    class="nge-table__toolbar"
+    data-testid="nge-table-toolbar"
+  >
+    <ng-container
+      [ngTemplateOutlet]="toolbarSlot"
+      [ngTemplateOutletContext]="tableSlotContext"
+    />
+  </div>
+}
+
+<!--
+  One scroll viewport for header and body together. AG Grid gives the header its
+  own scroller and keeps the two in step with a scroll listener; sharing a
+  viewport makes "header lanes stay aligned with body lanes" structural instead,
+  and nested sticky — `top` on the header band, `left` / `right` on the lanes
+  inside it — is what produces the frozen corner.
+-->
+<div
+  #viewport
+  class="nge-table__viewport"
+  role="grid"
+  data-testid="nge-table-container"
+  [attr.aria-colcount]="store.ariaColumnCount()"
+  [attr.aria-rowcount]="store.ariaRowCount()"
+>
+  <div
+    class="nge-table__header"
+    role="rowgroup"
+  >
+    @for (headerRow of headerRows; track headerRow.id) {
+      <!--
+        Header rows are rows 1..N of the grid, and body rows continue the count
+        from there — see `renderedRows`. Numbering them explicitly is what keeps
+        `aria-rowcount` honest once virtualization means most rows are absent.
+      -->
+      <div
+        class="nge-table__header-row"
+        role="row"
+        [attr.aria-rowindex]="$index + 1"
+      >
+        <!--
+          Lanes are iterated, never branched on: each one carries the kind it is,
+          so the header-cell markup below is written once rather than three times
+          and a new lane kind would be a `toNgeTableLanes` entry plus a CSS class.
+        -->
+        @for (lane of headerRow.lanes; track lane.kind) {
+          <div
+            class="nge-table__lane nge-table__lane--{{ lane.kind }}"
+            role="presentation"
+            [attr.data-testid]="'nge-table-lane-' + lane.kind"
+          >
+            @for (header of lane.items; track header.id) {
+              @let column = header.column;
+              @let sortable = column.getCanSort();
+              @let resizable = column.getCanResize();
+              @let sortDirection = column.getIsSorted();
+              @let headerSlot = store.slotTemplate("header-cell", column.id);
+              @let headerOverlaySlot = store.slotTemplate("header-overlay", column.id);
+              @let headerSlotContext = store.headerSlotContext(header);
+              @let selectionColumn = store.isSelectionColumn(column.id);
+              @let selectionHeaderSlot = store.slotTemplate("selection-header");
+              @let expansionColumn = store.isExpansionColumn(column.id);
+              @let expandHeaderSlot = store.slotTemplate("expand-header");
+
+              <!--
+                The cell is focusable when it can be sorted OR resized, and it
+                carries BOTH keyboard paths. Putting the resize keys here rather
+                than on a focusable grip is what keeps the header at one tab stop
+                per column instead of two; `Shift`-modified arrows leave the plain
+                ones free for the grid navigation the a11y story will add.
+              -->
+              <div
+                class="nge-table__header-cell"
+                role="columnheader"
+                [attr.aria-colindex]="columnIndexById[column.id]"
+                [attr.aria-sort]="sortable ? ariaSort(sortDirection) : null"
+                [attr.tabindex]="sortable || resizable ? 0 : null"
+                [class.nge-table__header-cell--sortable]="sortable"
+                [style.width.px]="header.getSize()"
+                (click)="store.toggleColumnSort(column.id)"
+                (keydown.enter)="store.toggleColumnSort(column.id)"
+                (keydown.shift.arrowleft)="onResizeKey($event, column.id, -1)"
+                (keydown.shift.arrowright)="onResizeKey($event, column.id, 1)"
+                (keydown.shift.home)="onResetKey($event, column.id)"
+                (keydown.space)="$event.preventDefault(); store.toggleColumnSort(column.id)"
+              >
+                @if (!header.isPlaceholder) {
+                  <!--
+                    The select-all control. Rendered only when more than one row can
+                    be held at once — with `enableMultiRowSelection: false` there is
+                    no such thing as "all", so the header stays empty rather than
+                    offering a control that would select one row.
+
+                    A projected `selection-header` template WINS over the native
+                    checkbox, which is how a consuming app supplies its own control
+                    and the table wears that domain's design language. The native one
+                    is the DEFAULT, not the only option — and it stays native because
+                    `accent-color` themes it while keeping it keyboard-, screen-reader-
+                    and high-contrast-correct for free.
+
+                    Unlike the per-row control this IS a tab stop: it is the only
+                    keyboard route to select-all, and there is exactly one of it.
+                    `keydown.space` is stopped because the header cell above
+                    `preventDefault()`s space for the sort toggle, which would
+                    otherwise swallow the checkbox's own activation.
+                  -->
+                  @if (expansionColumn) {
+                    <!--
+                      The expand-all control (ARCH-298). A projected `expand-header`
+                      template WINS over the native chevron — the same ordering the
+                      selection header below uses, and for the same reason: a branch
+                      consulting the column before the slot would silently foreclose
+                      the seam, which is the failure ARCH-278 documented.
+
+                      A real tab stop, exactly like select-all: there is one per
+                      table and it is the only keyboard route to expand-all.
+                      `keydown.space` is stopped because the header cell above
+                      `preventDefault()`s space for the sort toggle, which would
+                      otherwise swallow the button's own activation.
+                    -->
+                    @if (expandHeaderSlot) {
+                      <ng-container
+                        [ngTemplateOutlet]="expandHeaderSlot"
+                        [ngTemplateOutletContext]="store.expandHeaderSlotContext()"
+                      />
+                    } @else {
+                      <button
+                        class="nge-table__expand-all"
+                        type="button"
+                        data-testid="nge-table-expand-all"
+                        [attr.aria-expanded]="store.allRowsExpanded()"
+                        [attr.aria-label]="
+                          store.allRowsExpanded() ? 'Collapse all rows' : 'Expand all rows'
+                        "
+                        [class.nge-table__expand-all--open]="store.allRowsExpanded()"
+                        (click)="$event.stopPropagation(); store.toggleAllRowsExpansion()"
+                        (keydown.space)="$event.stopPropagation()"
+                      >
+                        <span aria-hidden="true">›</span>
+                      </button>
+                    }
+                  } @else if (selectionColumn) {
+                    @if (store.multiSelectEnabled()) {
+                      @if (selectionHeaderSlot) {
+                        <ng-container
+                          [ngTemplateOutlet]="selectionHeaderSlot"
+                          [ngTemplateOutletContext]="store.selectionHeaderSlotContext()"
+                        />
+                      } @else {
+                        <input
+                          class="nge-table__select-all"
+                          type="checkbox"
+                          aria-label="Select all rows"
+                          data-testid="nge-table-select-all"
+                          [checked]="store.allRowsSelected()"
+                          [indeterminate]="store.someRowsSelected()"
+                          (change)="store.toggleAllRowsSelection()"
+                          (click)="$event.stopPropagation()"
+                          (keydown.space)="$event.stopPropagation()"
+                        />
+                      }
+                    }
+                  } @else if (headerSlot) {
+                    <!--
+                      `header-cell` replaces the label outright rather than wrapping
+                      it, because these slots exist for the custom sort and filter
+                      forms a later story will host and must not assume text-only
+                      content. A template that puts a control here owns the control's
+                      events too: the cell's own click toggles the sort, so a control
+                      inside it needs `$event.stopPropagation()` — the same
+                      arrangement the resize grip below and the checkbox above
+                      already use.
+                    -->
+                    <ng-container
+                      [ngTemplateOutlet]="headerSlot"
+                      [ngTemplateOutletContext]="headerSlotContext"
+                    />
+                  } @else {
+                    <span class="nge-table__header-label">
+                      <ng-container
+                        *flexRender="column.columnDef.header; props: header.getContext(); let label"
+                        >{{ label }}</ng-container
+                      >
+                    </span>
+
+                    @if (sortable) {
+                      <span
+                        class="nge-table__sort-indicator"
+                        aria-hidden="true"
+                      >
+                        @switch (sortDirection) {
+                          @case ("asc") {
+                            ↑
+                          }
+                          @case ("desc") {
+                            ↓
+                          }
+                          @default {
+                            ↕
+                          }
+                        }
+                      </span>
+                    }
+                  }
+
+                  @if (headerOverlaySlot) {
+                    <span class="nge-table__header-overlay">
+                      <ng-container
+                        [ngTemplateOutlet]="headerOverlaySlot"
+                        [ngTemplateOutletContext]="headerSlotContext"
+                      />
+                    </span>
+                  }
+                }
+
+                <!--
+                  The resize grip. Pointer-only and `aria-hidden` on purpose — the
+                  keyboard path lives on the header cell above, so this adds no tab
+                  stop and nothing for a screen reader to announce.
+
+                  Every pointer handler is bound HERE rather than on the document:
+                  `setPointerCapture` retargets the whole stream to this element,
+                  so the drag survives the pointer leaving the cell and there is no
+                  listener left to leak if the row is recycled mid-gesture
+                  (virtualization, ARCH-245).
+                -->
+                @if (resizable) {
+                  <span
+                    class="nge-table__resize-handle"
+                    aria-hidden="true"
+                    data-testid="nge-table-resize-handle"
+                    [attr.data-column-id]="column.id"
+                    [class.nge-table__resize-handle--active]="
+                      store.resizingColumnId() === column.id
+                    "
+                    (click)="$event.stopPropagation()"
+                    (dblclick)="onResizeReset($event, column.id)"
+                    (pointercancel)="onResizeEnd($event)"
+                    (pointerdown)="onResizeStart($event, header)"
+                    (pointermove)="onResizeMove($event)"
+                    (pointerup)="onResizeEnd($event)"
+                  ></span>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!--
+    `store.renderedRows()` is the window when virtualization is on and every row
+    when it is off, in one shape either way — so there is a single row loop here
+    rather than two branches to keep in step. `top` is bound unconditionally;
+    Angular drops the property when it is `null`, which is what puts an
+    un-virtualized table back in normal flow with no markup saying so.
+
+    Positioning is `top`, NEVER `transform: translateY`. A transform creates a
+    stacking context and a stacking context breaks the sticky pinned lanes inside
+    the row — the wall AG Grid hit before switching to top-positioning.
+  -->
+  <div
+    class="nge-table__body"
+    role="rowgroup"
+    [class.nge-table__body--virtualized]="store.virtualizationEnabled()"
+    [style.height.px]="store.virtualTotalHeight()"
+  >
+    @for (rendered of store.renderedRows(); track rendered.row.id) {
+      @let rowDetailSlot = store.slotTemplate("row-detail");
+      @let selectable = store.selectionEnabled() && rendered.row.getCanSelect();
+      @let editable = store.editEnabled();
+      @let selected = rendered.row.getIsSelected();
+      @let striped = store.stripingEnabled() && rendered.isAlternate;
+
+      <!--
+        The pointer half of the event stream (ARCH-247). `cell-click` and
+        `row-click` are two ordinary bindings and DOM bubbling orders them: a
+        click inside a cell reaches the cell first and the row second, while a
+        click on a row's own padding — or inside a `row-detail` band — reaches
+        only the row.
+
+        A control inside a cell that should not read as a click on the table owes
+        itself a `$event.stopPropagation()`, the same arrangement the resize grip
+        (ARCH-244) and the header slots (ARCH-246) already use.
+
+        The row is focusable and key-activatable — `Space` while selection is on,
+        `Enter` while editing is — so it needs no a11y suppression. **The cell
+        below does suppress the two rules**:
+        the keyboard equivalent of "activate this cell" in a `role="grid"` is
+        arrow-key navigation over a ROVING tabindex, which the later a11y story
+        owns, and satisfying the rule per-cell would mean `tabindex="0"` on every
+        cell — tens of thousands of tab stops in a virtualized table, materially
+        worse for a keyboard user than the gap it papers over. Same call ARCH-244
+        made when it put the resize keys on the header cell instead of on a
+        focusable grip.
+
+        A ROW is a defensible tab stop where a cell is not, because there is one
+        per rendered row and virtualization keeps "rendered" to a window. It is
+        focusable only while selection or editing is on — a row that does nothing
+        when activated should not be in the tab order at all.
+
+        ⚠️ Without arrow-key grid navigation (still unticketed), `Enter` activates
+        the row's FIRST editable column rather than a focused cell, because there
+        is no such thing as a focused cell yet. That is the honest answer until
+        that story lands, and it is stated rather than left to be discovered — a
+        keyboard-only user with no route into an editable table would be the worse
+        outcome. See `onRowEditKey`.
+
+        ⚠️ The `mousedown` handler is not decoration. A shift-click extends the
+        browser's own TEXT selection across the rows it spans, so the range paints
+        under a native blue band and reads as a rendering bug. It is suppressed on
+        the modifier alone — see `onRowPointerDown` for why neither
+        `user-select: none` nor an unconditional `preventDefault()` is acceptable.
+      -->
+      <div
+        class="nge-table__row"
+        role="row"
+        [attr.aria-rowindex]="rendered.ariaRowIndex"
+        [attr.aria-selected]="selectable ? selected : null"
+        [attr.tabindex]="selectable || editable ? 0 : null"
+        [class.nge-table__row--alt]="striped"
+        [class.nge-table__row--selected]="selected"
+        [style.top.px]="rendered.top"
+        (click)="onRowClick($event, rendered.row)"
+        (keydown.enter)="onRowEditKey($event, rendered.row)"
+        (keydown.space)="onRowSelectKey($event, rendered.row)"
+        (mousedown)="onRowPointerDown($event)"
+      >
+        @for (lane of store.laneCellsFor(rendered.row); track lane.kind) {
+          <div
+            class="nge-table__lane nge-table__lane--{{ lane.kind }}"
+            role="presentation"
+            [attr.data-testid]="'nge-table-lane-' + lane.kind"
+          >
+            @for (cell of lane.items; track cell.id) {
+              @let cellTemplate = store.cellTemplate(cell.column.id);
+              @let cellOverlaySlot = store.slotTemplate("cell-overlay", cell.column.id);
+              @let selectionCellSlot = store.slotTemplate("selection-cell");
+              @let expandCellSlot = store.slotTemplate("expand-cell");
+
+              <!--
+                ⚠️ `keydown.escape` is bound HERE rather than on the table root or
+                the document, and the position is the whole of the containment
+                (ARCH-292). Three addons bind an unconditional document-level
+                `Escape` — the cell range (ARCH-269) and cell highlighting
+                (ARCH-250) today, and whatever registers next — and document is
+                LAST in the bubble path, so stopping the event at the cell starves
+                every one of them at once. Core stays ignorant of all three, which
+                is the only version of this that does not put the table in
+                negotiation with its own addons.
+
+                The cell is deliberately NOT a tab stop, so `interactive-supports-focus`
+                is suppressed rather than satisfied — see the row's comment for why
+                `tabindex="0"` per cell would be worse for a keyboard user than the
+                gap it papers over. The `Escape` binding rides whatever focus a
+                projected control brings with it, and it is also what now satisfies
+                `click-events-have-key-events` on its own.
+              -->
+              <!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus -->
+              <div
+                class="nge-table__cell"
+                role="gridcell"
+                [attr.aria-colindex]="columnIndexById[cell.column.id]"
+                [style.width.px]="cell.column.getSize()"
+                (click)="onCellClick(cell)"
+                (keydown.escape)="onCellEscape($event)"
+              >
+                <!--
+                  The per-row selection control. A projected `selection-cell`
+                  template WINS over the native checkbox, so a consuming app renders
+                  its own — `cg-checkbox`, `gy-checkbox` — against a context carrying
+                  `isSelected`, `canSelect`, and a `toggle` callback. Without one the
+                  library's native checkbox is the default.
+
+                  ⚠️ A projected control sits inside a row whose click selects, so it
+                  owes itself a `$event.stopPropagation()` exactly as the native one
+                  does below — otherwise a click on it toggles and is then
+                  immediately replaced by the row's own handler.
+
+                  The native checkbox is `tabindex="-1"` and `aria-hidden`
+                  deliberately: the row above already carries `aria-selected` and
+                  already handles `Space`, so a focusable checkbox would double the
+                  tab stops and announce the same fact twice. Pointer affordance only
+                  — exactly the call ARCH-244 made about the resize grip. A consumer
+                  replacing it inherits that arrangement and should keep it.
+                -->
+                @if (expandCellSlot && store.isExpansionColumn(cell.column.id)) {
+                  <!--
+                    The per-row disclosure control (ARCH-298). A projected
+                    `expand-cell` template WINS over the native chevron, so a
+                    consuming app renders its own against a context carrying
+                    `isExpanded`, `canExpand`, and a `toggle` callback.
+
+                    ⚠️ A projected control sits inside a row whose click may select,
+                    so it owes itself a `$event.stopPropagation()` exactly as the
+                    native one does below.
+                  -->
+                  <ng-container
+                    [ngTemplateOutlet]="expandCellSlot"
+                    [ngTemplateOutletContext]="store.expandCellSlotContext(cell.row)"
+                  />
+                } @else if (store.isExpansionColumn(cell.column.id)) {
+                  <!--
+                    A row the config rejects renders the chevron DISABLED rather than
+                    absent: a control that silently vanishes reads as a rendering
+                    bug where a disabled one reads as a rule. Same call ARCH-278 made
+                    about `canSelect`.
+
+                    ⚠️ Unlike the selection checkbox this IS focusable, and the
+                    asymmetry is deliberate rather than an oversight. The row's own
+                    `Space` already toggles selection and `Enter` already begins an
+                    edit, so there is no key left for expansion — and a disclosure
+                    control no keyboard user can reach is worse than the extra tab
+                    stop. `<button>` brings `Enter`/`Space` activation with it, so
+                    nothing here binds a key.
+                  -->
+                  <button
+                    class="nge-table__expand-row"
+                    type="button"
+                    data-testid="nge-table-expand-row"
+                    [attr.aria-expanded]="cell.row.getIsExpanded()"
+                    [attr.aria-label]="cell.row.getIsExpanded() ? 'Collapse row' : 'Expand row'"
+                    [attr.data-row-id]="cell.row.id"
+                    [class.nge-table__expand-row--open]="cell.row.getIsExpanded()"
+                    [disabled]="!cell.row.getCanExpand()"
+                    (click)="$event.stopPropagation(); store.toggleRowExpansion(cell.row)"
+                  >
+                    <span aria-hidden="true">›</span>
+                  </button>
+                } @else if (selectionCellSlot && store.isSelectionColumn(cell.column.id)) {
+                  <ng-container
+                    [ngTemplateOutlet]="selectionCellSlot"
+                    [ngTemplateOutletContext]="store.selectionCellSlotContext(cell.row)"
+                  />
+                } @else if (store.isSelectionColumn(cell.column.id)) {
+                  <input
+                    class="nge-table__select-row"
+                    type="checkbox"
+                    aria-hidden="true"
+                    tabindex="-1"
+                    data-testid="nge-table-select-row"
+                    [attr.data-row-id]="cell.row.id"
+                    [checked]="cell.row.getIsSelected()"
+                    [disabled]="!cell.row.getCanSelect()"
+                    (click)="onSelectionBoxClick($event, cell.row)"
+                  />
+                } @else if (cellTemplate) {
+                  <!--
+                    Both paths go through `*flexRender` — the adapter's own seam —
+                    and differ only in what they hand it. A registered `[ngeCell]`
+                    is rendered with OUR context, which is what keeps `@tanstack/*`
+                    out of a consumer's `let-` binding; a column without one keeps
+                    rendering its `columnDef.cell` against the engine's context,
+                    byte-identical to the table before this seam existed. That
+                    fallback is what makes adopting a custom cell a per-column
+                    decision rather than a per-table one.
+                  -->
+                  <ng-container
+                    *flexRender="cellTemplate.content; props: store.cellContext(cell)"
+                  />
+                } @else {
+                  <ng-container
+                    *flexRender="cell.column.columnDef.cell; props: cell.getContext(); let value"
+                    >{{ value }}</ng-container
+                  >
+                }
+
+                @if (cellOverlaySlot) {
+                  <span class="nge-table__cell-overlay">
+                    <ng-container
+                      [ngTemplateOutlet]="cellOverlaySlot"
+                      [ngTemplateOutletContext]="store.cellSlotContext(cell)"
+                    />
+                  </span>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        <!--
+          `row-detail` sits after the lanes, spanning the whole row. It renders
+          whenever a template is registered and gates itself on `isExpanded`,
+          because expansion is state the table and the host write through the same
+          slice — a band cannot tell a user's click from a host's restore, which is
+          what "a slot is a place, not a state" means in practice.
+
+          ⚠️ The band's height is DECLARED (`config.rowDetailHeight`), not measured.
+          A virtualized row is positioned at the running total of the sizes the
+          virtualizer was given, so `estimateSize` adds the band's height for an
+          expanded row and the row beneath moves down by exactly that much
+          (ARCH-298). Content taller than the declared height scrolls inside the
+          band rather than overflowing the row it was placed against.
+
+          ⚠️ **`--open` is what makes the height conditional, and it is load-bearing
+          rather than cosmetic.** The band renders for EVERY row whose table
+          registered a template — that is the slot contract, and the template does
+          its own gating — so a height applied unconditionally would reserve a band
+          on every closed row too. Visible without virtualization and catastrophic
+          with it: the window budgets one row's height for a closed row while the
+          DOM hands back that plus a band. `estimateSize` adds the band only for an
+          expanded row, and this class is what keeps the DOM agreeing with it.
+
+          The same class drives the open animation (ARCH-300). The band's height is
+          definite in both directions — `0` closed, the declared height open — so
+          the transition between them is plain CSS with no measurement anywhere.
+          Inside a window it animates open only: the rows beneath reclaim the space
+          in one frame, leaving a closing band nothing to collapse into.
+        -->
+        @if (rowDetailSlot) {
+          <div
+            class="nge-table__row-detail"
+            [class.nge-table__row-detail--open]="rendered.row.getIsExpanded()"
+          >
+            <ng-container
+              [ngTemplateOutlet]="rowDetailSlot"
+              [ngTemplateOutletContext]="store.rowSlotContext(rendered.row)"
+            />
+          </div>
+        }
+      </div>
+    } @empty {
+      <!--
+        The `empty` slot replaces this band's content, never the band itself — the
+        row keeps its `role` and its height so an empty result still reads as a
+        table with nothing in it rather than as a broken one.
+      -->
+      @let emptySlot = store.slotTemplate("empty");
+
+      <div
+        class="nge-table__empty"
+        role="row"
+      >
+        <span role="gridcell">
+          @if (emptySlot) {
+            <ng-container
+              [ngTemplateOutlet]="emptySlot"
+              [ngTemplateOutletContext]="tableSlotContext"
+            />
+          } @else {
+            No rows
+          }
+        </span>
+      </div>
+    }
+  </div>
+
+  <!--
+    The footer band, rendered only when something is registered for `footer-cell`.
+    It reuses `toNgeTableLanes` through `store.footerRows()`, so a pinned column's
+    footer cell lands in the pinned lane with no code here knowing pinning exists —
+    the lane substrate generalizing exactly as ARCH-243 intended.
+  -->
+  @if (store.hasSlot("footer-cell")) {
+    <div
+      class="nge-table__footer-row-group"
+      role="rowgroup"
+    >
+      @for (footerRow of store.footerRows(); track footerRow.id) {
+        <div
+          class="nge-table__footer-row"
+          role="row"
+        >
+          @for (lane of footerRow.lanes; track lane.kind) {
+            <div
+              class="nge-table__lane nge-table__lane--{{ lane.kind }}"
+              role="presentation"
+            >
+              @for (footer of lane.items; track footer.id) {
+                @let footerSlot = store.slotTemplate("footer-cell", footer.column.id);
+
+                <div
+                  class="nge-table__footer-cell"
+                  role="gridcell"
+                  [attr.aria-colindex]="columnIndexById[footer.column.id]"
+                  [style.width.px]="footer.getSize()"
+                >
+                  @if (footerSlot) {
+                    <ng-container
+                      [ngTemplateOutlet]="footerSlot"
+                      [ngTemplateOutletContext]="store.headerSlotContext(footer)"
+                    />
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!--
+  `footer` — a table-level band below the viewport, mirroring `toolbar` above it
+  (totals, row counts, pagination). Distinct from `footer-cell`, which is
+  column-aligned and lives inside the scroller.
+-->
+@let footerSlot = store.slotTemplate("footer");
+@if (footerSlot) {
+  <div
+    class="nge-table__footer"
+    data-testid="nge-table-footer"
+  >
+    <ng-container
+      [ngTemplateOutlet]="footerSlot"
+      [ngTemplateOutletContext]="tableSlotContext"
+    />
+  </div>
+}
+
+<!--
+  `loading` overlays the whole table, header included, so it is a sibling of the
+  viewport rather than a child — absolutely positioned against the host. Like
+  every other slot it renders whenever a template is registered: the consumer's
+  own template decides whether anything is visible, which is why the table needs
+  no loading flag of its own and gains no coupling to how a consumer fetches data.
+-->
+@let loadingSlot = store.slotTemplate("loading");
+@if (loadingSlot) {
+  <div
+    class="nge-table__loading"
+    data-testid="nge-table-loading"
+  >
+    <ng-container
+      [ngTemplateOutlet]="loadingSlot"
+      [ngTemplateOutletContext]="tableSlotContext"
+    />
+  </div>
+}

@@ -1,0 +1,198 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Row Selection (Usage)</h2>
+    <p class="intro-text">
+      Two config flags and a <code>getRowId</code>. The leading checkbox column is injected by the
+      library rather than declared, so nothing changes in a consumer's column definitions. No
+      example below imports <code>&#64;tanstack/*</code>.
+    </p>
+
+    <section class="story-section">
+      <h4>1. Switching selection on</h4>
+      <p class="story-description">
+        <code>enableRowSelection</code> is off by default. Switching it on adds the checkbox column,
+        makes rows clickable, and starts writing <code>state.rowSelection</code> — a plain
+        <code>&#123; rowId: true &#125;</code> map, JSON by construction, so it persists and
+        restores with the rest of the view.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }}
+  columns: NGE_TABLE_FIXTURE_COLUMNS,
+  data: rows,
+  enableRowSelection: true,
+  getRowId: row =&gt; row.id,
+{{ "}" }});
+
+state = signal(createNgeTableState());</pre>
+      </div>
+      <div class="code-block">
+        <pre>
+&lt;nge-table
+  [config]="config"
+  [state]="state()"
+  (stateChange)="state.set($event)"
+/&gt;</pre>
+      </div>
+      <div class="table-container">
+        <nge-table
+          [config]="basicConfig"
+          [state]="basicState()"
+          (stateChange)="onBasicState($event)"
+        />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>2. ⚠️ getRowId is not optional here</h4>
+      <p class="story-description">
+        Selection is <strong>id-keyed state</strong>. Without <code>getRowId</code> the engine keys
+        it by array index, so a sort, a filter, or a re-fetch leaves the user's ticks sitting on
+        whichever records moved into those positions — a failure that reads as data corruption
+        rather than as a bug. Switching selection on without one <strong>throws in dev</strong>
+        rather than degrading quietly.
+      </p>
+      <div class="code-block">
+        <pre>
+// ❌ throws in dev
+createNgeTableConfig&lt;Row&gt;({{ "{" }} columns, data, enableRowSelection: true {{ "}" }});
+
+// ✅
+createNgeTableConfig&lt;Row&gt;({{ "{" }}
+  columns,
+  data,
+  enableRowSelection: true,
+  getRowId: row =&gt; row.id,
+{{ "}" }});</pre>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>3. One row at a time</h4>
+      <p class="story-description">
+        <code>enableMultiRowSelection: false</code> reduces the feature to a single row: no header
+        checkbox, no range, and both modifiers fall through to a plain replace.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }}
+  columns,
+  data,
+  enableMultiRowSelection: false,
+  enableRowSelection: true,
+  getRowId: row =&gt; row.id,
+{{ "}" }});</pre>
+      </div>
+      <div class="table-container">
+        <nge-table
+          [config]="singleConfig"
+          [state]="singleState()"
+          (stateChange)="onSingleState($event)"
+        />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>4. Restoring a saved view</h4>
+      <p class="story-description">
+        This table starts with three rows selected and a sort applied, because both arrived as
+        ordinary <code>state</code>. That is what host-owned selection buys: a user's view — their
+        sort, their widths, their pinned columns, and now their selection — is one JSON object to
+        persist and hand back. State pushed in this way is deliberately <strong>silent</strong>: it
+        emits no event, so restoring a view never reads as user activity.
+      </p>
+      <div class="code-block">
+        <pre>
+state = signal(createNgeTableState({{ "{" }}
+  rowSelection: {{ "{" }} 'row-2': true, 'row-3': true, 'row-4': true {{ "}" }},
+  sorting: [{{ "{" }} desc: false, id: 'name' {{ "}" }}],
+{{ "}" }}));</pre>
+      </div>
+      <div class="table-container">
+        <nge-table
+          [config]="restoredConfig"
+          [state]="restoredState()"
+          (stateChange)="onRestoredState($event)"
+        />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>5. Composing with pinning and resizing</h4>
+      <p class="story-description">
+        The selection column is an ordinary column to everything downstream of it: it lands in a
+        lane, takes an <code>aria-colindex</code>, and leads the row whether or not a host has
+        supplied a <code>columnOrder</code>. It refuses sorting, resizing and hiding on its own
+        definition, so the affordances the rest of the table offers do not appear on it.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }}
+  columns,
+  data,
+  enableColumnResizing: true,
+  enablePinning: true,
+  enableRowSelection: true,
+  getRowId: row =&gt; row.id,
+{{ "}" }});</pre>
+      </div>
+      <div class="table-container">
+        <nge-table
+          [config]="composedConfig"
+          [state]="composedState()"
+          (stateChange)="onComposedState($event)"
+        />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>6. Reading the selection</h4>
+      <p class="story-description">
+        Two ways, for two purposes. <code>state.rowSelection</code> is the ids, and it is what you
+        persist. <code>readNgeExportData(&#123; slice: 'selected' &#125;)</code> is the
+        <em>content</em>, already filtered and in the current sort order — the export seam
+        (ARCH-248), which has never heard of the selection UI.
+      </p>
+      <div class="code-block">
+        <pre>
+// the ids
+const selectedIds = Object.keys(state().rowSelection);
+
+// the content, in the order the user sees it
+&#64;ViewChild(NgeTableComponent) table!: NgeTableComponent&lt;Row&gt;;
+const data = this.table.readNgeExportData({{ "{" }} slice: 'selected' {{ "}" }});</pre>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>7. Listening for changes</h4>
+      <p class="story-description">
+        One <code>selection-change</code> kind covers every route into the slice. A range is
+        <strong>one</strong> event, not one per row. Selecting a row does not swallow
+        <code>row-click</code> — a consumer already listening for it keeps hearing it.
+      </p>
+      <div class="code-block">
+        <pre>
+onNgeTableEvent(event: NgeTableEvent&lt;Row&gt;): void {{ "{" }}
+  if (event.kind === 'selection-change') {{ "{" }}
+    this.save(event.rowSelection);
+  {{ "}" }}
+{{ "}" }}</pre>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>8. Selection off — the default</h4>
+      <p class="story-description">
+        No checkbox column, no <code>aria-selected</code>, and rows are not in the tab order. A row
+        that does nothing when activated should not be a tab stop.
+      </p>
+      <div class="table-container">
+        <nge-table [config]="plainConfig" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

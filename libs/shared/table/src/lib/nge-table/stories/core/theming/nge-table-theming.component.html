@@ -1,0 +1,393 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Theming Examples</h2>
+    <p class="intro-text">
+      The table has <strong>no <code>config.theme</code></strong
+      >. Everything visual is a <code>--nge-table-*</code> CSS custom property, so theming is a
+      scoped selector that re-declares the properties — which is exactly what every section below
+      is. The defaults are literal light-mode values in
+      <code>src/lib/styles/_table-tokens.scss</code>, which is why the library renders correctly
+      with no theme imported at all.
+    </p>
+
+    <!-- SECTION 1: Default -->
+    <section class="story-section">
+      <h4>1. Default — no overrides</h4>
+      <p class="story-description">
+        Nothing is set here. This is the contract's own fallback layer, and the reason a consumer
+        can drop <code>&lt;nge-table&gt;</code> into an unthemed page and get a readable table.
+      </p>
+      <div class="table-container">
+        <nge-table [config]="baseConfig" />
+      </div>
+    </section>
+
+    <!-- SECTION 2: Surfaces and content -->
+    <section class="story-section">
+      <h4>2. Surfaces &amp; content</h4>
+      <p class="story-description">
+        The viewport, the header/footer band, the row backgrounds and the text on them. Hover a row
+        to see <code>--nge-table-row-surface-hover</code>.
+      </p>
+      <div class="code-block">
+        <pre>
+.my-table-theme {{ "{" }}
+  --nge-table-surface: #fdf8f3;
+  --nge-table-surface-variant: #f0e4d7;
+  --nge-table-row-surface-hover: #f7ede2;
+  --nge-table-on-surface: #3d2c1e;
+  --nge-table-on-surface-variant: #8a7360;
+  --nge-table-header-on-surface: #6b4423;
+{{ "}" }}</pre>
+      </div>
+      <div class="table-container theme-sand">
+        <nge-table [config]="baseConfig" />
+      </div>
+    </section>
+
+    <!-- SECTION 3: Borders -->
+    <section class="story-section">
+      <h4>3. Borders</h4>
+      <p class="story-description">
+        Row and column separators share <code>--nge-table-border-color</code>;
+        <code>--nge-table-header-border-color</code> is separate because the rule under the header
+        band usually wants to be stronger than a row separator.
+      </p>
+      <div class="code-block">
+        <pre>
+.my-table-theme {{ "{" }}
+  --nge-table-border-color: #c8d6e5;
+  --nge-table-border-width: 2px;
+  --nge-table-header-border-color: #2e86de;
+{{ "}" }}</pre>
+      </div>
+      <div class="table-container theme-ruled">
+        <nge-table [config]="baseConfig" />
+      </div>
+    </section>
+
+    <!-- SECTION 4: Density -->
+    <section class="story-section">
+      <h4>4. Density</h4>
+      <p class="story-description">
+        Row height, header height and cell padding — two boxes, one config. But
+        <strong
+          >the two height tokens are only reachable from CSS when the config leaves them out</strong
+        >, and that is the sharpest edge in the whole contract, so it is worth being exact about.
+      </p>
+      <p class="story-description">
+        <code>createNgeTableConfig()</code> fills in <code>rowHeight</code> and
+        <code>headerHeight</code> from <code>NGE_TABLE_DEFAULTS</code> unconditionally, and
+        <code>&lt;nge-table&gt;</code> then publishes both as <em>inline</em> custom properties on
+        its host element — where they beat a wrapper class outright, because an inline declaration
+        outranks a class selector regardless of specificity. So the tables below are the one place
+        in this story whose config is
+        <strong>hand-authored rather than built by the factory</strong>: a config that omits the
+        fields makes the component remove the properties, which is exactly how the tokens get handed
+        back to the theme.
+      </p>
+      <p class="story-description">
+        Cell padding has no such caveat — it is never written inline, so it themes from CSS either
+        way. And when virtualization is on, <code>rowHeight</code> must come from the config no
+        matter what: the virtualizer positions rows it has not rendered yet, so it needs the number
+        in TypeScript and pins the token to it.
+      </p>
+      <div class="code-block">
+        <pre>
+// Hand-authored — no rowHeight / headerHeight, so CSS owns them.
+config: NgeTableConfig&lt;Row&gt; = {{ "{" }} columns, data, getRowId {{ "}" }};
+
+.compact {{ "{" }}
+  --nge-table-row-height: 28px;
+  --nge-table-header-height: 32px;
+  --nge-table-cell-padding-x: 8px;
+{{ "}" }}
+
+.roomy {{ "{" }}
+  --nge-table-row-height: 60px;
+  --nge-table-header-height: 64px;
+  --nge-table-cell-padding-x: 20px;
+{{ "}" }}</pre>
+      </div>
+      <div class="density-row">
+        <div class="density-column">
+          <h5>Compact</h5>
+          <div class="table-container theme-compact">
+            <nge-table [config]="themableGeometryConfig" />
+          </div>
+        </div>
+        <div class="density-column">
+          <h5>Roomy</h5>
+          <div class="table-container theme-roomy">
+            <nge-table [config]="themableGeometryConfig" />
+          </div>
+        </div>
+      </div>
+      <p class="story-description">
+        For contrast, the same wrapper classes over a <code>createNgeTableConfig()</code> table:
+        the padding moves, the heights do not.
+      </p>
+      <div class="density-row">
+        <div class="density-column">
+          <h5>Compact class, factory config</h5>
+          <div class="table-container theme-compact">
+            <nge-table [config]="baseConfig" />
+          </div>
+        </div>
+        <div class="density-column">
+          <h5>Roomy class, factory config</h5>
+          <div class="table-container theme-roomy">
+            <nge-table [config]="baseConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: Typography -->
+    <section class="story-section">
+      <h4>5. Typography</h4>
+      <p class="story-description">
+        <code>--nge-table-font-family</code> defaults to <code>inherit</code>, so a table adopts
+        the page's face unless it is told otherwise. Header size and weight are separate tokens from
+        the body's.
+      </p>
+      <div class="code-block">
+        <pre>
+.my-table-theme {{ "{" }}
+  --nge-table-font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  --nge-table-font-size: 12px;
+  --nge-table-line-height: 18px;
+  --nge-table-header-font-size: 11px;
+  --nge-table-header-font-weight: 700;
+{{ "}" }}</pre>
+      </div>
+      <div class="table-container theme-mono">
+        <nge-table [config]="baseConfig" />
+      </div>
+    </section>
+
+    <!-- SECTION 6: Pinning -->
+    <section class="story-section">
+      <h4>6. Pinning</h4>
+      <p class="story-description">
+        <strong>Scroll this table sideways.</strong> A pinned lane is <code>position: sticky</code>
+        and passes over the centre lane, so its surface token
+        <strong>must stay opaque</strong> — a transparent one lets the scrolling cells bleed through
+        underneath. The two shadow tokens mirror each other: the left lane casts rightward, the
+        right lane leftward.
+      </p>
+      <div class="code-block">
+        <pre>
+.my-table-theme {{ "{" }}
+  --nge-table-pinned-surface: #eef7ee;
+  --nge-table-pinned-surface-hover: #dcefdc;
+  --nge-table-pinned-header-surface: #d6ead6;
+  --nge-table-pinned-left-shadow: 4px 0 8px rgb(27 94 32 / 0.28);
+  --nge-table-pinned-right-shadow: -4px 0 8px rgb(27 94 32 / 0.28);
+{{ "}" }}</pre>
+      </div>
+      <div class="table-container table-container--narrow theme-pinned">
+        <nge-table
+          [config]="pinnedConfig"
+          [state]="pinnedState"
+        />
+      </div>
+      <p class="story-description">
+        <code>--nge-table-pinned-left-sticky-offset</code> and its right-hand twin move where a
+        lane anchors inside the viewport. Zero is correct for a plain table; they exist so an app
+        with a permanent gutter at an edge can shift the anchor without patching the library.
+        <code>--nge-table-pinned-z-index</code> and <code>--nge-table-header-z-index</code> are
+        deliberately low and explicit so an app can lift its own overlays over the table without
+        fighting a magic number — the header must outrank the lanes, because at the top-left corner
+        cell the two stickies cross and the header has to win.
+      </p>
+    </section>
+
+    <!-- SECTION 7: Interaction -->
+    <section class="story-section">
+      <h4>7. Interaction — resize grip &amp; focus ring</h4>
+      <p class="story-description">
+        <strong>Hover a header's trailing edge, then drag it; then tab into a header.</strong> The
+        grip is <code>transparent</code> at rest on purpose — a permanent rule between every pair of
+        columns is noise, and the affordance is the cursor — so these tokens are only visible under
+        the gestures that summon them.
+      </p>
+      <div class="code-block">
+        <pre>
+.my-table-theme {{ "{" }}
+  --nge-table-resize-handle-width: 8px;
+  --nge-table-resize-handle-color: transparent;
+  --nge-table-resize-handle-color-hover: #f0a202;
+  --nge-table-resize-handle-color-active: #d94f04;
+  --nge-table-focus-ring-color: #d94f04;
+  --nge-table-focus-ring-width: 3px;
+{{ "}" }}</pre>
+      </div>
+      <div class="table-container theme-grip">
+        <nge-table [config]="resizableConfig" />
+      </div>
+    </section>
+
+    <!-- SECTION 8: Slot chrome -->
+    <section class="story-section">
+      <h4>8. Slot chrome</h4>
+      <p class="story-description">
+        The bands a <code>[ngeTableSlot]</code> template renders into. Only the chrome is tokenised
+        — what a slot renders is the consumer's markup carrying the consumer's own styles, and a
+        token that tried to style it would be dictating rather than theming.
+      </p>
+      <div class="code-block">
+        <pre>
+.my-table-theme {{ "{" }}
+  --nge-table-toolbar-padding: 16px 20px;
+  --nge-table-row-detail-surface: #ede7f6;
+{{ "}" }}</pre>
+      </div>
+      <div class="table-container theme-slots">
+        <nge-table
+          [config]="slotConfig"
+          [state]="slotExpandedState"
+        >
+          <ng-template ngeTableSlot="toolbar">
+            <strong>Toolbar band</strong>
+            <small>— padded by <code>--nge-table-toolbar-padding</code></small>
+          </ng-template>
+          <ng-template
+            ngeTableSlot="row-detail"
+            [ngeTableSlotOf]="slotRows"
+            let-detail
+          >
+            <span class="slotted-detail">
+              Detail band for <strong>{{ detail.row.name }}</strong> — surfaced by
+              <code>--nge-table-row-detail-surface</code>
+            </span>
+          </ng-template>
+        </nge-table>
+      </div>
+
+      <p class="story-description">
+        <code>--nge-table-loading-scrim</code> is translucent by default, because a refresh over
+        existing rows should read as “these are going stale”, not as an empty table. Its z-index
+        outranks the header's: an overlay the sticky header punched a hole through would be a worse
+        lie than no overlay at all. Both tables below project a <code>loading</code> template
+        permanently — its presence <em>is</em> the flag, so there is no
+        <code>config.loading</code> to set.
+      </p>
+      <div class="density-row">
+        <div class="density-column">
+          <h5>Default scrim</h5>
+          <div class="table-container">
+            <nge-table [config]="loadingConfig">
+              <ng-template ngeTableSlot="loading">
+                <span class="slotted-loading">Loading…</span>
+              </ng-template>
+            </nge-table>
+          </div>
+        </div>
+        <div class="density-column">
+          <h5>Heavier, tinted scrim</h5>
+          <div class="table-container theme-scrim">
+            <nge-table [config]="loadingConfig">
+              <ng-template ngeTableSlot="loading">
+                <span class="slotted-loading">Loading…</span>
+              </ng-template>
+            </nge-table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 9: Dark -->
+    <section class="story-section">
+      <h4>9. Dark</h4>
+      <p class="story-description">
+        The whole contract restated for a dark surface — the shape a domain's
+        <code>--nge-table-*</code> bridge will take when the first consumer adopts the library.
+        Note that the pinned surfaces have to be restated too and cannot fall back to the light
+        values: they are opaque by requirement, so a missed one shows up as two pale rectangles
+        punched through a dark table.
+      </p>
+      <div class="table-container theme-dark">
+        <nge-table
+          [config]="pinnedConfig"
+          [state]="pinnedState"
+        />
+      </div>
+    </section>
+
+    <!-- SECTION 10: Side by side -->
+    <section class="story-section story-section--highlight">
+      <h4>10. Three themes, one config</h4>
+      <p class="story-description">
+        All three tables below are the same <code>compactConfig</code>. Nothing but a wrapper class
+        differs — which is the whole claim of a CSS-custom-property contract, and why theming this
+        library never involves rebuilding a config.
+      </p>
+      <div class="density-row">
+        <div class="density-column">
+          <h5>Sand</h5>
+          <div class="table-container table-container--short theme-sand">
+            <nge-table [config]="compactConfig" />
+          </div>
+        </div>
+        <div class="density-column">
+          <h5>Ruled</h5>
+          <div class="table-container table-container--short theme-ruled">
+            <nge-table [config]="compactConfig" />
+          </div>
+        </div>
+        <div class="density-column">
+          <h5>Dark</h5>
+          <div class="table-container table-container--short theme-dark">
+            <nge-table [config]="compactConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 11: The tokens CSS cannot reach -->
+    <section class="story-section">
+      <h4>11. What a wrapper class cannot change</h4>
+      <p class="story-description">
+        Not every name in <code>_table-tokens.scss</code> is a knob a wrapper class can turn. Four
+        tiers exist, and only the first two are demonstrable above; setting a token from the rest
+        does nothing, so this story does not pretend otherwise.
+      </p>
+      <ul class="token-notes">
+        <li>
+          <strong>Read from CSS</strong> — everything in sections 2–9. A wrapper class changes them.
+          <code>--nge-table-row-surface-selected</code> and
+          <code>--nge-table-row-surface-alt</code> belong in this tier too; the features that read
+          them are simply switched off here, so the Selection and Striping theming stories are where
+          they are demonstrated.
+        </li>
+        <li>
+          <strong>Overwritten inline by the component</strong> —
+          <code>--nge-table-row-height</code> and <code>--nge-table-header-height</code>, whenever
+          the config carries a value for them. <code>createNgeTableConfig()</code> always does, and
+          virtualization always does; only a hand-authored config that omits the fields leaves them
+          to CSS. See section 4.
+        </li>
+        <li>
+          <strong>Mirrored in TypeScript, not read from CSS</strong> —
+          <code>--nge-table-column-min-width</code>,
+          <code>--nge-table-column-default-width</code> and
+          <code>--nge-table-column-max-width</code>. The resize drag clamps against
+          <code>NGE_TABLE_DEFAULTS</code>, because it cannot measure a column it has not rendered.
+          The knob that works is <code>NgeTableConfig</code> (<code>columnMinWidth</code> /
+          <code>columnDefaultWidth</code> / <code>columnMaxWidth</code>), or <code>minSize</code> /
+          <code>maxSize</code> per column.
+        </li>
+        <li>
+          <strong>Never yours to set</strong> — the <code>--nge-table-internal-*</code> family.
+          <code>&lt;nge-table&gt;</code> writes live lane geometry onto its own host element on
+          every state change; overriding one breaks layout rather than restyling it, which is why it
+          is deliberately absent from the token partial.
+        </li>
+      </ul>
+    </section>
+  </div>
+</nge-storybook-review-container>

@@ -1,0 +1,210 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Zebra Striping (Theming)</h2>
+    <p class="intro-text">
+      Striping has exactly one themeable token, <code>--nge-table-row-surface-alt</code>. There is
+      no <code>theme</code> field on <code>NgeTableConfig</code> — the table themes through CSS
+      custom properties only, so every section below is one scoped wrapper class re-declaring the
+      property, which is what a consumer writes. All ten domain themes bridge this token onto their
+      own <code>surface-container-low</code> tier.
+    </p>
+
+    <section class="story-section">
+      <h4>1. The library default</h4>
+      <p class="story-description">
+        <code>#fafafa</code> against a <code>#ffffff</code> surface — deliberately faint. A stripe
+        is a reading aid, and one strong enough to notice on its own is strong enough to compete
+        with the marks that carry meaning.
+      </p>
+      <div class="code-block">
+        <pre>
+// _table-tokens.scss
+--nge-table-row-surface-alt: #fafafa;</pre>
+      </div>
+      <div class="table-container">
+        <nge-table [config]="baseConfig" />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>2. A stronger stripe</h4>
+      <p class="story-description">
+        Raise the contrast for a dense table read at a distance. Note the ceiling: past a certain
+        strength the stripe starts reading as a state rather than as a ruler, and a user begins
+        wondering what the shaded rows have in common.
+      </p>
+      <div class="code-block">
+        <pre>
+.theme-strong {{ "{" }}
+  --nge-table-row-surface-alt: #eceff4;
+{{ "}" }}</pre>
+      </div>
+      <div class="table-container theme-strong">
+        <nge-table [config]="baseConfig" />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>3. A tinted stripe</h4>
+      <p class="story-description">
+        Nothing requires the alternate surface to be grey. A low-saturation tint of the domain's own
+        accent keeps the table looking like the rest of the product, and is the shape most of the
+        theme bridges take.
+      </p>
+      <div class="code-block">
+        <pre>
+.theme-tinted {{ "{" }}
+  --nge-table-row-surface-alt: #f2f6fc;
+{{ "}" }}</pre>
+      </div>
+      <div class="table-container theme-tinted">
+        <nge-table [config]="baseConfig" />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>4. Same config, three wrapper classes</h4>
+      <p class="story-description">
+        The point theming stories exist to make: the three tables below share one
+        <code>config</code> object. Nothing about striping is configuration beyond the flag that
+        switches it on — everything visual is a property a wrapper class sets.
+      </p>
+      <div class="theme-comparison">
+        <div class="theme-comparison__item">
+          <h5>Default</h5>
+          <div class="table-container table-container--short">
+            <nge-table [config]="baseConfig" />
+          </div>
+        </div>
+        <div class="theme-comparison__item theme-strong">
+          <h5>Strong</h5>
+          <div class="table-container table-container--short">
+            <nge-table [config]="baseConfig" />
+          </div>
+        </div>
+        <div class="theme-comparison__item theme-tinted">
+          <h5>Tinted</h5>
+          <div class="table-container table-container--short">
+            <nge-table [config]="baseConfig" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>5. The stripe still loses to a themed mark</h4>
+      <p class="story-description">
+        Both the alternate surface and the selected surface are themed here, and the selected rows
+        still read as selected — one of them striped, one not, and indistinguishable from each
+        other. The stripe never declares <code>background</code>; it only changes the value the
+        row's background resolves through, so a mark cannot be out-ranked by theming it wrong.
+      </p>
+      <div class="code-block">
+        <pre>
+.theme-marked {{ "{" }}
+  --nge-table-row-surface-alt: #eceff4;
+  --nge-table-row-surface-selected: #d7e8fb;
+  --nge-table-selection-accent: #1565c0;
+{{ "}" }}</pre>
+      </div>
+      <div class="table-container theme-marked">
+        <nge-table
+          [config]="selectableConfig"
+          [state]="selectedState"
+        />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>6. The pinned lanes, and why they must stay opaque</h4>
+      <p class="story-description">
+        A pinned lane is <code>position: sticky</code> and scrolls over the center lane, so its
+        surface has to be opaque. The alternate surface reaches the lanes by inheritance, which is
+        what keeps a striped row one continuous band — but it means a <em>translucent</em> value for
+        this token would let the center cells bleed through the pinned lanes as they pass. Theme it
+        with an opaque colour.
+      </p>
+      <p class="story-description"> <strong>Scroll horizontally</strong> to check the seams. </p>
+      <div class="code-block">
+        <pre>
+.theme-pinned {{ "{" }}
+  --nge-table-row-surface-alt: #eef2f7;   // opaque, not rgba(…, .5)
+  --nge-table-pinned-surface: #ffffff;
+{{ "}" }}</pre>
+      </div>
+      <div class="table-container table-container--narrow theme-pinned">
+        <nge-table
+          [config]="pinnedConfig"
+          [state]="pinnedState"
+        />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>7. Dark</h4>
+      <p class="story-description">
+        The shape a domain's <code>--nge-table-*</code> bridge takes. Every surface is restated
+        rather than left to inherit — the pinned surfaces especially, since a missed one shows up as
+        pale rectangles punched through a dark table. In dark themes the alternate row usually goes
+        <em>lighter</em> than the base surface, the reverse of the light-mode direction.
+      </p>
+      <div class="code-block">
+        <pre>
+.theme-dark {{ "{" }}
+  --nge-table-surface: #16181d;
+  --nge-table-surface-variant: #22252c;
+  --nge-table-row-surface-alt: #1c1f25;
+  --nge-table-row-surface-hover: #262a32;
+  --nge-table-pinned-surface: #16181d;
+  --nge-table-pinned-header-surface: #22252c;
+  --nge-table-on-surface: #e4e6ea;
+  --nge-table-on-surface-variant: #a4a9b4;
+  --nge-table-header-on-surface: #e4e6ea;
+  --nge-table-border-color: #2c3038;
+  --nge-table-header-border-color: #3a3f49;
+{{ "}" }}</pre>
+      </div>
+      <div class="table-container theme-dark">
+        <nge-table [config]="baseConfig" />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>8. What is and is not themeable here</h4>
+      <p class="story-description">
+        Four tiers, and striping adds its one token to the first of them.
+      </p>
+      <ul class="token-tiers">
+        <li>
+          <strong>Read from CSS —</strong> <code>--nge-table-row-surface-alt</code>, alongside the
+          surfaces, content, borders, header band, pinning, typography and mark tokens. Set them
+          from a wrapper class.
+        </li>
+        <li>
+          <strong>Overwritten inline by the component —</strong>
+          <code>--nge-table-row-height</code> / <code>-header-height</code>, whenever the config
+          carries them. <code>createNgeTableConfig()</code> always fills them in, and
+          <code>applyGeometry</code> then writes them inline on the host where they outrank any
+          class.
+        </li>
+        <li>
+          <strong>Mirrored in TypeScript —</strong> the
+          <code>--nge-table-column-*-width</code> family and
+          <code>--nge-table-selection-column-width</code>. The resize clamp and the selection
+          column's <code>size</code> read <code>NGE_TABLE_DEFAULTS</code>; the knob that works is
+          <code>NgeTableConfig</code>.
+        </li>
+        <li>
+          <strong>Never yours to set —</strong> the <code>--nge-table-internal-*</code> family,
+          which now includes <code>--nge-table-internal-row-surface</code>: the table writes it per
+          row to pick the zebra surface. Setting it from a theme would stripe every row at once,
+          which is why the token a theme <em>does</em> own is
+          <code>--nge-table-row-surface-alt</code>.
+        </li>
+      </ul>
+    </section>
+  </div>
+</nge-storybook-review-container>

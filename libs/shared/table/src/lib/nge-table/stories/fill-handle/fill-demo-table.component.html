@@ -1,0 +1,68 @@
+@let tableState = state();
+
+<div class="nge-table-fill-demo__controls">
+  <button
+    type="button"
+    [disabled]="lastIntent() === null"
+    (click)="undo()"
+    >Undo last fill</button
+  >
+  <span class="nge-table-fill-demo__hint"
+    >select cells · drag the square at the block's edge · <kbd>esc</kbd> mid-drag cancels</span
+  >
+</div>
+
+<!--
+  ⚠️ ONE `cell-overlay` template hosting BOTH components. A second registration for
+  the same slot would silently replace this one rather than compose with it — the
+  limit ARCH-269 recorded, now that there are three cell-marking components.
+
+  No wrapper listener for the gesture: `NgeRangeBridge` delegates its own pointer
+  stream from the table root, and distinguishes a fill drag from a range drag by
+  hit-testing the handle's class.
+-->
+<nge-table
+  [config]="config()"
+  [state]="tableState"
+  [style.max-height.px]="maxHeight()"
+  (ngeTableEvent)="onEvent($event)"
+  (stateChange)="state.set($event)"
+>
+  <ng-template
+    ngeTableSlot="cell-overlay"
+    [ngeTableSlotOf]="rows()"
+    let-cell
+  >
+    <nge-range-overlay
+      [cell]="cell"
+      [state]="tableState"
+    />
+    <nge-fill-handle
+      [cell]="cell"
+      [state]="tableState"
+    />
+  </ng-template>
+</nge-table>
+
+<div class="nge-table-fill-demo__readouts">
+  <!--
+    What is selected RIGHT NOW, as values — `readNgeExportData({ cellPredicate })`
+    read live rather than behind a button. This answers "what have I got hold of"
+    before a fill; the readout beside it answers "what did the table propose" after one.
+  -->
+  @if (showSelectedData()) {
+    <div class="nge-table-fill-demo__readout">
+      <h5>selected data — {{ selectedSummary() }}</h5>
+      @if (selectedJson()) {
+        <pre>{{ selectedJson() }}</pre>
+      }
+    </div>
+  }
+
+  <div class="nge-table-fill-demo__readout">
+    <h5>last fill-intent — {{ intentSummary() }}</h5>
+    @if (lastIntent()) {
+      <pre>{{ intentJson() }}</pre>
+    }
+  </div>
+</div>

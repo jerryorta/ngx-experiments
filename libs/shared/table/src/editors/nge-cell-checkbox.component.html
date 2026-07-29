@@ -1,0 +1,38 @@
+@let context = cell();
+@let ariaLabel = label() ?? "Edit " + context.columnId;
+@let value = checked();
+
+<!--
+  Two boxes rather than one, because the read-only half of the activation model has
+  to show the value without offering to change it — and a disabled checkbox says
+  both at once, where "true" / "false" text would say only the first.
+
+  ⚠️ They are separate elements on purpose. One box with a `[disabled]` binding
+  would keep its DOM `checked` across a virtualized recycle whenever the bound value
+  did not change, which is the stale-state trap the component's doc records. The
+  `@if` destroys and rebuilds instead, so nothing survives to be stale.
+
+  The click is stopped for the reason every in-cell control stops it: the row's
+  click selects and the cell's click activates, so without it a toggle also reads as
+  a click on the table.
+-->
+@if (context.isEditing()) {
+  <input
+    #field
+    class="nge-cell-checkbox__field"
+    type="checkbox"
+    [attr.aria-label]="ariaLabel"
+    [checked]="value"
+    (change)="commit(field.checked)"
+    (click)="$event.stopPropagation()"
+    (keydown.enter)="commit(field.checked)"
+  />
+} @else {
+  <input
+    class="nge-cell-checkbox__field nge-cell-checkbox__field--readonly"
+    type="checkbox"
+    disabled
+    [attr.aria-label]="ariaLabel"
+    [checked]="value"
+  />
+}

@@ -1,0 +1,174 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Cell Highlighting (Theming)</h2>
+    <p class="intro-text">
+      Three tokens, each with a literal fallback at its use site. The addon adds nothing to core's
+      <code>_table-tokens.scss</code> — editing that partial would be a core edit, and the point of
+      this story's feature is that an addon needs none. Every section below is the
+      <strong>same table with the same marks</strong> under a different wrapper class, which is
+      exactly what a consumer writes.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. The token contract</h4>
+      <p class="story-description">
+        Three properties, all read from CSS and all themeable from any selector with higher
+        specificity than <code>:root</code>.
+      </p>
+      <div class="code-block">
+        <pre>
+.my-theme {{ "{" }}
+  --nge-table-highlight-surface: #fff3bf;      // the cell tint (must be opaque)
+  --nge-table-highlight-outline: #f0c000;      // the inset ring
+  --nge-table-highlight-on-surface: #1f1a00;   // text on the tint
+{{ "}" }}</pre>
+      </div>
+      <p class="story-description">
+        <strong>Opaque is a requirement, not a preference.</strong> A pinned lane is
+        <code>position: sticky</code> and scrolls over the center lane, so a translucent tint shows
+        the center cells sliding underneath. Section 6 is where that is visible.
+      </p>
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. Default — no theme applied</h4>
+      <p class="story-description">
+        The literal fallbacks, which is what a consumer sees before writing a single token. Two
+        individually-picked cells and one two-column block.
+      </p>
+      <nge-table-highlight-demo
+        [config]="baseConfig"
+        [maxHeight]="300"
+        [showClear]="false"
+        [rows]="themedRows"
+        [(state)]="defaultState"
+      />
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. Three palettes, one table</h4>
+      <p class="story-description">
+        Identical config, identical state, three wrapper classes. Theming a table changes nothing
+        about its configuration — which is the whole reason this story is SCSS rather than
+        TypeScript.
+      </p>
+
+      <div class="comparison-grid">
+        <div class="comparison-box">
+          <h5>theme-amber (default)</h5>
+          <nge-table-highlight-demo
+            [config]="baseConfig"
+            [maxHeight]="300"
+            [showClear]="false"
+            [rows]="themedRows"
+            [(state)]="amberState"
+          />
+        </div>
+
+        <div class="comparison-box theme-mint">
+          <h5>theme-mint</h5>
+          <nge-table-highlight-demo
+            [config]="baseConfig"
+            [maxHeight]="300"
+            [showClear]="false"
+            [rows]="themedRows"
+            [(state)]="mintState"
+          />
+        </div>
+
+        <div class="comparison-box theme-violet">
+          <h5>theme-violet</h5>
+          <nge-table-highlight-demo
+            [config]="baseConfig"
+            [maxHeight]="300"
+            [showClear]="false"
+            [rows]="themedRows"
+            [(state)]="violetState"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section theme-subtle">
+      <h4>4. A subtle mark</h4>
+      <p class="story-description">
+        Dropping the outline to the tint's own colour leaves a wash rather than a box — appropriate
+        when highlighting means "these rows matched" rather than "you selected these".
+      </p>
+      <nge-table-highlight-demo
+        [config]="baseConfig"
+        [maxHeight]="300"
+        [showClear]="false"
+        [rows]="themedRows"
+        [(state)]="subtleState"
+      />
+    </section>
+
+    <!-- 5 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section theme-dark">
+      <h4>5. Dark</h4>
+      <p class="story-description">
+        The shape a domain's <code>--nge-table-*</code> bridge will take when a consumer adopts the
+        library. Every surface is restated rather than left to inherit — the pinned surfaces
+        especially, which are opaque by requirement, so a missed one shows up as a pale rectangle
+        punched through the table.
+      </p>
+      <nge-table-highlight-demo
+        [config]="baseConfig"
+        [maxHeight]="300"
+        [showClear]="false"
+        [rows]="themedRows"
+        [(state)]="darkState"
+      />
+    </section>
+
+    <!-- 6 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>6. A highlighted pinned column</h4>
+      <p class="story-description">
+        <code>name</code> is pinned left and highlighted. <strong>Scroll sideways.</strong> The tint
+        must stay opaque or the center cells show through it — which is why the addon's stylesheet
+        restates the surface for the pinned lanes rather than relying on the cell rule alone.
+      </p>
+      <nge-table-highlight-demo
+        [config]="pinnedConfig"
+        [maxHeight]="300"
+        [showClear]="false"
+        [rows]="themedRows"
+        [(state)]="pinnedState"
+      />
+    </section>
+
+    <!-- 7 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>7. What is and is not themeable here</h4>
+      <p class="story-description">
+        The addon's tokens sit in the first tier of the library's five — read straight from CSS,
+        overridable from any wrapper class. Nothing about highlighting falls into the other tiers,
+        and in particular it declares no geometry: a highlight paints inside a cell whose size the
+        engine already owns.
+      </p>
+      <div class="code-block">
+        <pre>
+--nge-table-highlight-surface      ✅ read from CSS
+--nge-table-highlight-outline      ✅ read from CSS
+--nge-table-highlight-on-surface   ✅ read from CSS
+
+--nge-table-internal-*             ❌ never yours to set — runtime lane geometry</pre>
+      </div>
+      <p class="story-description">
+        One caveat worth stating plainly: because a highlight is painted with
+        <code>box-shadow: inset</code> rather than a border, it adds no width. A real border would
+        add two pixels the lane arithmetic has not accounted for, and every column downstream would
+        drift.
+      </p>
+    </section>
+  </div>
+</nge-storybook-review-container>

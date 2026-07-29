@@ -17,6 +17,12 @@
       "@nge/rxjs": ["./libs/shared/rxjs/src/index.ts"],
       "@nge/storybook": ["./libs/shared/storybook/src/index.ts"],
       "@nge/charts": ["./libs/shared/charts/src/index.ts"],
+      "@nge/table": ["./libs/shared/table/src/index.ts"],
+      "@nge/table/editors": ["./libs/shared/table/src/editors/index.ts"],
+      "@nge/table/testing": ["./libs/shared/table/src/testing/index.ts"],
+      "@nge/table-addon-conformance": [
+        "./libs/shared/table-addon-conformance/src/index.ts"
+      ],
       "@nge/ui-design-library": [
         "./libs/shared/ui-design-library/src/index.ts"
       ],

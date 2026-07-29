@@ -1,0 +1,336 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Row-Detail Content Usage</h2>
+    <p class="intro-text">
+      A cell is bounded by a column width; a <code>row-detail</code> band is as wide as the table.
+      That difference is the whole reason the band exists, and since ARCH-298 gave it a
+      <strong>declared height</strong> it can hold content that needs one — charts above all.
+      <strong
+        >Nothing on this page is a table feature: a band's content is your own markup, and this
+        story adds no library code.</strong
+      >
+      <strong>No example here imports <code>&#64;tanstack/*</code>.</strong>
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. Two charts, side by side, in one band</h4>
+      <p class="story-description">
+        The band is a flex row and each chart is a column of it. Two independent interactive charts
+        fit where a cell could not have held one legibly — and both are built from the same twelve
+        numbers already on the row (<code>series</code>, from the shared ARCH-290 fixture), read
+        straight off <code>detail.row</code>.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }}
+  columns: NGE_TABLE_FIXTURE_COLUMNS,
+  data: rows,
+  enableRowExpansion: true,
+  getRowId: row =&gt; row.id,        // ⚠️ mandatory — throws in dev without it
+  rowDetailHeight: 320,           // the band's DECLARED height
+{{ "}" }});</pre>
+      </div>
+      <div class="code-block">
+        <pre>
+&lt;nge-table [config]="config" [state]="state()" (stateChange)="state.set($event)"&gt;
+  &lt;ng-template ngeTableSlot="row-detail" [ngeTableSlotOf]="rows" let-detail&gt;
+    &#64;if (detail.isExpanded) {{ "{" }}
+      &lt;div class="detail-band"&gt;
+        &lt;div class="detail-band__chart"&gt;
+          &lt;h5 class="detail-band__title"&gt;{{ "{" }}{{ "{" }} detail.row.name {{ "}"
+          }}{{ "}" }} — trend over 12 days&lt;/h5&gt;
+          &lt;div class="detail-band__plot"&gt;
+            &lt;nge-chart [config]="trendConfigFor(detail.row)" /&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="detail-band__chart"&gt;
+          &lt;h5 class="detail-band__title"&gt;Same series against itself, at three lags&lt;/h5&gt;
+          &lt;div class="detail-band__plot"&gt;
+            &lt;nge-chart [config]="lagConfigFor(detail.row)" /&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    {{ "}" }}
+  &lt;/ng-template&gt;
+&lt;/nge-table&gt;</pre>
+      </div>
+      <div class="table-container">
+        <nge-table
+          [config]="bandConfig"
+          [state]="bandState()"
+          (stateChange)="onBandState($event)"
+        >
+          <ng-template
+            ngeTableSlot="row-detail"
+            [ngeTableSlotOf]="rows"
+            let-detail
+          >
+            @if (detail.isExpanded) {
+              <div class="detail-band">
+                <div class="detail-band__chart">
+                  <h5 class="detail-band__title">{{ detail.row.name }} — trend over 12 days</h5>
+                  <div class="detail-band__plot">
+                    <nge-chart [config]="trendConfigFor(detail.row)" />
+                  </div>
+                </div>
+                <div class="detail-band__chart">
+                  <h5 class="detail-band__title">Same series against itself, at three lags</h5>
+                  <div class="detail-band__plot">
+                    <nge-chart [config]="lagConfigFor(detail.row)" />
+                  </div>
+                </div>
+              </div>
+            }
+          </ng-template>
+        </nge-table>
+      </div>
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. The height contract — the one rule you have to write</h4>
+      <p class="story-description">
+        <code>&lt;nge-chart&gt;</code> attaches a shadow root injecting
+        <code>:host, svg {{ "{" }} width: 100%; height: 100% {{ "}" }}</code
+        >, and a percentage height resolves against nothing when its parent's height is
+        <code>auto</code>. So a chart in a band with no declared height collapses to a 0px-tall
+        nothing — <strong>silently, with no error anywhere</strong>.
+      </p>
+      <p class="story-description">
+        The band has a height. It does not, however, hand it down: the band is a plain block. So the
+        content reads <em>the same custom property the table was sized by</em> — one declaration,
+        correct in both height regimes, and no number duplicated between your SCSS and your config.
+      </p>
+      <div class="code-block">
+        <pre>
+.detail-band {{ "{" }}
+  box-sizing: border-box;
+  display: flex;
+  height: var(--nge-table-row-detail-height, 120px);   /* ← the contract */
+  padding: 12px 16px;
+{{ "}" }}
+
+.detail-band__chart {{ "{" }} display: flex; flex: 1 1 0; flex-direction: column; min-width: 0; {{
+            "}"
+          }}
+.detail-band__plot  {{ "{" }} flex: 1 1 auto; min-height: 0; {{ "}" }}</pre>
+      </div>
+      <p class="story-description">
+        <code>min-height: 0</code> on the plot is load-bearing too. A flex item's automatic minimum
+        size is its content, and an SVG's content is not small — without it the plot refuses to
+        shrink and pushes the band's fixed height into a scrollbar instead of fitting inside it.
+      </p>
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. Why a chart <em>cell</em>'s sizing does not transfer here</h4>
+      <p class="story-description">
+        The <strong>Chart Cells</strong> story sizes its chart with
+        <code>align-self: stretch</code>, and it is reasonable to expect the same move one level
+        out. It does not work, and the reason is worth knowing rather than discovering:
+      </p>
+      <div class="code-block">
+        <pre>
+/* A CELL is a flex ITEM on a row whose height is already definite. */
+.chart-cell  {{ "{" }} align-self: stretch; {{ "}" }}            /* ✅ stretches to the row */
+
+/* A BAND is a BLOCK on its own line — no flex line to stretch against. */
+.detail-band {{ "{" }} align-self: stretch; {{ "}" }}            /* ❌ no-op; chart collapses */
+.detail-band {{ "{" }} height: var(--nge-table-row-detail-height, 120px); {{ "}" }}  /* ✅ */</pre>
+      </div>
+      <p class="story-description">
+        <code>.nge-table__row-detail</code> is a block spanning the row (the row carries
+        <code>flex-wrap: wrap</code> so the band lands on its own line). There is no flex line to
+        stretch against and nothing above it to inherit a height from — so the content claims the
+        height explicitly, which is what the rule in Example 2 does.
+      </p>
+    </section>
+
+    <!-- 4 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>4. Memoise the chart config by the row object</h4>
+      <p class="story-description">
+        A factory called straight from the template allocates a new config on every change-detection
+        pass, so <code>&lt;nge-chart&gt;</code>'s <code>config</code> input changes identity and
+        the chart re-renders. Memoise it — and key the cache on the <strong>row object</strong>, not
+        on <code>row.id</code>: a <code>Map</code> never forgets a row it has seen, so a full
+        virtualized scroll would end up holding a config for every row in the dataset. The row
+        object is also the correct key on its own merits, since sorting and filtering reorder and
+        rewrap rows but never replace the underlying datum.
+      </p>
+      <div class="code-block">
+        <pre>
+private readonly trendConfigs = new WeakMap&lt;Row, NgeChartConfig&gt;();
+
+trendConfigFor(row: Row): NgeChartConfig {{ "{" }}
+  const cached = this.trendConfigs.get(row);
+  if (cached) {{ "{" }} return cached; {{ "}" }}
+
+  const config = createLineChartConfig({{ "{" }} data: buildTrendSeries(row), … {{ "}" }});
+  this.trendConfigs.set(row, config);
+  return config;
+{{ "}" }}</pre>
+      </div>
+      <p class="story-description">
+        Building every config eagerly up front is not the alternative — it only trades a scroll
+        stall for a startup stall. If the config depends on something that can change (a control, a
+        theme), rebuild the whole cache when that dependency moves rather than reaching into it; the
+        <strong>Interaction</strong> story shows that shape.
+      </p>
+    </section>
+
+    <!-- 5 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>5. Band content must be a pure function of its row</h4>
+      <p class="story-description">
+        Virtualization recycles DOM, so a band's element is handed a different row as the user
+        scrolls and the template runs again against it. Content that derived anything from
+        <code>Math.random()</code>, or cached a value on the element, would redraw itself mid-scroll
+        — and would show one row's numbers under another row's name.
+      </p>
+      <div class="code-block">
+        <pre>
+// ✅ Everything traces to the row it was handed.
+function buildLagCloud(row: Row) {{ "{" }}
+  return LAGS.flatMap(lag =&gt;
+    row.series.slice(0, -lag).map((value, i) =&gt; ({{ "{" }}
+      seriesId: `Lag ${{ "{" }}lag{{ "}" }}`, x: value, y: row.series[i + lag],
+    {{ "}" }})));
+{{ "}" }}
+
+// ❌ Redraws itself every time the window recycles this element.
+const jitter = () =&gt; Math.random() * 10;</pre>
+      </div>
+      <p class="story-description">
+        Both charts above obey this: the lag cloud plots the row's series against itself, and the
+        trend line adds a trailing mean and a level derived from <code>row.quantity</code>. Nothing
+        is invented, so scrolling a band past the window and back draws the identical picture.
+      </p>
+    </section>
+
+    <!-- 6 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>6. One height regime, and why the same rule serves every table</h4>
+      <p class="story-description">
+        The band takes a definite <code>height</code> plus <code>overflow: auto</code> whether or
+        not the table is windowed. Windowing is what makes it load-bearing — the virtualizer was
+        told an expanded row is <code>rowHeight + rowDetailHeight</code> tall and placed the rows
+        beneath it on that basis, so content past the declared height must scroll rather than push
+        its neighbours. Un-windowed nothing is positioned by arithmetic, so the definite height is
+        not strictly required there; it is what the two regimes agree on so the band's open can be
+        animated, which needs two definite endpoints.
+      </p>
+      <p class="story-description">
+        Because the content reads the token rather than either rule, one declaration covers both.
+        10,000 rows below, windowed, with a row already open:
+      </p>
+      <div class="table-container table-container--windowed">
+        <nge-table
+          [config]="windowedConfig"
+          [state]="windowedState()"
+          (stateChange)="onWindowedState($event)"
+        >
+          <ng-template
+            ngeTableSlot="row-detail"
+            [ngeTableSlotOf]="windowedRows"
+            let-detail
+          >
+            @if (detail.isExpanded) {
+              <div class="detail-band">
+                <div class="detail-band__chart">
+                  <h5 class="detail-band__title">{{ detail.row.name }} — trend over 12 days</h5>
+                  <div class="detail-band__plot">
+                    <nge-chart [config]="trendConfigFor(detail.row)" />
+                  </div>
+                </div>
+                <div class="detail-band__chart">
+                  <h5 class="detail-band__title">Same series against itself, at three lags</h5>
+                  <div class="detail-band__plot">
+                    <nge-chart [config]="lagConfigFor(detail.row)" />
+                  </div>
+                </div>
+              </div>
+            }
+          </ng-template>
+        </nge-table>
+      </div>
+    </section>
+
+    <!-- 7 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>7. One height per table — and what to do when you need two</h4>
+      <p class="story-description">
+        <code>rowDetailHeight</code> is <strong>per table, not per row</strong>, and that is a
+        decision rather than an omission. It feeds <code>estimateSize</code>, so a per-row callback
+        would turn one number you set once into a function you can get wrong per row — and the
+        failure mode is expanded rows overlapping their neighbours. A uniform band is also what
+        keeps a table readable: bands you can compare down the column beat bands that each size to
+        their own content.
+      </p>
+      <p class="story-description">
+        Two things follow, and the second is the one that makes the first liveable.
+        <strong>When two band kinds genuinely want two heights, run two tables</strong> — it costs a
+        config object, keeps every band inside one table comparable, and cannot go wrong per row.
+        And <strong>within a table, the content is pitched at the height you chose</strong>: the
+        160px band below drops the legend, axis labels and gridlines that the 320px band above
+        affords, because that chrome is ~75px and would leave the plot a sliver. The band height is
+        the constant; the content adapts to it.
+      </p>
+      <div class="code-block">
+        <pre>
+compactConfig = createNgeTableConfig&lt;Row&gt;({{ "{" }} …, rowDetailHeight: 160 {{ "}" }});
+bandConfig    = createNgeTableConfig&lt;Row&gt;({{ "{" }} …, rowDetailHeight: 320 {{ "}" }});
+
+// …and the 160px band's chart drops what it has no room for:
+createLineChartConfig({{ "{" }}
+  data: buildTrendSeries(row),
+  legend: {{ "{" }} enabled: false {{ "}" }}, showXAxis: false, showYAxis: false, showPoints: false,
+{{ "}" }});</pre>
+      </div>
+      <div class="table-container">
+        <nge-table
+          [config]="compactConfig"
+          [state]="compactState()"
+          (stateChange)="onCompactState($event)"
+        >
+          <ng-template
+            ngeTableSlot="row-detail"
+            [ngeTableSlotOf]="rows"
+            let-detail
+          >
+            @if (detail.isExpanded) {
+              <div class="detail-band">
+                <div class="detail-band__chart">
+                  <h5 class="detail-band__title">{{ detail.row.name }} — trend</h5>
+                  <div class="detail-band__plot">
+                    <nge-chart [config]="compactTrendConfigFor(detail.row)" />
+                  </div>
+                </div>
+                <div class="detail-band__chart detail-band__chart--facts">
+                  <h5 class="detail-band__title">Details</h5>
+                  <dl class="detail-facts">
+                    <dt>Owner</dt>
+                    <dd>{{ detail.row.owner.name }}</dd>
+                    <dt>Quantity</dt>
+                    <dd>{{ detail.row.quantity }}</dd>
+                    <dt>Status</dt>
+                    <dd>{{ detail.row.status }}</dd>
+                  </dl>
+                </div>
+              </div>
+            }
+          </ng-template>
+        </nge-table>
+      </div>
+      <p class="story-description">
+        The identical band markup and the identical height rule serve both, because neither names a
+        number — the rule reads whatever the table declared.
+      </p>
+    </section>
+  </div>
+</nge-storybook-review-container>

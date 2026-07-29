@@ -1,0 +1,237 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Cell Select Interaction</h2>
+    <p class="intro-text"
+      >The table's own enum editor, over a CDK overlay (ARCH-294). Every section below asks you to
+      <em>do</em> something: the panel does not exist until it is opened, so none of what this story
+      is about survives a screenshot.</p
+    >
+
+    <section class="story-section">
+      <h4>1. The select, with no template written</h4>
+      <p class="story-description"
+        >Click a <strong>Status</strong> trigger to open it. Choose an option and the proposal
+        appears below as an <code>edit-intent</code>. The column named
+        <code>NgeCellSelectComponent</code> through <code>ngeCellSelectEdit()</code>; there is no
+        <code>[ngeCell]</code> template and no <code>&lt;nge-cell-select&gt;</code> tag in the
+        demo's markup.</p
+      >
+      <p class="story-description"
+        >⚠️ <strong>The trigger is there at rest, and that is the default</strong> —
+        <code>ngeCellSelectEdit()</code> declares the column <code>alwaysLive</code>. A cell
+        rendering as bare text gives a user no way to know the column is a select, and activation
+        would cost a click <em>before</em> the click that opens; what it saves is one
+        <code>&lt;button&gt;</code> per visible row. The expensive half is deferred either way — no
+        overlay, portal or option list exists until something is opened. Section 9 shows the
+        opposite trade.</p
+      >
+      <nge-table-select-demo
+        [(rows)]="basicRows"
+        [(state)]="basicState"
+      />
+    </section>
+
+    <section class="story-section">
+      <h4>2. The panel is not clipped, and the cell still clips</h4>
+      <p class="story-description"
+        >This table is deliberately narrow and short. Open a status select on the
+        <strong>last</strong> row and confirm the panel overhangs the table's bottom edge rather
+        than being cut off at it — while the <strong>Name</strong> and <strong>Owner</strong> cells
+        beside it still truncate with an ellipsis.</p
+      >
+      <p class="story-description"
+        ><strong>Both halves matter.</strong> <code>.nge-table__cell</code> keeps
+        <code>overflow: hidden</code> and stays unpositioned so pinned lanes remain sticky
+        (ARCH-243); the panel escapes anyway because the CDK attaches it to a container on
+        <code>&lt;body&gt;</code>. If the panel were clipped, the overlay is not doing its job; if
+        the neighbouring cells stopped truncating, the substrate has been broken to make room for
+        it.</p
+      >
+      <div class="narrow-container">
+        <nge-table-select-demo
+          [(rows)]="clippingRows"
+          [(state)]="clippingState"
+          [maxHeight]="180"
+        />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>3. An open panel follows its trigger, then vanishes with its row</h4>
+      <p class="story-description"
+        >Open a status select, then scroll the table <strong>gently</strong> — the panel tracks the
+        trigger. Now keep scrolling until that row leaves the window: the panel
+        <strong>disappears</strong> rather than drifting or hanging in place.</p
+      >
+      <p class="story-description"
+        ><strong>Those are one mechanism, not two.</strong> Rows are <code>&#64;for</code>-tracked
+        by <code>row.id</code>, so a row leaving the window is <em>destroyed</em> rather than
+        recycled onto another record — the editor dies with it and its
+        <code>DestroyRef</code> teardown disposes the overlay. So
+        <code>RepositionScrollStrategy</code> gets the close-on-exit for free, and the detached-node
+        fear that makes <code>CloseScrollStrategy</code> look like the safe choice never
+        materialises: measured at 25px per frame, thirteen frames tracked exactly and none was
+        positioned at the detached <code>{{ "{" }}0,0,0,0{{ "}" }}</code> origin.</p
+      >
+      <p class="story-description"
+        >⚠️ <strong>This depends on rows being destroyed rather than recycled.</strong> Row
+        recycling is an unticketed backlog item for this epic; if it lands, a recycled trigger stays
+        connected while showing a different record and the panel would follow the wrong row. The
+        strategy has to be revisited before that ships.</p
+      >
+      <nge-table-select-demo
+        [(rows)]="virtualRows"
+        [(state)]="virtualState"
+        [enableVirtualization]="true"
+        [maxHeight]="360"
+      />
+    </section>
+
+    <section class="story-section">
+      <h4>4. The two-stage <kbd>esc</kbd> — and the cell range it must not clear</h4>
+      <p class="story-description">Cell ranges are on. In this order:</p>
+      <ol class="story-description">
+        <li
+          >Drag across three or four cells in the <strong>Quantity</strong> column — the
+          <code>state.ngeRange</code> readout fills in.</li
+        >
+        <li
+          >Activate a <strong>Status</strong> cell and open its panel. This section runs with
+          <code>alwaysLive: false</code> deliberately, so there is an activation for the second
+          press to cancel and both stages are visible.</li
+        >
+        <li
+          >Press <kbd>esc</kbd> once. The panel closes, the cell is
+          <strong>still being edited</strong>, and <code>state.ngeRange</code> is
+          <strong>unchanged</strong>.</li
+        >
+        <li
+          >Press <kbd>esc</kbd> again. The edit cancels. The range is
+          <strong>still</strong> unchanged.</li
+        >
+      </ol>
+      <p class="story-description"
+        ><strong>Why this needed two mechanisms rather than one.</strong> ARCH-292 contains
+        <kbd>esc</kbd> by stopping it at the cell, which starves the range and highlight addons'
+        document-level listeners because <code>document</code> is last on the bubble path. A panel
+        attached to <code>&lt;body&gt;</code> is not on that path at all — CDK dispatches its keys
+        from a <code>body</code> listener, one node earlier — so stage one is claimed at the panel,
+        and a trigger handler guarded on the panel being open covers the case where focus never left
+        the trigger. With no panel open, <kbd>esc</kbd> is left completely alone.</p
+      >
+      <nge-table-select-demo
+        [(rows)]="escapeRows"
+        [(state)]="escapeState"
+        [alwaysLive]="false"
+        [enableCellRange]="true"
+      />
+    </section>
+
+    <section class="story-section">
+      <h4>5. A range drag started on the trigger selects no cells</h4>
+      <p class="story-description"
+        >Activate a <strong>Status</strong> cell, then press and drag
+        <em>from the trigger itself</em> across neighbouring cells.
+        <code>state.ngeRange</code> stays empty. Now drag from the <strong>Amount</strong> cell
+        beside it — it fills. The contrast is the assertion; an empty readout on its own would
+        equally suggest ranges were never wired up.</p
+      >
+      <p class="story-description"
+        >This costs no new code. <code>NGE_INTERACTIVE_SELECTOR</code> matches on
+        <code>role</code>, and the trigger declares <code>role="combobox"</code> — so the drag
+        guard, and <kbd>cmd</kbd>/<kbd>ctrl</kbd>+<kbd>a</kbd> and <kbd>shift</kbd>+arrow
+        containment, all arrive with the attribute.</p
+      >
+      <nge-table-select-demo
+        [(rows)]="dragRows"
+        [(state)]="dragState"
+        [enableCellRange]="true"
+      />
+    </section>
+
+    <section class="story-section">
+      <h4>6. Keyboard</h4>
+      <ul class="story-description">
+        <li><kbd>enter</kbd> on a focused row activates the row's first editable column.</li>
+        <li
+          ><kbd>enter</kbd>, <kbd>space</kbd>, <kbd>↑</kbd> or <kbd>↓</kbd> on the trigger opens the
+          panel.</li
+        >
+        <li
+          ><kbd>↑</kbd> <kbd>↓</kbd> move through the options and
+          <strong>skip <em>Archived</em></strong
+          >, which is declared disabled.</li
+        >
+        <li><kbd>home</kbd> and <kbd>end</kbd> jump to the first and last selectable option.</li>
+        <li
+          >Typing jumps by prefix — press <kbd>f</kbd> for <em>Failed</em>. The buffer clears after
+          half a second, so <kbd>p</kbd><kbd>e</kbd> finds <em>Pending</em> while <kbd>p</kbd> …
+          pause … <kbd>e</kbd> does not.</li
+        >
+        <li><kbd>enter</kbd> commits the option under the cursor.</li>
+      </ul>
+      <p class="story-description"
+        >The option under the keyboard is announced through <code>aria-activedescendant</code>
+        rather than by moving focus: focus stays on the panel itself so its keys reach CDK's
+        <code>body</code> listener, which is what makes stage one of <kbd>esc</kbd> possible.</p
+      >
+      <nge-table-select-demo
+        [(rows)]="keyboardRows"
+        [(state)]="keyboardState"
+      />
+    </section>
+
+    <section class="story-section">
+      <h4>7. A consumer's own template still wins</h4>
+      <p class="story-description"
+        >The same column, with a <code>[ngeCell]</code> template projected for <code>status</code>.
+        The uppercase badge renders and <code>&lt;nge-cell-select&gt;</code> is never reached —
+        <code>NgeTableStore.cellTemplate</code> consults projected registrations <em>first</em>. A
+        library editor is a default a consumer shadows, never a fixture they have to work around.</p
+      >
+      <nge-table-select-demo
+        [(rows)]="overrideRows"
+        [(state)]="overrideState"
+        [overrideStatus]="true"
+      />
+    </section>
+
+    <section class="story-section">
+      <h4>8. A host that ignores the proposal</h4>
+      <p class="story-description"
+        >Same table, but the host does not apply what arrives. Choose an option: the
+        <code>edit-intent</code> is emitted and the cell reverts. The library
+        <strong>never writes to <code>config.data</code></strong> — it announces a patch and the
+        host owns whether anything changes.</p
+      >
+      <nge-table-select-demo
+        [(rows)]="ignoreRows"
+        [(state)]="ignoreState"
+        [applyIntents]="false"
+      />
+    </section>
+
+    <section class="story-section">
+      <h4>9. The other trade — <code>alwaysLive: false</code></h4>
+      <p class="story-description"
+        >The same column left on activation. Cells render as read-only text and a click activates
+        before a second click opens — which is the right trade for a dense, read-mostly grid where a
+        trigger per row would be visual noise, and the wrong one where a user needs to see that the
+        column is editable at all.</p
+      >
+      <p class="story-description"
+        >Worth comparing against section 1 directly. Neither costs an overlay at rest; the whole
+        difference is one <code>&lt;button&gt;</code> per visible row against a user's ability to
+        tell what the column does.</p
+      >
+      <nge-table-select-demo
+        [(rows)]="activatedRows"
+        [(state)]="activatedState"
+        [alwaysLive]="false"
+      />
+    </section>
+  </div>
+</nge-storybook-review-container>

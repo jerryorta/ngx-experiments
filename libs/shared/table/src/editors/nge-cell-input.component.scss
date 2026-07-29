@@ -1,0 +1,48 @@
+// The table's own text / number cell editor (ARCH-293).
+//
+// Every token is paired with a literal fallback, per the consumption rule in
+// `libs/shared/table/AGENTS.md` — a consumer who has not loaded
+// `_table-tokens.scss` still gets a field that looks like one.
+//
+// ⚠️ The focus ring is INSET, and that is a requirement rather than a style
+// choice: `.nge-table__cell` carries `overflow: hidden` and is deliberately
+// unpositioned (ARCH-243, both staying), so a ring drawn outside the box is
+// clipped on all four sides and a keyboard user loses the only cue they have.
+
+.nge-cell-input {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.nge-cell-input__text {
+  overflow: hidden;
+  width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nge-cell-input__field {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 0 var(--nge-table-editor-padding-x, 6px);
+  border: var(--nge-table-editor-border-width, 1px) solid var(--nge-table-editor-border-color, #b6b6bd);
+  border-radius: var(--nge-table-editor-radius, 4px);
+  background: var(--nge-table-editor-surface, #ffffff);
+  color: var(--nge-table-editor-on-surface, #1d1b20);
+  font-family: inherit;
+  font-size: var(--nge-table-editor-font-size, inherit);
+
+  // Height is deliberately not a token of its own. The field fills the row the
+  // theme or the config already sized, so a table at any density gets a field
+  // that matches it without a second number to keep in step.
+  height: calc(var(--nge-table-row-height, 40px) - 8px);
+
+  &:focus {
+    border-color: var(--nge-table-editor-border-color-focus, #1565c0);
+    box-shadow: inset 0 0 0 var(--nge-table-focus-ring-width, 2px) var(--nge-table-focus-ring-color, #1565c0);
+    outline: none;
+  }
+}

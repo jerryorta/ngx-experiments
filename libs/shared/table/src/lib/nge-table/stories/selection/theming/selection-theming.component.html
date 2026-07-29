@@ -1,0 +1,161 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Row Selection (Theming)</h2>
+    <p class="intro-text">
+      There is no <code>config.theme</code>. Every section below is the <em>same</em> config wrapped
+      in a different class that re-declares <code>--nge-table-*</code> — which is exactly what a
+      consumer writes. The substance of this story is its SCSS; read that file alongside this page.
+    </p>
+
+    <section class="story-section">
+      <h4>1. The two tokens selection reads</h4>
+      <p class="story-description">
+        <code>--nge-table-row-surface-selected</code> tints the row and its pinned lanes;
+        <code>--nge-table-selection-accent</code> tints the checkboxes through
+        <code>accent-color</code>, which colours a <em>native</em> control rather than replacing it
+        — so the checkbox stays keyboard-, screen-reader- and high-contrast-correct for free.
+      </p>
+      <div class="code-block">
+        <pre>
+.my-table {{ "{" }}
+  --nge-table-row-surface-selected: #e3f2fd;
+  --nge-table-selection-accent: #1565c0;
+{{ "}" }}</pre>
+      </div>
+      <div class="table-container">
+        <nge-table
+          [config]="config"
+          [state]="defaultState()"
+          (stateChange)="onDefaultState($event)"
+        />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>2. Same config, three wrapper classes</h4>
+      <p class="story-description">
+        The comparison that makes the mechanism obvious: one config object, three tables, three
+        classes. Nothing in TypeScript differs between them.
+      </p>
+
+      <h5 class="variant-label">Default</h5>
+      <div class="table-container">
+        <nge-table
+          [config]="config"
+          [state]="defaultState()"
+          (stateChange)="onDefaultState($event)"
+        />
+      </div>
+
+      <h5 class="variant-label">Brand — a warmer accent</h5>
+      <div class="table-container theme-brand">
+        <nge-table
+          [config]="config"
+          [state]="brandState()"
+          (stateChange)="onBrandState($event)"
+        />
+      </div>
+
+      <h5 class="variant-label">Subtle — a near-neutral tint</h5>
+      <div class="table-container theme-subtle">
+        <nge-table
+          [config]="config"
+          [state]="subtleState()"
+          (stateChange)="onSubtleState($event)"
+        />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>3. Selected and pinned</h4>
+      <p class="story-description">
+        ⚠️ Scroll this table horizontally. A pinned lane is <code>position: sticky</code> and opaque
+        by requirement, so it scrolls <em>over</em> the center lane — the selected tint has to be
+        repainted on it or a selected row would read as selected in the middle and unselected at
+        both edges. A theme overriding the selected surface gets that repaint automatically; a theme
+        overriding only <code>--nge-table-pinned-surface</code> would break it.
+      </p>
+      <div class="table-container table-container--narrow theme-brand">
+        <nge-table
+          [config]="pinnedConfig"
+          [state]="pinnedState()"
+          (stateChange)="onPinnedState($event)"
+        />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>4. The focus ring — only visible under a gesture</h4>
+      <p class="story-description">
+        ⚠️ This section shows nothing at rest. <strong>Tab into the table</strong> and note the ring
+        on the focused <em>row</em>. Selection is what made rows focusable, so
+        <code>--nge-table-focus-ring-color</code> and <code>--nge-table-focus-ring-width</code>
+        acquired a second consumption site here (the first is the header cell, ARCH-244). This
+        wrapper widens and reddens it so the effect is unmistakable.
+      </p>
+      <div class="code-block">
+        <pre>
+.my-table {{ "{" }}
+  --nge-table-focus-ring-color: #b3261e;
+  --nge-table-focus-ring-width: 3px;
+{{ "}" }}</pre>
+      </div>
+      <div class="table-container theme-focus">
+        <nge-table
+          [config]="config"
+          [state]="focusState()"
+          (stateChange)="onFocusState($event)"
+        />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>5. Dark</h4>
+      <p class="story-description">
+        The shape a domain's <code>--nge-table-*</code> bridge will take when a consumer adopts the
+        library. ⚠️ Every surface is restated rather than left to inherit — the pinned surfaces
+        especially, which are opaque by requirement, so a missed one shows up as pale rectangles
+        punched through a dark table. The selected tint has to be re-derived too: a light-mode
+        <code>#e3f2fd</code> against a dark row is not a tint, it is an inversion.
+      </p>
+      <div class="table-container table-container--narrow theme-dark">
+        <nge-table
+          [config]="pinnedConfig"
+          [state]="darkState()"
+          (stateChange)="onDarkState($event)"
+        />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>6. What is and is not themeable here</h4>
+      <p class="story-description">Four tiers, and selection adds an entry to three of them.</p>
+      <ul class="token-tiers">
+        <li>
+          <strong>Read from CSS —</strong> <code>--nge-table-row-surface-selected</code>,
+          <code>--nge-table-selection-accent</code>, <code>--nge-table-focus-ring-*</code>. Set
+          these from a wrapper class.
+        </li>
+        <li>
+          <strong>Mirrored in TypeScript —</strong>
+          <code>--nge-table-selection-column-width</code>. The column's <code>size</code> is a
+          number the engine clamps against, so the token alone would style a lane the engine still
+          measured at the default width. Both move together, and a spec asserts it.
+        </li>
+        <li>
+          <strong>Overwritten inline by the component —</strong>
+          <code>--nge-table-row-height</code> / <code>-header-height</code>, whenever the config
+          carries them. <code>createNgeTableConfig()</code> always fills them in, and
+          <code>applyGeometry</code> writes them inline on the host where they outrank any class.
+        </li>
+        <li>
+          <strong>Never yours to set —</strong> the <code>--nge-table-internal-*</code> family.
+          Runtime lane geometry; overriding one breaks layout rather than restyling it.
+        </li>
+      </ul>
+    </section>
+  </div>
+</nge-storybook-review-container>

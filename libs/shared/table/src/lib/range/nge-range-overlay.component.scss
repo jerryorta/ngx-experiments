@@ -1,0 +1,87 @@
+// =============================================================================
+// Cell range selection (ARCH-269) — an ADDON stylesheet.
+//
+// Every token carries a literal fallback at its use site, exactly as the core
+// stylesheet does, so a range renders correctly with no theme applied and without
+// this addon adding anything to `_table-tokens.scss`. Editing that partial (or the
+// `_index.scss` that forwards it) would be a core edit, and the whole point of this
+// story is that an addon needs none.
+//
+// ⚠️ The namespace is `--nge-table-range-*`, NOT `--nge-table-selection-*`:
+// ARCH-268 already owns that prefix (`--nge-table-selection-column-width`,
+// `--nge-table-selection-accent`), and a range is not a row selection.
+//
+// A theme overrides these by re-declaring them anywhere with higher specificity
+// than `:root`, the same way it overrides `--nge-table-*`:
+//
+//   .my-theme { --nge-table-range-surface: #{...}; }
+//
+// NEVER reference --mat-sys-* or mat-*. Angular Material is banned in this library.
+// =============================================================================
+
+// The marker element itself is never seen. It exists to carry a class and to
+// publish its cell's id pair, and to occupy no space in the cell's flex row while
+// doing so — a zero-size element in the trailing `cell-overlay` badge slot.
+.nge-range-overlay {
+  display: none;
+}
+
+// The tint is painted on the CELL, reached outward with `:has()`.
+//
+// ⚠️ This is the one place the addon depends on core's BEM class names, and it is a
+// deliberate, documented cost rather than an oversight. The alternative would be an
+// absolutely-positioned layer, which cannot work here: `.nge-table__cell` is not
+// positioned and is not a stacking context (ARCH-243 keeps it that way so pinned
+// lanes stay sticky), so the layer would anchor to the table host instead of to the
+// cell. Giving the cell `position: relative` would be a core edit. A theme couples
+// to these same class names, so the dependency is of a kind the library already has.
+//
+// `background-color` rather than `background`, so a consumer who has given the cell
+// a background image of their own keeps it underneath the tint.
+.nge-table__cell:has(> .nge-table__cell-overlay > .nge-range-overlay--on) {
+  background-color: var(--nge-table-range-surface, #dbeafe);
+  // Inset rather than a border: the cell's width is the engine's exact column size
+  // (widths are explicit and user-owned), so a real border would add two pixels the
+  // lane arithmetic has not accounted for and every column would drift.
+  box-shadow: inset 0 0 0 1px var(--nge-table-range-outline, #93c5fd);
+  color: var(--nge-table-range-on-surface, #0b2545);
+}
+
+// The active rectangle's focus cell — the corner a keyboard extension moves, and
+// where a fill handle would sit. Declared after the fill so its heavier ring wins
+// the `box-shadow`, and it is a ring rather than a different fill so the cell still
+// reads as part of the block it anchors.
+//
+// A full border around the *block* is deliberately not attempted: with disjoint
+// cmd/ctrl rectangles that may overlap, "is this cell on the block's top edge" has
+// no single answer, and the four per-side computations would have to run per cell
+// per render. Excel's block outline is a nicety; the focus cell is the part that
+// carries information.
+.nge-table__cell:has(> .nge-table__cell-overlay > .nge-range-overlay--focus) {
+  box-shadow: inset 0 0 0 2px var(--nge-table-range-focus-outline, #1d4ed8);
+}
+
+// ⚠️ **No pinned-lane rule is needed, and adding one would be dead code.**
+//
+// A pinned lane (`.nge-table__lane--pinned-left` / `--pinned-right`) is
+// `position: sticky` and scrolls over the center lane, so anything that reads as
+// selected must stay opaque or the center cells show through it. ARCH-268 needed a
+// sibling rule for exactly this because its tint is on the **row**, which a lane
+// paints over. This one is on the **cell** — which paints over its own lane's
+// background — and `--nge-table-range-surface` is opaque by requirement, the same
+// requirement `--nge-table-pinned-surface` carries. Same reasoning, and the same
+// conclusion, as ARCH-250's highlight overlay. Should a future theme make the tint
+// translucent, the fix belongs on the token, not here.
+
+// Suppress the browser's own text selection FOR THE DURATION OF A DRAG.
+//
+// ⚠️ The class is added on `pointerdown` and removed on `pointerup` /
+// `pointercancel` by `NgeRangeBridge`, and that transience is the whole point.
+// A permanent `user-select: none` on cells would also stop a user selecting and
+// copying a single cell's text — a trade the ticket's constraints rule out — while
+// a drag with no suppression at all paints a native selection band across the same
+// cells and reads as a rendering bug. A shift-click, which selects without
+// dragging, is handled separately by a `preventDefault()` on the `mousedown`.
+.nge-range-dragging {
+  user-select: none;
+}

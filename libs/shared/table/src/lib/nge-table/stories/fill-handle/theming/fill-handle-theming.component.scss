@@ -1,0 +1,129 @@
+// The story panel takes its surface from the same `--nge-table-surface` /
+// `--nge-table-on-surface` the table reads, so prose and table always move
+// together: under one of the ten domain themes that bridge `--nge-table-*`
+// (ARCH-277) both follow the toolbar, and under a theme that does not bridge
+// them (`nge-*`, `gy-*`) both fall back to the library's light-mode defaults —
+// unless a section below overrides them.
+//
+// ⚠️ **Every section's substance is in this file**, not in the component. There is no
+// `config.theme` on `NgeTableConfig`; the table themes exclusively through custom
+// properties, so a theming section IS a scoped wrapper class. Do not "align" this
+// with the charts theming stories, which are TypeScript because charts has a theme
+// object.
+.nge-table-fill-handle-theming {
+  display: block;
+  padding: 20px;
+  color: var(--nge-table-on-surface, #1d1b20);
+  background: var(--nge-table-surface, #ffffff);
+
+  .stories-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    margin-bottom: 8px;
+  }
+
+  .intro-text {
+    margin-bottom: 32px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 16px;
+  }
+
+  .story-section {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+
+    h4 {
+      margin-bottom: 8px;
+      color: var(--nge-table-on-surface, #1d1b20);
+    }
+
+    .story-description {
+      margin-bottom: 16px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 14px;
+    }
+  }
+
+  .code-block {
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    background: var(--nge-table-surface-variant, #f5f5f5);
+    border-radius: 6px;
+
+    pre {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+  }
+
+  // ⚠️ Load-bearing, not cosmetic. The fixture's seven columns come to roughly
+  // 1120px, which fits the 1200px story panel — so section 6's claim that a pinned
+  // lane scrolls over the center lane has nothing to scroll unless the table is
+  // narrowed. Check `scrollWidth > clientWidth` in the browser rather than assuming.
+  .table-container--narrow {
+    max-width: 720px;
+  }
+
+  // ─── The sections ──────────────────────────────────────────────────────────
+  //
+  // Each is one wrapper class re-declaring tokens, which is exactly what a consuming
+  // app writes. Nothing here targets a `.nge-table__*` class: that would be styling
+  // the library rather than theming it, and under `ViewEncapsulation.None` such a
+  // rule would actually land.
+
+  // 2 — a larger target. A real trade rather than a free win: the grip sits INSIDE the
+  // cell (see `nge-fill-handle.component.scss` for why it cannot overhang), so every
+  // pixel it gains is a pixel of the cell's own content it covers.
+  .large-grip {
+    --nge-table-fill-handle-radius: 7px;
+    --nge-table-fill-handle-size: 14px;
+  }
+
+  // 3 — a domain's colour across the grip, the pending region, and the ARCH-269 range
+  // the fill extends from. Three token families, one visual idea.
+  .theme-branded {
+    --nge-table-fill-handle-color: #7c3aed;
+    --nge-table-fill-target-outline: #7c3aed;
+    --nge-table-fill-target-surface: #f5f3ff;
+    --nge-table-range-outline: #c4b5fd;
+    --nge-table-range-surface: #ede9fe;
+  }
+
+  // 4 — the shape a per-persona `--nge-table-*` bridge will take. ⚠️ Every surface is
+  // restated rather than left to inherit; `--nge-table-fill-handle-outline` earns its
+  // keep here, since it is what keeps a small dark square legible on a dark cell.
+  .theme-dark {
+    --nge-table-border-color: #49454f;
+    --nge-table-fill-handle-color: #7dd3fc;
+    --nge-table-fill-handle-outline: #0f172a;
+    --nge-table-fill-target-outline: #38bdf8;
+    --nge-table-fill-target-surface: #0c4a6e;
+    --nge-table-header-on-surface: #e6e1e5;
+    --nge-table-on-surface: #e6e1e5;
+    --nge-table-on-surface-variant: #cac4d0;
+    --nge-table-pinned-surface: #2b2930;
+    --nge-table-range-on-surface: #e0f2fe;
+    --nge-table-range-outline: #38bdf8;
+    --nge-table-range-surface: #075985;
+    --nge-table-surface: #1c1b1f;
+    --nge-table-surface-variant: #2b2930;
+
+    padding: 16px;
+    border-radius: 8px;
+    background: var(--nge-table-surface);
+  }
+
+  // 5 — ⚠️ visible ONLY while a pointer is down. The pending target is cleared the
+  // moment a drag ends, so this section is inert in a screenshot and the prose asks the
+  // reviewer to drag.
+  .theme-pending {
+    --nge-table-fill-target-outline: #ca8a04;
+    --nge-table-fill-target-surface: #fefce8;
+  }
+}

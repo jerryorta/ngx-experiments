@@ -1,0 +1,207 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Chart Cells (Theming)</h2>
+    <p class="intro-text">
+      There is <strong>no <code>config.theme</code></strong> here either. The only new visual
+      surface ARCH-291 adds is <code>&lt;nge-cell-shell&gt;</code>, and it themes through
+      <code>--nge-table-shell-*</code> custom properties, each paired with a literal fallback at
+      its use site. It declares nothing in <code>_table-tokens.scss</code> — editing that partial
+      would be a core edit — so every override below is a scoped wrapper class, exactly what a
+      consumer writes.
+    </p>
+
+    <!-- SECTION 1: The resolved chart cell -->
+    <section class="story-section">
+      <h4>1. The resolved chart cell — almost nothing left to theme</h4>
+      <p class="story-description">
+        Once <code>isSettled()</code> is <code>true</code>, the shell is gone and
+        <code>&lt;nge-chart&gt;</code>'s own palette — the charts library's contract — is what a
+        reviewer sees. But the cell's wrapper (<code>.chart-cell</code>) keeps reading the same
+        <code>--nge-table-shell-*</code> pair as its background and radius, deliberately: the chart
+        debounces its own render by 16ms, so this backing box is what shows for that first frame
+        instead of an unthemed flash. Section 3 makes that visible. This table is not virtualized,
+        so it never shows the shell itself.
+      </p>
+      <div class="table-container">
+        <nge-table [config]="resolvedConfig">
+          <ng-template
+            ngeCell="series"
+            [ngeCellOf]="resolvedRows"
+            let-cell
+          >
+            @if (cell.isSettled()) {
+              <div class="chart-cell">
+                <nge-chart [config]="chartFor(cell.row)" />
+              </div>
+            } @else {
+              <nge-cell-shell />
+            }
+          </ng-template>
+        </nge-table>
+      </div>
+    </section>
+
+    <!-- SECTION 2: The shell, in situ -->
+    <section class="story-section">
+      <h4>2. The shell, in situ</h4>
+      <p class="story-description">
+        <strong>Scroll this table quickly.</strong> The default tokens are on show here: with no
+        <code>--nge-table-shell-surface</code> set, the shell falls back to
+        <code>--nge-table-surface-variant</code> — the same surface the table's own header band
+        reads — so it wears whatever theme the host already loads with no eleventh bridge entry
+        required.
+      </p>
+      <div class="table-container table-container--tall">
+        <nge-table [config]="inSituConfig">
+          <ng-template
+            ngeCell="series"
+            [ngeCellOf]="inSituRows"
+            let-cell
+          >
+            @if (cell.isSettled()) {
+              <div class="chart-cell">
+                <nge-chart [config]="chartFor(cell.row)" />
+              </div>
+            } @else {
+              <nge-cell-shell />
+            }
+          </ng-template>
+        </nge-table>
+      </div>
+    </section>
+
+    <!-- SECTION 3: The shell's own tokens -->
+    <section class="story-section">
+      <h4>3. The shell's own tokens</h4>
+      <p class="story-description">
+        Requiring a scroll gesture before three palettes could be compared side by side would defeat
+        the point of a theming story — the same reason <code>highlight/theming</code> seeds its
+        marks instead of requiring a click. The three boxes below render
+        <code>&lt;nge-cell-shell&gt;</code> directly, sized like the chart column above, so they
+        are comparable at a glance.
+      </p>
+      <div class="code-block">
+        <pre>
+.theme-inherited {{ "{" }}
+  /* No --nge-table-shell-surface at all — only the CORE token most themes already bridge. */
+  --nge-table-surface-variant: #dceeff;
+{{ "}" }}
+
+.theme-tinted {{ "{" }}
+  --nge-table-shell-surface: #fde8d0;
+  --nge-table-shell-radius: 12px;
+{{ "}" }}</pre>
+      </div>
+      <div class="comparison-grid">
+        <div class="comparison-cell">
+          <h5>Default — no overrides</h5>
+          <div class="shell-box">
+            <nge-cell-shell />
+          </div>
+        </div>
+        <div class="comparison-cell theme-inherited">
+          <h5>Inherits <code>--nge-table-surface-variant</code></h5>
+          <div class="shell-box">
+            <nge-cell-shell />
+          </div>
+        </div>
+        <div class="comparison-cell theme-tinted">
+          <h5>Explicit <code>--nge-table-shell-surface</code> + radius</h5>
+          <div class="shell-box">
+            <nge-cell-shell />
+          </div>
+        </div>
+      </div>
+      <p class="story-description">
+        The middle box sets only the CORE <code>--nge-table-surface-variant</code> token — nothing
+        shell-specific — and the shell already follows it, which is the "no eleventh bridge entry"
+        claim made concrete. The third box sets <code>--nge-table-shell-surface</code> explicitly,
+        which wins over the core token even where both are set.
+      </p>
+      <p class="story-description">
+        <strong>And the chart, wrapped in the same three theme classes below.</strong> The chart's
+        own wrapper reads the identical token pair — deliberately, not by coincidence — so the shell
+        → chart handoff never flashes an unthemed box behind the arriving chart. Watch the thin edge
+        around each sparkline, at its own small margin: same colour, same corner radius, as the
+        shell box above it.
+      </p>
+      <div class="comparison-grid">
+        <div class="comparison-cell">
+          <h5>Default — no overrides</h5>
+          <div class="shell-box">
+            <div class="chart-cell">
+              <nge-chart [config]="chartFor(tokenDemoRow)" />
+            </div>
+          </div>
+        </div>
+        <div class="comparison-cell theme-inherited">
+          <h5>Inherits <code>--nge-table-surface-variant</code></h5>
+          <div class="shell-box">
+            <div class="chart-cell">
+              <nge-chart [config]="chartFor(tokenDemoRow)" />
+            </div>
+          </div>
+        </div>
+        <div class="comparison-cell theme-tinted">
+          <h5>Explicit <code>--nge-table-shell-surface</code> + radius</h5>
+          <div class="shell-box">
+            <div class="chart-cell">
+              <nge-chart [config]="chartFor(tokenDemoRow)" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: Outside a cell -->
+    <section class="story-section">
+      <h4>4. Outside a cell — min-height and inset</h4>
+      <p class="story-description">
+        <code>--nge-table-shell-min-height</code> and <code>--nge-table-shell-inset</code> are
+        only reachable when the shell sits inside a table cell that hands it a definite height via
+        <code>align-self: stretch</code> — the exact case a story panel is not. The two rows below
+        drop <code>&lt;nge-cell-shell&gt;</code> with no sizing wrapper at all, the way a
+        consumer's own skeleton row would.
+      </p>
+      <div class="code-block">
+        <pre>
+.theme-roomy-shell {{ "{" }}
+  --nge-table-shell-min-height: 48px;
+  --nge-table-shell-inset: 2px;
+{{ "}" }}</pre>
+      </div>
+      <div class="skeleton-stack">
+        <div>
+          <h5>Default — 12px min-height, 6px inset</h5>
+          <nge-cell-shell />
+        </div>
+        <div class="theme-roomy-shell">
+          <h5>Roomy — 48px min-height, 2px inset</h5>
+          <nge-cell-shell />
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: Dark -->
+    <section class="story-section">
+      <h4>5. Dark</h4>
+      <p class="story-description">
+        The shape a domain's <code>--nge-table-*</code> bridge takes once a consumer adopts this
+        feature. Every core surface is restated rather than left to inherit, and the shell-specific
+        token follows it — a shell left on the light default would read as a pale rectangle floating
+        in the middle of a dark cell.
+      </p>
+      <div class="comparison-grid">
+        <div class="comparison-cell theme-dark">
+          <h5>Dark surfaces + shell token</h5>
+          <div class="shell-box">
+            <nge-cell-shell />
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

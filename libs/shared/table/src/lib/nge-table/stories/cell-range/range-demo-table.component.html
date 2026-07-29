@@ -1,0 +1,76 @@
+@let tableState = state();
+
+@if (showControls()) {
+  <div class="nge-table-range-demo__controls">
+    <button
+      type="button"
+      [disabled]="!hasRanges()"
+      (click)="clear()"
+      >Clear selection</button
+    >
+    <button
+      type="button"
+      (click)="selectAll()"
+      >Select all</button
+    >
+    <span class="nge-table-range-demo__hint"
+      >drag to select · <kbd>shift</kbd>-click to extend · <kbd>cmd</kbd>/<kbd>ctrl</kbd>-drag to
+      add a block</span
+    >
+  </div>
+}
+
+<!--
+  No wrapper listener and no `(ngeTableEvent)` binding: `NgeRangeBridge` delegates
+  its own `pointerdown` / `pointermove` / `pointerup` from the table root, which the
+  overlay hands it. The whole integration is the providers plus the template below.
+-->
+<nge-table
+  [config]="config()"
+  [state]="tableState"
+  [style.max-height.px]="maxHeight()"
+  (stateChange)="state.set($event)"
+>
+  <!--
+    ONE template covers every column: the slot registry falls back to the shared
+    registration when a column has none of its own.
+
+    ⚠️ The overlay is not optional if the gesture is wanted. It stamps the
+    `data-nge-range-cell` attribute every hit-test reads, and it is what hands the
+    bridge the table root — a table that provides the addon and projects no overlay
+    has state and export composition and no pointer behaviour at all.
+  -->
+  <ng-template
+    ngeTableSlot="cell-overlay"
+    [ngeTableSlotOf]="rows()"
+    let-cell
+  >
+    <nge-range-overlay
+      [cell]="cell"
+      [state]="tableState"
+    />
+  </ng-template>
+
+  <!--
+    The header-side affordance (ARCH-270), independently optional. It binds its own
+    listeners rather than riding the delegated root, so neither template needs the
+    other — and both write the same `ngeRange` slice, which is why a column selected
+    from here is painted by the overlay above with nothing else wired.
+
+    ⚠️ The `@if` is on the TEMPLATE rather than inside it: `contentChildren` is a
+    signal query with `descendants: true`, so an unregistered slot really is absent
+    rather than registered-and-empty.
+  -->
+  @if (showColumnHandles()) {
+    <ng-template
+      ngeTableSlot="header-overlay"
+      [ngeTableSlotOf]="rows()"
+      let-header
+    >
+      <nge-range-column-handle
+        [header]="header"
+        [state]="tableState"
+      />
+    </ng-template>
+  }
+</nge-table>

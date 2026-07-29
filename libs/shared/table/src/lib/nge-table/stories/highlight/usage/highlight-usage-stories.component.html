@@ -1,0 +1,162 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Cell Highlighting (Usage)</h2>
+    <p class="intro-text">
+      Cell highlighting is an addon over <code>&lt;nge-table&gt;</code>: a
+      <code>TableFeature</code> for the state, the existing <code>cell-overlay</code> slot for the
+      paint, and a predicate for export composition. It touches no file in the library core, which
+      is what makes it the epic's extensibility gate.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. Switch it on</h4>
+      <p class="story-description">
+        One entry in <code>providers</code>. It registers the feature, the view bridge the overlay
+        resolves, and the hand-off between them. Put it on the component that hosts the table, never
+        in root providers — highlighting is per-table.
+      </p>
+      <div class="code-block">
+        <pre>
+&#64;Component({{ "{" }}
+  providers: [provideNgeCellHighlighting()],
+  …
+{{ "}" }})</pre>
+      </div>
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. Project the overlay</h4>
+      <p class="story-description">
+        One template covers every column: the slot registry falls back to a shared registration when
+        a column has none of its own. The overlay renders nothing — it carries a class, and the
+        addon's stylesheet paints the cell around it.
+      </p>
+      <div class="code-block">
+        <pre>
+&lt;nge-table [config]="config" [(state)]="state"&gt;
+  &lt;ng-template ngeTableSlot="cell-overlay" [ngeTableSlotOf]="rows" let-cell&gt;
+    &lt;nge-highlight-overlay [cell]="cell" [highlight]="state().ngeHighlight" /&gt;
+  &lt;/ng-template&gt;
+&lt;/nge-table&gt;</pre>
+      </div>
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. Mark a cell</h4>
+      <p class="story-description">
+        The <code>cell-click</code> event carries a <code>NgeCellContext</code> — ids and values,
+        no <code>@tanstack/*</code> type — and the bridge takes the same ids. Click any cell below.
+      </p>
+      <div class="code-block">
+        <pre>
+private readonly highlight = inject(NgeHighlightBridge);
+
+onEvent(event: NgeTableEvent&lt;Row&gt;): void {{ "{" }}
+  if (event.kind === 'cell-click') {{ "{" }}
+    this.highlight.toggle(event.cell.rowId, event.cell.columnId);
+  {{ "}" }}
+{{ "}" }}</pre>
+      </div>
+
+      <nge-table-highlight-demo
+        [config]="config"
+        [rows]="exampleRows"
+        [(state)]="state"
+      />
+
+      <div class="state-readout">
+        <h5>state.ngeHighlight</h5>
+        <pre>{{ stateJson() }}</pre>
+      </div>
+    </section>
+
+    <!-- 4 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>4. <code>getRowId</code> is mandatory</h4>
+      <p class="story-description">
+        Every mark is keyed by <code>getRowId(row)</code>. Without one the engine keys rows by array
+        index, so a sort, a filter, or a re-fetch silently moves the user's highlights onto
+        different records — the failure that reads as data corruption rather than as a bug. Bind
+        <code>state</code> too: the marks live there, and a table with no state binding has nowhere
+        to keep them.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }}
+  columns: NGE_TABLE_FIXTURE_COLUMNS,
+  data: rows,
+  getRowId: row =&gt; row.id,   // ⚠️ not optional once anything marks a cell
+{{ "}" }});</pre>
+      </div>
+    </section>
+
+    <!-- 5 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>5. The state shape</h4>
+      <p class="story-description">
+        Three collections, and the split is the point. A cell picked on its own is enumerated; a
+        contiguous block is a <strong>descriptor</strong> — an anchor, a focus, and the columns it
+        spans — whose membership is answered by a predicate rather than materialised. Highlighting
+        one column of a 10,000-row table as a per-cell map would be ~270&nbsp;KB of JSON re-emitted
+        on every state change, and a few such columns would exceed Firestore's 1&nbsp;MiB document
+        limit. A descriptor is one object whatever the row count.
+      </p>
+      <p class="story-description">
+        <code>exclusions</code> is what makes a click a real toggle. Clicking a cell that a block
+        covers has to be able to un-highlight it — and a rectangle minus a cell is not a rectangle,
+        so the block cannot simply be reshaped. Subtracting instead keeps the descriptor intact and
+        records the hole, and it stays bounded for the same reason <code>cells</code> does: a user
+        removes cells one at a time. Clicking the cell again drops the exclusion and the block takes
+        over again; shift-clicking the same block a second time removes the block outright.
+      </p>
+      <div class="code-block">
+        <pre>
+interface NgeHighlightState {{ "{" }}
+  anchor: string | null;          // "rowId::columnId", where a shift-click extends from
+  cells: string[];                // individually picked
+  exclusions: string[];           // individually removed — beats ranges
+  ranges: NgeHighlightRange[];   // contiguous blocks, as descriptors
+{{ "}" }}</pre>
+      </div>
+    </section>
+
+    <!-- 6 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>6. Export only what is highlighted</h4>
+      <p class="story-description">
+        The composition the gate exists to prove. The export seam takes a
+        <code>cellPredicate</code> and has never heard of highlighting; the highlight addon supplies
+        one and has never heard of exporting. Neither file imports the other — they meet on the
+        table instance.
+      </p>
+      <div class="code-block">
+        <pre>
+const table = viewChild.required&lt;NgeTableComponent&lt;Row&gt;&gt;('table');
+
+table().readNgeExportData({{ "{" }} cellPredicate: highlight.predicate() {{ "}" }});</pre>
+      </div>
+    </section>
+
+    <!-- 7 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>7. Persisting a user's view</h4>
+      <p class="story-description">
+        The slice is plain JSON by construction, so it round-trips through
+        <code>JSON.stringify</code> unchanged and stores alongside the sort, the column widths, and
+        the pinning. Restoring is silent — pushing state in through <code>[state]</code> is not the
+        table doing something, so it emits no <code>NgeTableEvent</code>.
+      </p>
+      <div class="code-block">
+        <pre>
+await setDoc(viewRef, {{ "{" }} table: state() {{ "}" }});   // save
+state.set(snapshot.data().table);            // restore — silent</pre>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

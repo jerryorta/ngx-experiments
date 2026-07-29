@@ -1,0 +1,198 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Cell Editors (Interaction)</h2>
+    <p class="intro-text">
+      Two editors ship from <code>&#64;nge/table/editors</code>:
+      <code>&lt;nge-cell-input&gt;</code> and <code>&lt;nge-cell-checkbox&gt;</code>. A column
+      <strong>names</strong> one in <code>meta.ngeEdit.editor</code> and the table renders it —
+      there is no template to write, and <code>&lt;nge-table&gt;</code>'s own markup gains no
+      branch, because the component resolves through the same render-slot registry a projected
+      <code>[ngeCell]</code> goes through.
+    </p>
+    <p class="intro-text">
+      <strong>Nothing here writes your data.</strong> Committing announces an
+      <code>edit-intent</code> and stops; the demo component wrapping each table applies the patch
+      to its own rows. Section 7 turns that listener off to show what the library does on its own.
+    </p>
+    <p class="intro-text">
+      ⚠️ <strong>This page needs a human in a foregrounded tab.</strong> An untrusted event triggers
+      no browser default, so a scripted <kbd>space</kbd> never types a character and a scripted drag
+      never selects text — and an automation tab is <code>visibilityState: 'hidden'</code>, which
+      suspends <code>requestAnimationFrame</code> so zoneless change detection never flushes and
+      activation reads as broken when it is not.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. The input, with no template written</h4>
+      <p class="story-description">
+        Click a cell in <strong>Name</strong>, <strong>Quantity</strong> or
+        <strong>Description</strong>. A field appears, <em>already focused</em> and holding the
+        current value. <kbd>enter</kbd> or clicking away commits; <kbd>esc</kbd> abandons it.
+      </p>
+      <p class="story-description">
+        ⚠️ <strong>The focus is not decoration.</strong> Tab to a row and press <kbd>enter</kbd> —
+        the row is a tab stop because the table is editable, and activation focuses nothing on its
+        own, so without the editor focusing itself a keyboard-only user would open a field they
+        could not type into.
+      </p>
+      <p class="story-description">
+        <strong>Quantity is a number field</strong>, declared as
+        <code>editorInputs: {{ "{" }} type: 'number' {{ "}" }}</code
+        >. Clear it, or type letters, and commit: the edit is abandoned rather than proposing a
+        <code>NaN</code> the host would write into its row.
+      </p>
+
+      <nge-table-editors-demo
+        [(rows)]="inputRows"
+        [(state)]="inputState"
+      />
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. The checkbox, always live</h4>
+      <p class="story-description">
+        <strong>Active</strong> declares <code>alwaysLive: true</code>, so its box is a real control
+        with a real tab stop from the first render. Tab into the column and press <kbd>space</kbd>:
+        the value is proposed immediately and the readout below records it.
+      </p>
+      <p class="story-description">
+        ⚠️ <strong>A toggle IS the commit here</strong>, and that is a correctness decision rather
+        than a shortcut. A half-typed string is worth holding; a flipped checkbox is not, and
+        holding one is unsafe — <code>[checked]</code> re-derives from the cell, and Angular writes
+        a property binding only when the <em>bound</em> value changes, so a box unchecked on a
+        <code>true</code> row and recycled onto another <code>true</code> row would keep showing the
+        stale state.
+      </p>
+      <p class="story-description">
+        ⚠️ Note what does <em>not</em> happen: the column is live for every rendered row, and no row
+        stole focus when the table painted. Focus follows the transition into editing, which an
+        always-live column never makes.
+      </p>
+
+      <nge-table-editors-demo
+        [(rows)]="checkboxRows"
+        [(state)]="checkboxState"
+      />
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. The same checkbox left on activation</h4>
+      <p class="story-description">
+        The same column with <code>alwaysLive</code> off. The box shows the value but is disabled
+        until the cell is clicked — the read-only half of the activation model, showing a value
+        without offering to change it.
+      </p>
+      <p class="story-description">
+        It works, and it is not what the control is for: activation exists to avoid building
+        controls nobody engaged, and a checkbox is the cheapest control there is, so the saving is
+        nil while the cost — a click to activate before the click that toggles — is real. Compare
+        the two sections and prefer section 2 for a boolean column.
+      </p>
+
+      <nge-table-editors-demo
+        [alwaysLiveActive]="false"
+        [(rows)]="activatedBoxRows"
+        [(state)]="activatedBoxState"
+      />
+    </section>
+
+    <!-- 4 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>4. A consumer's own template still wins</h4>
+      <p class="story-description">
+        The same configuration with a <code>[ngeCell]</code> template projected for
+        <strong>Name</strong>. That column now renders the consumer's uppercased read-only cell and
+        the library's editor is never reached for it — while Quantity, Description and Active still
+        use theirs.
+      </p>
+      <p class="story-description">
+        ⚠️ <strong>This is the resolution order, not a coincidence.</strong> The store consults the
+        projected templates <em>first</em> and only then the editor a column named. ARCH-278
+        recorded what the other order costs: it "compiles, lints and renders perfectly while
+        silently ignoring every consumer template".
+      </p>
+
+      <nge-table-editors-demo
+        [overrideName]="true"
+        [(rows)]="overrideRows"
+        [(state)]="overrideState"
+      />
+    </section>
+
+    <!-- 5 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>5. Keyboard containment, with cell ranges switched on</h4>
+      <p class="story-description">
+        Cell range selection is on for this table. Drag across a few cells to build a range, then
+        open an editor and try each key:
+      </p>
+      <ul class="story-description">
+        <li><kbd>space</kbd> types a space rather than toggling row selection.</li>
+        <li>
+          <kbd>esc</kbd> cancels the edit and <strong>leaves the range alone</strong> — the key is
+          contained at the cell, which starves the range and highlight addons' document-level
+          listeners at once without core knowing either exists.
+        </li>
+        <li>cmd/ctrl-<kbd>a</kbd> selects the field's text rather than every cell.</li>
+        <li>
+          Drag from inside a field: it selects text and <strong>no cells</strong>. The same guard
+          covers the checkbox.
+        </li>
+      </ul>
+
+      <nge-table-editors-demo
+        [enableCellRange]="true"
+        [(rows)]="keyboardRows"
+        [(state)]="keyboardState"
+      />
+    </section>
+
+    <!-- 6 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>6. Scrolling an open editor out of the window</h4>
+      <p class="story-description">
+        2,000 virtualized rows. Open an editor near the top, type something, then scroll far enough
+        for its row to leave the window and scroll back.
+      </p>
+      <p class="story-description">
+        ⚠️ <strong>The edit is cancelled, and that is the correct outcome.</strong> Virtualization
+        recycles DOM, so a draft that survived its row leaving would belong to whichever record the
+        recycled element shows next — the shape of a bug that reads as data corruption rather than
+        as an edit correctly abandoned.
+      </p>
+
+      <nge-table-editors-demo
+        [enableVirtualization]="true"
+        [maxHeight]="320"
+        [(rows)]="virtualRows"
+        [(state)]="virtualState"
+      />
+    </section>
+
+    <!-- 7 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>7. A host that ignores the intent</h4>
+      <p class="story-description">
+        The same table with the <code>edit-intent</code> handler switched off. Edit a cell and
+        commit it: the editor opens, the value is collected, the proposal arrives in the readout —
+        and the table does not change.
+      </p>
+      <p class="story-description">
+        ⚠️ <strong>This is correct behaviour, not a bug.</strong> The library owns no data, so it
+        announces the patch and waits. Owning the editors changes nothing about that boundary.
+      </p>
+
+      <nge-table-editors-demo
+        [applyIntents]="false"
+        [(rows)]="ignoreRows"
+        [(state)]="ignoreState"
+      />
+    </section>
+  </div>
+</nge-storybook-review-container>

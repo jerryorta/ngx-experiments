@@ -1,0 +1,118 @@
+@let context = cell();
+@let ariaLabel = label() ?? "Edit " + context.columnId;
+@let text = display();
+
+<!--
+  ⚠️ The activation model, in one branch — the same shape the three sibling editors
+  use. The cell is read-only text until `isEditing()` says otherwise, so thirty
+  visible rows cost zero triggers and zero overlays until someone engages one.
+  `isEditing` is a SIGNAL because the context it rides on is memoised against the
+  engine cell; a plain boolean would be read once here and this branch would never
+  flip (ARCH-291, ARCH-292).
+
+  ⚠️ The trigger is a positioning ORIGIN and an interactive-element marker, not a
+  control to press — the panel opens on activation, so nothing is ever waiting for a
+  click on it. `role="textbox"` is the whole cost of the "a range drag started on the
+  trigger selects no cells" criterion: `INTERACTIVE_ROLES` (`src/lib/interactive/`)
+  already matches it, so the drag guard, cmd/ctrl-A and Shift+arrow containment all
+  arrive with the attribute. `tabindex="-1"` keeps it out of the tab order while
+  satisfying the rule that an interactive role is focusable.
+
+  ⚠️ The click-stop matters only in the DEGRADED state, and that is why it stays. The
+  backdrop covers the whole viewport while the panel is open, so in normal use this
+  element cannot be clicked at all. But a column that sets `meta.ngeEdit.alwaysLive`
+  by hand — which `ngeCellTextareaEdit` gives no way to ask for — reports `isEditing()`
+  true from the first render, makes no transition, and so opens no panel: every row
+  then shows a trigger with nothing over it. Without the stop, clicking one would read
+  as a click on the table and select the row.
+-->
+@if (context.isEditing()) {
+  <!--
+    The rule wants a keyboard twin for a click handler, and there is nothing to give
+    it: this handler performs no action, it only keeps a click from reaching the table.
+    Focus is in the panel's field, which is where every key belongs. Suppressed rather
+    than satisfied for the same reason the select's options are — see that template.
+  -->
+  <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events -->
+  <div
+    #trigger
+    class="nge-cell-textarea__trigger"
+    role="textbox"
+    tabindex="-1"
+    aria-readonly="true"
+    [attr.aria-label]="ariaLabel"
+    [attr.aria-expanded]="isOpen()"
+    [attr.aria-controls]="isOpen() ? panelId : null"
+    (click)="$event.stopPropagation()"
+  >
+    {{ text }}
+  </div>
+} @else {
+  <span class="nge-cell-textarea__text">{{ text }}</span>
+}
+
+<!--
+  The panel, rendered into a CDK overlay on the body rather than here.
+
+  ⚠️ There is NO `(blur)` handler on the field, and its absence is the story's central
+  requirement rather than an omission. Clicking Cancel blurs the field on its way to
+  the button, so a commit-on-blur would apply the very edit Cancel exists to discard —
+  and unlike ARCH-293's input, a guard is not enough, because the blur is real and the
+  edit is still live at that moment. `commitEdit` fires from Apply and nowhere else.
+
+  ⚠️ `[value]` rather than `[(ngModel)]`: the field's own DOM value IS the draft, which
+  is safe because the backdrop keeps the row inside the virtualized window for as long
+  as the panel is open. `(input)` only mirrors WHETHER it has diverged, for the hint
+  and the outside-click guard.
+-->
+<ng-template #panel>
+  <div
+    class="nge-cell-textarea__panel"
+    role="dialog"
+    [id]="panelId"
+    [attr.aria-label]="ariaLabel"
+  >
+    <textarea
+      #field
+      class="nge-cell-textarea__field"
+      [attr.aria-label]="ariaLabel"
+      [attr.maxlength]="maxlength() ?? null"
+      [attr.placeholder]="placeholder() ?? null"
+      [rows]="rows()"
+      [value]="text"
+      (input)="onInput(field.value)"
+    ></textarea>
+
+    <div class="nge-cell-textarea__actions">
+      <!--
+        The "what the user is told" half of the draft contract. It appears exactly when
+        the panel starts refusing to dismiss on an outside click, so the two are one
+        explanation rather than a rule and a surprise.
+      -->
+      @if (isDirty()) {
+        <span
+          class="nge-cell-textarea__hint"
+          role="status"
+        >
+          Unsaved
+        </span>
+      }
+
+      <button
+        class="nge-cell-textarea__button"
+        type="button"
+        (click)="cancel()"
+      >
+        {{ cancelLabel() }}
+      </button>
+
+      <button
+        class="nge-cell-textarea__button nge-cell-textarea__button--apply"
+        type="button"
+        (click)="apply()"
+      >
+        {{ applyLabel() }}
+      </button>
+    </div>
+  </div>
+</ng-template>

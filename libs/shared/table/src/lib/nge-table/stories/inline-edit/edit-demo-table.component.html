@@ -1,0 +1,129 @@
+@let tableState = state();
+@let currentRows = rows();
+
+<div class="nge-table-edit-demo__controls">
+  <button
+    type="button"
+    [disabled]="lastIntent() === null"
+    (click)="undo()"
+    >Undo last edit</button
+  >
+  <span class="nge-table-edit-demo__hint"
+    >click a cell, or press <kbd>enter</kbd> on a focused row · <kbd>enter</kbd> or blur commits ·
+    <kbd>esc</kbd> cancels</span
+  >
+</div>
+
+<nge-table
+  [config]="config()"
+  [state]="tableState"
+  [style.max-height.px]="maxHeight()"
+  (ngeTableEvent)="onEvent($event)"
+  (stateChange)="state.set($event)"
+>
+  <!--
+    ⚠️ The whole activation model, in one branch. The cell renders read-only text until
+    `cell.isEditing()` says otherwise, at which point the control exists — so thirty
+    visible rows across three editable columns cost zero control instances until someone
+    engages one. `isEditing` is a SIGNAL because the context it rides on is memoised
+    against the engine cell; a plain boolean would be read once here and this branch
+    would never flip.
+
+    ⚠️ Every control owes itself `$event.stopPropagation()` on its click. The row's
+    click selects and the cell's click activates, so without it a click inside the input
+    re-enters activation and reads as a click on the table.
+  -->
+  <ng-template
+    ngeCell="name"
+    [ngeCellOf]="currentRows"
+    let-cell
+  >
+    @if (cell.isEditing()) {
+      <input
+        #nameInput
+        class="nge-table-edit-demo__input"
+        type="text"
+        [attr.aria-label]="'Edit name'"
+        [value]="cell.row.name"
+        (blur)="commitText(cell, nameInput.value)"
+        (click)="$event.stopPropagation()"
+        (keydown.enter)="nameInput.blur()"
+      />
+    } @else {
+      {{ cell.row.name }}
+    }
+  </ng-template>
+
+  <ng-template
+    ngeCell="description"
+    [ngeCellOf]="currentRows"
+    let-cell
+  >
+    @if (cell.isEditing()) {
+      <input
+        #descriptionInput
+        class="nge-table-edit-demo__input"
+        type="text"
+        [attr.aria-label]="'Edit description'"
+        [value]="cell.row.description"
+        (blur)="commitText(cell, descriptionInput.value)"
+        (click)="$event.stopPropagation()"
+        (keydown.enter)="descriptionInput.blur()"
+      />
+    } @else {
+      <span class="nge-table-edit-demo__truncate">{{ cell.row.description }}</span>
+    }
+  </ng-template>
+
+  <!--
+    ⚠️ The role-based control this story exists to exercise. `<nge-table-edit-demo-slider>`
+    renders a `div` carrying `role="slider"` — which is what a design-library control
+    actually looks like, and what the old native-tags-only guard did NOT match. With the
+    cell-range addon switched on, dragging this thumb must move the value and select no
+    cells.
+
+    With `alwaysLive` on, `cell.isEditing()` is permanently true for this column and the
+    slider never waits to be activated — the case that trade exists for.
+  -->
+  <ng-template
+    ngeCell="quantity"
+    [ngeCellOf]="currentRows"
+    let-cell
+  >
+    @if (cell.isEditing()) {
+      <nge-table-edit-demo-slider
+        [value]="cell.row.quantity"
+        (commit)="cell.commitEdit($event)"
+      />
+    } @else {
+      {{ cell.row.quantity }}
+    }
+  </ng-template>
+
+  @if (enableCellRange()) {
+    <ng-template
+      ngeTableSlot="cell-overlay"
+      [ngeTableSlotOf]="currentRows"
+      let-cell
+    >
+      <nge-range-overlay
+        [cell]="cell"
+        [state]="tableState"
+      />
+    </ng-template>
+  }
+</nge-table>
+
+<div class="nge-table-edit-demo__readouts">
+  <div class="nge-table-edit-demo__readout">
+    <h5>last edit-intent — {{ intentSummary() }}</h5>
+    @if (lastIntent()) {
+      <pre>{{ intentJson() }}</pre>
+    }
+    @if (!applyIntents()) {
+      <p class="nge-table-edit-demo__ignored"
+        >This host is ignoring the event — the proposal arrives and the table does not change.</p
+      >
+    }
+  </div>
+</div>

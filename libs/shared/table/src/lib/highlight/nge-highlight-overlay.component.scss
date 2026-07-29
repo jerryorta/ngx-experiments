@@ -1,0 +1,58 @@
+// =============================================================================
+// Cell highlighting (ARCH-250) — an ADDON stylesheet.
+//
+// Every token carries a literal fallback at its use site, exactly as the core
+// stylesheet does, so highlighting renders correctly with no theme applied and
+// without this addon adding anything to `_table-tokens.scss`. Editing that partial
+// (or the `_index.scss` that forwards it) would be a core edit, and the whole point
+// of this story is that an addon needs none.
+//
+// A theme overrides these by re-declaring them anywhere with higher specificity
+// than `:root`, the same way it overrides `--nge-table-*`:
+//
+//   .my-theme { --nge-table-highlight-surface: #{...}; }
+//
+// NEVER reference --mat-sys-* or mat-*. Angular Material is banned in this library.
+// =============================================================================
+
+// The marker element itself is never seen. It exists to carry a class, and to
+// occupy no space in the cell's flex row while doing so — a zero-size element in
+// the trailing `cell-overlay` badge slot.
+.nge-highlight-overlay {
+  display: none;
+}
+
+// The tint is painted on the CELL, reached outward with `:has()`.
+//
+// ⚠️ This is the one place the addon depends on core's BEM class names, and it is a
+// deliberate, documented cost rather than an oversight. The alternative would be an
+// absolutely-positioned layer, which cannot work here: `.nge-table__cell` is not
+// positioned and is not a stacking context (ARCH-243 keeps it that way so pinned
+// lanes stay sticky), so the layer would anchor to the table host instead of to the
+// cell. Giving the cell `position: relative` would be a core edit. A theme couples
+// to these same class names, so the dependency is of a kind the library already has.
+//
+// `background-color` rather than `background`, so a consumer who has given the cell
+// a background image of their own keeps it underneath the tint.
+.nge-table__cell:has(> .nge-table__cell-overlay > .nge-highlight-overlay--on) {
+  background-color: var(--nge-table-highlight-surface, #fff3bf);
+  // Inset rather than a border: the cell's width is the engine's exact column size
+  // (widths are explicit and user-owned), so a real border would add two pixels the
+  // lane arithmetic has not accounted for and every column would drift.
+  box-shadow: inset 0 0 0 1px var(--nge-table-highlight-outline, #f0c000);
+  color: var(--nge-table-highlight-on-surface, #1f1a00);
+}
+
+// ⚠️ **No pinned-lane rule is needed, and adding one would be dead code.**
+//
+// A pinned lane (`.nge-table__lane--pinned-left` / `--pinned-right`) is
+// `position: sticky` and scrolls over the center lane, so a highlighted cell inside
+// one must stay opaque or the center cells show through it. The rule above already
+// guarantees that: the tint is set on the **cell**, which paints over its lane's
+// background, and `--nge-table-highlight-surface` is opaque by requirement — the
+// same requirement `--nge-table-pinned-surface` carries.
+//
+// Verified in a browser rather than assumed, because it is exactly the kind of
+// thing jsdom cannot answer: a highlighted cell in a pinned lane resolves to
+// `rgb(255, 243, 191)` with the lane still `position: sticky` behind it. Should a
+// future theme make the tint translucent, the fix belongs on the token, not here.

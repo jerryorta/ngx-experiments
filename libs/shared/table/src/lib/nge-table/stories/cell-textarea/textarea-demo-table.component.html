@@ -1,0 +1,100 @@
+@let tableState = state();
+@let currentRows = rows();
+@let sample = scrollSample();
+
+<div class="nge-table-textarea-demo__controls">
+  <button
+    type="button"
+    [disabled]="lastIntent() === null"
+    (click)="undo()"
+    >Undo last edit</button
+  >
+
+  @if (enableVirtualization()) {
+    <button
+      type="button"
+      (click)="sampleScroll()"
+      >Sample viewport scrollTop</button
+    >
+    <span class="nge-table-textarea-demo__sample"
+      >scrollTop: {{ sample === null ? "not sampled" : sample + "px" }}</span
+    >
+  }
+
+  <span class="nge-table-textarea-demo__hint"
+    >click a description cell, or press <kbd>enter</kbd> on a focused row · type freely,
+    <kbd>enter</kbd> is a newline · <kbd>cmd</kbd>/<kbd>ctrl</kbd> + <kbd>enter</kbd> applies ·
+    <kbd>esc</kbd> cancels</span
+  >
+</div>
+
+<!--
+  ⚠️ One editable column, no `[ngeCell]` template, and no `<nge-cell-textarea>` tag
+  anywhere in this markup. `description` names the component in `meta.ngeEdit.editor`
+  (through `ngeCellTextareaEdit`) and the table resolves it through the same registry a
+  projected template goes through — so `<nge-table>`'s own markup gains no branch for
+  editing, and none for overlays either.
+-->
+<nge-table
+  [config]="config()"
+  [state]="tableState"
+  [style.max-height.px]="maxHeight()"
+  (ngeTableEvent)="onEvent($event)"
+  (stateChange)="state.set($event)"
+>
+  <!--
+    The acceptance criterion, as a switch. A projected template for a column the library
+    also has an editor for WINS — `NgeTableStore.cellTemplate` consults the projected
+    registrations first — so this markup is what renders and `<nge-cell-textarea>` is
+    never reached for `description`.
+  -->
+  @if (overrideDescription()) {
+    <ng-template
+      ngeCell="description"
+      [ngeCellOf]="currentRows"
+      let-cell
+    >
+      <em class="nge-table-textarea-demo__override">{{ cell.row.description }}</em>
+    </ng-template>
+  }
+
+  @if (enableCellRange()) {
+    <ng-template
+      ngeTableSlot="cell-overlay"
+      [ngeTableSlotOf]="currentRows"
+      let-cell
+    >
+      <nge-range-overlay
+        [cell]="cell"
+        [state]="tableState"
+      />
+    </ng-template>
+  }
+</nge-table>
+
+<div class="nge-table-textarea-demo__readouts">
+  <div class="nge-table-textarea-demo__readout">
+    <h5>last edit-intent — {{ intentSummary() }}</h5>
+    @if (lastIntent()) {
+      <pre>{{ intentJson() }}</pre>
+    }
+    @if (!applyIntents()) {
+      <p class="nge-table-textarea-demo__ignored"
+        >This host is ignoring the event — the proposal arrives and the table does not change.</p
+      >
+    }
+  </div>
+
+  <!--
+    ⚠️ The range readout is what turns "the drag did nothing" into evidence. A range
+    drag started on the editor's trigger must leave this empty, and `Escape` inside the
+    panel must not clear it — neither of which is convincing unless a drag started on a
+    NEIGHBOURING cell fills it first.
+  -->
+  @if (enableCellRange()) {
+    <div class="nge-table-textarea-demo__readout">
+      <h5>state.ngeRange</h5>
+      <pre>{{ rangeJson() }}</pre>
+    </div>
+  }
+</div>

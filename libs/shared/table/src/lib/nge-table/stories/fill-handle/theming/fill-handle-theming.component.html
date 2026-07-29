@@ -1,0 +1,156 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Fill Handle Theming</h2>
+    <p class="intro-text">
+      There is <strong>no <code>config.theme</code></strong
+      >. The handle themes through <code>--nge-table-fill-*</code> custom properties, so every
+      section below is one scoped wrapper class — the same thing a consuming app writes. Each table
+      is <strong>seeded</strong> with a selection so the grip is visible without a gesture; the
+      <em>pending outline</em> is the one thing no seed can show, and section 5 says so.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. The defaults, with nothing declared</h4>
+      <p class="story-description">
+        Every token carries a literal fallback at its use site, so the handle renders correctly with
+        no theme applied and adds nothing to <code>_table-tokens.scss</code> — editing that partial
+        would be a core edit. The grip sits at the trailing edge of the block's last cell.
+      </p>
+
+      <nge-table-fill-demo
+        [(rows)]="defaultRows"
+        [(state)]="defaultState"
+      />
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. A larger target</h4>
+      <p class="story-description">
+        The grip is 10px square by default. Enlarging it makes it easier to hit at the cost of
+        covering more of the cell it sits in — a real trade rather than a free win, since the cell
+        beneath it still has content to show.
+      </p>
+      <div class="code-block">
+        <pre>
+.large-grip {{ "{" }}
+  --nge-table-fill-handle-size: 14px;
+  --nge-table-fill-handle-radius: 7px;
+{{ "}" }}</pre>
+      </div>
+
+      <div class="large-grip">
+        <nge-table-fill-demo
+          [(rows)]="largeRows"
+          [(state)]="largeState"
+        />
+      </div>
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. A branded accent</h4>
+      <p class="story-description">
+        The grip and the pending region carry a domain's colour, alongside ARCH-269's range tokens
+        that paint the selection they extend from.
+      </p>
+      <div class="code-block">
+        <pre>
+.theme-branded {{ "{" }}
+  --nge-table-fill-handle-color: #7c3aed;
+  --nge-table-fill-target-outline: #7c3aed;
+  --nge-table-fill-target-surface: #f5f3ff;
+
+  // ARCH-269's tokens, painting the source block.
+  --nge-table-range-surface: #ede9fe;
+  --nge-table-range-outline: #c4b5fd;
+{{ "}" }}</pre>
+      </div>
+
+      <div class="theme-branded">
+        <nge-table-fill-demo
+          [(rows)]="brandedRows"
+          [(state)]="brandedState"
+        />
+      </div>
+    </section>
+
+    <!-- 4 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>4. Dark</h4>
+      <p class="story-description">
+        The shape a domain's <code>--nge-table-*</code> bridge will take. The grip's outline token
+        matters more here than anywhere: it is what keeps a small dark square legible against a dark
+        cell.
+      </p>
+
+      <div class="theme-dark">
+        <nge-table-fill-demo
+          [(rows)]="darkRows"
+          [(state)]="darkState"
+        />
+      </div>
+    </section>
+
+    <!-- 5 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>5. The pending region — visible only under a gesture</h4>
+      <p class="story-description">
+        ⚠️ <strong>Drag the grip on the table below to see this section at all.</strong> The pending
+        outline exists only while a pointer is down: the target is cleared the moment a drag ends,
+        so no seeded state can produce it and a screenshot of this section shows nothing unusual.
+      </p>
+      <div class="code-block">
+        <pre>
+.theme-pending {{ "{" }}
+  --nge-table-fill-target-surface: #fefce8;
+  --nge-table-fill-target-outline: #ca8a04;
+{{ "}" }}</pre>
+      </div>
+
+      <div class="theme-pending">
+        <nge-table-fill-demo
+          [(rows)]="pendingRows"
+          [(state)]="pendingState"
+        />
+      </div>
+    </section>
+
+    <!-- 6 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>6. No grip to theme</h4>
+      <p class="story-description">
+        This table's selection is a <strong>whole column</strong>, which has <code>null</code> row
+        endpoints — it names no record, so it has no corner. There is no grip here at any colour,
+        and no token brings one back.
+      </p>
+
+      <nge-table-fill-demo
+        [(rows)]="absentRows"
+        [(state)]="absentState"
+      />
+    </section>
+
+    <!-- 7 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>7. The token surface</h4>
+      <div class="code-block">
+        <pre>
+--nge-table-fill-handle-size        10px      ← the grip, square
+--nge-table-fill-handle-radius      2px
+--nge-table-fill-handle-color       #1d4ed8
+--nge-table-fill-handle-outline     #ffffff   ← keeps it legible on any cell
+--nge-table-fill-target-surface     #eff6ff   ← the pending region
+--nge-table-fill-target-outline     #1d4ed8</pre>
+      </div>
+      <p class="story-description">
+        None are in <code>_table-tokens.scss</code> — an addon that edited the core token partial
+        would not be an addon. Every use site carries its literal fallback instead.
+      </p>
+    </section>
+  </div>
+</nge-storybook-review-container>

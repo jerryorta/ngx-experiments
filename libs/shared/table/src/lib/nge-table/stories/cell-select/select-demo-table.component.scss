@@ -1,0 +1,91 @@
+// The shared demo table for the `cell-select` story set (ARCH-294).
+//
+// Nested under the host class so nothing leaks into the other stories in the
+// bundle — the component is `ViewEncapsulation.None`, so an unnested rule here
+// would land everywhere.
+//
+// ⚠️ No rule targets `.nge-table__*`, and none targets `.nge-cell-select__*`
+// either. That would be styling the library from a story rather than theming it,
+// and under `ViewEncapsulation.None` such a rule actually lands. The panel's own
+// appearance belongs to the component and its tokens.
+
+.nge-table-select-demo {
+  display: block;
+
+  .nge-table-select-demo__controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 12px;
+    gap: 12px;
+
+    button {
+      padding: 6px 12px;
+      border: 1px solid var(--nge-table-border-color, #e0e0e0);
+      border-radius: 4px;
+      background: var(--nge-table-surface-variant, #f5f5f5);
+      color: var(--nge-table-on-surface, #1d1b20);
+      font: inherit;
+      cursor: pointer;
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+    }
+  }
+
+  .nge-table-select-demo__hint {
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 12px;
+
+    kbd {
+      margin: 0 1px;
+      padding: 1px 5px;
+      border: 1px solid var(--nge-table-border-color, #e0e0e0);
+      border-radius: 3px;
+      background: var(--nge-table-surface-variant, #f5f5f5);
+      font-family: inherit;
+      font-size: 11px;
+    }
+  }
+
+  .nge-table-select-demo__override {
+    text-transform: uppercase;
+  }
+
+  .nge-table-select-demo__readouts {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    gap: 16px;
+  }
+
+  .nge-table-select-demo__readout {
+    flex: 1 1 240px;
+    min-width: 0;
+
+    h5 {
+      margin: 0 0 4px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    pre {
+      overflow-x: auto;
+      margin: 0;
+      padding: 8px 10px;
+      border-radius: 4px;
+      background: var(--nge-table-surface-variant, #f5f5f5);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+  }
+
+  .nge-table-select-demo__ignored {
+    margin: 4px 0 0;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 12px;
+  }
+}

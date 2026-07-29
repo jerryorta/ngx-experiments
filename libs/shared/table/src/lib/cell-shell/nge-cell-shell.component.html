@@ -1,0 +1,11 @@
+<!--
+  Deliberately empty.
+
+  The host element IS the shell: one block, sized and coloured by the stylesheet.
+  A child element would add a node per rendered cell for no gain, and the window
+  the shell exists to make affordable can hold hundreds at once.
+
+  Nothing here is bound, which is what makes the component safe under DOM recycling
+  — there is no value to go stale when the node showing row 12 becomes the node
+  showing row 4.
+-->

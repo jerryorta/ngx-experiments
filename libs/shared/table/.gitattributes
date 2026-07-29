@@ -1,0 +1,2 @@
+# A source file must always diff as text. See src/source-hygiene.spec.ts.
+*.ts diff

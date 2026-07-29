@@ -1,0 +1,127 @@
+// The table's own enum cell editor (ARCH-294).
+//
+// Every token is paired with a literal fallback, per the consumption rule in
+// `libs/shared/table/AGENTS.md` — a consumer who has not loaded
+// `_table-tokens.scss` still gets a control that looks like one.
+//
+// ⚠️ The panel rules below style an element that is NOT inside this component's
+// DOM: the CDK attaches it to a container on `<body>`. They work because the
+// component is `ViewEncapsulation.None`, so its styles are global — the same
+// reason the rest of this library can be themed at all. What does not follow the
+// panel out is the table's own token scoping, which is why the component copies
+// resolved values onto the pane (see `applyPanelTokens`).
+//
+// ⚠️ The trigger's focus ring is INSET, and that is a requirement rather than a
+// style choice: `.nge-table__cell` carries `overflow: hidden` and is
+// deliberately unpositioned (ARCH-243, both staying), so a ring drawn outside the
+// box is clipped on all four sides and a keyboard user loses their only cue. The
+// panel is under no such constraint — it is not in the cell.
+
+.nge-cell-select {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.nge-cell-select__text {
+  overflow: hidden;
+  width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nge-cell-select__trigger {
+  display: flex;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-width: 0;
+  padding: 0 var(--nge-table-editor-padding-x, 6px);
+  border: var(--nge-table-editor-border-width, 1px) solid var(--nge-table-editor-border-color, #b6b6bd);
+  border-radius: var(--nge-table-editor-radius, 4px);
+  background: var(--nge-table-editor-surface, #ffffff);
+  color: var(--nge-table-editor-on-surface, #1d1b20);
+  font-family: inherit;
+  font-size: var(--nge-table-editor-font-size, inherit);
+  text-align: start;
+  cursor: pointer;
+
+  // Height is deliberately not a token of its own — the trigger fills the row the
+  // theme or the config already sized, so a table at any density gets a control
+  // that matches it without a second number to keep in step. Same call
+  // `.nge-cell-input__field` makes.
+  height: calc(var(--nge-table-row-height, 40px) - 8px);
+
+  &:focus-visible {
+    border-color: var(--nge-table-editor-border-color-focus, #1565c0);
+    box-shadow: inset 0 0 0 var(--nge-table-focus-ring-width, 2px) var(--nge-table-focus-ring-color, #1565c0);
+    outline: none;
+  }
+}
+
+.nge-cell-select__value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nge-cell-select__arrow {
+  flex: none;
+  margin-inline-start: 4px;
+  border-top: 4px solid currentcolor;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+  opacity: 0.7;
+}
+
+// ─── Panel — rendered on the body, not here ─────────────────────────────────
+
+.nge-cell-select__panel {
+  overflow-y: auto;
+  box-sizing: border-box;
+  max-height: var(--nge-table-editor-panel-max-height, 240px);
+  padding: 4px 0;
+  border: var(--nge-table-editor-border-width, 1px) solid var(--nge-table-editor-panel-border-color, #b6b6bd);
+  border-radius: var(--nge-table-editor-radius, 4px);
+  background: var(--nge-table-editor-panel-surface, #ffffff);
+  box-shadow: var(--nge-table-editor-panel-shadow, 0 4px 12px rgb(0 0 0 / 15%));
+  color: var(--nge-table-editor-on-surface, #1d1b20);
+  font-family: var(--nge-table-font-family, inherit);
+  font-size: var(--nge-table-editor-font-size, inherit);
+
+  &:focus {
+    // The panel is a focus HOLDER rather than a focus affordance — it takes focus
+    // so its keys reach CDK's body listener, while the option a user is on is
+    // announced through `aria-activedescendant` and shown by `--active` below. A
+    // ring around the whole list would point at the wrong thing.
+    outline: none;
+  }
+}
+
+.nge-cell-select__option {
+  padding: 6px var(--nge-table-editor-padding-x, 6px);
+  white-space: nowrap;
+  cursor: pointer;
+
+  &--active {
+    background: var(--nge-table-editor-option-hover-surface, #f1f1f4);
+  }
+
+  &--selected {
+    background: var(--nge-table-editor-option-selected-surface, #e3f0fc);
+    font-weight: 600;
+  }
+
+  &--disabled {
+    opacity: var(--nge-table-editor-readonly-opacity, 0.75);
+    cursor: default;
+  }
+}
+
+.nge-cell-select__empty {
+  padding: 6px var(--nge-table-editor-padding-x, 6px);
+  opacity: var(--nge-table-editor-readonly-opacity, 0.75);
+  white-space: nowrap;
+}

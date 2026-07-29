@@ -1,0 +1,334 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  @let report = latest();
+  @let drift = p95Drift();
+  @let running = isRunning();
+  @let history = runs();
+  @let failureMessage = failure();
+
+  <div class="stories-container">
+    <h2>NgeTable — Scroll Baseline (Interaction)</h2>
+    <p class="intro-text">
+      Every other story here demonstrates a behaviour. This one produces the
+      <strong>reference number</strong> the others are read against. The library has claimed since
+      Wave 0 that ten thousand rows cost a DOM of tens and that scrolling them stays smooth, and
+      Wave 6 is about to put charts and editors inside those cells on the strength of that claim —
+      so the claim needs an instrument before it takes any more weight.
+    </p>
+    <p class="intro-text">
+      ⚠️ <strong>This table is deliberately plain and must stay that way.</strong> A virtualized
+      table and nothing else — no striping, no selection, no editors. Its value is being the
+      unfeatured case, so a feature story's numbers mean something next to it. Adding a feature here
+      would leave it named "baseline" while measuring something else.
+    </p>
+    <p class="intro-text">
+      ⚠️ <strong>Baselines are per-machine and measured fresh, never hard-coded.</strong> Frame
+      timings depend on the CPU, the display's refresh rate, and whatever else the machine is doing.
+      On a new machine: run this story, then run the feature story, and compare the two
+      <em>there</em>. The <strong>Display</strong> tile reports the measured refresh rate so you can
+      tell whether two figures are even comparable.
+    </p>
+    <p class="intro-text">
+      ⚠️ <strong>Only works in a real browser.</strong> jsdom lays nothing out, so the virtualizer
+      builds no window, so there is nothing to scroll and no frame to time. The arithmetic behind
+      the readout is unit-tested; the driving of it cannot be.
+    </p>
+
+    <section class="story-section">
+      <h4>1. Run the benchmark</h4>
+      <p class="story-description">
+        {{ counted(totalRowCount) }} rows, virtualized, in a bounded viewport. Pressing
+        <strong>Run</strong> resets the scroll to the top, lets a few frames settle, then advances
+        <code>{{ stepPx() }}px</code> per frame for <code>{{ steps() }}</code> frames and times
+        every one. The schedule is fixed on purpose — a hand-scroll cannot be compared against
+        itself.
+      </p>
+
+      <div class="benchmark-controls">
+        <button
+          type="button"
+          class="benchmark-run"
+          [disabled]="running"
+          (click)="runBenchmark()"
+        >
+          {{ running ? "Running…" : "Run benchmark" }}
+        </button>
+        <button
+          type="button"
+          class="benchmark-clear"
+          [disabled]="running || history.length === 0"
+          (click)="clearRuns()"
+        >
+          Clear runs
+        </button>
+        <span class="benchmark-meta">runs: {{ history.length }}</span>
+      </div>
+
+      <div class="table-container table-container--tall">
+        <nge-table [config]="config" />
+      </div>
+
+      @if (failureMessage) {
+        <p class="benchmark-failure">⚠️ {{ failureMessage }}</p>
+      }
+
+      @if (report) {
+        <dl class="benchmark-readout">
+          <div class="benchmark-metric">
+            <dt>Frames</dt>
+            <dd>{{ report.summary.frames }}</dd>
+          </div>
+          <div
+            class="benchmark-metric"
+            [class.benchmark-metric--over]="report.droppedFrames > 0"
+          >
+            <dt>Dropped</dt>
+            <dd>
+              {{ report.droppedFrames }}
+              <small>missed a vsync</small>
+            </dd>
+          </div>
+          <div class="benchmark-metric">
+            <dt>Display</dt>
+            <dd>
+              {{ rounded(report.estimatedRefreshHz) }}Hz
+              <small>{{ rounded(report.idleFrameMs) }}ms idle frame</small>
+            </dd>
+          </div>
+          <div
+            class="benchmark-metric"
+            [class.benchmark-metric--over]="report.summary.p95FrameMs > report.droppedThresholdMs"
+          >
+            <dt>p95 frame</dt>
+            <dd>{{ rounded(report.summary.p95FrameMs) }}ms</dd>
+          </div>
+          <div class="benchmark-metric">
+            <dt>Worst frame</dt>
+            <dd>{{ rounded(report.summary.worstFrameMs) }}ms</dd>
+          </div>
+          <div class="benchmark-metric">
+            <dt>Rows built</dt>
+            <dd
+              >{{ report.rowsAdded }} <small>/ {{ report.rowsRemoved }} torn down</small></dd
+            >
+          </div>
+          <div class="benchmark-metric">
+            <dt>Rows in DOM</dt>
+            <dd>
+              {{ report.renderedRowCount }} <small>of {{ counted(totalRowCount) }}</small>
+            </dd>
+          </div>
+          <div class="benchmark-metric">
+            <dt>Scrolled</dt>
+            <dd>{{ counted(report.scrolledPx) }}px</dd>
+          </div>
+        </dl>
+
+        <div class="benchmark-copy">
+          <div class="benchmark-copy__head">
+            <span class="benchmark-copy__label">Paste-ready</span>
+            <button
+              type="button"
+              class="benchmark-copy__button"
+              aria-label="Copy the benchmark report to the clipboard"
+              (click)="copyReport()"
+            >
+              {{ justCopied() ? "Copied ✓" : "Copy report" }}
+            </button>
+          </div>
+          <pre class="benchmark-copy__text">{{ reportText() }}</pre>
+        </div>
+      } @else {
+        <p class="benchmark-empty">No run yet.</p>
+      }
+    </section>
+
+    <section class="story-section">
+      <h4>2. Run it twice before quoting it</h4>
+      <p class="story-description">
+        A single run is an anecdote. The second run is what establishes whether the instrument can
+        detect anything at all: if its own run-to-run spread is wider than the regression a later
+        story is watching for, it will report noise with a straight face. Press <strong>Run</strong>
+        again and compare.
+      </p>
+
+      @if (hasMixedOptions()) {
+        <p class="benchmark-failure">
+          ⚠️ Runs in this session used <strong>different options</strong>, so they are not
+          comparable — drift and spread are withheld rather than reported as a tolerance. Press
+          <strong>Clear runs</strong> and re-run with the controls held still.
+        </p>
+      }
+
+      @if (drift !== null) {
+        <p
+          class="benchmark-drift"
+          [class.benchmark-drift--wide]="drift > 0.2"
+        >
+          p95 drift between the last two runs: <strong>{{ rounded(drift * 100) }}%</strong>
+        </p>
+      } @else if (history.length > 1) {
+        <p class="benchmark-empty">Drift withheld — the last two runs are not comparable.</p>
+      } @else {
+        <p class="benchmark-empty">Needs two runs.</p>
+      }
+
+      @if (history.length > 0) {
+        <table class="benchmark-history">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Frames</th>
+              <th>Dropped</th>
+              <th>p95</th>
+              <th>Worst</th>
+              <th>Display</th>
+              <th>Rows built</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (run of history; track $index) {
+              <tr>
+                <td>{{ $index + 1 }}</td>
+                <td>{{ run.summary.frames }}</td>
+                <td>{{ run.droppedFrames }}</td>
+                <td>{{ rounded(run.summary.p95FrameMs) }}ms</td>
+                <td>{{ rounded(run.summary.worstFrameMs) }}ms</td>
+                <td>{{ rounded(run.estimatedRefreshHz) }}Hz</td>
+                <td>{{ run.rowsAdded }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </section>
+
+    <section class="story-section">
+      <h4>3. Compare against the reference</h4>
+      <p class="story-description">
+        Two of these are <strong>machine-independent</strong> and are checked live — they must hold
+        on any hardware. The timings are not: they are shown only so a first run on a new machine
+        can be sanity-checked for "same ballpark", and a difference there is <em>not</em> a
+        regression.
+      </p>
+
+      @if (report) {
+        @let expectedRows = expectedRowsBuilt();
+        @let rowsOk = rowsBuiltMatches();
+
+        <table class="benchmark-compare">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>This run</th>
+              <th>Reference</th>
+              <th>Holds anywhere?</th>
+            </tr>
+          </thead>
+          <tbody>
+            @let dropped = droppedVerdict();
+            <tr [class.benchmark-compare__row--bad]="dropped === 'problem'">
+              <td>Dropped frames</td>
+              <td>
+                <strong>{{ report.droppedFrames }}</strong>
+                @switch (dropped) {
+                  @case ("clean") {
+                    ✓
+                  }
+                  @case ("tolerable") {
+                    ✓ <small>an isolated miss is ordinary</small>
+                  }
+                  @default {
+                    ⚠️ <small>sustained — investigate</small>
+                  }
+                }
+              </td>
+              <td>{{ reference.droppedFrames }}, occasionally 1</td>
+              <td>Mostly — a stray miss is the machine, not the table</td>
+            </tr>
+            <tr [class.benchmark-compare__row--bad]="rowsOk === false">
+              <td>Rows built</td>
+              <td>
+                <strong>{{ report.rowsAdded }}</strong>
+                @if (rowsOk !== null) {
+                  {{ rowsOk ? "✓" : "⚠️" }}
+                }
+              </td>
+              <td>
+                @if (expectedRows !== null) {
+                  {{ expectedRows }} exactly
+                } @else {
+                  n/a — step is not a whole number of rows
+                }
+              </td>
+              <td>
+                Yes — <code>({{ steps() }} − 1) × ({{ stepPx() }}px ÷ {{ rowHeightPx }}px)</code> is
+                geometry, not speed
+              </td>
+            </tr>
+            <tr>
+              <td>p95 frame</td>
+              <td>{{ rounded(report.summary.p95FrameMs) }}ms</td>
+              <td>{{ reference.p95MedianMs }}ms median</td>
+              <td>No — depends on CPU and refresh rate</td>
+            </tr>
+            <tr>
+              <td>Worst frame</td>
+              <td>{{ rounded(report.summary.worstFrameMs) }}ms</td>
+              <td>{{ reference.worstFrameMs }}ms</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td>Display</td>
+              <td>{{ rounded(report.estimatedRefreshHz) }}Hz</td>
+              <td>60Hz</td>
+              <td>No — a different refresh rate rescales every timing</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="story-description benchmark-reference-note">
+          Reference measured on <strong>{{ reference.machine }}</strong> over
+          <strong>{{ reference.runs }} runs</strong> ({{ reference.recordedOn }}), p95 spread
+          {{ reference.p95SpreadPercent }}% warm. ⚠️ That spread was
+          <strong>4.2–4.8%</strong> minutes after a cold <code>nx reset</code> rebuild — same table,
+          twice the apparent noise. So the noise floor is not a constant, and a feature story must
+          be measured <strong>back to back with this one in the same session</strong> rather than
+          against any figure recorded on another day.
+        </p>
+      } @else {
+        <p class="benchmark-empty">Run the benchmark to compare.</p>
+      }
+    </section>
+
+    <section class="story-section">
+      <h4>4. What each number is for</h4>
+      <p class="story-description">
+        <strong>Dropped</strong> is the one that means "it stuttered": frames past 1.5× this
+        display's own measured frame interval, so a missed vsync rather than an assumed 60Hz.
+        <strong>p95</strong> sits beside <strong>worst frame</strong> because one stall is ordinary
+        — a collection, the browser doing something else — while a p95 well above the frame interval
+        means most frames are late, which is what a person actually perceives.
+      </p>
+      <p class="story-description">
+        ⚠️ <strong>There is deliberately no "frames over 16.7ms" count.</strong> An earlier version
+        had one, and measured across eight runs it ranged <strong>29%–48%</strong> while p95, worst
+        frame and dropped frames all held still — the threshold sat <em>on</em> the 60Hz refresh
+        interval, so jitter relocated dozens of frames across it. Lateness only means something
+        relative to the display's own cadence, which is what <strong>Dropped</strong> measures.
+      </p>
+      <p class="story-description">
+        <strong>Rows built</strong> is the one to watch across Wave 6. It counts row elements the
+        browser had to construct during the run, and a window slide pays that cost whatever the
+        cells contain — so deferring a chart's contents cannot reduce it. It is therefore the number
+        that decides whether row recycling is worth its own story, rather than a matter of opinion.
+      </p>
+      <p class="story-description">
+        <strong>Rows in DOM</strong> against the dataset size is the virtualization claim itself,
+        stated as two numbers instead of a sentence.
+      </p>
+    </section>
+  </div>
+</nge-storybook-review-container>

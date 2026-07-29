@@ -1,0 +1,848 @@
+@let observed = observedSorting();
+@let controlled = controlledState();
+@let controlledJson = controlledStateJson();
+@let saved = savedView();
+@let pinning = pinningState();
+@let pinningSummary = pinningJson();
+@let resizing = resizeState();
+@let resizeSummary = resizeSizingJson();
+@let resizePinned = resizePinnedState();
+@let virtualPinned = virtualPinnedState();
+@let virtualResizablePinned = virtualResizablePinnedState();
+@let renderedRows = renderedRowCount();
+
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Interaction</h2>
+    <p class="intro-text">
+      The controlled-state contract is behaviour, so it only shows up when driven. Click headers,
+      push state in from the buttons, and watch the emitted <code>NgeTableState</code> below —
+      client-side and server-side tables are indistinguishable from here, which is exactly why
+      server-side mode later becomes a flag flip rather than a rewrite.
+    </p>
+
+    <!-- EXAMPLE 1: Uncontrolled -->
+    <section class="story-section">
+      <h4>1. Uncontrolled — bind nothing</h4>
+      <p class="story-description">
+        With no <code>[state]</code> binding the store keeps its own copy, so the table is usable
+        out of the box. <code>(stateChange)</code> still fires, so a host can observe without
+        owning.
+      </p>
+      <div class="code-block">
+        <pre>&lt;nge-table [config]="config" (stateChange)="log($event)" /&gt;</pre>
+      </div>
+      <p class="readout"
+        >Last emitted sorting: <strong>{{ observed }}</strong></p
+      >
+      <div class="table-container">
+        <nge-table
+          [config]="config"
+          (stateChange)="onUncontrolledStateChange($event)"
+        />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Controlled round trip -->
+    <section class="story-section">
+      <h4>2. Controlled — the round trip</h4>
+      <p class="story-description">
+        Bind both halves and the host owns the state. Sort from the table and the JSON updates;
+        press a button and the table follows. The pair is named so
+        <code>[(state)]</code> works as a two-way binding.
+      </p>
+      <div class="code-block">
+        <pre>
+&lt;nge-table [config]="config" [(state)]="tableState" /&gt;
+
+&lt;!-- or, spelled out --&gt;
+&lt;nge-table
+  [config]="config"
+  [state]="tableState()"
+  (stateChange)="tableState.set($event)"
+/&gt;</pre>
+      </div>
+      <div class="controls">
+        <button
+          type="button"
+          (click)="sortExternally('name', false)"
+          >Sort name ascending</button
+        >
+        <button
+          type="button"
+          (click)="sortExternally('amount', true)"
+          >Sort amount descending</button
+        >
+        <button
+          type="button"
+          (click)="clearSort()"
+          >Clear sort</button
+        >
+      </div>
+      <div class="split">
+        <div class="table-container">
+          <nge-table
+            [config]="config"
+            [state]="controlled"
+            (stateChange)="controlledState.set($event)"
+          />
+        </div>
+        <pre class="state-readout">{{ controlledJson }}</pre>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Persist and restore -->
+    <section class="story-section">
+      <h4>3. Persist and restore a view</h4>
+      <p class="story-description">
+        The state is plain JSON, which is what makes "remember how this user left the table"
+        possible. Sort the table above, save, change the sort, then restore — the string is the
+        whole contract, and Firestore is just a slower place to keep it.
+      </p>
+      <div class="code-block">
+        <pre>
+save() {{ "{" }} localStorage.setItem('view', JSON.stringify(this.tableState())); {{ "}" }}
+restore() {{ "{" }} this.tableState.set(JSON.parse(localStorage.getItem('view')!)); {{ "}" }}</pre>
+      </div>
+      <div class="controls">
+        <button
+          type="button"
+          (click)="saveView()"
+          >Save view</button
+        >
+        <button
+          type="button"
+          [disabled]="!saved"
+          (click)="restoreView()"
+          >Restore view</button
+        >
+      </div>
+      @if (saved) {
+        <pre class="state-readout state-readout--inline">{{ saved }}</pre>
+      } @else {
+        <p class="readout">No view saved yet.</p>
+      }
+    </section>
+
+    <!-- EXAMPLE 4: Pinning, driven live -->
+    <section class="story-section">
+      <h4>4. Pinning — three lanes, driven live</h4>
+      <p class="story-description">
+        Freeze columns to either edge and scroll the center sideways. Pin three or more to the left
+        and they hold their places without overlapping, because pinning is
+        <code>position: sticky</code> on the <strong>lane wrapper</strong>, never on a cell — one
+        sticky box with ordinary flex children instead of N cells each claiming
+        <code>left: 0</code>. Pinning has no header affordance of its own, so these buttons drive it
+        the way a header menu eventually will: through the public <code>state</code> input.
+      </p>
+      <div class="code-block">
+        <pre>
+// The capability is config; WHICH columns are frozen is state.
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }} columns, data, enablePinning: true {{ "}" }});
+state.update(s =&gt; ({{ "{" }} ...s, columnPinning: {{ "{" }} left: ['name'], right: ['owner'] {{
+            "}"
+          }} {{ "}" }}));</pre>
+      </div>
+
+      @for (columnId of pinnableColumns; track columnId) {
+        @let target = pinTargetOf(columnId);
+
+        <div class="controls controls--row">
+          <span class="control-label">{{ columnId }}</span>
+          <button
+            type="button"
+            [attr.aria-label]="'Pin ' + columnId + ' left'"
+            [disabled]="target === 'left'"
+            (click)="pinColumn(columnId, 'left')"
+            >Pin left</button
+          >
+          <button
+            type="button"
+            [attr.aria-label]="'Unpin ' + columnId"
+            [disabled]="target === 'unpinned'"
+            (click)="pinColumn(columnId, 'unpinned')"
+            >Unpin</button
+          >
+          <button
+            type="button"
+            [attr.aria-label]="'Pin ' + columnId + ' right'"
+            [disabled]="target === 'right'"
+            (click)="pinColumn(columnId, 'right')"
+            >Pin right</button
+          >
+        </div>
+      }
+
+      <div class="controls">
+        <button
+          type="button"
+          (click)="clearPinning()"
+          >Clear all pinning</button
+        >
+      </div>
+
+      <div class="split">
+        <div class="table-container">
+          <nge-table
+            [config]="pinnableConfig"
+            [state]="pinning"
+            (stateChange)="pinningState.set($event)"
+          />
+        </div>
+        <pre class="state-readout">{{ pinningSummary }}</pre>
+      </div>
+
+      <p class="story-description">
+        The same state below, with <code>enablePinning: false</code>. The lanes collapse to one and
+        nothing freezes — a capability flag gates the <em>effect</em>, exactly as
+        <code>enableSorting: false</code> ignores a <code>state.sorting</code> it was handed. The
+        state is never rewritten, so the frozen columns come back the moment the flag does.
+      </p>
+      <div class="table-container">
+        <nge-table
+          [config]="unpinnableConfig"
+          [state]="pinning"
+        />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Column drag-to-resize -->
+    <section class="story-section">
+      <h4>5. Drag to resize — Excel / Numbers behaviour</h4>
+      <p class="story-description">
+        Drag any column's trailing edge. Columns <strong>never</strong> size themselves to their
+        content — the width is whatever the user last dragged it to, which is the requirement that
+        decided the flexbox substrate. Widths land in <code>state.columnSizing</code> as plain
+        numbers, so they persist and restore with the rest of the view.
+      </p>
+      <p class="story-description">
+        <strong>Status</strong> carries <code>minSize: 120</code> and <code>maxSize: 220</code>, so
+        it stops short in both directions; every other column uses the library's 60–800px defaults.
+        Watch the JSON while you drag past a bound — the emitted value is clamped too, not just the
+        render, so a saved view can never carry a width the table would refuse to draw.
+      </p>
+      <p class="story-description">
+        The grip is pointer-driven (mouse, trackpad, touch and pen all take the same path), and
+        every column is also resizable from the keyboard: focus a header and press
+        <kbd>Shift</kbd> + <kbd>←</kbd> / <kbd>→</kbd>. Double-click a grip — or press
+        <kbd>Shift</kbd> + <kbd>Home</kbd> — to hand the column back to its defined width.
+      </p>
+      <div class="code-block">
+        <pre>
+// The capability is config; the WIDTHS are state.
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }}
+  columns, data, enableColumnResizing: true
+{{ "}" }});
+
+// Per-column bounds live on the column definition.
+{{ "{" }} accessorKey: 'status', id: 'status', minSize: 120, maxSize: 220 {{ "}" }}</pre>
+      </div>
+      <div class="controls">
+        <button
+          type="button"
+          (click)="applyPresetWidths()"
+          >Apply widths from outside</button
+        >
+        <button
+          type="button"
+          (click)="clearWidths()"
+          >Reset every width</button
+        >
+      </div>
+      <div class="split">
+        <div class="table-container">
+          <nge-table
+            [config]="resizableConfig"
+            [state]="resizing"
+            (stateChange)="resizeState.set($event)"
+          />
+        </div>
+        <pre class="state-readout">{{ resizeSummary }}</pre>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Resizing a pinned column -->
+    <section class="story-section">
+      <h4>6. Resizing a pinned column</h4>
+      <p class="story-description">
+        Two columns frozen left, one right, and every one of them resizable. Drag
+        <strong>Name</strong> or <strong>Status</strong> wider and the pinned lane grows with it
+        while the center lane reflows — no overlap at any width, and the right-hand lane stays flush
+        to the edge.
+      </p>
+      <p class="story-description">
+        Nothing in the resize code knows that pinning exists. Lane widths are the engine's own
+        totals over each lane's visible columns, published as
+        <code>--nge-table-internal-*</code> properties on the host, so a new width re-derives the
+        geometry on its own. That is the pay-off for taking sticky offsets from the engine rather
+        than computing them by hand.
+      </p>
+      <div class="table-container">
+        <nge-table
+          [config]="resizablePinnedConfig"
+          [state]="resizePinned"
+          (stateChange)="resizePinnedState.set($event)"
+        />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7: Ten thousand rows -->
+    <section class="story-section">
+      <h4>7. Ten thousand rows</h4>
+      <p class="story-description">
+        The whole dataset is {{ totalRowCount }} rows; only the ones near the viewport are ever in
+        the DOM. Scroll to the middle, scroll to the end, then sample the count — it stays in the
+        tens wherever you are. Sorting still sorts all ten thousand, because the window is cut from
+        the <em>processed</em> row model rather than from the raw data.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }}
+  columns, data, enableVirtualization: true
+{{ "}" }});
+
+/* The table needs a bounded height — on `nge-table` itself, never a wrapper. */
+nge-table {{ "{" }} max-height: 420px; {{ "}" }}</pre>
+      </div>
+      <div class="controls">
+        <button
+          type="button"
+          (click)="countRenderedRows(virtualTable)"
+          >Count rendered rows</button
+        >
+      </div>
+      <p class="readout">
+        @if (renderedRows === null) {
+          Scroll the table, then sample the DOM.
+        } @else {
+          <strong>{{ renderedRows }}</strong> rows in the DOM, of {{ totalRowCount }}.
+        }
+      </p>
+      <div
+        #virtualTable
+        class="table-container"
+      >
+        <nge-table [config]="virtualConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 8: Virtualization with pinned columns -->
+    <section class="story-section">
+      <h4>8. Ten thousand rows, with columns pinned</h4>
+      <p class="story-description">
+        The combination this story exists for. <strong>Name</strong> is frozen left and
+        <strong>Owner</strong> right; scroll fast, in both directions at once, and the pinned lanes
+        stay locked to their edges and aligned with the rows they belong to.
+      </p>
+      <p class="story-description">
+        Windowed rows are absolutely positioned and pinned lanes are
+        <code>position: sticky</code> inside them, which only works because the rows are placed with
+        <code>top</code>. A <code>transform</code> would be the obvious way to move a row and would
+        create a stacking context, stranding every sticky lane inside it — AG Grid hit exactly this
+        and switched to top-positioning. Nothing here is free to "optimize" that back.
+      </p>
+      <div class="table-container">
+        <nge-table
+          [config]="virtualPinnedConfig"
+          [state]="virtualPinned"
+          (stateChange)="virtualPinnedState.set($event)"
+        />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 9: Resizing a pinned column mid-scroll -->
+    <section class="story-section">
+      <h4>9. Resizing a pinned column, mid-scroll</h4>
+      <p class="story-description">
+        All three at once — windowed rows, two lanes frozen left and one right, and every column
+        draggable. Scroll into the middle of the dataset, then drag <strong>Name</strong> wider
+        without scrolling back: the lane grows, the center reflows, and the rows already on screen
+        keep their alignment.
+      </p>
+      <p class="story-description">
+        Nothing in the virtualization code knows a column can be resized. Row offsets are arithmetic
+        over the row <em>height</em>, lane widths are the engine's own totals, and the two never
+        meet — which is why this composition needed no code of its own.
+      </p>
+      <div class="table-container">
+        <nge-table
+          [config]="virtualResizablePinnedConfig"
+          [state]="virtualResizablePinned"
+          (stateChange)="virtualResizablePinnedState.set($event)"
+        />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 10: Inline editing as a cell pattern -->
+    <section class="story-section">
+      <h4>10. Inline editing — a cell containing an input</h4>
+      <p class="story-description">
+        Type in a <strong>Name</strong> cell. Nothing in the table knows editing exists: a cell is
+        an arbitrary Angular render target, so inline editing is a <em>cell pattern</em> rather than
+        a table feature. Sort by another column and the edits follow their rows, because they are
+        keyed by <code>rowId</code> — which is why <code>getRowId</code> matters the moment state
+        outlives the render.
+      </p>
+      <p class="story-description">
+        The drafts live in the <em>host</em>, not in the cell, and that is the constraint rather
+        than a preference. Virtualization recycles DOM, so the node showing row 12 is the node that
+        showed row 4 a moment ago — a cell holding its own draft would hand row 12 the wrong text.
+      </p>
+      <div class="split">
+        <div class="table-container">
+          <nge-table [config]="editableConfig">
+            <ng-template
+              ngeCell="name"
+              let-cell
+              [ngeCellOf]="editableRows"
+            >
+              <input
+                class="cell-input"
+                type="text"
+                [attr.aria-label]="'Edit name for row ' + cell.rowId"
+                [value]="nameFor(cell.rowId, cell.row.name)"
+                (input)="editName(cell.rowId, $any($event.target).value)"
+              />
+            </ng-template>
+          </nge-table>
+        </div>
+        <div>
+          <p class="story-description">
+            <button
+              type="button"
+              (click)="clearEdits()"
+            >
+              Discard edits
+            </button>
+          </p>
+          <pre class="state-readout">{{ editedNamesJson() }}</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 11: Row detail driven by state.expanded -->
+    <section class="story-section">
+      <h4>11. Row detail, gated on <code>state.expanded</code></h4>
+      <p class="story-description">
+        Click a row's <strong>toggle</strong> and its detail band appears. The
+        <code>row-detail</code> slot renders for every row whenever a template is registered — a
+        slot is a <em>place</em>, not a state — and the template gates itself on
+        <code>isExpanded</code>. That signal is real today because <code>state.expanded</code> was
+        routed through the controlled-state contract in ARCH-242, before any expansion feature
+        existed to use it.
+      </p>
+      <p class="story-description">
+        Virtualization is off here on purpose: a windowed row is positioned at
+        <code>index × rowHeight</code>, so a detail band would overlap the row beneath it. The two
+        compose once variable row heights land.
+      </p>
+      <div class="split">
+        <div class="table-container">
+          <nge-table
+            [config]="expandableConfig"
+            [state]="expansionState()"
+            (stateChange)="expansionState.set($event)"
+          >
+            <ng-template
+              ngeCell="name"
+              let-cell
+              [ngeCellOf]="expandableRows"
+            >
+              <button
+                class="detail-toggle"
+                type="button"
+                [attr.aria-label]="'Toggle detail for ' + cell.row.name"
+                (click)="toggleExpanded(cell.rowId)"
+              >
+                ▸
+              </button>
+              {{ cell.row.name }}
+            </ng-template>
+
+            <ng-template
+              ngeTableSlot="row-detail"
+              let-row
+              [ngeTableSlotOf]="expandableRows"
+            >
+              @if (row.isExpanded) {
+                <span class="row-detail-body">
+                  <strong>{{ row.row.name }}</strong> — owned by {{ row.row.owner.name }} ({{
+                    row.row.owner.email
+                  }}), {{ row.row.quantity }} units, created
+                  {{ row.row.createdAt | date: "mediumDate" }}.
+                </span>
+              }
+            </ng-template>
+          </nge-table>
+        </div>
+        <div>
+          <p class="story-description">
+            <button
+              type="button"
+              (click)="expandAll()"
+            >
+              Expand all
+            </button>
+            <button
+              type="button"
+              (click)="collapseAll()"
+            >
+              Collapse all
+            </button>
+          </p>
+          <p class="story-description">
+            <strong>Expand all</strong> writes the engine's <code>true</code> shorthand rather than
+            six map entries — the shape that keeps expand-all on ten thousand rows from
+            materialising ten thousand keys.
+          </p>
+          <pre class="state-readout">{{ expandedJson() }}</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 12: A control inside a header slot -->
+    <section class="story-section">
+      <h4>12. A control inside a header slot</h4>
+      <p class="story-description">
+        <code>header-cell</code> replaces the label outright rather than wrapping it, because these
+        slots exist for the custom sort and filter forms a later story will host and must not assume
+        text-only content. Use the ▲ / ▼ buttons on <strong>Name</strong> and
+        <strong>Status</strong> to sort explicitly.
+      </p>
+      <p class="story-description">
+        The footgun the seam inherits: the header cell's own click toggles the sort, so a control
+        inside it needs <code>$event.stopPropagation()</code> — the same arrangement the resize grip
+        has used since ARCH-244. The two buttons below stop propagation;
+        <strong>Quantity</strong> keeps the default header so the difference is visible side by
+        side.
+      </p>
+      <div class="split">
+        <div class="table-container">
+          <nge-table
+            [config]="headerSlotConfig"
+            [state]="headerSlotState()"
+            (stateChange)="headerSlotState.set($event)"
+          >
+            <ng-template
+              ngeTableSlot="header-cell"
+              ngeTableSlotColumn="name"
+              let-header
+            >
+              <span class="header-control">
+                Name
+                <button
+                  type="button"
+                  aria-label="Sort name ascending"
+                  (click)="sortFromHeader($event, header.columnId, false)"
+                >
+                  ▲
+                </button>
+                <button
+                  type="button"
+                  aria-label="Sort name descending"
+                  (click)="sortFromHeader($event, header.columnId, true)"
+                >
+                  ▼
+                </button>
+              </span>
+            </ng-template>
+
+            <ng-template
+              ngeTableSlot="header-cell"
+              ngeTableSlotColumn="status"
+              let-header
+            >
+              <span class="header-control">
+                Status
+                <button
+                  type="button"
+                  aria-label="Sort status ascending"
+                  (click)="sortFromHeader($event, header.columnId, false)"
+                >
+                  ▲
+                </button>
+                <button
+                  type="button"
+                  aria-label="Sort status descending"
+                  (click)="sortFromHeader($event, header.columnId, true)"
+                >
+                  ▼
+                </button>
+              </span>
+            </ng-template>
+
+            <ng-template
+              ngeTableSlot="header-overlay"
+              ngeTableSlotColumn="amount"
+              let-header
+            >
+              <span class="header-badge">{{ header.width }}px</span>
+            </ng-template>
+          </nge-table>
+        </div>
+        <div>
+          <p class="story-description">
+            <code>header-overlay</code> on <strong>Amount</strong> sits <em>beside</em> the default
+            label rather than replacing it, and reports the column's live width from the same
+            context.
+          </p>
+          <pre class="state-readout">{{ headerSortJson() }}</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 13: The event stream (ARCH-247) -->
+    <section class="story-section">
+      <h4>13. The event stream — one output, one union</h4>
+      <p class="story-description">
+        Extension axis 4 of 4. Everything the table announces leaves through a single
+        <code>(ngeTableEvent)</code>, so a new kind is a member on <code>NgeTableEvent</code>
+        rather than a new binding on the component. The host below does nothing but listen — no
+        library code is involved in this panel.
+      </p>
+      <div class="code-block">
+        <pre>
+&lt;nge-table [config]="config" (ngeTableEvent)="onEvent($event)" /&gt;
+
+onEvent(event: NgeTableEvent&lt;Row&gt;) &#123;
+  switch (event.kind) &#123;
+    case 'sort-change':   return this.reload(event.sorting);
+    case 'cell-click':    return this.open(event.cell.row);
+    case 'column-resize': return this.save(event.columnSizing);
+  &#125;
+&#125;</pre>
+      </div>
+      <p class="story-description">
+        Things worth doing here: <strong>drag a column edge</strong> — the width follows the pointer
+        every frame and exactly <em>one</em> <code>column-resize</code> lands, on release.
+        <strong>Click a cell</strong> — <code>cell-click</code> arrives before
+        <code>row-click</code>, because the two ride ordinary DOM bubbling.
+        <strong>Sort a header</strong> — <code>sort-change</code> is followed by
+        <code>load-complete</code> and then <code>render-complete</code>, in that order, because
+        sorting rebuilds the row model and the pair describes the row model.
+        <strong>Pin a column from the buttons</strong> — nothing is announced, because state the
+        host pushes in is the host's own write coming back, not news.
+      </p>
+      <div class="controls">
+        @for (columnId of pinnableColumns; track columnId) {
+          <button
+            type="button"
+            (click)="pinFromEventStory(columnId)"
+          >
+            Toggle pin: {{ columnId }}
+          </button>
+        }
+        <button
+          type="button"
+          (click)="clearEventLog()"
+          >Clear log</button
+        >
+      </div>
+      <div class="event-filters">
+        @for (kind of eventKinds; track kind) {
+          @let muted = mutedKinds().has(kind);
+          <button
+            type="button"
+            class="event-filter"
+            [attr.aria-pressed]="!muted"
+            [class.event-filter--muted]="muted"
+            (click)="toggleEventKind(kind)"
+          >
+            {{ kind }}
+            <span class="event-filter__count">{{ eventCounts()[kind] ?? 0 }}</span>
+          </button>
+        }
+      </div>
+      <div class="split">
+        <div>
+          <div class="table-container">
+            <nge-table
+              [config]="eventConfig"
+              [state]="eventState()"
+              (ngeTableEvent)="onNgeTableEvent($event)"
+              (stateChange)="eventState.set($event)"
+            />
+          </div>
+          <p class="story-description">
+            And the guarantee that only a real browser can check: the table below is the same log
+            fed by <strong>ten thousand virtualized rows</strong>.
+            <strong>Scroll it and the log does not move.</strong>
+            <code>render-complete</code> describes the row model, not the scroll position — so
+            re-windowing the DOM sixty times a second announces nothing, and its
+            <code>renderedRowCount</code> stays the window as first painted, which is the number
+            that shows virtualization working.
+          </p>
+          <div class="table-container table-container--virtual-events">
+            <nge-table
+              class="event-virtual-table"
+              [config]="virtualEventConfig"
+              (ngeTableEvent)="onNgeTableEvent($event)"
+            />
+          </div>
+        </div>
+        <ol class="event-log">
+          @for (entry of visibleEventLog(); track entry.seq) {
+            <li class="event-log__entry">
+              <span class="event-log__kind">{{ entry.kind }}</span>
+              <code class="event-log__detail">{{ entry.detail }}</code>
+            </li>
+          } @empty {
+            <li class="event-log__entry event-log__entry--idle">
+              Nothing announced yet — sort, drag an edge, or click a cell.
+            </li>
+          }
+        </ol>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 14: The export seam (ARCH-248) -->
+    <section class="story-section">
+      <h4>14. The export seam — a reader over what the user sees</h4>
+      <p class="story-description">
+        Extension axis 3 of 4. <code>readNgeExportData()</code> returns a neutral shape — columns,
+        rows, and per cell both a <code>raw</code> value and a <code>formatted</code> one —
+        reflecting the active sort, filters, column order, and visibility. It knows no output format
+        at all; a CSV or XLSX writer is an addon over this shape.
+      </p>
+      <div class="code-block">
+        <pre>
+&lt;nge-table #table [config]="config" [(state)]="tableState" /&gt;
+
+private readonly table = viewChild.required&lt;NgeTableComponent&lt;Row&gt;&gt;('table');
+
+export() &#123;
+  const data = this.table().readNgeExportData(&#123; slice: 'selected' &#125;);
+  //    data.columns → &#123; id, header &#125;[]
+  //    data.rows    → &#123; id, cells: &#123; columnId, raw, formatted &#125;[] &#125;[]
+&#125;</pre>
+      </div>
+      <p class="story-description">
+        Things worth doing here: <strong>sort a header, hide a column, pin one left</strong> — then
+        export and watch the shape follow, because it is cut from the processed row model rather
+        than from <code>config.data</code>. <strong>Click cells to mark them</strong>, switch on
+        “marked cells only”, and export: the predicate is an ordinary closure over this story's own
+        state, and the seam never learns what a mark is. That is the composition ARCH-250 and
+        ARCH-251 are built to prove — one side marks, one side exports, neither imports the other.
+      </p>
+      <div class="controls">
+        <button
+          type="button"
+          (click)="runExport('all')"
+          >Export all</button
+        >
+        <button
+          type="button"
+          (click)="runExport('page')"
+          >Export page</button
+        >
+        <button
+          type="button"
+          (click)="runExport('selected')"
+          >Export selected</button
+        >
+        <button
+          type="button"
+          [attr.aria-pressed]="markedOnly()"
+          [class.control--active]="markedOnly()"
+          (click)="toggleMarkedOnly()"
+        >
+          Marked cells only: {{ markedOnly() ? "on" : "off" }}
+        </button>
+        <button
+          type="button"
+          (click)="clearMarks()"
+          >Clear marks ({{ markedCells().size }})</button
+        >
+      </div>
+      <div class="controls">
+        <button
+          type="button"
+          (click)="toggleExportColumn('status')"
+          >Toggle column: status</button
+        >
+        <button
+          type="button"
+          (click)="toggleExportPin('owner')"
+          >Toggle pin left: owner</button
+        >
+        @for (row of exportRows.slice(0, 3); track row.id) {
+          <button
+            type="button"
+            [attr.aria-pressed]="!!exportState().rowSelection[row.id]"
+            [class.control--active]="!!exportState().rowSelection[row.id]"
+            (click)="toggleExportSelection(row.id)"
+          >
+            Select: {{ row.name }}
+          </button>
+        }
+      </div>
+      <p class="readout">
+        Last export (<strong>{{ exportSlice() }}</strong
+        >): <strong>{{ exportSummary() }}</strong>
+      </p>
+      <div class="split">
+        <div class="table-container">
+          <nge-table
+            #exportTable
+            [config]="exportConfig"
+            [state]="exportState()"
+            (ngeTableEvent)="onExportEvent($event)"
+            (stateChange)="exportState.set($event)"
+          >
+            <!-- The mark, drawn beside the value rather than replacing it. -->
+            <ng-template
+              ngeTableSlot="cell-overlay"
+              let-cell
+            >
+              @if (isMarked(cell.rowId, cell.columnId)) {
+                <span
+                  class="export-mark"
+                  aria-label="marked for export"
+                  >●</span
+                >
+              }
+            </ng-template>
+          </nge-table>
+        </div>
+        <div>
+          @if (exportResult(); as exported) {
+            <p class="story-description">
+              <code>raw</code> versus <code>formatted</code>, first exported row — the two differ
+              exactly where the column declared a <code>meta.ngeExport.format</code>, which is the
+              currency one and the date one.
+            </p>
+            <table class="export-preview">
+              <thead>
+                <tr>
+                  <th scope="col">column</th>
+                  <th scope="col">raw</th>
+                  <th scope="col">formatted</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (cell of exported.rows[0].cells; track cell.columnId) {
+                  <tr>
+                    <td>{{ cell.columnId }}</td>
+                    <td>{{ cell.raw }}</td>
+                    <td>{{ cell.formatted }}</td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="3">No cells survived the predicate.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+            <p class="story-description">The shape itself, trimmed to the first two rows:</p>
+            <pre class="export-json">{{ exportPreview() }}</pre>
+          } @else {
+            <p class="story-description">Press an export button to see the shape.</p>
+          }
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

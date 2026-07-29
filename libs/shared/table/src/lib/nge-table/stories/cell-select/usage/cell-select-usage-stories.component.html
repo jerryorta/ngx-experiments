@@ -1,0 +1,153 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Cell Select Usage</h2>
+    <p class="intro-text"
+      >A column declares its choices and names the editor; the table renders it. No
+      <code>[ngeCell]</code> template, no <code>&#64;tanstack/*</code> import, and no
+      <code>&lt;nge-cell-select&gt;</code> tag in the consumer's markup.</p
+    >
+
+    <section class="story-section">
+      <h4>1. Declaring a select column</h4>
+      <p class="story-description"
+        ><code>ngeCellSelectEdit()</code> builds the <code>ngeEdit</code> meta for you. Options
+        are primitives — a <code>label</code> the user reads and a <code>value</code> the table
+        proposes.</p
+      >
+      <div class="code-block">
+        <pre>
+import {{ "{" }} ngeCellSelectEdit {{ "}" }} from '&#64;nge/table/editors';
+
+const STATUS_OPTIONS = [
+  {{ "{" }} label: 'Active', value: 'active' {{ "}" }},
+  {{ "{" }} label: 'Pending', value: 'pending' {{ "}" }},
+  {{ "{" }} label: 'Archived', value: 'archived', disabled: true {{ "}" }},
+  {{ "{" }} label: 'Failed', value: 'failed' {{ "}" }},
+];
+
+const columns = [
+  {{ "{" }}
+    accessorKey: 'status',
+    header: 'Status',
+    id: 'status',
+    meta: {{ "{" }} ngeEdit: ngeCellSelectEdit(STATUS_OPTIONS, {{ "{" }} label: 'Edit status' {{
+            "}"
+          }}) {{ "}" }},
+  {{ "}" }},
+];</pre>
+      </div>
+      <nge-table-select-demo
+        [(rows)]="basicRows"
+        [(state)]="basicState"
+        [maxHeight]="260"
+      />
+    </section>
+
+    <section class="story-section">
+      <h4>2. Why the options ride <code>editorInputs</code></h4>
+      <p class="story-description"
+        >The helper expands to the shape below. <code>ngeExport</code> (ARCH-248) and
+        <code>ngeFill</code> (ARCH-271) are <em>top-level</em> meta keys because the table's
+        <strong>core</strong> reads them. An editor's options are read by the
+        <strong>editor</strong>, and a <code>NgeCellContext</code> carries no column — so
+        <code>editorInputs</code>, which the adapter spreads as component inputs, is the only
+        channel there is. A top-level <code>ngeSelect</code> key would mean core learning what a
+        select is.</p
+      >
+      <div class="code-block">
+        <pre>
+meta: {{ "{" }}
+  ngeEdit: {{ "{" }}
+    editor: NgeCellSelectComponent,
+    editorInputs: {{ "{" }} label: 'Edit status', options: STATUS_OPTIONS {{ "}" }},
+    enabled: true,
+  {{ "}" }},
+{{ "}" }}</pre>
+      </div>
+      <p class="story-description"
+        >⚠️ Prefer the helper to writing this by hand. <code>editorInputs</code> is
+        <code>Record&lt;string, unknown&gt;</code> and the adapter applies only keys the component
+        declares as inputs — so <code>{{ "{" }} items: … {{ "}" }}</code> is dropped in silence and
+        the panel renders empty, which reads as a data problem rather than a typo.</p
+      >
+    </section>
+
+    <section class="story-section">
+      <h4>3. Reacting to the proposal</h4>
+      <p class="story-description"
+        >The table never writes to <code>config.data</code>. It emits an
+        <code>edit-intent</code> carrying a <code>NgeCellPatch</code> — the same shape
+        <code>fill-intent</code> uses, so one handler serves both — and the host applies it and
+        hands new data back in.</p
+      >
+      <div class="code-block">
+        <pre>
+onEvent(event: NgeTableEvent&lt;Row&gt;): void {{ "{" }}
+  if (event.kind !== 'edit-intent') return;
+
+  // event.cells: {{ "{" }} columnId, rowId, value, previousValue {{ "}" }}[]
+  this.rows.update(rows =&gt; applyPatches(rows, event.cells));
+{{ "}" }}</pre>
+      </div>
+      <nge-table-select-demo
+        [(rows)]="intentRows"
+        [(state)]="intentState"
+        [maxHeight]="260"
+      />
+    </section>
+
+    <section class="story-section">
+      <h4>4. Shadowing it with your own control</h4>
+      <p class="story-description"
+        >A library editor is a <strong>default</strong>, not a fixture. A
+        <code>[ngeCell]</code> template for the same column wins, because
+        <code>NgeTableStore.cellTemplate</code> consults projected registrations before the editor
+        a column named. Grouped options, per-option templates and async loading are all reachable
+        this way today — that seam is why the select itself stays a flat list.</p
+      >
+      <div class="code-block">
+        <pre>
+&lt;nge-table [config]="config()"&gt;
+  &lt;ng-template ngeCell="status" [ngeCellOf]="rows" let-cell&gt;
+    &lt;strong&gt;{{ "{{" }} cell.row.status {{ '}}' }}&lt;/strong&gt;
+  &lt;/ng-template&gt;
+&lt;/nge-table&gt;</pre>
+      </div>
+      <nge-table-select-demo
+        [(rows)]="overrideRows"
+        [(state)]="overrideState"
+        [maxHeight]="260"
+        [overrideStatus]="true"
+      />
+    </section>
+
+    <section class="story-section">
+      <h4>5. What it deliberately is not</h4>
+      <ul class="story-description">
+        <li
+          ><strong>Not a form control.</strong> No <code>ControlValueAccessor</code>, no
+          <code>NgControl</code>, no validation, no touched/dirty. That per-instance saving is the
+          whole reason the table owns an editor rather than reaching for a design-library
+          select.</li
+        >
+        <li
+          ><strong>Not a rich picker.</strong> A flat <code>&#64;for</code> over primitives, with no
+          per-option template and no content projection — those are most of what makes a
+          design-system select expensive to instantiate.</li
+        >
+        <li
+          ><strong>Not always built.</strong> Activation means the panel is constructed when a user
+          engages the cell, so thirty visible rows cost zero overlays.</li
+        >
+        <li
+          ><strong>Not <code>&#64;angular/cdk</code> in your table bundle.</strong> The CDK is a
+          dependency of <code>&#64;nge/table/editors</code> alone; the production barrel
+          never reaches it, and a spec asserts so against the module graph.</li
+        >
+      </ul>
+    </section>
+  </div>
+</nge-storybook-review-container>

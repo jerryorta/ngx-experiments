@@ -1,0 +1,174 @@
+// Everything below is nested under the component's own root wrapper, never
+// `:host`. The library is `ViewEncapsulation.None`, so an unnested rule would
+// leak into every other story in the Storybook bundle.
+//
+// The inner class names stay BARE — `.story-section`, not `.nge-story-section`
+// — matching every other table story: the runtime emits BEM `.nge-table__*`
+// classes, so there is no collision surface here for a prefix to guard against.
+.nge-table-chart-cells-interaction-stories {
+  display: block;
+  padding: 20px;
+  color: var(--nge-table-on-surface, #1d1b20);
+  background: var(--nge-table-surface, #ffffff);
+
+  .stories-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    margin-bottom: 8px;
+  }
+
+  .intro-text {
+    margin-bottom: 32px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 16px;
+  }
+
+  .story-section {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+
+    h4 {
+      margin-bottom: 8px;
+      color: var(--nge-table-on-surface, #1d1b20);
+    }
+
+    .story-description {
+      margin-bottom: 16px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 14px;
+    }
+  }
+
+  .code-block {
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    background: var(--nge-table-surface-variant, #f5f5f5);
+    border-radius: 6px;
+
+    pre {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+
+    button {
+      padding: 6px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      background: var(--nge-table-surface, #ffffff);
+      border: 1px solid var(--nge-table-border-color, #e0e0e0);
+      border-radius: 4px;
+    }
+  }
+
+  .readout {
+    margin-bottom: 16px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 13px;
+  }
+
+  // The height goes on `nge-table` itself, not on this wrapper: the host is a
+  // flex column and the scroller inside it shrinks to fit, whereas a max-height
+  // here would simply be overflowed and nothing would scroll vertically.
+  .table-container {
+    margin-bottom: 16px;
+
+    nge-table {
+      max-height: 420px;
+    }
+
+    // The 10,000-row example — tall enough that a fast scroll has real distance
+    // to cover before settling matters.
+    &--tall nge-table {
+      max-height: 560px;
+    }
+  }
+
+  // Table on the left, ... on the right in Example 3 — the two boxes have to be
+  // visible at once for a row-height comparison to read as a comparison.
+  .split {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-start;
+
+    > * {
+      flex: 1 1 300px;
+      min-width: 0;
+    }
+
+    h5 {
+      margin: 0 0 8px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+  }
+
+  // ─── The chart cell (ARCH-291) ──────────────────────────────────────────────
+
+  // The sizing `<nge-cell-shell>` itself uses against the very same cell.
+  // `.nge-table__cell` always carries a DEFINITE height (`--nge-table-row-height`,
+  // never `auto`), so `<nge-chart>`'s own `height: 100%` resolves fully against it
+  // whether or not this wrapper is present — see Example 3. `align-self: stretch`
+  // is kept anyway so the chart shares the shell's own sizing convention.
+  //
+  // ⚠️ It resolves here because a cell is a flex ITEM on a row of definite height.
+  // A `row-detail` band is a block on its own line, so stretching buys it nothing;
+  // band content reads `--nge-table-row-detail-height` directly instead
+  // (`stories/row-detail-content/`).
+  .chart-cell {
+    flex: 1 1 auto;
+    align-self: stretch;
+    min-width: 0;
+
+    // ⚠️ The shell's inset, matched exactly. `<nge-cell-shell>` sets the same
+    // margin, and `align-self: stretch` subtracts margin from the used height —
+    // so without this, the settled content is a full 96px while the shell it
+    // replaces was 84px, and the row visibly grows the instant the scroll
+    // settles. Matching the margin is what makes the swap invisible; the
+    // background above stops the flash, this stops the jump.
+    margin: var(--nge-table-shell-inset, 6px) 0;
+
+    // ⚠️ `<nge-chart>` debounces its render by 16ms, so nothing paints in the
+    // frame the chart mounts. Without the shell's own surface underneath, the
+    // shell→chart transition reads as shell → empty box → chart — a flash,
+    // rather than content arriving in place. Same token and fallback chain as
+    // `nge-cell-shell.component.scss`, so the two are the same colour by
+    // construction, not by coincidence — see Example 1, where this cell is
+    // what the shell hands off to.
+    background: var(--nge-table-shell-surface, var(--nge-table-surface-variant, #f5f5f5));
+    border-radius: var(--nge-table-shell-radius, 4px);
+  }
+
+  // Drawn in a `cell-overlay` slot, pushed to the cell's trailing edge by the
+  // library's own stylesheet — nothing here positions it.
+  .settle-badge {
+    padding: 1px 6px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-weight: 600;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: var(--nge-table-surface-variant, #f5f5f5);
+    border-radius: 999px;
+
+    &--settled {
+      color: var(--nge-table-on-surface, #1d1b20);
+      background: var(--nge-table-surface, #ffffff);
+    }
+  }
+}

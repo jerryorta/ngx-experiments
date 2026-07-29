@@ -1,0 +1,274 @@
+// Everything below is nested under the component's own root wrapper, never
+// `:host`. The library is `ViewEncapsulation.None`, so an unnested rule would
+// leak into every other story in the Storybook bundle.
+//
+// The inner class names stay BARE — `.story-section`, not `.nge-story-section`.
+// That diverges from the charts stories on purpose: charts had to prefix because
+// its runtime emits `nge-chart-*` classes a story could collide with, whereas the
+// table runtime emits BEM `.nge-table__*`, so there is no collision surface here.
+// The nesting is what provides the isolation either way.
+//
+// The story panel takes its surface from the same `--nge-table-surface` /
+// `--nge-table-on-surface` the tables read, for the same reason the usage story
+// does: prose and tables always move together — under one of the ten domain
+// themes that bridge `--nge-table-*` (ARCH-277) both follow the toolbar, and
+// under a theme that does not bridge them (`nge-*`, `gy-*`) both fall back to
+// the library's light-mode defaults.
+.nge-table-theming {
+  display: block;
+  padding: 20px;
+  color: var(--nge-table-on-surface, #1d1b20);
+  background: var(--nge-table-surface, #ffffff);
+
+  .stories-container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    margin-bottom: 8px;
+  }
+
+  .intro-text {
+    margin-bottom: 32px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 16px;
+  }
+
+  .story-section {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+
+    h4 {
+      margin-bottom: 8px;
+      color: var(--nge-table-on-surface, #1d1b20);
+    }
+
+    h5 {
+      margin-bottom: 8px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .story-description {
+      margin-bottom: 16px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 14px;
+    }
+
+    // The side-by-side section, so "same config, different wrapper" reads as the
+    // conclusion of the story rather than as one more example.
+    &--highlight {
+      padding: 20px;
+      background: var(--nge-table-surface-variant, #f5f5f5);
+      border-radius: 8px;
+    }
+  }
+
+  .code-block {
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    background: var(--nge-table-surface-variant, #f5f5f5);
+    border-radius: 6px;
+
+    pre {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+  }
+
+  // The table owns its own scrolling, so the story only bounds its box. The height
+  // goes on `nge-table` itself, not on this wrapper: the host is a flex column and
+  // the scroller inside it shrinks to fit, whereas a max-height here would simply
+  // be overflowed and nothing would ever scroll vertically.
+  .table-container {
+    nge-table {
+      max-height: 420px;
+    }
+
+    // The fixture's 7 columns come to 1120px, which barely overflows the 1100px
+    // panel. The pinning tokens are only legible against a real horizontal scroll,
+    // so that section takes a narrower box on purpose.
+    &--narrow {
+      max-width: 720px;
+    }
+
+    &--short nge-table {
+      max-height: 260px;
+    }
+  }
+
+  // Two or three tables abreast, for the density and comparison sections.
+  .density-row {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+
+    .density-column {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+  }
+
+  .token-notes {
+    margin: 0;
+    padding-left: 20px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 14px;
+    line-height: 1.7;
+
+    li + li {
+      margin-top: 10px;
+    }
+
+    strong {
+      color: var(--nge-table-on-surface, #1d1b20);
+    }
+  }
+
+  // Slot contents belong to the STORY, not to the library — what a slot renders is
+  // the consumer's markup carrying the consumer's styles. The library ships the
+  // band; this dresses what goes in it.
+  .slotted-detail {
+    font-size: 13px;
+  }
+
+  .slotted-loading {
+    font-weight: 600;
+  }
+
+  // ===========================================================================
+  // The themes themselves.
+  //
+  // Each of these is the entire mechanism: a scoped selector re-declaring
+  // `--nge-table-*`. There is no `config.theme` to pair them with, and nothing
+  // below reaches into the table's internals — a rule targeting `.nge-table__*`
+  // would be styling the library rather than theming it.
+  //
+  // `--nge-table-internal-*` is deliberately absent from every block: those carry
+  // live lane geometry the component writes onto its own host, so setting one
+  // would break layout rather than restyle it.
+  // ===========================================================================
+
+  // ─── Surfaces & content ────────────────────────────────────────────────────
+  .theme-sand {
+    --nge-table-surface: #fdf8f3;
+    --nge-table-surface-variant: #f0e4d7;
+    --nge-table-row-surface-hover: #f7ede2;
+    --nge-table-on-surface: #3d2c1e;
+    --nge-table-on-surface-variant: #8a7360;
+    --nge-table-header-on-surface: #6b4423;
+    --nge-table-border-color: #e6d5c3;
+    --nge-table-header-border-color: #d2b48c;
+  }
+
+  // ─── Borders ───────────────────────────────────────────────────────────────
+  .theme-ruled {
+    --nge-table-border-color: #c8d6e5;
+    --nge-table-border-width: 2px;
+    --nge-table-header-border-color: #2e86de;
+  }
+
+  // ─── Density ───────────────────────────────────────────────────────────────
+  //
+  // These land because neither config sets `rowHeight` / `headerHeight`: the
+  // component writes those tokens inline only when the config names them (or when
+  // virtualization is on, where the number has to be known in TypeScript), and
+  // otherwise removes the property and hands the token back to the theme.
+  .theme-compact {
+    --nge-table-row-height: 28px;
+    --nge-table-header-height: 32px;
+    --nge-table-cell-padding-x: 8px;
+    --nge-table-font-size: 12px;
+    --nge-table-header-font-size: 11px;
+  }
+
+  .theme-roomy {
+    --nge-table-row-height: 60px;
+    --nge-table-header-height: 64px;
+    --nge-table-cell-padding-x: 20px;
+  }
+
+  // ─── Typography ────────────────────────────────────────────────────────────
+  .theme-mono {
+    --nge-table-font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    --nge-table-font-size: 12px;
+    --nge-table-line-height: 18px;
+    --nge-table-header-font-size: 11px;
+    --nge-table-header-font-weight: 700;
+  }
+
+  // ─── Pinning ───────────────────────────────────────────────────────────────
+  //
+  // The pinned surfaces are opaque by requirement, not by taste: a pinned lane is
+  // `position: sticky` and travels over the centre lane, so a translucent one
+  // shows the scrolling cells through it. The header variant is separate because a
+  // pinned header lane sits on the header band, and reusing the row-flavoured
+  // colour would punch two pale rectangles through it.
+  .theme-pinned {
+    --nge-table-pinned-surface: #eef7ee;
+    --nge-table-pinned-surface-hover: #dcefdc;
+    --nge-table-pinned-header-surface: #d6ead6;
+    --nge-table-pinned-left-shadow: 4px 0 8px rgb(27 94 32 / 0.28);
+    --nge-table-pinned-right-shadow: -4px 0 8px rgb(27 94 32 / 0.28);
+  }
+
+  // ─── Interaction ───────────────────────────────────────────────────────────
+  //
+  // The grip stays transparent at rest — that default is the design, not an
+  // omission — so only the hover and active colours are worth moving here.
+  .theme-grip {
+    --nge-table-resize-handle-width: 8px;
+    --nge-table-resize-handle-color: transparent;
+    --nge-table-resize-handle-color-hover: #f0a202;
+    --nge-table-resize-handle-color-active: #d94f04;
+    --nge-table-focus-ring-color: #d94f04;
+    --nge-table-focus-ring-width: 3px;
+  }
+
+  // ─── Slot chrome ───────────────────────────────────────────────────────────
+  .theme-slots {
+    --nge-table-toolbar-padding: 16px 20px;
+    --nge-table-row-detail-surface: #ede7f6;
+  }
+
+  .theme-scrim {
+    --nge-table-loading-scrim: rgb(49 27 96 / 0.62);
+
+    .slotted-loading {
+      color: #ffffff;
+    }
+  }
+
+  // ─── Dark ──────────────────────────────────────────────────────────────────
+  //
+  // The shape a domain's `--nge-table-*` bridge will take once a consumer adopts
+  // the library. Every surface is restated rather than inherited, the pinned ones
+  // included: they cannot fall back to the light defaults without showing up as
+  // pale rectangles on a dark table.
+  .theme-dark {
+    --nge-table-surface: #16161a;
+    --nge-table-surface-variant: #202027;
+    --nge-table-row-surface: transparent;
+    --nge-table-row-surface-hover: #26262e;
+    --nge-table-on-surface: #e8e8ed;
+    --nge-table-on-surface-variant: #9a9aa5;
+    --nge-table-header-on-surface: #f2f2f7;
+    --nge-table-border-color: #303038;
+    --nge-table-header-border-color: #43434e;
+    --nge-table-pinned-surface: #16161a;
+    --nge-table-pinned-surface-hover: #26262e;
+    --nge-table-pinned-header-surface: #202027;
+    --nge-table-pinned-left-shadow: 2px 0 6px rgb(0 0 0 / 0.55);
+    --nge-table-pinned-right-shadow: -2px 0 6px rgb(0 0 0 / 0.55);
+    --nge-table-resize-handle-color-hover: #5a5a68;
+    --nge-table-resize-handle-color-active: #6ea8fe;
+    --nge-table-focus-ring-color: #6ea8fe;
+    --nge-table-row-detail-surface: #202027;
+    --nge-table-loading-scrim: rgb(22 22 26 / 0.72);
+  }
+}

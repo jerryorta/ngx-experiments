@@ -1,0 +1,256 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Cell Textarea Interaction</h2>
+    <p class="intro-text"
+      >The table's own long-text editor, and the first whose commit is
+      <strong>explicit</strong> (ARCH-296). Every section below asks you to <em>do</em> something,
+      and most of them ask you to confirm that something did <em>not</em> happen — so read the
+      <code>edit-intent</code> readout under each table, not the table alone.</p
+    >
+
+    <section class="story-section">
+      <h4>1. Apply is the only commit</h4>
+      <p class="story-description"
+        >Click a <strong>Description</strong> cell to activate it. A panel opens with the text
+        already in it and the caret in the field. Change something and press
+        <strong>Apply</strong> — the proposal appears below as an <code>edit-intent</code> and the
+        row updates.</p
+      >
+      <p class="story-description"
+        >The column named <code>NgeCellTextareaComponent</code> through
+        <code>ngeCellTextareaEdit()</code>; there is no <code>[ngeCell]</code> template and no
+        <code>&lt;nge-cell-textarea&gt;</code> tag in the demo's markup.</p
+      >
+      <nge-table-textarea-demo
+        [(rows)]="applyRows"
+        [(state)]="applyState"
+      />
+    </section>
+
+    <section class="story-section">
+      <h4>2. Cancel proposes nothing</h4>
+      <p class="story-description"
+        >Type into a description, then press <strong>Cancel</strong>. The panel closes, the cell
+        keeps its old text, and the <code>edit-intent</code> readout stays empty.</p
+      >
+      <p class="story-description"
+        >⚠️ <strong>This is the section the whole story turns on.</strong> Clicking Cancel
+        <em>blurs the field on its way to the button</em>, and every other editor in this library
+        commits on blur. If a commit-on-blur handler existed here, Cancel would apply the very edit
+        it exists to discard — so there is no blur handler at all, not even a guarded one.</p
+      >
+      <nge-table-textarea-demo
+        [(rows)]="cancelRows"
+        [(state)]="cancelState"
+      />
+    </section>
+
+    <section class="story-section">
+      <h4>3. A host that ignores the proposal</h4>
+      <p class="story-description"
+        >The same editor against a host that listens and declines to act. Press
+        <strong>Apply</strong>: the <code>edit-intent</code> arrives and the table does not change.
+      </p>
+      <p class="story-description"
+        >This section exists to keep two different outcomes legible in every section above it.
+        &ldquo;The table proposed nothing&rdquo; and &ldquo;the host declined to apply&rdquo; look
+        identical if you watch only the rows. <code>config.data</code> belongs to the host; the
+        library announces a patch and never writes one.</p
+      >
+      <nge-table-textarea-demo
+        [(rows)]="ignoreRows"
+        [(state)]="ignoreState"
+        [applyIntents]="false"
+      />
+    </section>
+
+    <section class="story-section">
+      <h4>4. Blur proposes nothing, by every route</h4>
+      <p class="story-description"
+        >Activate a cell, type, and then leave the field <strong>three different ways</strong>,
+        checking the readout after each: click <strong>Cancel</strong>; press <kbd>tab</kbd> until
+        focus reaches <strong>Apply</strong> without pressing it; and click somewhere outside the
+        panel entirely.</p
+      >
+      <p class="story-description"
+        >All three fire a real <code>blur</code> on the field. None of them proposes anything. Only
+        pressing Apply does.</p
+      >
+      <nge-table-textarea-demo
+        [(rows)]="blurRows"
+        [(state)]="blurState"
+      />
+    </section>
+
+    <section class="story-section">
+      <h4>5. A dirty draft is protected; a clean one does not detain you</h4>
+      <p class="story-description"
+        ><strong>First, dirty:</strong> activate a cell, type a few words, then click outside the
+        panel. The panel <em>stays</em>, focus returns to the field, and an
+        <strong>Unsaved</strong> hint appears beside the buttons. Dismissing there would throw away
+        what you had typed, which is exactly the failure this editor exists to prevent.</p
+      >
+      <p class="story-description"
+        ><strong>Then, clean:</strong> activate another cell and click outside without typing. It
+        closes immediately, like any dropdown. And if you type and then undo your typing back to the
+        original text, it closes again — the panel is asking &ldquo;is anything at stake&rdquo;, not
+        &ldquo;did you press a key&rdquo;.</p
+      >
+      <p class="story-description"
+        >⚠️ <kbd>tab</kbd> is deliberately <em>not</em> trapped, even while dirty. A click outside
+        is refused because it would <em>destroy</em> the draft; tabbing away destroys nothing — the
+        panel stays open, the text stays put, and <kbd>shift</kbd> + <kbd>tab</kbd> comes back.</p
+      >
+      <nge-table-textarea-demo
+        [(rows)]="dirtyRows"
+        [(state)]="dirtyState"
+      />
+    </section>
+
+    <section class="story-section">
+      <h4>6. Scrolling cannot destroy a draft</h4>
+      <p class="story-description"
+        ><strong>Establish the baseline first, or this section proves nothing.</strong> With no
+        panel open, scroll the table and press <strong>Sample viewport scrollTop</strong> — it
+        moves. This table is virtualized over 2,000 rows in a short viewport, so a row genuinely
+        leaves the window when you scroll past it.</p
+      >
+      <p class="story-description"
+        ><strong>Now the claim.</strong> Activate a description cell, type something, and try to
+        scroll the table — wheel over it, and drag its scrollbar. Nothing moves. Sample
+        <code>scrollTop</code> again and confirm the number is unchanged. Press
+        <strong>Cancel</strong> and the table scrolls normally again.</p
+      >
+      <p class="story-description"
+        >⚠️ <strong>Why this matters more here than for the select.</strong> Rows are tracked by id,
+        so a row leaving the virtualized window is <em>destroyed</em> — the editor dies with it. For
+        a dropdown that costs a closed list. For a textarea it would cost however much prose you had
+        typed, silently, mid-sentence, because you scrolled. So the panel takes a backdrop, and the
+        row simply cannot leave while you are typing.</p
+      >
+      <p class="story-description"
+        >⚠️ <strong>The obvious API does not do this.</strong> CDK's
+        <code>scrollStrategies.block()</code> acts on the document element, and this table scrolls
+        in an inner viewport — it would read as implemented and change nothing. The fix is an
+        element in the way, not a strategy.</p
+      >
+      <nge-table-textarea-demo
+        [(rows)]="virtualRows"
+        [(state)]="virtualState"
+        [enableVirtualization]="true"
+        [maxHeight]="260"
+      />
+    </section>
+
+    <section class="story-section">
+      <h4>7. Keyboard, and what <kbd>esc</kbd> must not take with it</h4>
+      <p class="story-description"
+        ><strong>Drag across a few cells first</strong> so <code>state.ngeRange</code> below is not
+        empty. Then activate a description, and try each of:</p
+      >
+      <ul class="story-description">
+        <li
+          ><kbd>enter</kbd> — inserts a newline. It never commits; that is why this is a
+          textarea.</li
+        >
+        <li
+          ><kbd>cmd</kbd>/<kbd>ctrl</kbd> + <kbd>enter</kbd> — applies, exactly as the button
+          does.</li
+        >
+        <li><kbd>esc</kbd> — cancels outright and proposes nothing.</li>
+      </ul>
+      <p class="story-description"
+        >⚠️
+        <strong
+          >After <kbd>esc</kbd>, check that <code>state.ngeRange</code> is still there.</strong
+        >
+        The cell-range and highlight addons both listen for <kbd>esc</kbd> on the document, and a
+        panel's keys are dispatched from <code>body</code> — one node earlier. Without the panel
+        stopping the key, closing this editor would silently clear your selection. The panel closing
+        is <em>not</em> evidence that it does; the range readout is.</p
+      >
+      <p class="story-description"
+        ><kbd>esc</kbd> cancels in one press rather than two. The select closes its panel first and
+        cancels on a second press, but its trigger is still a usable control with the panel shut —
+        here a closed panel would leave the cell as plain text with no way back into it.</p
+      >
+      <nge-table-textarea-demo
+        [(rows)]="keyboardRows"
+        [(state)]="keyboardState"
+        [enableCellRange]="true"
+      />
+    </section>
+
+    <section class="story-section">
+      <h4>8. A range drag started on the trigger selects nothing</h4>
+      <p class="story-description"
+        >Activate a description cell, then press and drag from the <em>cell itself</em> across its
+        neighbours. <code>state.ngeRange</code> stays empty. Then drag from a
+        <strong>Name</strong> cell and watch it fill — which is what makes the first half evidence
+        rather than a table with the feature switched off.</p
+      >
+      <p class="story-description"
+        >The whole cost of this is one attribute: the trigger declares <code>role="textbox"</code>,
+        and the library's interactive-element guard already matches that role. No core change —
+        roles rather than component names, so a consumer's own control gets the same treatment.</p
+      >
+      <nge-table-textarea-demo
+        [(rows)]="dragRows"
+        [(state)]="dragState"
+        [enableCellRange]="true"
+      />
+    </section>
+
+    <section class="story-section">
+      <h4>9. A consumer's own template still wins</h4>
+      <p class="story-description"
+        >The same column, with a <code>[ngeCell]</code> template projected for it. The library's
+        editor is never reached — clicking a description does not open a panel, because the
+        consumer's markup is what renders.</p
+      >
+      <p class="story-description"
+        >A library-shipped editor is a <strong>default</strong>, not a fixture: the slot registry
+        consults projected templates first, then the component a column named. Reversing those two
+        lines compiles, lints and renders perfectly while silently ignoring every consumer
+        template.</p
+      >
+      <nge-table-textarea-demo
+        [(rows)]="overrideRows"
+        [(state)]="overrideState"
+        [overrideDescription]="true"
+      />
+    </section>
+
+    <section class="story-section">
+      <h4>10. The options a column can declare</h4>
+      <p class="story-description"
+        >The same editor with <code>rows: 8</code>, <code>maxlength: 120</code> and a placeholder.
+        Activate a cell and confirm the field is taller, stops accepting input at 120 characters,
+        and shows the placeholder once you clear it.</p
+      >
+      <p class="story-description"
+        >Options ride <code>editorInputs</code> rather than a top-level meta key, because a cell
+        context carries a column <em>id</em> and no column — an editor cannot read column meta at
+        all. <code>ngeCellTextareaEdit()</code> exists because that bag is
+        <code>Record&lt;string, unknown&gt;</code> and a misspelled key would be dropped in silence;
+        going through the helper makes it a compile error.</p
+      >
+      <p class="story-description"
+        >⚠️ There is no <code>alwaysLive</code> to pass, and its absence is deliberate. For the
+        select it is a trade — one <code>&lt;button&gt;</code> per row against a click before the
+        click that opens. Here the control <em>is</em> a body-level overlay, so an always-live
+        column would mean one panel per visible row, which is not a rendering of a column at all.</p
+      >
+      <nge-table-textarea-demo
+        [(rows)]="optionsRows"
+        [(state)]="optionsState"
+        [editorRows]="8"
+        [maxlength]="120"
+        placeholder="Describe this item…"
+      />
+    </section>
+  </div>
+</nge-storybook-review-container>

@@ -1,0 +1,120 @@
+// The story panel takes its surface from the same `--nge-table-surface` /
+// `--nge-table-on-surface` the table reads, so prose and table always move together:
+// under one of the ten domain themes that bridge `--nge-table-*` (ARCH-277) both
+// follow the toolbar, and under a theme that does not bridge them both fall back to the
+// library's light-mode defaults.
+.nge-table-cell-editors-theming {
+  display: block;
+  padding: 20px;
+  color: var(--nge-table-on-surface, #1d1b20);
+  background: var(--nge-table-surface, #ffffff);
+
+  .stories-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    margin-bottom: 8px;
+  }
+
+  .intro-text {
+    margin-bottom: 32px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 16px;
+  }
+
+  .story-section {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+
+    h4 {
+      margin-bottom: 8px;
+      color: var(--nge-table-on-surface, #1d1b20);
+    }
+
+    .story-description {
+      margin-bottom: 16px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 14px;
+
+      kbd {
+        padding: 1px 5px;
+        font-family: inherit;
+        font-size: 12px;
+        background: var(--nge-table-surface-variant, #f5f5f5);
+        border: 1px solid var(--nge-table-border-color, #e0e0e0);
+        border-radius: 3px;
+      }
+    }
+
+    // Height is NOT set here: `<nge-table-edit-demo>` binds it inline on `nge-table`
+    // from its `maxHeight` input, and an inline declaration outranks any class. On a
+    // wrapper it would be worse than dead code, because the host is a flex column whose
+    // viewport is `flex: 1 1 auto; min-height: 0` — an ancestor's bound is simply
+    // overflowed and nothing scrolls.
+    .code-block {
+      margin-bottom: 16px;
+      padding: 12px 16px;
+      overflow-x: auto;
+      background: var(--nge-table-surface-variant, #f5f5f5);
+      border-radius: 6px;
+
+      pre {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.6;
+      }
+    }
+  }
+
+  // ─── the token sections ─────────────────────────────────────────────────
+  //
+  // Each wrapper re-declares tokens exactly as a consumer would — a scoped class,
+  // literal values, nothing reaching into `.nge-table__*`. Styling the library's
+  // own class names from a story would be styling it rather than theming it, and
+  // under `ViewEncapsulation.None` such a rule would actually land.
+
+  .theme-amber {
+    --nge-table-editor-surface: #fff8e1;
+    --nge-table-editor-on-surface: #4a3800;
+    --nge-table-editor-border-color: #c8a415;
+  }
+
+  .theme-violet {
+    --nge-table-editor-accent: #8e24aa;
+    --nge-table-editor-border-color-focus: #8e24aa;
+    --nge-table-focus-ring-color: #8e24aa;
+  }
+
+  .theme-square {
+    --nge-table-editor-radius: 0;
+    --nge-table-editor-border-width: 2px;
+    --nge-table-editor-padding-x: 12px;
+    --nge-table-editor-control-size: 20px;
+  }
+
+  // The shape a domain bridge takes. Every surface is restated rather than left to
+  // inherit — a field on the light default is a white rectangle punched through a
+  // dark table, the same failure a missed pinned surface produces.
+  .theme-dark {
+    --nge-table-surface: #1a1a1f;
+    --nge-table-surface-variant: #24242b;
+    --nge-table-on-surface: #e6e6ea;
+    --nge-table-on-surface-variant: #a0a0aa;
+    --nge-table-header-on-surface: #e6e6ea;
+    --nge-table-border-color: #35353f;
+    --nge-table-header-border-color: #45454f;
+    --nge-table-row-surface-hover: #2c2c35;
+    --nge-table-pinned-surface: #1a1a1f;
+    --nge-table-pinned-header-surface: #24242b;
+
+    --nge-table-editor-surface: #2c2c35;
+    --nge-table-editor-on-surface: #e6e6ea;
+    --nge-table-editor-border-color: #55555f;
+    --nge-table-editor-border-color-focus: #7aa7ff;
+    --nge-table-editor-accent: #7aa7ff;
+    --nge-table-focus-ring-color: #7aa7ff;
+  }
+}

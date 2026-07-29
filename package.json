@@ -38,6 +38,8 @@
     "@ngrx/signals": "^21.1.1",
     "@ngrx/store": "^21.1.1",
     "@ngrx/store-devtools": "^21.1.1",
+    "@tanstack/angular-table": "^8.21.4",
+    "@tanstack/angular-virtual": "^6.0.2",
     "@tauri-apps/api": "^2.11.0",
     "@tauri-apps/plugin-fs": "^2.5.1",
     "d3": "^7.9.0",

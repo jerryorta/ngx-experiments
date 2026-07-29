@@ -1,0 +1,51 @@
+// =============================================================================
+// The deferred-cell shell (ARCH-291).
+//
+// Every token carries a literal fallback at its use site, exactly as the core
+// stylesheet does, so a shell renders correctly with no theme applied.
+//
+// ⚠️ It adds NOTHING to `_table-tokens.scss`, and that is a decision rather than
+// an oversight. The surface falls through to `--nge-table-surface-variant` — a
+// token all ten domain themes already bridge (ARCH-277) — so a shell wears the
+// host's theme for free, with no eleventh bridge entry and no new member of the
+// public contract for a theme to get wrong. `--nge-table-shell-surface` sits
+// above it for a consumer who wants the shell to differ from the header band, and
+// costs nothing while nobody sets it.
+//
+// NEVER reference --mat-sys-* or mat-*. Angular Material is banned in this library.
+// =============================================================================
+
+.nge-cell-shell {
+  display: block;
+
+  // A cell is `display: flex; align-items: center` with an explicit height
+  // (nge-table.component.scss § .nge-table__cell), so the shell sizes itself
+  // from the cell rather than from a constant: `flex` takes the width the column
+  // was dragged to, and `align-self: stretch` takes the row's height minus the
+  // margins below — no `calc`, and correct for a 40px text row and a 96px chart
+  // row alike. A shell that did not match the shape it stands in for would make
+  // the row twitch as content resolved.
+  flex: 1 1 auto;
+  align-self: stretch;
+  // Flex items floor at their content size without this, which for an empty
+  // element is 0 but for a future one would refuse to shrink with the column.
+  min-width: 0;
+
+  // Inset so the block reads as content inside the cell rather than as a
+  // repainted cell — without it a column of shells looks like a rendering fault.
+  // `align-self: stretch` subtracts these from the height on its own.
+  margin: var(--nge-table-shell-inset, 6px) 0;
+
+  // Only reached when the shell is rendered outside a table cell — a story panel,
+  // a consumer's own skeleton row — where there is no flex parent to stretch
+  // against and the height would otherwise resolve to zero.
+  min-height: var(--nge-table-shell-min-height, 12px);
+
+  background: var(--nge-table-shell-surface, var(--nge-table-surface-variant, #f5f5f5));
+  border-radius: var(--nge-table-shell-radius, 4px);
+
+  // ⚠️ No animation, deliberately — see the component's doc comment. A shimmer is
+  // a per-frame paint on every node in the window, asked for at exactly the moment
+  // the frame budget is tightest, and virtualization restarts it on every window
+  // slide so it reads as a strobe rather than as progress.
+}

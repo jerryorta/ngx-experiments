@@ -1,0 +1,121 @@
+@let report = latest();
+@let expected = expectedRowsBuilt();
+@let drift = p95Drift();
+
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Cell Editors (Performance)</h2>
+    <p class="intro-text">
+      ARCH-293's acceptance criterion as a number: a scripted scroll with editable columns present
+      stays inside ARCH-289's frame budget, measured with the identical harness on the identical
+      geometry — the same seven fixture columns, 40px rows, 240px steps.
+    </p>
+    <p class="intro-text">
+      ⚠️ <strong>The always-live boolean column is the honest subject.</strong> Activation means an
+      activated column builds no control at all while nobody is editing, so measuring only those
+      would measure almost nothing and report a pass. <strong>Active</strong> is
+      <code>alwaysLive</code>, so every rendered row really does construct a control — the worst
+      case a consumer can configure.
+    </p>
+    <p class="intro-text">
+      ⚠️ <strong>Take both readings in one session.</strong> Run with the toggle on, then off, twice
+      each. The noise floor is not a constant — the baseline's own runs spread 1.8% warm and
+      4.2–4.8% shortly after a cold rebuild — so a figure from another day attributes the machine's
+      mood to the editors.
+    </p>
+
+    <section class="story-section">
+      <h4>Run</h4>
+      <div class="benchmark-controls">
+        <button
+          type="button"
+          [disabled]="isRunning()"
+          (click)="runBenchmark()"
+          >{{ isRunning() ? "Running…" : "Run benchmark" }}</button
+        >
+        <button
+          type="button"
+          [disabled]="isRunning() || runs().length === 0"
+          (click)="clearRuns()"
+          >Clear</button
+        >
+        <span class="benchmark-meta"
+          >editors <strong>{{ withEditors() ? "on" : "off" }}</strong> · {{ steps() }} frames ×
+          {{ stepPx() }}px · {{ totalRowCount }} rows virtualized</span
+        >
+      </div>
+
+      @if (failure()) {
+        <p class="benchmark-failure">{{ failure() }}</p>
+      }
+
+      @if (report) {
+        <dl class="benchmark-readout">
+          <div class="benchmark-metric">
+            <dt>p95 frame</dt>
+            <dd>{{ rounded(report.summary.p95FrameMs) }}ms</dd>
+          </div>
+          <div class="benchmark-metric">
+            <dt>Worst frame</dt>
+            <dd>{{ rounded(report.summary.worstFrameMs) }}ms</dd>
+          </div>
+          <div class="benchmark-metric">
+            <dt>Display</dt>
+            <dd>
+              {{ rounded(report.estimatedRefreshHz) }}Hz
+              <small>{{ rounded(report.idleFrameMs) }}ms idle frame</small>
+            </dd>
+          </div>
+          <div
+            class="benchmark-metric"
+            [class.benchmark-metric--over]="droppedVerdict() === 'problem'"
+          >
+            <dt>Dropped</dt>
+            <dd>
+              {{ report.droppedFrames }} / {{ report.summary.frames }}
+              <small>{{ droppedVerdict() }}</small>
+            </dd>
+          </div>
+          <div
+            class="benchmark-metric"
+            [class.benchmark-metric--over]="rowsBuiltMatches() === false"
+          >
+            <dt>Rows built</dt>
+            <dd>
+              {{ report.rowsAdded }}
+              <small>{{ expected }} expected</small>
+            </dd>
+          </div>
+          @if (drift !== null) {
+            <div class="benchmark-metric">
+              <dt>p95 drift</dt>
+              <dd>
+                {{ rounded(drift * 100) }}%
+                <small>vs the previous run</small>
+              </dd>
+            </div>
+          }
+        </dl>
+
+        <p class="story-description">
+          ⚠️ <strong><code>rowsBuilt</code> is the regression metric, not the timings.</strong> It
+          is geometry — 240px ÷ 40px = 6 rows per step × 119 steps — so it must hold on any machine
+          and must not move with the toggle. A run that disagrees is a harness or memoisation
+          finding rather than a slower table.
+        </p>
+
+        <pre class="benchmark-history">{{ reportText() }}</pre>
+      }
+    </section>
+
+    <section class="story-section">
+      <h4>The table under measurement</h4>
+      <div class="table-container">
+        <nge-table [config]="config()" />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

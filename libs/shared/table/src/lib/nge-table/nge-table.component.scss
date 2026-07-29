@@ -1,0 +1,634 @@
+// `<nge-table>` lane substrate (ARCH-242 shell, ARCH-243 lanes).
+//
+// ViewEncapsulation.None — every rule is scoped under the `.nge-table` host
+// class, NEVER `:host`. Every value pairs a `--nge-table-*` token with a literal
+// fallback so the table renders correctly with no theme partial imported at all;
+// the defaults live in `../styles/_table-tokens.scss`.
+//
+// Flexbox lanes, not CSS Grid and not a semantic `<table>` — the locked substrate
+// decision (docs/architecture/table.md § Substrate). Three lanes per row, and
+// pinning is `position: sticky` on the LANE WRAPPER, never per-cell. That single
+// choice is what makes multiple pinned columns work: pinned cells are ordinary
+// flex children of one sticky box, so there is no per-cell `left` for a second
+// pinned column to collide with.
+//
+// Lane and row widths come from `--nge-table-internal-*` properties that
+// `<nge-table>` writes on its host from the engine's own totals. They are
+// deliberately NOT in the token partial — they are runtime measurements, not
+// values a theme has anything to say about.
+
+// A flex column rather than a block so a consumer can bound the table's height by
+// styling `<nge-table>` itself — `height` or `max-height` on the host then
+// constrains the viewport, which scrolls inside it. With no height set the column
+// collapses to its content and this is indistinguishable from `display: block`.
+// Without it the scroller grows to fit every row, so a height on any ancestor is
+// simply overflowed: the sticky header would have nothing to stick against, and
+// virtualization (ARCH-245) needs a bounded viewport to compute a window from.
+.nge-table {
+  // The containing block for the `loading` overlay (ARCH-246), which covers the
+  // header as well as the rows. `z-index: auto` is load-bearing: this makes the
+  // host a containing block WITHOUT making it a stacking context, so the pinned
+  // lanes below keep working. Never give it a z-index.
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--nge-table-font-family, inherit);
+  font-size: var(--nge-table-font-size, 14px);
+  line-height: var(--nge-table-line-height, 20px);
+  color: var(--nge-table-on-surface, #1d1b20);
+}
+
+.nge-table__viewport {
+  flex: 1 1 auto;
+  // Flex items floor at their content size unless told otherwise, and a scroller
+  // that cannot shrink below its content never scrolls.
+  min-height: 0;
+  overflow: auto;
+  background: var(--nge-table-surface, #ffffff);
+  border: var(--nge-table-border-width, 1px) solid var(--nge-table-border-color, #e0e0e0);
+}
+
+// Sticky vertically so the header survives the vertical scroll the viewport owns.
+// It outranks the pinned lanes because the two stickies cross at the top-left
+// corner cell, and there the header has to win. Giving it a z-index also makes it
+// a stacking context, which is what keeps its own pinned lanes above every body
+// lane regardless of their local order.
+.nge-table__header {
+  position: sticky;
+  top: 0;
+  z-index: var(--nge-table-header-z-index, 3);
+}
+
+.nge-table__header-row,
+.nge-table__row {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  // As wide as its columns, so a horizontal scroll reveals them rather than
+  // squashing them into the viewport — but never narrower than the viewport, so
+  // the pinned-right lane sits flush with the right edge and the row's background
+  // paints from edge to edge. An explicit length rather than `max-content` on
+  // purpose: it skips intrinsic sizing per row, which is what stops mattering
+  // cheaply once virtualization (ARCH-245) is rendering thousands of them.
+  width: var(--nge-table-internal-total-width, max-content);
+  min-width: 100%;
+}
+
+// The header band's colour belongs to the ROW, not to the sticky wrapper above
+// it. The wrapper is a block child of the scroll viewport, so it is only ever as
+// wide as the viewport; the row is as wide as the table. Painting the band on the
+// wrapper leaves it running out mid-scroll.
+.nge-table__header-row {
+  background: var(--nge-table-surface-variant, #f5f5f5);
+  border-bottom: var(--nge-table-border-width, 1px) solid var(--nge-table-header-border-color, #cfcfcf);
+}
+
+// The row surface resolves through `--nge-table-internal-row-surface`, which
+// zebra striping (ARCH-286) sets on the alternate rows and nothing else writes.
+// That indirection settles the precedence question by removing the contest: a
+// stripe changes the VALUE this one declaration resolves, so the rules below —
+// hover, selection, and whatever a later story adds — remain the only other
+// declarations of the property and beat this one as they already do.
+.nge-table__row {
+  background: var(--nge-table-internal-row-surface, var(--nge-table-row-surface, transparent));
+  border-bottom: var(--nge-table-border-width, 1px) solid var(--nge-table-border-color, #e0e0e0);
+
+  // Sets ONLY the custom property — never `background` directly. A background
+  // declared here would score (0,1,0): a tie with `.nge-table__row--selected`,
+  // leaving source order as the only thing keeping selection ahead of it, and
+  // making every future row-level mark either a source-order obligation or an
+  // entry in a `:not()` chain. Nothing has to be kept in step this way.
+  &--alt {
+    --nge-table-internal-row-surface: var(--nge-table-row-surface-alt, #fafafa);
+  }
+
+  &:hover {
+    background: var(--nge-table-row-surface-hover, #f0f0f0);
+  }
+}
+
+// ─── Row selection (ARCH-268) ────────────────────────────────────────────────
+//
+// The token has existed since ARCH-240; this is its first consumption site.
+// Declared after the hover rule so a selected row keeps reading as selected while
+// the pointer is over it — hover is a transient state and selection is not.
+.nge-table__row--selected,
+.nge-table__row--selected:hover {
+  background: var(--nge-table-row-surface-selected, #e3f2fd);
+}
+
+// The pinned lanes scroll OVER the center lane, so their opaque background hides
+// the tint underneath unless it is repainted on them too — the same reason the
+// hover rule below has a pinned-lane sibling.
+.nge-table__row--selected .nge-table__lane--pinned-left,
+.nge-table__row--selected .nge-table__lane--pinned-right,
+.nge-table__row--selected:hover .nge-table__lane--pinned-left,
+.nge-table__row--selected:hover .nge-table__lane--pinned-right {
+  background: var(--nge-table-row-surface-selected, #e3f2fd);
+}
+
+// A focused row needs a visible ring: selection made rows focusable, so a
+// keyboard user has to be able to see which one `Space` would toggle. Inset so it
+// is not clipped by the viewport's scroll edges.
+.nge-table__row:focus-visible {
+  outline: var(--nge-table-focus-ring-width, 2px) solid var(--nge-table-focus-ring-color, #1565c0);
+  outline-offset: calc(var(--nge-table-focus-ring-width, 2px) * -1);
+}
+
+// Both checkboxes are `flex: 0 0 auto` inside a cell that centers them. The
+// selection column's width is pinned by the column definition, so nothing here
+// sizes it — this is purely how the control sits in the box it is given.
+.nge-table__select-all,
+.nge-table__select-row {
+  flex: 0 0 auto;
+  margin: 0 auto;
+  accent-color: var(--nge-table-selection-accent, #1565c0);
+  cursor: pointer;
+}
+
+.nge-table__select-row:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+// ─── Row expansion (ARCH-298) ────────────────────────────────────────────────
+//
+// A native <button> rather than a styled <span>, so Enter/Space activation, the
+// disabled semantics and the focus ring all arrive without being re-implemented.
+// Stripped back to nothing visually — the chevron IS the control.
+.nge-table__expand-all,
+.nge-table__expand-row {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  // The same token the sort indicator takes, rather than one of its own: both are
+  // a small monochrome glyph beside content, so a theme that has an opinion about
+  // one has the same opinion about the other. A new colour token here would mean
+  // ten bridge entries teaching nothing this one does not already say.
+  color: var(--nge-table-on-surface-variant, #5f5f66);
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+
+  // The chevron points right at rest and down when open. Rotating the inner glyph
+  // rather than the button keeps the hit target and the focus ring axis-aligned —
+  // a rotated button would tilt both.
+  > span {
+    display: block;
+    transition: transform 120ms ease;
+  }
+
+  &--open > span {
+    transform: rotate(90deg);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.4;
+  }
+}
+
+// ─── Virtualized rows (ARCH-245) ─────────────────────────────────────────────
+//
+// Only the rows near the viewport are in the DOM, so the body is given the full
+// dataset's height — that box is what the scrollbar measures itself against —
+// and each rendered row is placed inside it at its own offset.
+//
+// `top`, NEVER `transform: translateY`. A transform creates a stacking context,
+// and a stacking context breaks `position: sticky` for everything inside it —
+// which here is every pinned lane. AG Grid hit exactly this and switched to
+// top-positioning (`rendering/row/rowCtrl.ts:163-167` in the reference clone).
+// Do not "optimize" this to a transform without re-testing pinning; it will look
+// like it works right up until a column is pinned.
+//
+// `position: relative` with `z-index: auto` — the body must be a containing
+// block for the rows WITHOUT becoming a stacking context, or it would trap the
+// pinned lanes it exists to hold.
+.nge-table__body--virtualized {
+  position: relative;
+
+  .nge-table__row {
+    position: absolute;
+    left: 0;
+  }
+
+  // ⚠️ **A detail band CLOSES instantly here, and only here** (ARCH-300). The
+  // reason is the arithmetic above: a row sits at the running total of the sizes
+  // the virtualizer was given, so on collapse the row beneath takes its new `top`
+  // in ONE frame while an animating band is still at its full height. Rows are
+  // transparent by default, so the closing band would go on painting through the
+  // row that has already moved over it — a smear, not a collapse.
+  //
+  // Opening has the opposite shape and needs no help: the rows make the space in
+  // one frame and the band grows into it. So the band animates in the direction
+  // where the space already exists — both directions in normal flow, where the
+  // rows beneath simply follow the band, and one direction inside a window.
+  //
+  // The rule is on the CLOSED selector because a transition is chosen from the
+  // style the element is moving TO: removing `--open` lands here.
+  .nge-table__row-detail {
+    transition: none;
+  }
+}
+
+// ─── Lanes ───────────────────────────────────────────────────────────────────
+//
+// NEVER put a `transform` on a lane or a row. A transform creates a stacking
+// context, and a stacking context breaks sticky positioning for everything
+// inside it — which is why virtualized rows position with `top` (ARCH-245).
+// Likewise no `overflow: hidden` here: cells already clip their own content, and
+// clipping the lane would cut off ARCH-244's resize handle where it overhangs the
+// last pinned cell.
+
+.nge-table__lane {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.nge-table__lane--center {
+  width: var(--nge-table-internal-center-width, auto);
+  // A base stacking context for the scrolling cells, so a pinned lane always
+  // layers above them whatever a cell's own content does.
+  position: relative;
+  z-index: 0;
+}
+
+.nge-table__lane--pinned-left,
+.nge-table__lane--pinned-right {
+  position: sticky;
+  z-index: var(--nge-table-pinned-z-index, 2);
+  // MUST be opaque: a pinned lane scrolls over the center lane, and a transparent
+  // background shows the center cells bleeding through underneath.
+  //
+  // The row's resolved surface is read first so a striped row stays one
+  // continuous band instead of breaking into three at the lane seams — the
+  // property inherits from the row, and the alternate surface is opaque in the
+  // library default and in every theme bridge, so the opacity requirement above
+  // still holds. A header lane overrides this below; hover and selection paint
+  // their own pinned-lane surfaces further down.
+  background: var(--nge-table-internal-row-surface, var(--nge-table-pinned-surface, #ffffff));
+}
+
+.nge-table__lane--pinned-left {
+  left: var(--nge-table-pinned-left-sticky-offset, 0px);
+  width: var(--nge-table-internal-pinned-left-width, auto);
+  box-shadow: var(--nge-table-pinned-left-shadow, 2px 0 4px rgb(0 0 0 / 0.08));
+}
+
+.nge-table__lane--pinned-right {
+  right: var(--nge-table-pinned-right-sticky-offset, 0px);
+  width: var(--nge-table-internal-pinned-right-width, auto);
+  box-shadow: var(--nge-table-pinned-right-shadow, -2px 0 4px rgb(0 0 0 / 0.08));
+  // Absorbs the slack when the columns are narrower than the viewport, so the
+  // lane stays flush right instead of floating in the middle of the row. When
+  // there is no slack the auto margin is zero and sticky takes over.
+  margin-left: auto;
+}
+
+// A pinned lane inside the header sits on the header band rather than on a row,
+// so it takes the band's colour — the row-flavoured surface would punch two pale
+// rectangles through it.
+.nge-table__header-row .nge-table__lane--pinned-left,
+.nge-table__header-row .nge-table__lane--pinned-right {
+  background: var(--nge-table-pinned-header-surface, #f5f5f5);
+}
+
+.nge-table__row:hover .nge-table__lane--pinned-left,
+.nge-table__row:hover .nge-table__lane--pinned-right {
+  background: var(--nge-table-pinned-surface-hover, #f0f0f0);
+}
+
+// ─── Cells ───────────────────────────────────────────────────────────────────
+
+.nge-table__header-cell,
+.nge-table__cell {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  // Widths are explicit and user-owned (Excel/Numbers style), so a cell must never
+  // grow or shrink to its content — that is the intrinsic sizing this product
+  // rejected CSS Grid to avoid.
+  box-sizing: border-box;
+  padding: var(--nge-table-cell-padding-y, 0px) var(--nge-table-cell-padding-x, 12px);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+// A header cell deliberately does NOT clip — clipping would cut the resize grip
+// in half, since the grip straddles the cell's trailing edge (ARCH-244). Nothing
+// is lost by it: `.nge-table__header-label` owns the ellipsis, so a long label
+// still truncates. `position: relative` is what the grip anchors to.
+.nge-table__header-cell {
+  position: relative;
+  gap: 4px;
+  height: var(--nge-table-header-height, 44px);
+  font-size: var(--nge-table-header-font-size, 13px);
+  font-weight: var(--nge-table-header-font-weight, 600);
+  color: var(--nge-table-header-on-surface, #1d1b20);
+
+  &--sortable {
+    cursor: pointer;
+    user-select: none;
+  }
+
+  &:focus-visible {
+    outline: var(--nge-table-focus-ring-width, 2px) solid var(--nge-table-focus-ring-color, #1565c0);
+    outline-offset: calc(var(--nge-table-focus-ring-width, 2px) * -1);
+  }
+}
+
+// ─── The resize grip (ARCH-244) ──────────────────────────────────────────────
+//
+// Half-overhanging the cell's trailing edge, so the grab zone is centred on the
+// boundary the user is actually aiming at rather than tucked inside one column.
+// That overhang is why the header cell must not clip, and why a lane must never
+// take `overflow: hidden` either.
+//
+// `z-index: 1` matters: the next header cell is also positioned and comes later
+// in the DOM, so without it the neighbour would paint over the half of the grip
+// that hangs into it. Neither cell creates a stacking context (both are
+// `z-index: auto`), so this resolves inside the lane.
+.nge-table__resize-handle {
+  position: absolute;
+  top: 0;
+  right: calc(var(--nge-table-resize-handle-width, 5px) / -2);
+  bottom: 0;
+  z-index: 1;
+  width: var(--nge-table-resize-handle-width, 5px);
+  background: var(--nge-table-resize-handle-color, transparent);
+  cursor: col-resize;
+  // REQUIRED, not cosmetic. Without it a touch drag is claimed by the browser
+  // for scrolling and no `pointermove` is ever delivered — the grip would simply
+  // do nothing on a touchscreen, with no error to explain why.
+  touch-action: none;
+  // A drag is not a text selection; without this a slow drag paints the header
+  // label half-highlighted.
+  user-select: none;
+}
+
+// Quiet at rest, discoverable on approach. Hovering anywhere on the header cell
+// reveals its grip rather than requiring the user to find a 5px target first.
+//
+// The `:not()` is doing real work. A drag usually STARTS with the pointer over
+// the header cell, so hover and active are live at the same moment — and the
+// hover selector is more specific (0,3,0 against 0,1,0), so source order never
+// gets a say and the drag would wear the hover grey for as long as the pointer
+// stayed on the header. Excluding the active grip here settles it by intent
+// rather than by out-specifying it, which the next rule added would undo again.
+.nge-table__header-cell:hover .nge-table__resize-handle:not(.nge-table__resize-handle--active) {
+  background: var(--nge-table-resize-handle-color-hover, #b6b6bd);
+}
+
+// An in-flight drag stays lit wherever the pointer has got to — by then it is
+// usually well away from the header cell it started on.
+.nge-table__resize-handle--active {
+  background: var(--nge-table-resize-handle-color-active, #1565c0);
+}
+
+// While a drag is in flight the resize cursor applies table-wide. The pointer
+// spends the drag over cells that each have opinions about the cursor — sortable
+// headers say `pointer` — and without this it flickers as the pointer crosses
+// them. Scoped to the host and to the duration of the gesture.
+.nge-table--resizing,
+.nge-table--resizing * {
+  cursor: col-resize;
+  user-select: none;
+}
+
+.nge-table__header-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nge-table__sort-indicator {
+  flex: 0 0 auto;
+  color: var(--nge-table-on-surface-variant, #5f5f66);
+}
+
+// A body cell still clips — it has no grip to accommodate, and its content is
+// arbitrary (charts, inputs, graphics), so it must not spill into its neighbour.
+.nge-table__cell {
+  height: var(--nge-table-row-height, 40px);
+  overflow: hidden;
+}
+
+.nge-table__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  // Spans the scrollable width, not just the viewport, so scrolling a wide table
+  // sideways does not run off the end of the empty band.
+  width: var(--nge-table-internal-total-width, auto);
+  min-width: 100%;
+  height: calc(var(--nge-table-row-height, 40px) * 3);
+  color: var(--nge-table-on-surface-variant, #5f5f66);
+}
+
+// ─── Render slots (ARCH-246) ─────────────────────────────────────────────────
+//
+// These rules style the BANDS, never their contents. What a slot renders is the
+// consumer's markup carrying the consumer's styles — a library rule reaching
+// inside would be dictating rather than theming, and `ViewEncapsulation.None`
+// means such a rule would actually land.
+//
+// Two of the bands sit OUTSIDE `.nge-table__viewport`, in the host's flex
+// column: the toolbar above it. Inside the viewport they would scroll with the
+// rows, which is not what a toolbar is for; outside, the viewport's `flex: 1 1
+// auto; min-height: 0` still gives them their height first and leaves the rest
+// to the scroller.
+
+.nge-table__toolbar,
+.nge-table__footer {
+  flex: 0 0 auto;
+  padding: var(--nge-table-toolbar-padding, 8px 12px);
+}
+
+// An overlay slot is a decoration beside the cell's own content, so it must not
+// take part in the width the column was given — `flex: 0 0 auto` keeps it at its
+// intrinsic size and `margin-left: auto` pushes it to the trailing edge, which is
+// where a status dot or an action affordance belongs.
+.nge-table__cell-overlay,
+.nge-table__header-overlay {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  margin-left: auto;
+}
+
+// The detail band spans the row rather than a lane, so a row carrying one becomes
+// a wrapping flex container: lanes fill the first line, the band takes the next,
+// and `width: 100%` on the band is what forces that break.
+//
+// Scoped with `:has()` rather than applied to every row, deliberately. A row's
+// width is the engine's exact lane total, so its lanes fit by construction — but
+// only just, and `flex-wrap: wrap` on every table would let a sub-pixel rounding
+// error drop a whole lane onto its own line. A table with no detail slot keeps
+// `nowrap` and cannot hit that.
+//
+// The band's height is DECLARED rather than measured (ARCH-298): the virtualizer
+// is told an expanded row is `rowHeight + rowDetailHeight` tall, so the DOM has to
+// agree or the arithmetic that placed the row beneath it is wrong.
+//
+// ⚠️ **The height hangs off `--open`, never off the band itself.** The band renders
+// for every row whose table registered a `row-detail` template — that is the slot
+// contract (a slot is a place, not a state), and the template does its own gating —
+// so an unconditional height would reserve a band on every CLOSED row as well.
+// Off virtualization that is a table of triple-height rows; on it, the window
+// budgets one row's height while the DOM hands back that plus a band, and every
+// row overlaps the next. `estimateSize` adds the band only for an expanded row,
+// and this modifier is what keeps the DOM agreeing with it.
+//
+// ⚠️ The WRAP is keyed on the band existing, the HEIGHT on it being open, and the
+// two must not be collapsed into one selector. A band is `width: 100%`, so in a
+// `nowrap` row it is a flex item competing with the lanes for width — harmless
+// only while there is slack, and a squashed lane the moment there is not. Keeping
+// the wrap unconditional puts a closed band on its own line at zero height, which
+// costs nothing and is what this rule did before the height existed.
+.nge-table__row:has(.nge-table__row-detail) {
+  flex-wrap: wrap;
+}
+
+// A DEFINITE height in both directions — `0` closed, the declared band open — and
+// that is the whole of what makes the open animatable (ARCH-300). A transition
+// needs two definite endpoints, and `height: auto` supplies none; that is the
+// usual reason an accordion ends up measuring in JavaScript or reaching for a FLIP
+// library, and the reason this one needs neither.
+//
+// ⚠️ **Off virtualization the open band was a `min-height` until ARCH-300**, so an
+// un-virtualized table could grow one to arbitrary content. That cannot animate:
+// the consumer's template un-gates its content in the same frame the class flips,
+// so the band jumps straight to content height whatever a `min-height` is doing.
+// The two regimes therefore converge on a declared height and content taller than
+// it scrolls in BOTH — which is what a window already did, and is ARCH-298's
+// honest-and-visible failure rather than a new one. It also retires the trap
+// ARCH-299 had to write down, that a band's content resolved a percentage against
+// a fixed height in one regime and a bare `min-height` in the other.
+//
+// ⚠️ **It CLIPS, it does not squash**, and only `height` + `overflow` does. The
+// content keeps its own height inside a shorter box, so a `<nge-chart>` in the
+// band (ARCH-299) is laid out once and then progressively revealed. Anything that
+// resized the content instead — `grid-template-rows: 0fr → 1fr`, the usual
+// animate-to-auto trick — stretches the item into a collapsing track and re-lays
+// the chart out on every frame, which for a chart is thrash rather than motion.
+.nge-table__row-detail {
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  transition: height var(--nge-table-row-detail-duration, 180ms) ease;
+}
+
+// Stated twice so the second selector outranks the close suppression the
+// virtualized block carries — one declaration block, so the two cannot drift.
+.nge-table__row-detail--open,
+.nge-table__body--virtualized .nge-table__row-detail--open {
+  height: var(--nge-table-row-detail-height, 120px);
+  background: var(--nge-table-row-detail-surface, #fafafa);
+  // Content beyond the declared height scrolls rather than overflowing the row it
+  // was placed against (ARCH-298) — but only once the band has arrived.
+  overflow: auto;
+  // ⚠️ **The delay on `overflow` is load-bearing, not tidiness.** A band's content
+  // is pitched at the declared height (ARCH-299's contract), so mid-animation it
+  // always exceeds the growing box: an `overflow: auto` in force from the first
+  // frame shows a scrollbar for the whole duration, and wherever that scrollbar
+  // takes layout space it narrows the content box and re-lays out the chart the
+  // clip exists to protect. Measured, not theorised — ARCH-300 swept the band
+  // through the heights the transition passes and read the chart back: with
+  // `hidden` its box is identical at every height, with `auto` it moves by 8px on
+  // every frame. Do not assume overlay scrollbars save you; whether one takes space
+  // depends on the platform AND the user's "show scroll bars" setting, so the bug
+  // is reproducible on macOS too. `overflow` is a discrete property, so
+  // `allow-discrete` with a delay of exactly the duration flips it at the END
+  // instead of the midpoint.
+  // Closing needs none of this: the rule above has no `overflow` in its transition
+  // list, so it returns to `hidden` at once and the band clips on the way out.
+  transition-property: height, overflow;
+  transition-duration: var(--nge-table-row-detail-duration, 180ms), 0s;
+  transition-timing-function: ease;
+  transition-delay: 0s, var(--nge-table-row-detail-duration, 180ms);
+  transition-behavior: allow-discrete;
+}
+
+// The footer band is the header band's twin — same surface, same rule, drawn on
+// the row rather than on the wrapper for the same reason (the wrapper is only as
+// wide as the viewport; the row is as wide as the table).
+.nge-table__footer-row {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  width: var(--nge-table-internal-total-width, max-content);
+  min-width: 100%;
+  background: var(--nge-table-surface-variant, #f5f5f5);
+  border-top: var(--nge-table-border-width, 1px) solid var(--nge-table-header-border-color, #cfcfcf);
+}
+
+.nge-table__footer-cell {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  box-sizing: border-box;
+  height: var(--nge-table-row-height, 40px);
+  padding: var(--nge-table-cell-padding-y, 0px) var(--nge-table-cell-padding-x, 12px);
+  overflow: hidden;
+}
+
+.nge-table__footer-row .nge-table__lane--pinned-left,
+.nge-table__footer-row .nge-table__lane--pinned-right {
+  background: var(--nge-table-pinned-header-surface, #f5f5f5);
+}
+
+// The loading overlay covers the whole table — header included — so it is a child
+// of the HOST rather than of the scroller, absolutely positioned against the host's
+// padding box. Out of flow, so it adds no height; over the header, because a
+// loading state the sticky header punched a hole through would be a worse lie than
+// no overlay at all.
+//
+// The host takes `position: relative` for this, which is safe: `z-index: auto`
+// means it is a containing block WITHOUT being a stacking context, so the pinned
+// lanes inside are left alone. Anything that gave the host a z-index here would
+// strand them.
+.nge-table__loading {
+  position: absolute;
+  inset: 0;
+  z-index: var(--nge-table-loading-z-index, 4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--nge-table-loading-scrim, rgb(255 255 255 / 0.72));
+}
+
+// ─── Reduced motion (ARCH-300) ───────────────────────────────────────────────
+//
+// The library's only motion, switched off together: the detail band's height and
+// the chevron's rotation. Listing the chevron here rather than leaving it to the
+// story that shipped it is the point — a reduced-motion rule that covered the new
+// animation and skipped the one already in the file would be a worse precedent
+// than two extra selectors. Anything animated later belongs in this block on the
+// day it lands, not in a follow-up.
+//
+// ⚠️ **`transition: none` rather than zeroing `--nge-table-row-detail-duration`
+// in here**, and the difference is not cosmetic. A consumer can set the duration
+// inline on the host, and an inline custom property outranks anything a media
+// query says about it — so the accessibility setting would lose to a theme. A
+// declaration on the same element cannot be beaten that way. The token's `0ms`
+// escape is the consumer-facing half of the same switch, and the two are
+// independent by design: either alone stops the band moving.
+//
+// Last in the file on purpose. Every selector here ties on specificity with the
+// rule it is overriding, so source order is what settles it.
+@media (prefers-reduced-motion: reduce) {
+  .nge-table__row-detail,
+  .nge-table__row-detail--open,
+  .nge-table__body--virtualized .nge-table__row-detail,
+  .nge-table__body--virtualized .nge-table__row-detail--open,
+  .nge-table__expand-all > span,
+  .nge-table__expand-row > span {
+    transition: none;
+  }
+}

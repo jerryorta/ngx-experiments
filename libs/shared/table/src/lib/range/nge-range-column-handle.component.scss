@@ -1,0 +1,89 @@
+// =============================================================================
+// Column selection (ARCH-270) — an ADDON stylesheet, and part of ARCH-269's addon.
+//
+// Every token carries a literal fallback at its use site, exactly as the core
+// stylesheet does, so a selected column renders correctly with no theme applied and
+// without this addon adding anything to `_table-tokens.scss`. Editing that partial
+// (or the `_index.scss` that forwards it) would be a core edit, and this story needs
+// none.
+//
+// ⚠️ The namespace is `--nge-table-range-column-*` — under ARCH-269's
+// `--nge-table-range-*`, because a selected column IS a range, not a fourth kind of
+// mark. It is not `--nge-table-selection-*`, which ARCH-268 owns for row selection.
+//
+// NEVER reference --mat-sys-* or mat-*. Angular Material is banned in this library.
+// =============================================================================
+
+// `display: contents` rather than `none`: the grip is absolutely positioned and
+// needs to render, but the host must add nothing to the header cell's flex row.
+// Removing the host box leaves the out-of-flow grip resolving against
+// `.nge-table__header-cell`, which is already `position: relative` for ARCH-244's
+// resize grip — so this needs no core edit to anchor against.
+.nge-range-column-handle {
+  display: contents;
+}
+
+// The strip, on the header's LEADING edge — the opposite end from the resize grip,
+// which half-overhangs the trailing one. It sits inside the header cell's 12px
+// padding, so it never clips a label or a consumer's slotted `header-cell` control.
+//
+// ⚠️ **No `z-index`, deliberately.** The previous column's resize grip carries
+// `z-index: 1` and overhangs a couple of pixels into this cell; leaving this one at
+// `auto` lets the grip win that sliver, which is the right precedence — a user
+// aiming at a column boundary means to resize.
+//
+// ⚠️ **No `touch-action: none` either.** ARCH-244's grip needs it because it drags;
+// this is a click, and a finger must still be able to scroll the header band.
+.nge-range-column-handle__grip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--nge-table-range-column-handle-width, 8px);
+  background: var(--nge-table-range-column-handle-color, transparent);
+  cursor: pointer;
+  // A click is not a text selection; without this a double-click paints the header
+  // label half-highlighted.
+  user-select: none;
+}
+
+// Quiet at rest, discoverable on approach — the same bargain ARCH-244's grip strikes,
+// and the mitigation for this affordance's one cost, a target to find. Hovering
+// anywhere on the header reveals its strip rather than requiring a user to find an
+// 8px target first.
+//
+// The `:not()` is doing real work, and it is the trap ARCH-244 documented. Hover is
+// live whenever the pointer is over the header, including while the column is
+// selected, and the hover selector out-specifies the selected one — so without this
+// a selected column's strip would wear the hover grey for as long as the pointer
+// stayed on its header. Excluding the selected state settles it by intent rather
+// than by out-specifying it, which the next rule added would undo again.
+.nge-table__header-cell:hover
+  .nge-range-column-handle:not(.nge-range-column-handle--on)
+  .nge-range-column-handle__grip {
+  background: var(--nge-table-range-column-handle-color-hover, #b6b6bd);
+}
+
+.nge-range-column-handle--on .nge-range-column-handle__grip {
+  background: var(--nge-table-range-column-handle-color-active, #1d4ed8);
+}
+
+// The header of a fully selected column, tinted to match the body — reached outward
+// with `:has()`, the same indirection (and the same documented dependency on core's
+// BEM class names) that `nge-range-overlay.component.scss` explains at length. The
+// child combinators are exact rather than descendant, so a consumer nesting their own
+// markup cannot accidentally satisfy the selector.
+//
+// `background-color` rather than `background`, so a consumer who has given the header
+// a background image of their own keeps it underneath the tint.
+.nge-table__header-cell:has(> .nge-table__header-overlay > .nge-range-column-handle--on) {
+  background-color: var(--nge-table-range-column-surface, #dbeafe);
+  color: var(--nge-table-range-column-on-surface, #0b2545);
+}
+
+// ⚠️ **No pinned-lane rule is needed, and adding one would be dead code** — the same
+// conclusion, for the same reason, as ARCH-269's overlay and ARCH-250's before it.
+// This tint is on the header CELL, which paints over its own lane's background, and
+// `--nge-table-range-column-surface` is opaque by the same requirement
+// `--nge-table-pinned-surface` carries. Should a theme make it translucent, the fix
+// belongs on the token, not here.

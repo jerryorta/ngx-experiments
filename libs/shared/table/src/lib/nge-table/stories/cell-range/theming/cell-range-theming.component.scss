@@ -1,0 +1,152 @@
+// The story panel takes its surface from the same `--nge-table-surface` /
+// `--nge-table-on-surface` the table reads, so prose and table always move
+// together: under one of the ten domain themes that bridge `--nge-table-*`
+// (ARCH-277) both follow the toolbar, and under a theme that does not bridge
+// them (`nge-*`, `gy-*`) both fall back to the library's light-mode defaults.
+.nge-table-cell-range-theming {
+  display: block;
+  padding: 20px;
+  color: var(--nge-table-on-surface, #1d1b20);
+  background: var(--nge-table-surface, #ffffff);
+
+  .stories-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    margin-bottom: 8px;
+  }
+
+  .intro-text {
+    margin-bottom: 32px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 16px;
+  }
+
+  .story-section {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+
+    h4 {
+      margin-bottom: 8px;
+      color: var(--nge-table-on-surface, #1d1b20);
+    }
+
+    .story-description {
+      margin-bottom: 16px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 14px;
+    }
+  }
+
+  .code-block {
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    background: var(--nge-table-surface-variant, #f5f5f5);
+    border-radius: 6px;
+
+    pre {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+  }
+
+  // Height is bound inline on `nge-table` from the demo's `maxHeight` input, so a
+  // rule here would be dead. ⚠️ Width is not: the fixture's seven columns come to
+  // roughly 1120px and fit the panel, so a section whose prose says "scroll
+  // sideways" has nothing to scroll unless the table is narrowed.
+  .table-container {
+    margin-bottom: 16px;
+
+    &--narrow {
+      max-width: 720px;
+    }
+  }
+
+  .comparison-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+
+    h5 {
+      margin: 0 0 8px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // The theme sections. Each is nothing but a scoped re-declaration of the
+  // addon's four tokens — which is precisely what a consuming domain writes.
+  // ───────────────────────────────────────────────────────────────────────────
+
+  .theme-mint {
+    --nge-table-range-surface: #d3f9d8;
+    --nge-table-range-outline: #69db7c;
+    --nge-table-range-on-surface: #0b2e13;
+    --nge-table-range-focus-outline: #2b8a3e;
+  }
+
+  .theme-violet {
+    --nge-table-range-surface: #e5dbff;
+    --nge-table-range-outline: #b197fc;
+    --nge-table-range-on-surface: #1f1235;
+    --nge-table-range-focus-outline: #6741d9;
+  }
+
+  // A wash rather than a grid of boxes: the per-cell outline collapses into the
+  // tint, and only the focus ring survives.
+  .theme-subtle {
+    --nge-table-range-surface: #fff9db;
+    --nge-table-range-outline: #fff9db;
+    --nge-table-range-on-surface: #1d1b20;
+    --nge-table-range-focus-outline: #b8912a;
+  }
+
+  // The shape a domain bridge takes. Every surface is restated rather than left to
+  // inherit — a pinned surface left light shows up as a pale rectangle punched
+  // through a dark table, because pinned lanes are opaque by requirement.
+  .theme-dark {
+    --nge-table-surface: #17171b;
+    --nge-table-surface-variant: #222228;
+    --nge-table-pinned-surface: #17171b;
+    --nge-table-on-surface: #e8e8ea;
+    --nge-table-on-surface-variant: #a0a0aa;
+    --nge-table-border-color: #33333c;
+    --nge-table-row-surface-hover: #26262e;
+
+    --nge-table-range-surface: #10314f;
+    --nge-table-range-outline: #2f6fa8;
+    --nge-table-range-on-surface: #cfe6ff;
+    --nge-table-range-focus-outline: #74b3f0;
+
+    // The section's own chrome follows the table, or the prose sits on white.
+    color: var(--nge-table-on-surface, #e8e8ea);
+    background: var(--nge-table-surface, #17171b);
+    padding: 16px;
+    border-radius: 8px;
+
+    h4,
+    .story-description {
+      color: inherit;
+    }
+  }
+
+  // ⚠️ These two only land because section 7's config is hand-authored and omits
+  // `rowHeight` / `headerHeight`. `createNgeTableConfig()` fills both in
+  // unconditionally and `<nge-table>` publishes them as INLINE custom properties on
+  // its host, where they outrank a class selector regardless of specificity — so the
+  // same two declarations over any other table on this page do nothing at all, and
+  // do it silently.
+  .theme-compact {
+    --nge-table-row-height: 32px;
+    --nge-table-header-height: 36px;
+    --nge-table-cell-padding-y: 4px;
+  }
+}

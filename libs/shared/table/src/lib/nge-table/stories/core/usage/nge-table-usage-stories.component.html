@@ -1,0 +1,400 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Usage Examples</h2>
+    <p class="intro-text">
+      <code>&lt;nge-table&gt;</code> takes one required input: a <code>NgeTableConfig</code>.
+      Every example below draws its rows from the shared fixture
+      (<code>&#64;nge/table/testing</code>) rather than an inline array — and note that no
+      example imports <code>&#64;tanstack/*</code>. That insulation is the point of the facade.
+    </p>
+
+    <!-- EXAMPLE 1: Basic Usage -->
+    <section class="story-section">
+      <h4>1. Basic Usage</h4>
+      <p class="story-description">
+        Columns and rows are the only required fields. Click a header to sort — sorting is on by
+        default, and the table keeps its own copy of the state when the host does not bind one.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }}
+  columns: NGE_TABLE_FIXTURE_COLUMNS,
+  data: createNgeTableFixture({{ "{" }} rows: 25 {{ "}" }}),
+{{ "}" }});
+
+&lt;nge-table [config]="config" /&gt;</pre>
+      </div>
+      <div class="table-container">
+        <nge-table [config]="basicConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Custom Geometry -->
+    <section class="story-section">
+      <h4>2. Custom Geometry</h4>
+      <p class="story-description">
+        <code>rowHeight</code> and <code>headerHeight</code> are applied as inline
+        <code>--nge-table-*</code> overrides. They live in the config rather than in CSS alone
+        because virtualization (ARCH-245) needs them as numbers — it positions rows it has not
+        rendered yet and so cannot measure one.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }}
+  columns, data,
+  headerHeight: 56,
+  rowHeight: 64,
+{{ "}" }});</pre>
+      </div>
+      <div class="table-container">
+        <nge-table [config]="roomyConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Sorting Off -->
+    <section class="story-section">
+      <h4>3. Sorting Off</h4>
+      <p class="story-description">
+        With <code>enableSorting: false</code> the headers lose their affordance, their
+        <code>aria-sort</code>, and their keyboard focus stop. Capability flags gate the whole
+        interaction, not just the visual.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }} columns, data, enableSorting: false {{
+            "}"
+          }});</pre>
+      </div>
+      <div class="table-container">
+        <nge-table [config]="readOnlyConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 4: Stable Row Identity -->
+    <section class="story-section">
+      <h4>4. Stable Row Identity</h4>
+      <p class="story-description">
+        Supply <code>getRowId</code> whenever selection, expansion, or sizing state outlives the
+        data. Without it the engine keys row state by array index, so a re-fetch that reorders rows
+        silently moves the user's selection onto different records.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }}
+  columns, data,
+  getRowId: row =&gt; row.id,
+{{ "}" }});</pre>
+      </div>
+      <div class="table-container">
+        <nge-table [config]="identifiedConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 5: Empty State -->
+    <section class="story-section">
+      <h4>5. Empty State</h4>
+      <p class="story-description">
+        No rows renders the header plus an empty band rather than a bare header rule, so an empty
+        result never reads as a broken table.
+      </p>
+      <div class="table-container">
+        <nge-table [config]="emptyConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 6: Three pinned-left columns -->
+    <section class="story-section">
+      <h4>6. Three Pinned-Left Columns</h4>
+      <p class="story-description">
+        Scroll sideways. All three frozen columns hold their place and none of them overlaps —
+        because they are not individually sticky. They are ordinary flex children of
+        <strong>one</strong> sticky lane wrapper, so there is no per-cell <code>left</code> for a
+        second frozen column to collide with. The component this library replaces did it per-cell,
+        and its own source says so:
+        <em
+          >"only one sticky column is supported; multiple sticky columns will overlap because they
+          all use <code>left: 0</code>"</em
+        >.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }} columns, data, enablePinning: true {{ "}" }});
+
+// WHICH columns are frozen is state, not config — a user changes it.
+state = createNgeTableState({{ "{" }}
+  columnPinning: {{ "{" }} left: ['name', 'status', 'quantity'] {{ "}" }},
+{{ "}" }});
+
+&lt;nge-table [config]="config" [state]="state" /&gt;</pre>
+      </div>
+      <div class="table-container table-container--narrow">
+        <nge-table
+          [config]="pinnableConfig"
+          [state]="threePinnedLeft"
+        />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 7: Both edges at once -->
+    <section class="story-section">
+      <h4>7. Both Edges, Center Scrolling</h4>
+      <p class="story-description">
+        Three lanes: pinned-left, center, pinned-right. Only the center one scrolls, and the header
+        lanes track the body lanes exactly — not through a scroll listener, but because header and
+        body share a single scroll viewport. Where the two stickies cross, at the top-left corner
+        cell, the header band wins.
+      </p>
+      <div class="code-block">
+        <pre>
+state = createNgeTableState({{ "{" }}
+  columnPinning: {{ "{" }} left: ['name', 'status'], right: ['amount'] {{ "}" }},
+{{ "}" }});</pre>
+      </div>
+      <div class="table-container table-container--narrow">
+        <nge-table
+          [config]="pinnableConfig"
+          [state]="bothEdgesPinned"
+        />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 8: Pinning switched off -->
+    <section class="story-section">
+      <h4>8. Pinning Switched Off</h4>
+      <p class="story-description">
+        Identical state to example 7, with <code>enablePinning: false</code>. The lanes collapse to
+        one and nothing freezes. A capability flag gates the <em>effect</em>, not just a future
+        affordance — the same way <code>enableSorting: false</code> ignores a
+        <code>state.sorting</code> it was handed. The state itself is untouched, so flipping the
+        flag back restores the frozen columns.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }} columns, data, enablePinning: false {{
+            "}"
+          }});</pre>
+      </div>
+      <div class="table-container table-container--narrow">
+        <nge-table
+          [config]="unpinnableConfig"
+          [state]="bothEdgesPinned"
+        />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 9: Resizable columns -->
+    <section class="story-section">
+      <h4>9. Resizable Columns</h4>
+      <p class="story-description">
+        <code>enableColumnResizing: true</code> puts a grip on every header's trailing edge. Drag
+        one and the width follows the pointer; columns never size themselves to their content, which
+        is the Excel / Numbers behaviour this library was built around. Bounds come from
+        <code>minSize</code> / <code>maxSize</code> on the column definition, falling back to
+        <code>columnMinWidth</code> / <code>columnMaxWidth</code> on the config — here
+        <strong>Quantity</strong> is held between 80 and 160px.
+      </p>
+      <p class="story-description">
+        Widths land in <code>state.columnSizing</code> as whole numbers, already clamped, so a saved
+        view restores exactly what the user left. Driving the drag — and the <kbd>Shift</kbd> +
+        arrow keyboard path — is the <strong>Interaction</strong> story's job; this one just shows
+        the switch.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }}
+  columns, data,
+  enableColumnResizing: true,
+  columnMinWidth: 60,   // the fallback for every column
+  columnMaxWidth: 800,
+{{ "}" }});
+
+// Per-column bounds win over the config's.
+{{ "{" }} accessorKey: 'quantity', id: 'quantity', minSize: 80, maxSize: 160 {{ "}" }}</pre>
+      </div>
+      <div class="table-container">
+        <nge-table [config]="resizableConfig" />
+      </div>
+    </section>
+
+    <!-- EXAMPLE 10: A custom cell for one column -->
+    <section class="story-section">
+      <h4>10. A Custom Cell for One Column</h4>
+      <p class="story-description">
+        A cell is an <strong>arbitrary Angular render target</strong>. Project an
+        <code>&lt;ng-template ngeCell="…"&gt;</code> and that column renders your markup; every
+        other column keeps rendering its own <code>columnDef.cell</code>, so adopting this is a
+        per-column decision rather than a per-table one. Inline editing follows from the same
+        reframing — a cell containing an <code>&lt;input&gt;</code>, not a table feature. The
+        <strong>Interaction</strong> story drives one.
+      </p>
+      <p class="story-description">
+        <code>[ngeCellOf]</code> is never read at runtime. It exists so <code>TRow</code> has
+        somewhere to be inferred from, which is what makes <code>let-cell</code> resolve to
+        <code>NgeCellContext&lt;Row&gt;</code> rather than
+        <code>NgeCellContext&lt;unknown&gt;</code>. Note what the context does
+        <em>not</em> contain: any <code>&#64;tanstack/*</code> type.
+      </p>
+      <div class="code-block">
+        <pre>
+&lt;nge-table [config]="config"&gt;
+  &lt;ng-template ngeCell="amount" [ngeCellOf]="rows" let-cell&gt;
+    {{ "{{" }} cell.value | currency {{ "}}" }} · {{ "{{" }} cell.row.owner.name {{ "}}" }}
+  &lt;/ng-template&gt;
+&lt;/nge-table&gt;</pre>
+      </div>
+      <div class="table-container">
+        <nge-table [config]="slottedConfig">
+          <ng-template
+            ngeCell="amount"
+            let-cell
+            [ngeCellOf]="slottedRows"
+          >
+            <span class="slotted-amount">
+              <strong>{{ cell.row.amount | currency }}</strong>
+              <small>{{ cell.row.owner.name }}</small>
+            </span>
+          </ng-template>
+        </nge-table>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 11: The empty slot -->
+    <section class="story-section">
+      <h4>11. The Empty Slot</h4>
+      <p class="story-description">
+        Everything that is not a cell is addressed by <em>name</em> instead of by column. The
+        <code>empty</code> slot replaces the band's content, never the band itself, so an empty
+        result still reads as a table with nothing in it. Its context reports the counts —
+        <code>rowCount</code> and <code>columnCount</code> — because a band drawn about the table
+        should not be handed the rows and invited to iterate them.
+      </p>
+      <div class="code-block">
+        <pre>
+&lt;ng-template ngeTableSlot="empty" let-table&gt;
+  Nothing matched across {{ "{{" }} table.columnCount {{ "}}" }} columns.
+&lt;/ng-template&gt;</pre>
+      </div>
+      <div class="table-container">
+        <nge-table [config]="slottedEmptyConfig">
+          <ng-template
+            ngeTableSlot="empty"
+            let-table
+          >
+            <span class="slotted-empty">
+              Nothing matched across {{ table.columnCount }} columns — try widening the search.
+            </span>
+          </ng-template>
+        </nge-table>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 12: Bands around the table -->
+    <section class="story-section">
+      <h4>12. Toolbar and Footer Bands</h4>
+      <p class="story-description">
+        <code>toolbar</code> sits above the scroll viewport, so it stays put while the rows scroll
+        under it. <code>footer-cell</code> is addressed per column and renders a footer row that
+        reuses the same three lanes as the header — pin a column and its footer cell follows it into
+        the pinned lane, with nothing in the footer code aware that pinning exists.
+      </p>
+      <p class="story-description">
+        A slot <em>renders</em>; it does not <em>calculate</em>. The total below is computed by the
+        host and handed in, which is what keeps the table from growing an aggregation feature by
+        accident.
+      </p>
+      <div class="code-block">
+        <pre>
+&lt;ng-template ngeTableSlot="toolbar" let-table&gt;…&lt;/ng-template&gt;
+&lt;ng-template ngeTableSlot="footer-cell" ngeTableSlotColumn="amount"&gt;…&lt;/ng-template&gt;</pre>
+      </div>
+      <div class="table-container">
+        <nge-table [config]="bandedConfig">
+          <ng-template
+            ngeTableSlot="toolbar"
+            let-table
+          >
+            <span class="slotted-toolbar">
+              <strong>Orders</strong>
+              <small>{{ table.rowCount }} rows · {{ table.columnCount }} columns</small>
+            </span>
+          </ng-template>
+
+          <ng-template
+            ngeTableSlot="footer-cell"
+            ngeTableSlotColumn="name"
+          >
+            <strong>Total</strong>
+          </ng-template>
+
+          <ng-template
+            ngeTableSlot="footer-cell"
+            ngeTableSlotColumn="amount"
+          >
+            <strong>{{ bandedTotal | currency }}</strong>
+          </ng-template>
+
+          <!--
+            The ninth slot name, added once the other eight had shipped. Everything
+            it took is visible in this commit: a name, its context, one anchor, and
+            this template.
+          -->
+          <ng-template
+            ngeTableSlot="footer"
+            let-table
+          >
+            <small class="slotted-footer">
+              Showing all {{ table.rowCount }} orders · the total is computed by the host
+            </small>
+          </ng-template>
+        </nge-table>
+      </div>
+    </section>
+
+    <!-- EXAMPLE: The export seam (ARCH-248) -->
+    <section class="story-section">
+      <h4>13. Exporting what the table shows</h4>
+      <p class="story-description">
+        <code>readNgeExportData()</code> reads the table as a neutral shape — the active sort,
+        filters, column order, and visibility already applied. It is a pure read and knows no output
+        format, so a CSV or XLSX writer is an addon over the shape rather than a feature of the
+        table. Drive it in the <strong>Interaction</strong> story; this is the API.
+      </p>
+      <div class="code-block">
+        <pre>
+&lt;nge-table #table [config]="config" [(state)]="tableState" /&gt;
+
+private readonly table = viewChild.required&lt;NgeTableComponent&lt;Row&gt;&gt;('table');
+
+const data = this.table().readNgeExportData();
+// data.columns → &#123; id: 'amount', header: 'Amount' &#125;[]
+// data.rows    → &#123; id: 'row-0001', cells: [&#123; columnId, raw, formatted &#125;, …] &#125;[]
+
+// Which rows: every processed row, the rendered page, or the selection.
+this.table().readNgeExportData(&#123; slice: 'selected' &#125;);
+
+// Which cells: any predicate at all. This is the seam an addon plugs into —
+// it is handed the same context a [ngeCell] template receives.
+this.table().readNgeExportData(&#123; cellPredicate: cell =&gt; this.isMarked(cell.rowId, cell.columnId) &#125;);</pre>
+      </div>
+      <p class="story-description">
+        Every cell carries both readings of its value: <code>raw</code> for a machine (a
+        <code>Date</code> stays a <code>Date</code>) and <code>formatted</code> for a person. A
+        column says how it reads by declaring a formatter in its own namespaced
+        <code>meta</code> key — the library cannot derive it, because a cell here may be a chart or
+        an input rather than text. Keeping the two in step is the column's job.
+      </p>
+      <div class="code-block">
+        <pre>
+&#123;
+  accessorKey: 'amount',
+  header: 'Amount',
+  id: 'amount',
+  meta: &#123; ngeExport: &#123; format: value =&gt; formatCurrency(value) &#125; &#125;,
+&#125;</pre>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

@@ -1,0 +1,20 @@
+<!--
+  The grip. Pointer-only and `aria-hidden`, the call ARCH-244 made about the resize
+  grip and ARCH-270 about the header strip — a keyboard user fills through the host's
+  own controls, not through a tab stop on every corner.
+
+  ⚠️ No handlers here. The gesture is delegated from the table root by
+  `NgeRangeBridge`, which is what lets one `setPointerCapture` follow the pointer past
+  the viewport edge and drive the auto-scroll. A local `pointerdown` would fire *as
+  well*, and the bridge distinguishes the two gestures by hit-testing this class —
+  see FILL_HANDLE_SELECTOR.
+-->
+@if (isHandleCell()) {
+  <span
+    class="nge-fill-handle__grip"
+    aria-hidden="true"
+    data-testid="nge-fill-handle"
+    [attr.data-column-id]="cell().columnId"
+    [attr.data-row-id]="cell().rowId"
+  ></span>
+}

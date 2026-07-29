@@ -1,0 +1,48 @@
+@let tableState = state();
+
+@if (showClear()) {
+  <div class="nge-table-highlight-demo__controls">
+    <button
+      type="button"
+      [disabled]="!hasMarks()"
+      (click)="clear()"
+      >Clear highlighting</button
+    >
+    <span class="nge-table-highlight-demo__hint">or press <kbd>Esc</kbd></span>
+  </div>
+}
+
+<!--
+  `mousedown` rather than `click`: it fires first, so the modifier is captured
+  before the table's own `cell-click` event is emitted.
+
+  eslint-disable-next-line is not needed here — this is a passive listener on a
+  wrapper, not an interactive element pretending to be a control.
+-->
+<div
+  class="nge-table-highlight-demo__viewport"
+  (mousedown)="captureModifier($event)"
+>
+  <nge-table
+    [config]="config()"
+    [state]="tableState"
+    [style.max-height.px]="maxHeight()"
+    (ngeTableEvent)="onNgeTableEvent($event)"
+    (stateChange)="state.set($event)"
+  >
+    <!--
+      ONE template covers every column: the slot registry falls back to the shared
+      registration when a column has none of its own.
+    -->
+    <ng-template
+      ngeTableSlot="cell-overlay"
+      [ngeTableSlotOf]="rows()"
+      let-cell
+    >
+      <nge-highlight-overlay
+        [cell]="cell"
+        [highlight]="tableState.ngeHighlight"
+      />
+    </ng-template>
+  </nge-table>
+</div>

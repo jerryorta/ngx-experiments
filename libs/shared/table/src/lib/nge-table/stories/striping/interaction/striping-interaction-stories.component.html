@@ -1,0 +1,164 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Zebra Striping (Interaction)</h2>
+    <p class="intro-text">
+      Striping is one boolean, and it would be a one-line feature if a stripe could be taken from
+      the DOM. It cannot. Examples 2 and 3 are the two that decide whether the implementation is
+      right, and neither can be checked from a screenshot: a <code>:nth-child</code> stripe looks
+      perfect until you <strong>scroll</strong>, and a stripe keyed on the engine's
+      <code>row.index</code> looks perfect until you <strong>sort</strong>. Examples 4 to 7 check
+      the other half — that every mark still outranks the stripe.
+    </p>
+
+    <section class="story-section">
+      <h4>1. The flag, on and off</h4>
+      <p class="story-description">
+        <code>enableStriping</code> defaults to <strong>false</strong>, and with it off the table
+        must render exactly as it did before the feature existed. Toggle the
+        <code>enableStriping</code> control in the Storybook panel: nothing moves except the
+        alternate rows' surface.
+      </p>
+      <div class="table-container">
+        <nge-table [config]="toggleConfig()" />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>2. A stripe survives a virtualized scroll</h4>
+      <p class="story-description">
+        Ten thousand rows, of which about thirty are in the DOM at any moment. Angular's
+        <code>&#64;for</code> reorders those nodes as the window slides, so a row's position among
+        its rendered siblings changes constantly — which is exactly what
+        <code>:nth-child</code> reads. Under a <code>:nth-child</code> stripe the bands would stand
+        still while the rows travelled through them.
+      </p>
+      <p class="story-description">
+        <strong>Scroll slowly, a row at a time, and follow one row.</strong> Its stripe goes with
+        it. Then scroll to the bottom and back: the pattern is unchanged, because parity comes from
+        the row's place in the processed row model rather than from the DOM.
+      </p>
+      <div class="table-container table-container--tall">
+        <nge-table [config]="virtualConfig" />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>3. A sort re-stripes the rows</h4>
+      <p class="story-description">
+        Click the <strong>Name</strong> header. The rows reorder and the banding stays regular,
+        because parity is re-cut from the processed row model. TanStack's own
+        <code>row.index</code> is the position in <code>config.data</code> and is carried through
+        the sorted model unchanged — a stripe keyed on it would scatter into an arbitrary pattern
+        here, which is the failure that survives a scroll and still ships broken.
+      </p>
+      <div class="table-container">
+        <nge-table
+          [config]="sortConfig"
+          [state]="sortState()"
+          (stateChange)="onSortState($event)"
+        />
+      </div>
+      <div class="stat-row">
+        <span class="stat">Sorted by: {{ sortDescription() }}</span>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>4. Hover outranks the stripe</h4>
+      <p class="story-description">
+        <strong>Run the pointer down the table.</strong> Every row lifts by the same amount. An
+        alternate row is neither "already hovered" nor immune to it, because the stripe declares no
+        <code>background</code> of its own — it swaps the value the row's background already
+        resolves through, so the hover rule keeps winning on specificity exactly as it did before
+        striping existed.
+      </p>
+      <div class="table-container">
+        <nge-table [config]="hoverConfig" />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>5. Selection outranks the stripe</h4>
+      <p class="story-description">
+        The case a naive implementation gets wrong, and it shows on alternate rows only.
+        <strong>Select an odd row and an even one.</strong> Both must read as equally selected — a
+        stripe that out-ranked selection would leave every other selected row looking untouched,
+        which is easy to miss and hard to diagnose.
+      </p>
+      <div class="table-container">
+        <nge-table
+          [config]="selectionConfig"
+          [state]="selectionState()"
+          (stateChange)="onSelectionState($event)"
+        />
+      </div>
+      <div class="stat-row">
+        <span class="stat">{{ selectedCount() }} row(s) selected</span>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>6. One band across three lanes</h4>
+      <p class="story-description">
+        The pinned lanes are <code>position: sticky</code> and opaque by requirement, so they scroll
+        <em>over</em> the center lane and would otherwise hide the row's own surface. They read the
+        same resolved property by inheritance.
+      </p>
+      <p class="story-description">
+        <strong>Scroll horizontally.</strong> A striped row stays one continuous band across the
+        pinned-left, center and pinned-right seams rather than breaking into three.
+      </p>
+      <div class="table-container table-container--narrow">
+        <nge-table
+          [config]="pinnedConfig"
+          [state]="pinnedState()"
+          (stateChange)="onPinnedState($event)"
+        />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>7. All of it at once</h4>
+      <p class="story-description">
+        Ten thousand rows — striped, virtualized, pinned and selectable together. Every axis the
+        stripe has to survive, composed into one table.
+      </p>
+      <p class="story-description">
+        <strong
+          >Select a few rows near the top, scroll to the bottom and back, then scroll
+          sideways.</strong
+        >
+        The marks stay on their records, the stripes stay on their rows, and the bands stay
+        unbroken.
+      </p>
+      <div class="controls">
+        <button
+          type="button"
+          (click)="selectFirstThree()"
+        >
+          Select first three
+        </button>
+        <button
+          type="button"
+          [disabled]="composedSelectedCount() === 0"
+          (click)="clearComposedSelection()"
+        >
+          Clear selection
+        </button>
+      </div>
+      <div class="table-container table-container--narrow table-container--tall">
+        <nge-table
+          [config]="composedConfig"
+          [state]="composedState()"
+          (stateChange)="onComposedState($event)"
+        />
+      </div>
+      <div class="stat-row">
+        <span class="stat">{{ composedSelectedCount() }} of 10,000 selected</span>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

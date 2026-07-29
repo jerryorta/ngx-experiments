@@ -4,6 +4,7 @@ const config: StorybookConfig = {
   stories: [
     '../../../libs/shared/ui-design-library/src/**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
     '../../../libs/shared/charts/src/**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
+    '../../../libs/shared/table/src/**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
     '../../../libs/shared/calendar/src/**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
     '../../../libs/ledger/design-library/src/**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
   ],

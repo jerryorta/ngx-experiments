@@ -1,0 +1,251 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Fill Handle (Interaction)</h2>
+    <p class="intro-text">
+      Select a block of cells, then drag the small square at its edge. The values extend into the
+      swept region — <strong>but not because the table wrote them</strong>. The table computes an
+      intent, announces it as a <code>fill-intent</code> event, and the demo component wrapping each
+      table applies it to its own rows. Section 5 turns that listener off to show what the library
+      does on its own: nothing. jsdom has no pointer capture, no auto-scroll and no
+      <code>touch-action</code>, so this page is where the feature is actually verified.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. Copy — drag one cell down</h4>
+      <p class="story-description">
+        Click a single cell to select it, then drag its handle down a few rows. The value repeats. A
+        single source cell is not a series — there is no second value to infer a step from — so it
+        copies.
+      </p>
+      <p class="story-description">
+        Select two or more cells of <em>text</em> and the block cycles: a three-cell pattern repeats
+        every three rows, exactly as a spreadsheet does.
+      </p>
+      <p class="story-description">
+        Notice what happens on release:
+        <strong>the selection grows to cover what you filled</strong>, and the grip moves to the new
+        bottom edge — so you can drag straight on to extend further without re-selecting. Only the
+        block you dragged from reshapes; disjoint blocks you added with <kbd>cmd</kbd>/<kbd
+          >ctrl</kbd
+        >
+        are left alone.
+      </p>
+
+      <nge-table-fill-demo
+        [(rows)]="copyRows"
+        [(state)]="copyState"
+      />
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. Linear series — drag two numbers down</h4>
+      <p class="story-description">
+        Select two cells in <code>quantity</code> or <code>amount</code> and drag down. The values
+        continue the arithmetic rather than repeating it. The step is taken across the
+        <strong>whole</strong> source — <code>(last − first) / (n − 1)</code> — so a three-cell
+        source of <code>1, 3, 5</code> continues <code>7, 9</code> rather than reading only the last
+        pair.
+      </p>
+      <p class="story-description">
+        A source whose numbers are all equal has a step of zero, which repeats the value. That is
+        the right answer and needs no special case — and it is why "not a series" is a distinct
+        answer from "a series whose step is zero".
+      </p>
+
+      <nge-table-fill-demo
+        [(rows)]="seriesRows"
+        [(state)]="seriesState"
+      />
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. Backwards, and sideways</h4>
+      <p class="story-description">
+        Drag the handle <strong>up</strong> from a numeric pair and the series descends —
+        <code>10, 20</code> extended upward gives <code>…, −10, 0</code>, never <code>30</code>.
+        Backwards changes the arithmetic, not just the order.
+      </p>
+      <p class="story-description">
+        The gesture is <strong>two-dimensional</strong>: drag the grip diagonally and both axes move
+        at once. The grip drags the far corner and each axis resolves on its own, so a single drag
+        can <em>grow</em> the rows while <em>shrinking</em> the columns.
+      </p>
+      <p class="story-description">
+        ⚠️ Growing both axes leaves a <strong>corner quadrant</strong> that belongs to neither the
+        source's rows nor its columns, so the fill runs in two passes: rows first from the real
+        source, then columns across every row — including the ones just produced. The corner is
+        therefore derived from derived values. It is deterministic, and it is the only reading
+        available, since nothing in the source points at it. Excel declines diagonal fills rather
+        than take it; this takes it.
+      </p>
+
+      <nge-table-fill-demo
+        [(rows)]="directionRows"
+        [(state)]="directionState"
+      />
+    </section>
+
+    <!-- 4 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>4. Cancelling, and dragging nowhere</h4>
+      <p class="story-description">
+        Start a drag and press <kbd>esc</kbd> before releasing: the outline disappears, nothing is
+        proposed, and the selection you were filling from is still there. A cancelled fill gives up
+        the gesture, not the selection.
+      </p>
+      <p class="story-description">
+        Then drag the handle back <em>inside</em> the block. The cells about to leave grey out, and
+        on release the selection <strong>shrinks</strong> to what is left — with the grip on the new
+        corner. Nothing is proposed and no value changes; the readout below stays put.
+      </p>
+      <p class="story-description">
+        ⚠️ A spreadsheet also <em>clears</em> the cells you drag back over. That is deliberately not
+        done here: clearing is a change to <strong>data</strong>, and what "cleared" means —
+        <code>null</code>, empty string, a type's zero — belongs to a host's schema rather than to
+        this library. Shrinking is pure interaction state, which it does own.
+      </p>
+      <p class="story-description">
+        The source stays fixed for the whole gesture, so dipping back inside and then dragging out
+        again fills from where you <em>started</em>, not from whatever the block momentarily became.
+      </p>
+
+      <nge-table-fill-demo
+        [(rows)]="cancelRows"
+        [(state)]="cancelState"
+      />
+    </section>
+
+    <!-- 5 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>5. A host that ignores the intent — the contract, made visible</h4>
+      <p class="story-description">
+        ⚠️ <strong>This is the section that matters.</strong> The same handle, the same drag, the
+        same event — and the table never changes, because this demo's listener does not apply it.
+        The proposal still arrives; read it below.
+      </p>
+      <p class="story-description">
+        The library owns no data and must never acquire any. Every other feature reads
+        <code>config.data</code> and writes <code>NgeTableState</code>; this one reads data and
+        writes an <em>event</em>. A host that has not opted into editing gets a fill handle that
+        proposes and a table that stays exactly as it was supplied.
+      </p>
+
+      <nge-table-fill-demo
+        [applyIntents]="false"
+        [(rows)]="inertRows"
+        [(state)]="inertState"
+      />
+    </section>
+
+    <!-- 6 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>6. The fill follows the view, not the data</h4>
+      <p class="story-description">
+        Sort the table, then fill down. The proposal names the rows you can
+        <strong>see</strong>, in the order you see them — resolved against the processed row model
+        rather than the source array. Filling down a sorted table any other way would scatter values
+        across records the user never dragged past.
+      </p>
+
+      <div class="controls">
+        <button
+          type="button"
+          (click)="sortExternally()"
+          >Sort by amount ↓</button
+        >
+        <button
+          type="button"
+          (click)="clearSort()"
+          >Clear sort</button
+        >
+      </div>
+
+      <nge-table-fill-demo
+        [(rows)]="sortedRows"
+        [(state)]="sortedState"
+      />
+    </section>
+
+    <!-- 7 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>7. A column that refuses to be filled</h4>
+      <p class="story-description">
+        <code>status</code> carries <code>meta.ngeFill.enabled: false</code>. Select across it and
+        fill: its neighbours change and it does not. It is excluded as a
+        <strong>target</strong> only — its values still seed a neighbour's series, which is what a
+        derived or read-only column wants.
+      </p>
+
+      <nge-table-fill-demo
+        [configOverrides]="optOutConfig"
+        [(rows)]="optOutRows"
+        [(state)]="optOutState"
+      />
+    </section>
+
+    <!-- 8 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>8. No handle on a whole-column selection</h4>
+      <p class="story-description">
+        This table is seeded with a <strong>whole-column</strong> selection — the shape a header
+        strip (ARCH-270) or <kbd>cmd</kbd>/<kbd>ctrl</kbd>-<kbd>A</kbd> produces. Every cell of
+        <code>quantity</code> reads as selected and <strong>no handle appears anywhere</strong>.
+        Select a couple of cells normally and the grip comes straight back.
+      </p>
+      <p class="story-description">
+        It is seeded rather than typed because every table on this page passes
+        <code>selectAllOnModifierA: false</code> — the listener is on the document, and nine tables
+        would fight over the key.
+      </p>
+      <p class="story-description">
+        ⚠️ That is ARCH-270's consequence rather than an oversight. A whole-column mark has
+        <code>null</code> row endpoints — it names no record, which is what makes it survive a sort
+        — so it has no bottom corner to hang a grip off and nothing below it to extend into.
+        Materialising rows to give the handle somewhere to sit would silently turn "this whole
+        column" into "these rows of it".
+      </p>
+
+      <nge-table-fill-demo
+        [(rows)]="wholeColumnRows"
+        [(state)]="wholeColumnState"
+      />
+    </section>
+
+    <!-- 9 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>9. Ten thousand rows</h4>
+      <p class="story-description">
+        Select two cells near the top and drag the handle to the viewport's bottom edge — the table
+        auto-scrolls (ARCH-269's mechanism, reused) and the fill keeps going. Release far down the
+        table and the proposal covers every row swept, including the ones no window ever rendered.
+      </p>
+      <p class="story-description">
+        The pending outline survives the scroll because it is derived from row ids on every render,
+        never held on the recycled elements it is drawn over.
+      </p>
+
+      <p class="story-description">
+        ⚠️ The live <strong>selected data</strong> readout is switched off for this table alone.
+        <code>readNgeExportData</code> walks every row of the processed model — ~170–230 ms at
+        10,000 rows × 7 columns — and the readout recomputes on every state change, which during a
+        drag is every frame. On the twelve-row tables above that is 84 cells and free; here it would
+        make the drag unusable. Which is itself the reason the other stories put the export behind a
+        button.
+      </p>
+
+      <nge-table-fill-demo
+        [configOverrides]="virtualConfig"
+        [maxHeight]="420"
+        [showSelectedData]="false"
+        [(rows)]="virtualRows"
+        [(state)]="virtualState"
+      />
+    </section>
+  </div>
+</nge-storybook-review-container>

@@ -1,0 +1,392 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Cell Range Selection (Interaction)</h2>
+    <p class="intro-text">
+      A range is an <strong>addon</strong>, not a table feature: one line of providers, one
+      projected overlay, and no file in the library core changed.
+      <strong>Everything here is a gesture.</strong>
+      Drag across cells to select a block; shift-click to extend it; cmd/ctrl-drag to add a second,
+      disjoint one. jsdom has no scroll geometry, no sticky offsets and no pointer capture, so this
+      page — not a spec — is where the feature is actually verified.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. Drag out a rectangle</h4>
+      <p class="story-description">
+        Press in one cell, drag to another, release. The block is stored as a single
+        <strong>descriptor</strong> — four ids naming two opposite corners — never as a map of the
+        cells it covers. Which cells lie between those corners is resolved at
+        <strong>read</strong> time, rows against the processed row model and columns against the
+        visible leaf columns in visual order.
+      </p>
+      <p class="story-description">
+        The corner you started from is the <strong>anchor</strong>; the one under the pointer is the
+        <strong>focus</strong>, painted with a heavier ring because it is what a keyboard extension
+        would move and where a fill handle (ARCH-271) will sit.
+      </p>
+
+      <nge-table-range-demo
+        [config]="basicConfig"
+        [rows]="basicRows"
+        [(state)]="basicState"
+      />
+
+      <div class="state-readout">
+        <h5>state.ngeRange</h5>
+        <pre>{{ basicRangeJson() }}</pre>
+      </div>
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. Shift-click extends — and the anchor does not move</h4>
+      <p class="story-description">
+        Click a cell, then shift-click somewhere else. Now shift-click <em>back</em> towards the
+        first cell: the block <strong>shrinks</strong>. That is the whole reason the anchor stays
+        put — a second shift-click is how a user corrects an over-shoot, and an anchor that followed
+        the pointer would leave a block that could only ever be grown.
+      </p>
+      <p class="story-description">
+        Watch <code>anchorRowId</code> / <code>anchorColumnId</code> below hold still while the two
+        focus fields move. It is the same rule ARCH-268 records for row ranges and ARCH-250 for
+        highlight blocks.
+      </p>
+
+      <nge-table-range-demo
+        [config]="extendConfig"
+        [rows]="extendRows"
+        [(state)]="extendState"
+      />
+
+      <div class="state-readout">
+        <h5>state.ngeRange.ranges</h5>
+        <pre>{{ extendRangeJson() }}</pre>
+      </div>
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. cmd/ctrl-drag adds a disjoint block</h4>
+      <p class="story-description">
+        Drag out one block, then hold <kbd>cmd</kbd> (<kbd>ctrl</kbd> on Windows) and drag out
+        another somewhere else. Both stay. A plain drag <strong>replaces</strong>, because that is
+        what clicking into a spreadsheet does; cmd/ctrl <strong>appends</strong>, which is the whole
+        reason the slice holds an array rather than one rectangle.
+      </p>
+      <p class="story-description">
+        Only the <strong>last</strong> rectangle is active — a following shift-click moves that one
+        and leaves the earlier blocks where they were put.
+      </p>
+
+      <div class="stat-row">
+        <span class="stat"
+          >rectangles: <strong>{{ additiveCount() }}</strong></span
+        >
+      </div>
+
+      <nge-table-range-demo
+        [config]="additiveConfig"
+        [rows]="additiveRows"
+        [(state)]="additiveState"
+      />
+
+      <div class="state-readout">
+        <h5>state.ngeRange.ranges</h5>
+        <pre>{{ additiveRangeJson() }}</pre>
+      </div>
+    </section>
+
+    <!-- 4 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>4. Drag past the edge — auto-scroll</h4>
+      <p class="story-description">
+        <strong>Only checkable in a browser.</strong> This table is deliberately narrower and
+        shorter than its data. Start a drag and push the pointer past the bottom edge, or past the
+        right-hand edge: the viewport scrolls and the block keeps extending against the cells that
+        arrive, so a selection can exceed what is visible without you letting go.
+      </p>
+      <p class="story-description">
+        The speed <strong>ramps</strong> rather than being flat — nothing at
+        <code>autoScrollThreshold</code> (48px) from the edge, up to
+        <code>autoScrollSpeed</code> (12px per frame) at the boundary and beyond. Nudge the pointer
+        towards the edge and it creeps; shove it well past and it runs. A flat speed makes a long
+        selection either unbearable or uncontrollable, and there is no single value that is both.
+      </p>
+      <p class="story-description">
+        It re-hit-tests at the <em>last known pointer position</em> on every frame, because during
+        an auto-scroll the pointer is not moving — the cells under it are.
+      </p>
+
+      <div class="table-container table-container--narrow">
+        <nge-table-range-demo
+          [config]="autoScrollConfig"
+          [maxHeight]="240"
+          [rows]="autoScrollRows"
+          [(state)]="autoScrollState"
+        />
+      </div>
+
+      <div class="state-readout">
+        <h5>state.ngeRange.ranges</h5>
+        <pre>{{ autoScrollRangeJson() }}</pre>
+      </div>
+    </section>
+
+    <!-- 5 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>5. Escape and cmd/ctrl-A — and why only this table has them</h4>
+      <p class="story-description">
+        Select something here and press <kbd>Esc</kbd>: the selection goes, and so does the gesture
+        anchor. Click into this table first, then press <kbd>cmd</kbd>/<kbd>ctrl</kbd> +
+        <kbd>A</kbd>: every cell of the current view is selected as one rectangle, anchored on its
+        own top-left corner so a following shift-click narrows it rather than starting over.
+      </p>
+      <p class="story-description">
+        ⚠️ <strong>This is the only table on the page that answers those keys.</strong> Both
+        listeners are on the <em>document</em> — nothing in a table body is focusable, so a scoped
+        handler would never fire — which means several range-enabled tables on one page would all
+        clear on one <kbd>Esc</kbd>. Every other section here passes
+        <code>{{ "{" }} clearOnEscape: false, selectAllOnModifierA: false {{ "}" }}</code
+        >. A single-table application should keep the defaults.
+      </p>
+      <p class="story-description">
+        The two keys are polite in different ways, and they have to be.
+        <kbd>Esc</kbd> never calls <code>preventDefault()</code> and writes nothing on an unselected
+        table, so an <kbd>Esc</kbd> meant for a dialog costs nothing. cmd/ctrl-<kbd>A</kbd>
+        <em>must</em> take the key to work at all — otherwise the browser also selects the whole
+        document's text underneath — so it is scoped by <strong>engagement</strong> instead: try it
+        before clicking into the table and the page keeps its own select-all.
+      </p>
+
+      <nge-table-range-keys-demo
+        [config]="keysConfig"
+        [rows]="keysRows"
+        [(state)]="keysState"
+      />
+
+      <div class="state-readout">
+        <h5>state.ngeRange.ranges</h5>
+        <pre>{{ keysRangeJson() }}</pre>
+      </div>
+    </section>
+
+    <!-- 6 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>6. Ten thousand rows — a range survives a virtualized scroll</h4>
+      <p class="story-description">
+        <strong>The acceptance criterion only a browser can check.</strong> Select a block, scroll
+        it far out of view, and scroll back — it is still selected. Virtualization recycles DOM, so
+        the node drawing row 4,000 drew row 12 a moment ago; the selection survives because it lives
+        in state and every render re-derives from there, never because an element remembered
+        anything.
+      </p>
+      <p class="story-description">
+        Start a drag and hold the pointer just below the last visible row: auto-scroll runs through
+        the virtual window and the block keeps extending. Then watch <code>slice size</code> barely
+        move. A descriptor is four strings whatever it covers — the same block enumerated per cell
+        would be ~270&nbsp;KB of JSON re-emitted on every state change, and a few such columns would
+        exceed Firestore's 1&nbsp;MiB document limit. That breaks the "a user's view can be
+        persisted and restored" property, not merely a frame budget.
+      </p>
+
+      <div class="stat-row">
+        <span class="stat"
+          >rectangles: <strong>{{ virtualCounts().ranges }}</strong></span
+        >
+        <span class="stat"
+          >slice size: <strong>{{ virtualCounts().bytes }} bytes</strong></span
+        >
+      </div>
+
+      <nge-table-range-demo
+        [config]="virtualConfig"
+        [maxHeight]="520"
+        [rows]="virtualRows"
+        [(state)]="virtualState"
+      />
+    </section>
+
+    <!-- 7 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>7. Pinned columns — the block resolves against visual order</h4>
+      <p class="story-description">
+        <code>name</code> is pinned left and <code>owner</code> right. Drag a block that starts in
+        the pinned lane and ends in the center, then <strong>scroll sideways</strong>. A pinned lane
+        is <code>position: sticky</code> and scrolls over the center lane, so a selected pinned cell
+        must stay <strong>opaque</strong> — a translucent tint would show the center cells sliding
+        underneath it.
+      </p>
+      <p class="story-description">
+        Now select a block spanning <code>status</code> through <code>amount</code> and press
+        <strong>Pin quantity</strong>. The rectangle <strong>re-shapes</strong>: its corners are
+        column ids, and everything between them is resolved against visual order across the three
+        lanes at read time. This is the axis ARCH-250's highlighting never had — it materialised its
+        column span at write time, so a pin left it describing columns that had moved.
+      </p>
+
+      <div class="controls">
+        <button
+          type="button"
+          (click)="toggleQuantityPin()"
+          >{{ quantityPinned() ? "Unpin quantity" : "Pin quantity" }}</button
+        >
+      </div>
+
+      <div class="table-container table-container--narrow">
+        <nge-table-range-demo
+          [config]="pinnedConfig"
+          [maxHeight]="360"
+          [rows]="pinnedRows"
+          [(state)]="pinnedState"
+        />
+      </div>
+    </section>
+
+    <!-- 8 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>8. A block follows the view; its corners follow their records</h4>
+      <p class="story-description">
+        Drag out a block, then sort. The descriptor's endpoints are row <strong>ids</strong>, so
+        they follow their records — but which rows lie <em>between</em> them is resolved against the
+        current sort order, so the block re-shapes rather than travelling intact.
+      </p>
+      <p class="story-description">
+        That is a deliberate reading of "the block the user dragged out", inherited from ARCH-250,
+        and it is the one AG Grid's coordinate-based ranges get wrong in the other direction —
+        theirs survive a scroll but not a sort. Note too what a filter does: a focus that is no
+        longer in the model matches nothing, while an anchor that is gone degenerates to the focus
+        alone rather than selecting from index zero.
+      </p>
+
+      <div class="controls">
+        <button
+          type="button"
+          (click)="sortExternally('amount', false)"
+          >Sort amount ↑</button
+        >
+        <button
+          type="button"
+          (click)="sortExternally('amount', true)"
+          >Sort amount ↓</button
+        >
+        <button
+          type="button"
+          (click)="clearSort()"
+          >Clear sort</button
+        >
+      </div>
+
+      <nge-table-range-demo
+        [config]="sortableConfig"
+        [rows]="sortableRows"
+        [(state)]="sortableState"
+      />
+
+      <div class="state-readout">
+        <h5>state.ngeRange.ranges</h5>
+        <pre>{{ sortableRangeJson() }}</pre>
+      </div>
+    </section>
+
+    <!-- 9 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>9. Exporting only the selected cells</h4>
+      <p class="story-description">
+        <strong>Two independent addons composing without importing each other.</strong> The export
+        seam takes a <code>cellPredicate</code> and has never heard of cell ranges; this addon
+        supplies one and has never heard of exporting. They meet on the table instance and nowhere
+        else — the same composition ARCH-251's CSV formatter is built on.
+      </p>
+
+      <div class="code-block">
+        <pre>table.readNgeExportData({{ "{" }} cellPredicate: range.predicate() {{ "}" }});</pre>
+      </div>
+
+      <p class="story-description">
+        Select a block, then export. A predicate-narrowed export is <strong>ragged</strong> by
+        design — a column with no selected cell simply contributes nothing to that row.
+      </p>
+
+      <div class="controls">
+        <button
+          type="button"
+          (click)="exportSelected()"
+          >Export selection only</button
+        >
+        <button
+          type="button"
+          (click)="exportEverything()"
+          >Export everything</button
+        >
+        <button
+          type="button"
+          (click)="clearExportResult()"
+          >Clear result</button
+        >
+      </div>
+
+      <nge-table-range-demo
+        #exportDemo
+        [config]="exportConfig"
+        [rows]="exportRows"
+        [(state)]="exportState"
+      />
+
+      <div class="state-readout">
+        <h5>{{ exportSummary() }}</h5>
+        @if (exportPreview()) {
+          <pre>{{ exportPreview() }}</pre>
+        }
+      </div>
+    </section>
+
+    <!-- 10 ───────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>10. Host-driven state — seed, persist, restore</h4>
+      <p class="story-description">
+        These three controls all write <strong>section 1's</strong> table from outside, with no
+        gesture at all — the other half of the controlled-state round trip, and the half a drag
+        never shows. The slice is plain JSON, so a user's selection persists and restores with the
+        rest of their view. Pushing state back in is <strong>silent</strong>: it emits no
+        <code>NgeTableEvent</code>, or restoring a saved view would replay as a burst of user
+        activity.
+      </p>
+      <p class="story-description">
+        ⚠️ <strong>The gesture anchor deliberately does not travel.</strong> It is scratch on the
+        bridge and never reaches state, so after a restore your next shift-click <em>starts</em> a
+        rectangle rather than extending the restored one. Reaching from a corner the user never
+        touched in this session is the alternative, and it is worse.
+      </p>
+
+      <div class="controls">
+        <button
+          type="button"
+          (click)="seedRange()"
+          >Seed a rectangle</button
+        >
+        <button
+          type="button"
+          (click)="saveView()"
+          >Save view</button
+        >
+        <button
+          type="button"
+          [disabled]="!savedView()"
+          (click)="restoreView()"
+          >Restore view</button
+        >
+      </div>
+
+      @if (savedView(); as saved) {
+        <div class="state-readout">
+          <h5>Saved payload</h5>
+          <pre>{{ saved }}</pre>
+        </div>
+      }
+    </section>
+  </div>
+</nge-storybook-review-container>

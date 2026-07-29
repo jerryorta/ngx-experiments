@@ -1,0 +1,183 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Cell Editors (Usage)</h2>
+    <p class="intro-text">
+      The table ships two editors of its own. They live behind a third entry point,
+      <code>&#64;nge/table/editors</code>, so the production barrel never reaches them —
+      most tables display rather than edit, and a dependency an editor needs must not become the
+      table's.
+    </p>
+    <p class="intro-text">
+      They are <strong>defaults, not fixtures</strong>: a <code>[ngeCell]</code> template for the
+      same column shadows whichever editor it named, so adopting one is never a decision you have to
+      unpick later.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. Naming an editor on a column</h4>
+      <p class="story-description">
+        <code>meta.ngeEdit.enabled</code> puts a column into the activation model;
+        <code>meta.ngeEdit.editor</code> says what to render while it is being edited. There is no
+        template to write and no directive to import.
+      </p>
+      <div class="code-block">
+        <pre>
+import {{ "{" }} NgeCellInputComponent {{ "}" }} from '&#64;nge/table/editors';
+
+const columns: NgeTableColumn&lt;Row&gt;[] = [
+  {{ "{" }}
+    accessorKey: 'name',
+    header: 'Name',
+    id: 'name',
+    meta: {{ "{" }} ngeEdit: {{ "{" }} editor: NgeCellInputComponent, enabled: true {{ "}" }} {{
+            "}"
+          }},
+  {{ "}" }},
+];</pre>
+      </div>
+
+      <nge-table-editors-demo
+        [(rows)]="basicRows"
+        [(state)]="basicState"
+      />
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. Configuring the editor a column named</h4>
+      <p class="story-description">
+        <code>editorInputs</code> carries whatever inputs that editor declares — the number mode, a
+        label better than the column id. It exists so an option is never a reason to fall back to
+        writing a template.
+      </p>
+      <p class="story-description">
+        ⚠️ Only inputs the component actually declares are applied: the adapter filters by the
+        component's reflected input names, so a misspelled key is dropped in silence. Check the
+        rendered control rather than the console when an option seems to do nothing.
+      </p>
+      <div class="code-block">
+        <pre>
+meta: {{ "{" }}
+  ngeEdit: {{ "{" }}
+    editor: NgeCellInputComponent,
+    editorInputs: {{ "{" }} label: 'Edit quantity', type: 'number' {{ "}" }},
+    enabled: true,
+  {{ "}" }},
+{{ "}" }}</pre>
+      </div>
+      <p class="story-description">
+        The <strong>Quantity</strong> column of every table on this page is declared exactly that
+        way. It commits a <code>number</code> rather than its text, so a host applying the patch
+        writes the type its row already had.
+      </p>
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. The boolean column</h4>
+      <p class="story-description">
+        <code>&lt;nge-cell-checkbox&gt;</code> is a focusable control with a real tab stop —
+        deliberately <em>not</em> ARCH-268's selection checkbox, which is a pointer affordance
+        (<code>tabindex="-1"</code>, <code>aria-hidden</code>) announced by the row it sits in.
+      </p>
+      <p class="story-description">
+        Pair it with <code>alwaysLive: true</code>. Activation exists to avoid building controls
+        nobody engaged, and a checkbox is the cheapest control there is, so the saving is nil while
+        the extra click is real.
+      </p>
+      <div class="code-block">
+        <pre>
+import {{ "{" }} NgeCellCheckboxComponent {{ "}" }} from '&#64;nge/table/editors';
+
+meta: {{ "{" }}
+  ngeEdit: {{ "{" }}
+    alwaysLive: true,
+    editor: NgeCellCheckboxComponent,
+    editorInputs: {{ "{" }} label: 'Active' {{ "}" }},
+    enabled: true,
+  {{ "}" }},
+{{ "}" }}</pre>
+      </div>
+
+      <nge-table-editors-demo
+        [(rows)]="booleanRows"
+        [(state)]="booleanState"
+      />
+    </section>
+
+    <!-- 4 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>4. Applying the edit — still the host's job</h4>
+      <p class="story-description">
+        Owning the editors changes nothing about the data boundary. A commit announces an
+        <code>edit-intent</code> carrying the same <code>NgeCellPatch</code> shape
+        <code>fill-intent</code> uses, and the table's own <code>data</code> is unchanged until the
+        host hands new rows back in. Ignoring the event means the edit does not happen — correct for
+        a host that has not opted into editing.
+      </p>
+      <div class="code-block">
+        <pre>
+onEvent(event: NgeTableEvent&lt;Row&gt;): void {{ "{" }}
+  if (event.kind !== 'edit-intent') return;
+  this.rows.update(rows =&gt; applyPatches(rows, event.cells));   // the host's own write
+{{ "}" }}</pre>
+      </div>
+      <p class="story-description">
+        ⚠️ <code>config.getRowId</code> stops being optional the moment a column sets
+        <code>meta.ngeEdit.enabled</code>. An edit is id-keyed scratch state, so without one a sort
+        or a re-fetch would land the patch on a different record; the library throws in dev rather
+        than degrade.
+      </p>
+    </section>
+
+    <!-- 5 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>5. Replacing an editor with your own control</h4>
+      <p class="story-description">
+        Project a <code>[ngeCell]</code> template for the column and it wins. The store consults
+        the projected templates first and only then the editor a column named, so a domain dropping
+        its own <code>cg-input</code> into a cell never has to remove the <code>meta</code> entry.
+      </p>
+      <div class="code-block">
+        <pre>
+&lt;nge-table [config]="config" [(state)]="state"&gt;
+  &lt;ng-template ngeCell="name" [ngeCellOf]="rows" let-cell&gt;
+    &#64;if (cell.isEditing()) {{ "{" }} &lt;cg-input [value]="cell.value" … /&gt; {{ "}" }}
+    &#64;else {{ "{" }} {{ "{" }}{{ "{" }} cell.value {{ "}" }}{{ "}" }} {{ "}" }}
+  &lt;/ng-template&gt;
+&lt;/nge-table&gt;</pre>
+      </div>
+      <p class="story-description">
+        Below, <strong>Name</strong> is shadowed by a read-only uppercased template while every
+        other editable column still uses the library's editor.
+      </p>
+
+      <nge-table-editors-demo
+        [overrideName]="true"
+        [(rows)]="overrideRows"
+        [(state)]="overrideState"
+      />
+    </section>
+
+    <!-- 6 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>6. What these editors deliberately are not</h4>
+      <p class="story-description">
+        <strong>A cell editor is not a form control</strong>, and that is what makes it cheap: no
+        <code>ControlValueAccessor</code>, no <code>NgControl</code>, no label element, no
+        validation, no touched or dirty tracking. There is no form. That per-instance saving is the
+        justification for the table owning an editor rather than reaching for a design-library
+        input.
+      </p>
+      <p class="story-description">
+        They also hold no draft. The field's own DOM value is the draft, which is safe because
+        activation bounds the element's life — and the checkbox commits on toggle for the same
+        reason, since an always-live column has no such bound.
+      </p>
+    </section>
+  </div>
+</nge-storybook-review-container>

@@ -1,0 +1,170 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Cell Editors (Theming)</h2>
+    <p class="intro-text">
+      The editors theme through <code>--nge-table-editor-*</code>, declared with literal light-mode
+      defaults in <code>_table-tokens.scss</code> and paired with a literal fallback at every use
+      site — so a field renders correctly with no theme applied at all.
+    </p>
+    <p class="intro-text">
+      ⚠️ <strong>Most of this needs a gesture.</strong> Activation is the default, so a field only
+      exists once a cell is engaged: click into <strong>Name</strong>, <strong>Quantity</strong> or
+      <strong>Description</strong> in each section to see the tokens it declares. The
+      <strong>Active</strong> column is always live, so its box is visible at rest.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. The library defaults</h4>
+      <p class="story-description">
+        No wrapper class, nothing overridden. This is what a consumer sees before they have said
+        anything — the property the whole token contract exists to preserve.
+      </p>
+
+      <nge-table-editors-demo
+        [(rows)]="defaultRows"
+        [(state)]="defaultState"
+      />
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. Surface, content and border</h4>
+      <p class="story-description">
+        A field has to read as <em>sitting on</em> the row rather than as part of it, which is why
+        the editors carry a surface token of their own instead of inheriting
+        <code>--nge-table-surface</code>: on a themed table the two routinely resolve to the same
+        colour, and a field that inherited it would have only its border to say it is a control.
+      </p>
+      <div class="code-block">
+        <pre>
+.my-table {{ "{" }}
+  --nge-table-editor-surface: #fff8e1;
+  --nge-table-editor-on-surface: #4a3800;
+  --nge-table-editor-border-color: #c8a415;
+{{ "}" }}</pre>
+      </div>
+
+      <div class="theme-amber">
+        <nge-table-editors-demo
+          [(rows)]="surfaceRows"
+          [(state)]="surfaceState"
+        />
+      </div>
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. The accent and the focus border</h4>
+      <p class="story-description">
+        <code>--nge-table-editor-accent</code> tints the native checkbox through
+        <code>accent-color</code>, which is what keeps the box keyboard-, screen-reader- and
+        high-contrast-correct for free. It is separate from
+        <code>--nge-table-selection-accent</code> on purpose: ARCH-268's selection box and an
+        editing box mean different things, and a theme may well want to say so.
+      </p>
+      <p class="story-description">
+        ⚠️ <strong>Click into a field to see the rest.</strong>
+        <code>--nge-table-editor-border-color-focus</code> only applies while the field holds
+        focus, and the ring inside it is <code>--nge-table-focus-ring-color</code> — reused rather
+        than duplicated, and drawn <strong>inset</strong> because
+        <code>.nge-table__cell</code> carries <code>overflow: hidden</code> and would clip an outer
+        one away.
+      </p>
+      <div class="code-block">
+        <pre>
+.my-table {{ "{" }}
+  --nge-table-editor-accent: #8e24aa;
+  --nge-table-editor-border-color-focus: #8e24aa;
+  --nge-table-focus-ring-color: #8e24aa;
+{{ "}" }}</pre>
+      </div>
+
+      <div class="theme-violet">
+        <nge-table-editors-demo
+          [(rows)]="accentRows"
+          [(state)]="accentState"
+        />
+      </div>
+    </section>
+
+    <!-- 4 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>4. Geometry</h4>
+      <p class="story-description">
+        Radius, border width, horizontal padding and the checkbox's size. A field's
+        <em>height</em> is deliberately not a token: it is derived from
+        <code>--nge-table-row-height</code>, so a table at any density gets a field that matches it
+        with no second number to keep in step.
+      </p>
+      <div class="code-block">
+        <pre>
+.my-table {{ "{" }}
+  --nge-table-editor-radius: 0;
+  --nge-table-editor-border-width: 2px;
+  --nge-table-editor-padding-x: 12px;
+  --nge-table-editor-control-size: 20px;
+{{ "}" }}</pre>
+      </div>
+
+      <div class="theme-square">
+        <nge-table-editors-demo
+          [(rows)]="geometryRows"
+          [(state)]="geometryState"
+        />
+      </div>
+    </section>
+
+    <!-- 5 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>5. A dark section — the shape a domain bridge takes</h4>
+      <p class="story-description">
+        All ten domain themes bridge five of these tokens onto their own variables (ARCH-277's
+        arrangement, extended in ARCH-293): surface, content, border, focus border and accent.
+        Geometry and type size are left alone, for the reason every bridge leaves them alone — a
+        bridge entry that teaches a contract the table does not honour is worse than no entry.
+      </p>
+      <p class="story-description">
+        ⚠️ Restate every surface rather than letting any inherit. Click into a field: a field left
+        on the light default is a white rectangle punched through a dark table, and it is the exact
+        failure a missed pinned surface produces.
+      </p>
+      <div class="code-block">
+        <pre>
+.cg-professional-dark {{ "{" }}
+  --nge-table-editor-surface: var(--cg-surface-container);
+  --nge-table-editor-on-surface: var(--cg-on-surface);
+  --nge-table-editor-border-color: var(--cg-outline);
+  --nge-table-editor-border-color-focus: var(--cg-secondary);
+  --nge-table-editor-accent: var(--cg-secondary);
+{{ "}" }}</pre>
+      </div>
+
+      <div class="theme-dark">
+        <nge-table-editors-demo
+          [(rows)]="darkRows"
+          [(state)]="darkState"
+        />
+      </div>
+    </section>
+
+    <!-- 6 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>6. Which of these a theme should set</h4>
+      <p class="story-description">
+        Sections 2, 3 and 5 are a theme's business — they carry colour, and a domain has an opinion
+        about colour. Section 4 is not: geometry belongs to whoever is laying the table out, and
+        <code>--nge-table-editor-font-size</code> defaults to <code>inherit</code> so a field
+        already matches the table's type without anyone saying so.
+      </p>
+      <p class="story-description">
+        The test that decides it, unchanged from ARCH-277:
+        <em>would a bridge entry here teach a contract the table does not honour?</em> If yes, the
+        token is not a theme's business.
+      </p>
+    </section>
+  </div>
+</nge-storybook-review-container>
