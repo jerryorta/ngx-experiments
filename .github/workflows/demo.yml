@@ -66,7 +66,9 @@ jobs:
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_STORYBOOK }}
+          # Project-scoped service account shared with storybook.yml — see the note
+          # there. One account covers every hosting target in gigasoft-svc-prd.
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GIGASOFT_SVC_PRD }}
           projectId: gigasoft-svc-prd
           target: demo
           channelId: ${{ github.event_name == 'push' && 'live' || '' }}
