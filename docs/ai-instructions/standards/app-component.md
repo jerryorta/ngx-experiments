@@ -18,7 +18,7 @@ Required `host` config — first class MUST equal the `selector`, then `dlc-glob
 
 ```ts
 @Component({
-  animations: [fadeInAnimation],            // from @gigasoftware/ui-design-library-deprecated
+  animations: [fadeInAnimation],            // from @nge/ui-design-library-deprecated
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[@fadeInAnimation]': '', class: 're-my-page dlc-global-mobile-page' },
 })

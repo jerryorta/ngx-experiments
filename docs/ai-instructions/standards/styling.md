@@ -8,15 +8,15 @@ New components theme via their OWN `--<prefix>-*` CSS-variable tokens with liter
 - Prefer Tailwind token refs in the template over SCSS:
 
 ```html
-<span class="text-[var(--giga-calendar-primary,#2563eb)]">…</span>
-<div class="bg-[var(--giga-calendar-surface-container,#f3f4f6)]">…</div>
+<span class="text-[var(--nge-calendar-primary,#2563eb)]">…</span>
+<div class="bg-[var(--nge-calendar-surface-container,#f3f4f6)]">…</div>
 ```
 
 - Use SCSS only for: defining override tokens, pseudo-elements, or selectors Tailwind can't express:
 
 ```scss
-.giga-calendar { --giga-calendar-header-color: var(--giga-calendar-on-surface-variant, #475569); }
-.giga-calendar::before { background-color: var(--giga-calendar-primary, #2563eb); }
+.nge-calendar { --nge-calendar-header-color: var(--nge-calendar-on-surface-variant, #475569); }
+.nge-calendar::before { background-color: var(--nge-calendar-primary, #2563eb); }
 ```
 
 - Always pair a token with a literal fallback: `var(--<prefix>-token, <literal>)`.

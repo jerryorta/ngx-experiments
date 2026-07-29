@@ -1,6 +1,6 @@
 # Refactoring Procedures
 
-This document contains standardized procedures for refactoring Angular code in the Gigasoftware workspace.
+This document contains standardized procedures for refactoring Angular code in the Ngesoftware workspace.
 
 ## Inject Refactoring
 
@@ -105,17 +105,17 @@ private parentService = inject(SomeService, { skipSelf: true });
 private apiUrl = inject(API_URL);
 ```
 
-### GigaFirebaseConnectionService Pattern
+### NgeFirebaseConnectionService Pattern
 
 Special pattern for Firebase connection services:
 
 ```typescript
 // After refactoring
-export class MyFirebaseService extends ComponentStore<MyState> implements GigaFirebaseConnectionService {
+export class MyFirebaseService extends ComponentStore<MyState> implements NgeFirebaseConnectionService {
   private store = inject(Store);
-  private firestoreService = inject(GigaFirestoreService);
+  private firestoreService = inject(NgeFirestoreService);
   
-  connection = new GigaServiceConnector(this, this.store);
+  connection = new NgeServiceConnector(this, this.store);
 
   constructor() {
     super(initialState);

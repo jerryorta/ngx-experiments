@@ -4,7 +4,7 @@ Task-time how-tos in this directory (opened by intent, never auto-injected — s
 
 - **[angular-generator.instructions.md](./angular-generator.instructions.md)** — scaffold components / services / pipes / directives via Nx generators
 - **[angular-file-rename.instructions.md](./angular-file-rename.instructions.md)** — safe file renames (+ reference updates)
-- **[angular-inject.instructions.md](./angular-inject.instructions.md)** — convert constructor DI → `inject()` (incl. `GigaFirebaseConnectionService` services)
+- **[angular-inject.instructions.md](./angular-inject.instructions.md)** — convert constructor DI → `inject()` (incl. `NgeFirebaseConnectionService` services)
 - **[angular-signals.instructions.md](./angular-signals.instructions.md)** — convert `@Input()`/`@Output()` → signal `input()`/`output()`
 - **[ngrx-mutation-flow.instructions.md](./ngrx-mutation-flow.instructions.md)** — add an NgRx mutation method (facade recipe)
 - **[query-engine-service-setup.instructions.md](./query-engine-service-setup.instructions.md)** — Firestore sub-collection query-engine service setup

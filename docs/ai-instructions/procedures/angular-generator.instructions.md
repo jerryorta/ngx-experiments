@@ -296,7 +296,7 @@ export class [ComponentName]Component {
 **Page Components** (in `/pages/` directories):
 
 ```typescript
-import { fadeInAnimation } from '@gigasoftware/ui-design-library-deprecated';
+import { fadeInAnimation } from '@nge/ui-design-library-deprecated';
 
 @Component({
   animations: [fadeInAnimation],

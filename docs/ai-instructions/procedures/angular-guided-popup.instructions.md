@@ -51,7 +51,7 @@ add tooltip guide to [selector]
 
 ```typescript
 import { CdkOverlayOrigin } from '@angular/cdk/overlay';
-import { DlcGuidedPopupComponent } from '@gigasoftware/shared/ui-design-library-deprecated';
+import { DlcGuidedPopupComponent } from '@nge/shared/ui-design-library-deprecated';
 // OR for relative imports within ui-design-library-deprecated:
 import { DlcGuidedPopupComponent } from '../../popup/dlc-guided-popup/dlc-guided-popup.component';
 ```
@@ -145,7 +145,7 @@ onUserAction(): void {
 ```typescript
 import { CdkOverlayOrigin } from '@angular/cdk/overlay';
 import { ChangeDetectionStrategy, Component, signal, ViewEncapsulation } from '@angular/core';
-import { DlcGuidedPopupComponent } from '@gigasoftware/shared/ui-design-library-deprecated';
+import { DlcGuidedPopupComponent } from '@nge/shared/ui-design-library-deprecated';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,

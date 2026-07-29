@@ -121,7 +121,7 @@
       "fileGlob": "*.scss",
       "severity": "warn",
       "note": "Also applies to the Tailwind arbitrary-value syntax in templates, e.g. text-(--mat-sys-primary). Legacy evolving-cognition / real-estate apps and their theme libs are exempt. New components must not depend on Material's --mat-sys-* tokens. See docs/ai/CONSTRAINTS.md § Angular Material.",
-      "fix": "Replace with var(--<prefix>-token, <literal>) — an own-namespace token with a literal fallback (ref libs/shared/calendar theme/_giga-calendar-tokens.scss)."
+      "fix": "Replace with var(--<prefix>-token, <literal>) — an own-namespace token with a literal fallback (ref libs/shared/calendar theme/_nge-calendar-tokens.scss)."
     },
     {
       "id": "mat-component-selector",

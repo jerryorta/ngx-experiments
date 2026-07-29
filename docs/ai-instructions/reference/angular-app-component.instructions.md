@@ -8,7 +8,7 @@ applyTo: 'apps/*/src/app/**/*.component.ts,apps/*/src/app/**/*.component.html'
 
 ## Overview
 
-Components in `apps/` are **wrapper (page) components**. They should contain minimal logic and delegate to library components from `@gigasoftware/ui-design-library-deprecated` or `@gigasoftware/store`. Unless explicitly instructed otherwise, always build app components as wrappers.
+Components in `apps/` are **wrapper (page) components**. They should contain minimal logic and delegate to library components from `@nge/ui-design-library-deprecated` or `@nge/store`. Unless explicitly instructed otherwise, always build app components as wrappers.
 
 ## Full Example
 
@@ -20,7 +20,7 @@ import {
   DlcHeaderBarComponent,
   DlcMobilePageContentComponent,
   fadeInAnimation,
-} from '@gigasoftware/ui-design-library-deprecated';
+} from '@nge/ui-design-library-deprecated';
 import { Store } from '@ngrx/store';
 
 @Component({
@@ -68,7 +68,7 @@ export class MyPageComponent {
 1. **Wrapper by default** — App components wrap library components. Keep logic in the store or library components, not in the page.
 2. **Host class must match selector** — The first class in `host.class` must be the component's `selector` value.
 3. **Always include `dlc-global-mobile-page`** — This class provides the standard page layout.
-4. **Always include `fadeInAnimation`** — Import from `@gigasoftware/ui-design-library-deprecated` and bind via `'[@fadeInAnimation]': ''`.
+4. **Always include `fadeInAnimation`** — Import from `@nge/ui-design-library-deprecated` and bind via `'[@fadeInAnimation]': ''`.
 5. **Use `inject()` for DI** — Never use constructor injection.
 6. **Use new control flow** — `@if`, `@for`, `@switch` instead of `*ngIf`, `*ngFor`, `[ngSwitch]`.
 7. **Prefer Tailwind CSS** — Use Tailwind utility classes over custom SCSS where possible.

@@ -274,34 +274,34 @@ export class MyComponent {
 }
 ```
 
-## GigaFirebaseConnectionService Services (ComponentStore-based)
+## NgeFirebaseConnectionService Services (ComponentStore-based)
 
-Services implementing `GigaFirebaseConnectionService` (typically extending `ComponentStore` with Firebase connection management) have extra conversion concerns beyond the standard procedure:
+Services implementing `NgeFirebaseConnectionService` (typically extending `ComponentStore` with Firebase connection management) have extra conversion concerns beyond the standard procedure:
 
 1. **Update imports** — add `inject`, change type imports to value imports
 2. **Replace constructor injection** with `inject()` class properties
-3. **`GigaServiceConnector` moves to a property initializer** (it needs the injected store): `connection: GigaServiceConnector = new GigaServiceConnector(this, this.store);`
+3. **`NgeServiceConnector` moves to a property initializer** (it needs the injected store): `connection: NgeServiceConnector = new NgeServiceConnector(this, this.store);`
 4. **Clean up the constructor** — remove the `const that = this` pattern; use `this` directly in configuration objects
 5. **Simplify `onDisconnect()`** — remove the unused `user` parameter; null-check the connection
 
 ```typescript
 // Before
-export class MyFirebaseService extends ComponentStore<MyState> implements GigaFirebaseConnectionService {
+export class MyFirebaseService extends ComponentStore<MyState> implements NgeFirebaseConnectionService {
   constructor(
     private store: Store,
-    private customFirestoreService: GigaFirestoreService
+    private customFirestoreService: NgeFirestoreService
   ) {
     super(initialState);
-    this.connection = new GigaServiceConnector(this, this.store);
+    this.connection = new NgeServiceConnector(this, this.store);
 
     const that = this;
-    this._queryService = new GigaFirestoreCollectionQuery<T>({
+    this._queryService = new NgeFirestoreCollectionQuery<T>({
       deleteManyUpdater: (ids: string[]) => that.deleteMany(ids),
       // ... other config
     }, store, customFirestoreService);
   }
 
-  onDisconnect(user: GigaAccountState) {
+  onDisconnect(user: NgeAccountState) {
     if (this.someCondition && user.uid) {
       this._isConnected$.next(false);
     }
@@ -311,16 +311,16 @@ export class MyFirebaseService extends ComponentStore<MyState> implements GigaFi
 }
 
 // After
-export class MyFirebaseService extends ComponentStore<MyState> implements GigaFirebaseConnectionService {
+export class MyFirebaseService extends ComponentStore<MyState> implements NgeFirebaseConnectionService {
   private store = inject(Store);
-  private customFirestoreService = inject(GigaFirestoreService);
+  private customFirestoreService = inject(NgeFirestoreService);
 
-  connection: GigaServiceConnector = new GigaServiceConnector(this, this.store);
+  connection: NgeServiceConnector = new NgeServiceConnector(this, this.store);
 
   constructor() {
     super(initialState);
 
-    this._queryService = new GigaFirestoreCollectionQuery<T>({
+    this._queryService = new NgeFirestoreCollectionQuery<T>({
       deleteManyUpdater: (ids: string[]) => this.deleteMany(ids),
       // ... other config
     }, this.store, this.customFirestoreService);

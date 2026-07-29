@@ -1,10 +1,10 @@
-# GigaChart Scatter — Production Implementation Instructions
+# NgeChart Scatter — Production Implementation Instructions
 
-**Purpose:** Everything needed to implement a production scatter/bubble chart with `@gigasoftware/charts` — data model, preset options, multi-series, legend selection, zoom/pan/brush gestures, theming, testing — **without reading the library source**.
+**Purpose:** Everything needed to implement a production scatter/bubble chart with `@nge/charts` — data model, preset options, multi-series, legend selection, zoom/pan/brush gestures, theming, testing — **without reading the library source**.
 
 **When to use:** Any app feature that renders a scatter or bubble chart: single-series, multi-series comparison (groups/categories on shared axes), interactive series selection, or zoom/pan exploration.
 
-**Canonical companion:** `docs/architecture/charts.md` (architecture, `--chart-*` token contract, layer authoring). This file is the consumer-side how-to; that file is the system reference.
+**Canonical companion:** `docs/architecture/charts.md` (architecture, `--nge-chart-*` token contract, layer authoring). This file is the consumer-side how-to; that file is the system reference.
 
 ---
 
@@ -13,11 +13,11 @@
 **Static / simple (no interactivity beyond tooltips):**
 
 ```ts
-import { createScatterChartConfig } from '@gigasoftware/charts';
+import { createScatterChartConfig } from '@nge/charts';
 
 readonly config = computed(() =>
   createScatterChartConfig({
-    data: this.points(),            // GigaScatterDataPoint[] from your store/facade
+    data: this.points(),            // NgeScatterDataPoint[] from your store/facade
     legend: { enabled: true },      // auto-generated from seriesId
     tooltip: { enabled: true },
     showXAxis: true,
@@ -31,17 +31,17 @@ readonly config = computed(() =>
 ```html
 <!-- REQUIRED: explicit-height wrapper — the chart fills 100% and collapses to 0 without one -->
 <div class="h-72">
-  <giga-chart [config]="config()" />
+  <nge-chart [config]="config()" />
 </div>
 ```
 
 **Interactive (series selection, zoom/pan/brush) — use the transform:**
 
 ```ts
-import { GigaScatterChartTransform } from '@gigasoftware/charts';
+import { NgeScatterChartTransform } from '@nge/charts';
 
 // Plain class, NO providers/DI — hold it as a component field
-readonly transform = new GigaScatterChartTransform({
+readonly transform = new NgeScatterChartTransform({
   data: this.points(),                                  // points carry seriesId
   gestures: { brushZoom: true, pan: true, zoom: true },
   tooltip: { enabled: true },
@@ -52,7 +52,7 @@ readonly transform = new GigaScatterChartTransform({
 
 ```html
 <div class="h-72">
-  <giga-chart
+  <nge-chart
     [config]="transform.config()"
     (legendItemClick)="transform.onLegendItemClick($event)"
     (chartGesture)="transform.onChartGesture($event)"
@@ -66,23 +66,23 @@ Data updates: `this.transform.setData(newPoints)` (e.g. from an `effect()` watch
 
 ## 1. Imports & exports
 
-All from the barrel `@gigasoftware/charts` (project `shared-charts`):
+All from the barrel `@nge/charts` (project `shared-charts`):
 
 | Export | Kind | Use |
 |---|---|---|
-| `GigaChartComponent` (`<giga-chart>`) | standalone component | the single chart host; input `config`, outputs `legendItemClick`, `chartGesture` |
-| `createScatterChartConfig(options)` | preset factory | builds a complete `GigaChartConfig` |
-| `GigaScatterChartTransform` | plain class | interaction semantics → derived config signal |
-| `GigaChartLegendComponent` (`<giga-chart-legend>`) | standalone component | standalone/custom-placement legend |
-| `GigaScatterDataPoint`, `ScatterChartPresetOptions`, `GigaScatterTransformOptions`, `GigaChartConfig`, `GigaChartGestureEvent`, `GigaChartGesturesConfig`, `GigaLegendItem`, `GigaChartLegendConfig` | types | as needed |
+| `NgeChartComponent` (`<nge-chart>`) | standalone component | the single chart host; input `config`, outputs `legendItemClick`, `chartGesture` |
+| `createScatterChartConfig(options)` | preset factory | builds a complete `NgeChartConfig` |
+| `NgeScatterChartTransform` | plain class | interaction semantics → derived config signal |
+| `NgeChartLegendComponent` (`<nge-chart-legend>`) | standalone component | standalone/custom-placement legend |
+| `NgeScatterDataPoint`, `ScatterChartPresetOptions`, `NgeScatterTransformOptions`, `NgeChartConfig`, `NgeChartGestureEvent`, `NgeChartGesturesConfig`, `NgeLegendItem`, `NgeChartLegendConfig` | types | as needed |
 | `extractScatterChartLegendItems(data, seriesColors?, themeColors?)` | fn | legend items for fully custom legends |
 
 ---
 
-## 2. Data model — `GigaScatterDataPoint`
+## 2. Data model — `NgeScatterDataPoint`
 
 ```ts
-interface GigaScatterDataPoint {
+interface NgeScatterDataPoint {
   x: number;            // REQUIRED — numeric only (linear scales)
   y: number;            // REQUIRED
   seriesId?: string;    // groups points into a named series (multi-series)
@@ -104,9 +104,9 @@ interface GigaScatterDataPoint {
 
 | Option | Type / default | Notes |
 |---|---|---|
-| `data` | `GigaScatterDataPoint[]` **required** | |
-| `seriesColors` | `string[]` | multi-series palette; cycles with modulo. Must be **browser-resolvable** colors (hex/rgb or `var(--chart-*)` — see §8) |
-| `legend` | `Partial<GigaChartLegendConfig>` | `{ enabled: true }` auto-generates one entry per unique `seriesId` (empty for single-series). Sub-options: `position` (`'bottom'`\|`'top'`\|`'left'`\|`'right'`, default bottom), `interactive` (default false → entries become buttons + `legendItemClick` fires), `swatchShape` (default `'circle'` for scatter), `items` (explicit override) |
+| `data` | `NgeScatterDataPoint[]` **required** | |
+| `seriesColors` | `string[]` | multi-series palette; cycles with modulo. Must be **browser-resolvable** colors (hex/rgb or `var(--nge-chart-*)` — see §8) |
+| `legend` | `Partial<NgeChartLegendConfig>` | `{ enabled: true }` auto-generates one entry per unique `seriesId` (empty for single-series). Sub-options: `position` (`'bottom'`\|`'top'`\|`'left'`\|`'right'`, default bottom), `interactive` (default false → entries become buttons + `legendItemClick` fires), `swatchShape` (default `'circle'` for scatter), `items` (explicit override) |
 | `tooltip` | see below / disabled | `{ enabled: true }` gives the default series-aware formatter |
 | `gestures` | `{ brushZoom?, pan?, zoom? }` / none | see §6 |
 | `animationMs` | `number` / `300` | enter/update/exit transition duration; `0` = instant (the transform manages this during gestures — don't set manually when using the transform) |
@@ -126,13 +126,13 @@ interface GigaScatterDataPoint {
 **Custom tooltip template** (projected, overrides the default bubble content):
 
 ```html
-<giga-chart [config]="config()">
-  <ng-template #gigaChartTooltip let-content>
+<nge-chart [config]="config()">
+  <ng-template #ngeChartTooltip let-content>
     <strong>{{ content?.label }}</strong>
     <span>{{ content?.value }}</span>
     <!-- content.extra.seriesId is set by the default formatter -->
   </ng-template>
-</giga-chart>
+</nge-chart>
 ```
 
 ---
@@ -151,14 +151,14 @@ data = [
 
 - Each series renders in a distinct palette color (resolution order in §2); the legend (when enabled) lists each series with a circle swatch; the default tooltip prefixes the series name.
 - Per-point `color`/`size` still override within a series (highlight one point, bubble-encode a third dimension).
-- Renders as keyed `<g class="giga-scatter-series" data-series-id="...">` groups with ONE Voronoi overlay across all series — hover always highlights the correct point.
+- Renders as keyed `<g class="nge-scatter-series" data-series-id="...">` groups with ONE Voronoi overlay across all series — hover always highlights the correct point.
 - Series order (and palette assignment) = first-seen order of `seriesId` in `data`.
 
 ---
 
-## 5. Interactivity — `GigaScatterChartTransform`
+## 5. Interactivity — `NgeScatterChartTransform`
 
-The production pattern for anything interactive. A **plain class** (no DI, no providers — same idiom as `ChartsTooltipCalc`); it owns interaction state and derives the config; the chart stays dumb. Signals inside, so it composes with any component.
+The production pattern for anything interactive. A **plain class** (no DI, no providers — same idiom as `NgeChartTooltipCalc`); it owns interaction state and derives the config; the chart stays dumb. Signals inside, so it composes with any component.
 
 **Constructor options** = ALL preset options (§3) **plus**:
 
@@ -173,8 +173,8 @@ The production pattern for anything interactive. A **plain class** (no DI, no pr
 
 | Member | Purpose |
 |---|---|
-| `config: Signal<GigaChartConfig>` | bind: `[config]="transform.config()"` |
-| `legendItems: Signal<GigaLegendItem[]>` | selection-stamped items for an EXTERNAL legend; populated even when the internal legend is disabled |
+| `config: Signal<NgeChartConfig>` | bind: `[config]="transform.config()"` |
+| `legendItems: Signal<NgeLegendItem[]>` | selection-stamped items for an EXTERNAL legend; populated even when the internal legend is disabled |
 | `selectedSeries: Signal<string \| null>` | current selection (for status text etc.) |
 | `onLegendItemClick(item)` | wire to `(legendItemClick)` — toggles selection (click again = clear) |
 | `onChartGesture(event)` | wire to `(chartGesture)` — pan/zoom/brush/reset math |
@@ -183,7 +183,7 @@ The production pattern for anything interactive. A **plain class** (no DI, no pr
 | `updateOptions(partial)` | merge any preset/transform options (for option-driven consumers: Storybook controls, app filter panels) |
 | `setXDomain([min,max] \| null)` / `setYDomain(...)` / `resetZoom()` | programmatic axis zoom (null/reset = data-driven domains) |
 
-**Selection semantics:** clicking a legend entry keeps that series at full prominence and fades every other series (points → `fadedPointOpacity` via per-point `opacity`; legend entries → `fadedLegendOpacity` + `selected`/aria-pressed). Fading uses **opacity, never color math** — series colors are often unresolved `var(--chart-*)` strings that JS cannot derive a "faded" version of. Source data is never mutated.
+**Selection semantics:** clicking a legend entry keeps that series at full prominence and fades every other series (points → `fadedPointOpacity` via per-point `opacity`; legend entries → `fadedLegendOpacity` + `selected`/aria-pressed). Fading uses **opacity, never color math** — series colors are often unresolved `var(--nge-chart-*)` strings that JS cannot derive a "faded" version of. Source data is never mutated.
 
 **Feeding data from your store:** the transform is chart-interaction state, not app state. Keep domain data in your NgRx store/facade (or component signalStore) and push it in:
 
@@ -209,53 +209,53 @@ Enable via `gestures` (preset or transform options) and wire `(chartGesture)`:
 Notes:
 - **Marks are clipped to the plot area automatically** (base-layout `clipPath`) — zoomed/panned points never spill over axes or margins.
 - During continuous gestures the transform renders with `animationMs: 0` (no smearing); brush-zoom, reset, and selection changes restore the 300ms transitions.
-- Events are **stateless** (`GigaChartGestureEvent` carries current domains + data-space deltas/extents) — if you skip the transform, you can consume `(chartGesture)` yourself with pure math; there is no hidden d3-zoom element state.
+- Events are **stateless** (`NgeChartGestureEvent` carries current domains + data-space deltas/extents) — if you skip the transform, you can consume `(chartGesture)` yourself with pure math; there is no hidden d3-zoom element state.
 - Touch/pinch is not implemented yet (the event union is designed to extend).
 
 ---
 
 ## 7. Legends — internal, external, fully custom
 
-**Internal (default):** `legend: { enabled: true }` — rendered by `<giga-chart>` at `position`; interactive when `interactive: true`.
+**Internal (default):** `legend: { enabled: true }` — rendered by `<nge-chart>` at `position`; interactive when `interactive: true`.
 
 **External / custom placement** (page header, side panel): suppress the internal one and drive the standalone component from the transform:
 
 ```ts
-transform = new GigaScatterChartTransform({ data, legend: { enabled: false }, ... });
+transform = new NgeScatterChartTransform({ data, legend: { enabled: false }, ... });
 ```
 
 ```html
 <div class="flex items-center justify-between">
   <h3>Market segments</h3>
-  <giga-chart-legend
+  <nge-chart-legend
     [items]="transform.legendItems()"
     [interactive]="true"
     swatchShape="circle"
     (itemClick)="transform.onLegendItemClick($event)"
   />
 </div>
-<div class="h-72"><giga-chart [config]="transform.config()" (chartGesture)="transform.onChartGesture($event)" /></div>
+<div class="h-72"><nge-chart [config]="transform.config()" (chartGesture)="transform.onChartGesture($event)" /></div>
 ```
 
-`<giga-chart-legend>` inputs: `items` (required), `orientation` (`'horizontal'` default | `'vertical'`), `interactive` (false), `swatchShape` (`'square'` default | `'circle'` | `'line'`). Output: `itemClick(GigaLegendItem)`.
+`<nge-chart-legend>` inputs: `items` (required), `orientation` (`'horizontal'` default | `'vertical'`), `interactive` (false), `swatchShape` (`'square'` default | `'circle'` | `'line'`). Output: `itemClick(NgeLegendItem)`.
 
-**Fully custom legend (build guideline):** consume `GigaLegendItem[]` — `{ id?, color, label, opacity?, selected? }` — render however you like (respect `opacity` for fade, `selected` for aria-pressed), and emit the clicked item back to `transform.onLegendItemClick`. Anything speaking this contract stays compatible with the transform.
+**Fully custom legend (build guideline):** consume `NgeLegendItem[]` — `{ id?, color, label, opacity?, selected? }` — render however you like (respect `opacity` for fade, `selected` for aria-pressed), and emit the clicked item back to `transform.onLegendItemClick`. Anything speaking this contract stays compatible with the transform.
 
 ---
 
 ## 8. Theming
 
-- Colors resolve through the domain-agnostic **`--chart-*` token contract** (defaults in the lib render correctly with no theme). Default series palette: `var(--chart-primary)`, `var(--chart-secondary)`, `var(--chart-tertiary)`, `var(--chart-error)`, `#4CAF50`, `#FF9800` — themed apps recolor series via their token bridge, not code.
+- Colors resolve through the domain-agnostic **`--nge-chart-*` token contract** (defaults in the lib render correctly with no theme). Default series palette: `var(--nge-chart-primary)`, `var(--nge-chart-secondary)`, `var(--nge-chart-tertiary)`, `var(--nge-chart-error)`, `#4CAF50`, `#FF9800` — themed apps recolor series via their token bridge, not code.
 - Per-persona bridges live in each domain's themes lib (`libs/media-workbench/themes/...`, `libs/concierge/themes/...`, `libs/cognition/themes/...`) — see `libs/shared/charts/AGENTS.md` for the live list. Real-estate has no bridge (its charts pass literal colors).
 - Theme overrides per chart: spread `theme.scatter.point` onto the preset's config — `{ ...createScatterChartConfig({...}), theme: { scatter: { point: { color: '#4CAF50', opacity: 0.5, strokeColor: '#2E7D32', strokeWidth: 2 } } } }`. Fields: `color`, `colors[]` (series palette), `opacity`, `radius`, `strokeColor`, `strokeWidth` (`hoverColor` exists but is not applied — hover keeps the series color and grows the radius).
-- **`var()` caveat:** point fill/stroke are applied as D3 *styles*, so `var(--chart-*)` values resolve in the chart's DOM context — but a `var()` string is NOT resolvable in JS. If you compute anything from a color (e.g. your own scale), pass resolved colors. `seriesColors` with `var(--chart-*)` entries is fine.
+- **`var()` caveat:** point fill/stroke are applied as D3 *styles*, so `var(--nge-chart-*)` values resolve in the chart's DOM context — but a `var()` string is NOT resolvable in JS. If you compute anything from a color (e.g. your own scale), pass resolved colors. `seriesColors` with `var(--nge-chart-*)` entries is fine.
 - No Angular Material anywhere (`--mat-sys-*` is banned; legacy EC/RE only).
 
 ---
 
 ## 9. Testing in a consumer app (Jest)
 
-Any project that renders `<giga-chart>` needs two shims (jsdom lacks the primitives):
+Any project that renders `<nge-chart>` needs two shims (jsdom lacks the primitives):
 
 1. **`ResizeObserver` stub** in the project's `test-setup.ts`:
    ```ts
@@ -264,16 +264,16 @@ Any project that renders `<giga-chart>` needs two shims (jsdom lacks the primiti
 2. **d3 is pure ESM** — the project's `jest.config` `transformIgnorePatterns` must transform: `d3-.*|internmap|delaunator|robust-predicates` (the last three are transitive deps of `d3-scale`/`d3-delaunay`).
 
 Assertion rules:
-- The SVG lives in a **shadow root** — `document.querySelector('giga-chart svg')` returns nothing. Reach it via `element.querySelector('.giga-chart-container').shadowRoot`.
+- The SVG lives in a **shadow root** — `document.querySelector('nge-chart svg')` returns nothing. Reach it via `element.querySelector('.nge-chart-container').shadowRoot`.
 - Geometry (`r`, `cx`, `opacity`) animates via d3 transitions — jsdom fake timers do NOT drive them; use real-timer waits (~400ms past `animationMs`) or set `animationMs: 0`.
 - Transform logic needs **no TestBed** — instantiate the class and assert on `transform.config()` / `legendItems()` directly (pure functions of state).
-- Legend clicks/aria: TestBed the standalone `GigaChartLegendComponent` with `fixture.componentRef.setInput(...)`.
+- Legend clicks/aria: TestBed the standalone `NgeChartLegendComponent` with `fixture.componentRef.setInput(...)`.
 
 ---
 
 ## 10. Production checklist & gotchas
 
-- [ ] `<giga-chart>` sits inside an **explicit-height** container (`h-64`/`h-72`/`height: 300px`) — it fills 100% and collapses to nothing otherwise.
+- [ ] `<nge-chart>` sits inside an **explicit-height** container (`h-64`/`h-72`/`height: 300px`) — it fills 100% and collapses to nothing otherwise.
 - [ ] Data is numeric `x`/`y` (no strings/dates — scatter scales are linear).
 - [ ] Multi-series data spans a shared x-range if series are meant to be compared (don't band series into separate x-regions).
 - [ ] `seriesColors` shorter than the series count is fine — it cycles, and the legend cycles identically.
@@ -286,6 +286,6 @@ Assertion rules:
 
 ## 11. Working references
 
-- **Live examples (Storybook, `Charts → GigaChart → Scatter Chart`):** usage Examples 1–11 (basics → multi-series → legend selection), interaction stories `MultiSeries`, `ExternalLegend`, `ZoomPan` — source under `libs/shared/charts/src/lib/giga-chart/stories/scatter-chart/`.
+- **Live examples (Storybook, `Charts → NgeChart → Scatter Chart`):** usage Examples 1–11 (basics → multi-series → legend selection), interaction stories `MultiSeries`, `ExternalLegend`, `ZoomPan` — source under `libs/shared/charts/src/lib/nge-chart/stories/scatter-chart/`.
 - **Production consumer:** RE property analytics — `libs/real-estate/ui/src/lib/google/mls-property-search/property-analytics/property-analytics.component.ts` (single-series scatters + composed trend-line layer + custom scaleFactory).
 - **Library internals** (only if extending the lib itself): `docs/architecture/charts.md`, then `libs/shared/charts/src/lib/{presets,transforms,layers/scatter,core}`.
