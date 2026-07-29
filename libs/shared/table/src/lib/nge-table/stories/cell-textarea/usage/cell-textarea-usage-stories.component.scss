@@ -1,0 +1,80 @@
+// Prose and table share `--nge-table-surface` / `--nge-table-on-surface`, so both
+// follow a domain theme that bridges `--nge-table-*` (ARCH-277) and both fall back
+// to the library's light-mode defaults under one that does not.
+.nge-table-cell-textarea-usage-stories {
+  display: block;
+  padding: 20px;
+  color: var(--nge-table-on-surface, #1d1b20);
+  background: var(--nge-table-surface, #ffffff);
+
+  .stories-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    margin-bottom: 8px;
+  }
+
+  // Declared at the host rather than inside `.story-section`, because this story
+  // uses both marks in its intro paragraph as well as in its sections.
+  code {
+    padding: 1px 4px;
+    border-radius: 3px;
+    background: var(--nge-table-surface-variant, #f5f5f5);
+    font-size: 12px;
+  }
+
+  kbd {
+    margin: 0 1px;
+    padding: 1px 5px;
+    border: 1px solid var(--nge-table-border-color, #e0e0e0);
+    border-radius: 3px;
+    background: var(--nge-table-surface-variant, #f5f5f5);
+    font-family: inherit;
+    font-size: 12px;
+  }
+
+  .intro-text {
+    margin-bottom: 32px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 16px;
+  }
+
+  .story-section {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+
+    h4 {
+      margin-bottom: 8px;
+      color: var(--nge-table-on-surface, #1d1b20);
+    }
+
+    .story-description {
+      margin-bottom: 16px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 14px;
+
+      &:is(ol, ul) {
+        padding-left: 20px;
+      }
+
+      li {
+        margin-bottom: 6px;
+      }
+    }
+
+    // A `pre` carrying the class directly rather than wrapping one, since the
+    // snippets are plain text with no highlighting to hang a wrapper on.
+    .code-block {
+      overflow-x: auto;
+      margin: 0 0 16px;
+      padding: 12px 16px;
+      border-radius: 6px;
+      background: var(--nge-table-surface-variant, #f5f5f5);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+  }
+}

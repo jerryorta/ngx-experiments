@@ -1,0 +1,234 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Cell Range Selection (Theming)</h2>
+    <p class="intro-text">
+      Four tokens, each with a literal fallback at its use site. The addon adds nothing to core's
+      <code>_table-tokens.scss</code> — editing that partial would be a core edit, and the point of
+      this story's feature is that an addon needs none. Every section below is the
+      <strong>same table with the same rectangle</strong> under a different wrapper class, which is
+      exactly what a consumer writes. <strong>There is no <code>config.theme</code>;</strong> a
+      table themes through CSS custom properties alone, so this story's substance is its SCSS.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. The token contract</h4>
+      <p class="story-description">
+        Four properties, all read from CSS and all themeable from any selector with higher
+        specificity than <code>:root</code>.
+      </p>
+      <div class="code-block">
+        <pre>
+.my-theme {{ "{" }}
+  --nge-table-range-surface: #dbeafe;        // the cell tint (must be opaque)
+  --nge-table-range-outline: #93c5fd;        // the inset ring on every selected cell
+  --nge-table-range-on-surface: #0b2545;     // text on the tint
+  --nge-table-range-focus-outline: #1d4ed8;  // the heavier ring on the ACTIVE range's focus cell
+{{ "}" }}</pre>
+      </div>
+      <p class="story-description">
+        ⚠️ The namespace is <code>--nge-table-range-*</code>, not
+        <code>--nge-table-selection-*</code>: ARCH-268's row selection already owns that prefix,
+        and a cell range is not a row selection. The two can be lit at once on the same table, and
+        picking colours that survive the overlap is a theme's job.
+      </p>
+      <p class="story-description">
+        <strong>Opaque is a requirement, not a preference.</strong> A pinned lane is
+        <code>position: sticky</code> and scrolls over the center lane, so a translucent tint shows
+        the center cells sliding underneath. Section 6 is where that is visible.
+      </p>
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. Default — no theme applied</h4>
+      <p class="story-description">
+        The literal fallbacks, which is what a consumer sees before writing a single token. One
+        three-row block spanning <code>status</code> → <code>amount</code>; the cell at
+        <code>amount</code> on the last row is the <strong>focus</strong>, and carries the heavier
+        ring.
+      </p>
+      <nge-table-range-demo
+        [config]="baseConfig"
+        [maxHeight]="300"
+        [showControls]="false"
+        [rows]="themedRows"
+        [(state)]="defaultState"
+      />
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. Three palettes, one table</h4>
+      <p class="story-description">
+        Identical config, identical state, three wrapper classes. Theming a table changes nothing
+        about its configuration — which is the whole reason this story is SCSS rather than
+        TypeScript.
+      </p>
+
+      <div class="comparison-grid">
+        <div class="comparison-box">
+          <h5>default (blue)</h5>
+          <nge-table-range-demo
+            [config]="baseConfig"
+            [maxHeight]="300"
+            [showControls]="false"
+            [rows]="themedRows"
+            [(state)]="blueState"
+          />
+        </div>
+
+        <div class="comparison-box theme-mint">
+          <h5>theme-mint</h5>
+          <nge-table-range-demo
+            [config]="baseConfig"
+            [maxHeight]="300"
+            [showControls]="false"
+            [rows]="themedRows"
+            [(state)]="mintState"
+          />
+        </div>
+
+        <div class="comparison-box theme-violet">
+          <h5>theme-violet</h5>
+          <nge-table-range-demo
+            [config]="baseConfig"
+            [maxHeight]="300"
+            [showControls]="false"
+            [rows]="themedRows"
+            [(state)]="violetState"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section theme-subtle">
+      <h4>4. A subtle wash</h4>
+      <p class="story-description">
+        Dropping the outline to the tint's own colour leaves a wash rather than a grid of boxes —
+        appropriate when a range means "this is the region you are working in" rather than "you have
+        selected exactly these". The focus ring is deliberately left strong: it is the one mark that
+        carries information a user cannot infer from the block's shape.
+      </p>
+      <nge-table-range-demo
+        [config]="baseConfig"
+        [maxHeight]="300"
+        [showControls]="false"
+        [rows]="themedRows"
+        [(state)]="subtleState"
+      />
+    </section>
+
+    <!-- 5 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section theme-dark">
+      <h4>5. Dark</h4>
+      <p class="story-description">
+        The shape a domain's <code>--nge-table-*</code> bridge will take when a consumer adopts the
+        library. Every surface is restated rather than left to inherit — the pinned surfaces
+        especially, which are opaque by requirement, so a missed one shows up as a pale rectangle
+        punched through the table.
+      </p>
+      <nge-table-range-demo
+        [config]="baseConfig"
+        [maxHeight]="300"
+        [showControls]="false"
+        [rows]="themedRows"
+        [(state)]="darkState"
+      />
+    </section>
+
+    <!-- 6 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>6. A selected pinned column</h4>
+      <p class="story-description">
+        <code>name</code> is pinned left and the block starts inside it.
+        <strong>Scroll sideways</strong> — the table is deliberately narrowed here, because the
+        fixture's seven columns otherwise fit the panel and there would be nothing to scroll. The
+        tint must stay opaque or the center cells show through the sticky lane.
+      </p>
+      <p class="story-description">
+        No pinned-lane rule exists in the addon's stylesheet and adding one would be dead code: this
+        tint is on the <strong>cell</strong>, which paints over its own lane's background. ARCH-268
+        needed a sibling rule because its tint is on the <em>row</em>, which a lane paints over.
+        Should a theme make this tint translucent, the fix belongs on the token.
+      </p>
+      <div class="table-container table-container--narrow">
+        <nge-table-range-demo
+          [config]="pinnedConfig"
+          [maxHeight]="300"
+          [showControls]="false"
+          [rows]="themedRows"
+          [(state)]="pinnedState"
+        />
+      </div>
+    </section>
+
+    <!-- 7 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section theme-compact">
+      <h4>7. Density — and the trap underneath it</h4>
+      <p class="story-description">
+        This section's wrapper sets <code>--nge-table-row-height</code> and
+        <code>--nge-table-header-height</code>, and it works — because
+        <strong>its config omits both fields</strong>. Every other table on this page would ignore
+        the same two declarations entirely.
+      </p>
+      <div class="code-block">
+        <pre>
+// ❌ the factory fills rowHeight/headerHeight in, and &lt;nge-table&gt; writes them
+//    INLINE on the host — where they outrank any wrapper class, silently
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }} columns, data, getRowId {{ "}" }});
+
+// ✅ hand-authored, omitting them — the tokens reach the theme
+config: NgeTableConfig&lt;Row&gt; = {{ "{" }} columns, data, getRowId {{ "}" }};</pre>
+      </div>
+      <p class="story-description">
+        ⚠️ It does not compose with virtualization: the virtualizer positions rows it has not
+        rendered at <code>index × rowHeight</code>, so with windowing on the resolved height is
+        always written inline and row height is a config concern whatever the theme says. Cell
+        padding (<code>--nge-table-cell-padding-x</code> / <code>-y</code>) has no such caveat and
+        is the safer density knob.
+      </p>
+      <nge-table-range-demo
+        [config]="themableGeometryConfig"
+        [maxHeight]="300"
+        [showControls]="false"
+        [rows]="themedRows"
+        [(state)]="denseState"
+      />
+    </section>
+
+    <!-- 8 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>8. What is and is not themeable here</h4>
+      <p class="story-description">
+        The addon's four tokens sit in the library's first tier — read straight from CSS,
+        overridable from any wrapper class. The other tiers are worth knowing before reaching for a
+        token that will not answer.
+      </p>
+      <div class="code-block">
+        <pre>
+--nge-table-range-surface          ✅ read from CSS
+--nge-table-range-outline          ✅ read from CSS
+--nge-table-range-on-surface       ✅ read from CSS
+--nge-table-range-focus-outline    ✅ read from CSS
+
+--nge-table-row-height             ⚠️ only when the config omits `rowHeight` (section 7)
+--nge-table-header-height          ⚠️ only when the config omits `headerHeight`
+--nge-table-column-min-width       ❌ mirrored in TypeScript — the knob is NgeTableConfig
+--nge-table-selection-column-width ❌ mirrored in TypeScript — ARCH-268's injected column
+--nge-table-internal-*             ❌ never yours to set — runtime lane geometry</pre>
+      </div>
+      <p class="story-description">
+        One caveat worth stating plainly: because a selected cell is painted with
+        <code>box-shadow: inset</code> rather than a border, it adds no width. A real border would
+        add two pixels the lane arithmetic has not accounted for — column widths are the engine's
+        exact numbers and are user-owned once resizing is on — and every column downstream would
+        drift.
+      </p>
+    </section>
+  </div>
+</nge-storybook-review-container>

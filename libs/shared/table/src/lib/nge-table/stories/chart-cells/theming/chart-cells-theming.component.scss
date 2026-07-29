@@ -1,0 +1,190 @@
+// Everything below is nested under the component's own root wrapper, never
+// `:host`. The library is `ViewEncapsulation.None`, so an unnested rule would
+// leak into every other story in the Storybook bundle.
+//
+// `--nge-table-internal-*` never appears in any block here — that family is
+// live lane geometry the table writes onto its own host, unrelated to a shell
+// that never pins or resizes.
+.nge-table-chart-cells-theming {
+  display: block;
+  padding: 20px;
+  color: var(--nge-table-on-surface, #1d1b20);
+  background: var(--nge-table-surface, #ffffff);
+
+  .stories-container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    margin-bottom: 8px;
+  }
+
+  .intro-text {
+    margin-bottom: 32px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 16px;
+  }
+
+  .story-section {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+
+    h4 {
+      margin-bottom: 8px;
+      color: var(--nge-table-on-surface, #1d1b20);
+    }
+
+    .story-description {
+      margin-bottom: 16px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 14px;
+    }
+  }
+
+  .code-block {
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    background: var(--nge-table-surface-variant, #f5f5f5);
+    border-radius: 6px;
+
+    pre {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+  }
+
+  // The table owns its own scrolling, so the story only bounds its box. The
+  // height goes on `nge-table` itself, never this wrapper — the host is a flex
+  // column and a max-height here would simply be overflowed.
+  .table-container {
+    nge-table {
+      max-height: 340px;
+    }
+
+    // Section 2's ten-thousand-row example — tall enough that a fast scroll has
+    // real distance to cover before settling matters.
+    &--tall nge-table {
+      max-height: 480px;
+    }
+  }
+
+  // ─── The chart cell (ARCH-291) ──────────────────────────────────────────────
+  //
+  // ⚠️ Reads the identical `--nge-table-shell-*` pair `nge-cell-shell.component.scss`
+  // reads, on purpose: `<nge-chart>` debounces its render by 16ms, so nothing paints
+  // in the frame it mounts, and without this the shell → chart handoff flashes an
+  // unthemed box behind the incoming chart. Section 3's "and the chart" row below is
+  // this rule made visible — the same three theme classes tint both.
+  .chart-cell {
+    flex: 1 1 auto;
+    align-self: stretch;
+    min-width: 0;
+    // The shell's inset, matched exactly — `align-self: stretch` subtracts margin
+    // from the used height, so without this the settled content grows 12px
+    // taller than the shell it replaces the instant the scroll settles.
+    margin: var(--nge-table-shell-inset, 6px) 0;
+    background: var(--nge-table-shell-surface, var(--nge-table-surface-variant, #f5f5f5));
+    border-radius: var(--nge-table-shell-radius, 4px);
+  }
+
+  // ─── Standalone shell comparisons ───────────────────────────────────────────
+  //
+  // `<nge-cell-shell>` reads `align-self: stretch` from its own stylesheet, so
+  // a flex box with a definite height is all a comparison box needs to give it
+  // — the same contract a real `.nge-table__cell` provides. Sized to match the
+  // chart column above (220px × 96px) so the comparison is against the real
+  // proportions rather than an arbitrary box.
+  .comparison-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+
+    h5 {
+      margin: 0 0 8px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+  }
+
+  .shell-box {
+    display: flex;
+    width: 100%;
+    max-width: 220px;
+    height: 96px;
+  }
+
+  // Section 4 — no `.shell-box`, no defined height anywhere: a plain block a
+  // consumer might drop a skeleton row into. The dashed rule marks where an
+  // arbitrary layout ends, without itself constraining the shell.
+  .skeleton-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    > div {
+      padding: 12px;
+      border: 1px dashed var(--nge-table-border-color, #e0e0e0);
+      border-radius: 6px;
+    }
+
+    h5 {
+      margin: 0 0 8px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+  }
+
+  // ===========================================================================
+  // The themes themselves — each is the entire mechanism: a scoped selector
+  // re-declaring `--nge-table-shell-*` (and, for the dark section, the CORE
+  // surfaces the shell's own fallback chain reads through).
+  // ===========================================================================
+
+  // No `--nge-table-shell-surface` at all — only the CORE token most domain
+  // themes already bridge (ARCH-277). The shell follows it with zero
+  // shell-specific configuration, which is the "no eleventh bridge entry" claim.
+  .theme-inherited {
+    --nge-table-surface-variant: #dceeff;
+  }
+
+  .theme-tinted {
+    --nge-table-shell-surface: #fde8d0;
+    --nge-table-shell-radius: 12px;
+  }
+
+  .theme-roomy-shell {
+    --nge-table-shell-min-height: 48px;
+    --nge-table-shell-inset: 2px;
+  }
+
+  // The shape a domain's `--nge-table-*` bridge takes. Every surface is
+  // restated rather than inherited, the shell's own token included — a shell
+  // left on the light default would be a pale rectangle on a dark cell.
+  .theme-dark {
+    --nge-table-surface: #16161a;
+    --nge-table-surface-variant: #202027;
+    --nge-table-on-surface: #e8e8ed;
+    --nge-table-on-surface-variant: #9a9aa5;
+
+    --nge-table-shell-surface: #26262e;
+
+    // The section's own chrome follows the table, or the prose sits on white.
+    padding: 16px;
+    color: var(--nge-table-on-surface, #e8e8ed);
+    background: var(--nge-table-surface, #16161a);
+    border-radius: 8px;
+
+    h5,
+    .story-description {
+      color: inherit;
+    }
+  }
+}

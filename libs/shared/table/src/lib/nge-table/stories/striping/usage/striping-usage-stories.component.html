@@ -1,0 +1,173 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Zebra Striping (Usage)</h2>
+    <p class="intro-text">
+      One flag, one token, and no state. Striping is a display concern: it derives from the row's
+      position in the processed row model on every render, is never persisted, and never touches the
+      datum. No example below imports <code>&#64;tanstack/*</code>.
+    </p>
+
+    <section class="story-section">
+      <h4>1. Switching it on</h4>
+      <p class="story-description">
+        <code>enableStriping</code> is the whole API. Alternate rows take
+        <code>--nge-table-row-surface-alt</code>; the rest keep
+        <code>--nge-table-row-surface</code>, which is <code>transparent</code> by default so a row
+        shows the table surface through it.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }}
+  columns: NGE_TABLE_FIXTURE_COLUMNS,
+  data: rows,
+  enableStriping: true,
+  getRowId: row =&gt; row.id,
+{{ "}" }});</pre>
+      </div>
+      <div class="table-container">
+        <nge-table [config]="basicConfig" />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>2. The default is off</h4>
+      <p class="story-description">
+        Omit the flag and nothing about the rendering changes — the same table as before the feature
+        existed. Striping is a strong default to impose on a table that may already be carrying
+        marks of its own, so it is opt-in.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }}
+  columns: NGE_TABLE_FIXTURE_COLUMNS,
+  data: rows,
+  getRowId: row =&gt; row.id,
+{{ "}" }});
+// enableStriping defaults to false</pre>
+      </div>
+      <div class="table-container">
+        <nge-table [config]="plainConfig" />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>3. Where the parity comes from</h4>
+      <p class="story-description">
+        Nothing to configure here, but worth knowing, because it is what makes the two cases below
+        work. Parity is the row's index in the <strong>processed</strong> row model — the same model
+        the virtual window is cut from, after filtering and sorting. It reaches the DOM as a
+        <code>nge-table__row--alt</code> class.
+      </p>
+      <p class="story-description">
+        The two positions that are <em>not</em> used are the interesting ones.
+        <code>:nth-child</code> would read the DOM, which under virtualization holds a recycled
+        window, so the stripes would crawl as you scrolled. The engine's <code>row.index</code> is
+        the position in <code>config.data</code> and survives a sort unchanged, so the stripes would
+        scramble the first time a column was sorted.
+      </p>
+      <div class="code-block">
+        <pre>
+// Not something a consumer writes — this is what the library does with it.
+&lt;div class="nge-table__row nge-table__row--alt"&gt;…&lt;/div&gt;
+
+.nge-table__row--alt {{ "{" }}
+  --nge-table-internal-row-surface: var(--nge-table-row-surface-alt, #fafafa);
+{{ "}" }}</pre>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>4. With virtualization</h4>
+      <p class="story-description">
+        Compose the two flags and nothing else is needed. Parity is computed for the windowed rows
+        from the same model position, so a stripe stays with its row across a scroll of ten thousand
+        rows.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }}
+  columns: NGE_TABLE_FIXTURE_COLUMNS,
+  data: rows,              // 10,000
+  enableStriping: true,
+  enableVirtualization: true,
+  getRowId: row =&gt; row.id,
+{{ "}" }});</pre>
+      </div>
+      <div class="table-container table-container--tall">
+        <nge-table [config]="virtualConfig" />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>5. With pinned columns</h4>
+      <p class="story-description">
+        Also nothing to do. The pinned lanes read the row's resolved surface by inheritance, so a
+        striped row is one continuous band rather than three. Scroll sideways to check the seams.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }}
+  columns: NGE_TABLE_FIXTURE_COLUMNS,
+  data: rows,
+  enablePinning: true,
+  enableStriping: true,
+  getRowId: row =&gt; row.id,
+{{ "}" }});
+
+state = createNgeTableState({{ "{" }}
+  columnPinning: {{ "{" }} left: ["name"], right: ["owner"] {{ "}" }},
+{{ "}" }});</pre>
+      </div>
+      <div class="table-container table-container--narrow">
+        <nge-table
+          [config]="pinnedConfig"
+          [state]="pinnedState"
+        />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>6. Under a mark</h4>
+      <p class="story-description">
+        A stripe always loses. It never declares <code>background</code> — it swaps the value the
+        row's background already resolves through — so hover, selection, cell ranges, column
+        selection, highlighting and the fill region all read on an alternate row exactly as they do
+        on a plain one. Two rows are selected below, one striped and one not.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }}
+  columns: NGE_TABLE_FIXTURE_COLUMNS,
+  data: rows,
+  enableRowSelection: true,
+  enableStriping: true,
+  getRowId: row =&gt; row.id,
+{{ "}" }});</pre>
+      </div>
+      <div class="table-container">
+        <nge-table
+          [config]="selectableConfig"
+          [state]="selectedState"
+        />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>7. Theming the alternate surface</h4>
+      <p class="story-description">
+        One token, and all ten domain themes bridge it onto their own
+        <code>surface-container-low</code> tier. A consumer overriding it writes the same thing from
+        a wrapper class — the Theming story demonstrates it.
+      </p>
+      <div class="code-block">
+        <pre>
+.my-table-theme {{ "{" }}
+  --nge-table-row-surface-alt: #f4f6fb;
+{{ "}" }}</pre>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

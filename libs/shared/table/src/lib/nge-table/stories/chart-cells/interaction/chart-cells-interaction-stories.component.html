@@ -1,0 +1,222 @@
+@let sampled = sampledCounts();
+
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Chart Cells (Interaction)</h2>
+    <p class="intro-text">
+      <code>NgeCellContext.isSettled</code> is a signal every cell template receives, answering
+      whether the scroll has been quiet long enough to draw something expensive. It carries no slice
+      of <code>NgeTableState</code> — there is nothing here to persist or push in from outside, so
+      the sections below drive the signal directly and read it back live instead of showing a state
+      JSON.
+    </p>
+
+    <!-- EXAMPLE 1: The shell↔chart switch, driven by scroll -->
+    <section class="story-section">
+      <h4>1. The shell↔chart switch, driven by scroll</h4>
+      <p class="story-description">
+        <strong>Scroll the table below quickly, in both directions.</strong> While it is moving, the
+        <strong>Trend</strong> column fills with flat <code>&lt;nge-cell-shell&gt;</code> blocks;
+        about 150ms after you stop, they resolve into sparklines. The badge beside each one reads
+        <code>cell.isSettled()</code> directly — every cell's context closes over the same
+        underlying signal, so whichever one you look at reports the table's current state.
+      </p>
+      <div class="code-block">
+        <pre>
+&lt;ng-template ngeCell="series" [ngeCellOf]="rows" let-cell&gt;
+  &#64;if (cell.isSettled()) {{ "{" }}
+    &lt;div class="chart-cell"&gt;&lt;nge-chart [config]="chartFor(cell.row)" /&gt;&lt;/div&gt;
+  {{ "}" }} &#64;else {{ "{" }}
+    &lt;nge-cell-shell /&gt;
+  {{ "}" }}
+&lt;/ng-template&gt;</pre>
+      </div>
+      <p class="story-description">
+        <code>rowHeight: 96</code> and <code>enableVirtualization: true</code> are both
+        load-bearing: without a tall row the sparkline has no room, and without virtualization
+        <code>isSettled()</code> never has anything to settle FROM — see Example 2.
+      </p>
+      <div class="controls">
+        <button
+          type="button"
+          (click)="sampleCells(switchTable)"
+        >
+          Sample cells now
+        </button>
+      </div>
+      <p class="readout">
+        @if (sampled === null) {
+          Scroll, then sample — or sample right now to see every visible cell already resolved.
+        } @else {
+          <strong>{{ sampled.charts }}</strong> chart cells, <strong>{{ sampled.shells }}</strong>
+          shells, in the DOM at the moment you clicked.
+        }
+      </p>
+      <p class="readout">
+        @if (sampled !== null) {
+          Distinct chart configs built so far: <strong>{{ sampled.configsBuilt }}</strong
+          >, of {{ totalRowCount }} rows in the dataset. Scroll to the end and back to the start,
+          then sample again — the count does not move the second time a row you have already seen
+          scrolls back into view, because <code>chartFor</code> caches by row id rather than
+          rebuilding on every render.
+        }
+      </p>
+      <div
+        #switchTable
+        class="table-container table-container--tall"
+      >
+        <nge-table [config]="switchConfig">
+          <ng-template
+            ngeCell="series"
+            [ngeCellOf]="switchRows"
+            let-cell
+          >
+            @if (cell.isSettled()) {
+              <div class="chart-cell">
+                <nge-chart [config]="chartFor(cell.row)" />
+              </div>
+            } @else {
+              <nge-cell-shell />
+            }
+          </ng-template>
+
+          <!--
+            `cell-overlay` is ARCH-246's decoration seam, reused rather than
+            reinvented: it sits beside the value it belongs to, is pushed to the
+            cell's trailing edge by the library's own stylesheet, and needs no
+            positioning of its own.
+          -->
+          <ng-template
+            ngeTableSlot="cell-overlay"
+            ngeTableSlotColumn="series"
+            [ngeTableSlotOf]="switchRows"
+            let-cell
+          >
+            <span
+              class="settle-badge"
+              [class.settle-badge--settled]="cell.isSettled()"
+            >
+              {{ cell.isSettled() ? "chart" : "shell" }}
+            </span>
+          </ng-template>
+        </nge-table>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 2: Permanently settled without virtualization -->
+    <section class="story-section">
+      <h4>2. Without virtualization, the switch never trips</h4>
+      <p class="story-description">
+        Same column, same <code>chartFor</code>, same 96px rows — only
+        <code>enableVirtualization</code> is missing. The badge below reads
+        <strong>chart</strong> from first paint and stays that way regardless of how you scroll the
+        page around it. This is the honest degradation the signal's own doc comment describes: a
+        table that renders every row builds each cell once and never recycles it, so there is no
+        per-slide cost for a shell to save.
+      </p>
+      <div class="table-container">
+        <nge-table [config]="alwaysSettledConfig">
+          <ng-template
+            ngeCell="series"
+            [ngeCellOf]="alwaysSettledRows"
+            let-cell
+          >
+            @if (cell.isSettled()) {
+              <div class="chart-cell">
+                <nge-chart [config]="chartFor(cell.row)" />
+              </div>
+            } @else {
+              <nge-cell-shell />
+            }
+          </ng-template>
+
+          <ng-template
+            ngeTableSlot="cell-overlay"
+            ngeTableSlotColumn="series"
+            [ngeTableSlotOf]="alwaysSettledRows"
+            let-cell
+          >
+            <span
+              class="settle-badge"
+              [class.settle-badge--settled]="cell.isSettled()"
+            >
+              {{ cell.isSettled() ? "chart" : "shell" }}
+            </span>
+          </ng-template>
+        </nge-table>
+      </div>
+    </section>
+
+    <!-- EXAMPLE 3: Row height gives the chart its room -->
+    <section class="story-section">
+      <h4>3. Row height, not a wrapper, gives the chart its room</h4>
+      <p class="story-description">
+        <code>&lt;nge-chart&gt;</code> attaches a shadow root that injects
+        <code>:host, svg {{ "{" }} width: 100%; height: 100% {{ "}" }}</code
+        >. That percentage resolves against <code>.nge-table__cell</code>'s own height — which is
+        always definite (the row's <code>--nge-table-row-height</code>), never <code>auto</code> —
+        so a bare <code>&lt;nge-chart&gt;</code> with no wrapping <code>&lt;div&gt;</code> renders
+        at the cell's full height regardless of the cell's <code>align-items</code>. It does not
+        collapse in a table cell. What it needs is a <strong>tall enough row</strong>: both tables
+        below use the identical wrapped pattern from Example 1 and differ only in
+        <code>rowHeight</code>.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }} columns, data, getRowId {{ "}" }});
+// rowHeight omitted → falls to NGE_TABLE_DEFAULTS.rowHeight (40px)
+
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }} columns, data, getRowId, rowHeight: 96 {{
+            "}"
+          }});</pre>
+      </div>
+      <p class="story-description">
+        The wrapper is still worth keeping, for a different reason than avoiding a collapse: it is
+        the same <code>align-self: stretch</code> sizing <code>&lt;nge-cell-shell&gt;</code> uses
+        against this identical cell, so the shell and the chart share one sizing convention rather
+        than two. ⚠️ It is a <em>cell's</em> convention, though: it resolves because a cell is a
+        flex item on a row of definite height. A <code>row-detail</code> band has a declared height
+        too (<code>config.rowDetailHeight</code>) but is a block on its own line, so its content
+        reads <code>--nge-table-row-detail-height</code> rather than stretching — see
+        <strong>Row Detail Content</strong>.
+      </p>
+      <div class="split">
+        <div>
+          <h5>Default — 40px rows</h5>
+          <div class="table-container">
+            <nge-table [config]="shortRowConfig">
+              <ng-template
+                ngeCell="series"
+                [ngeCellOf]="shortRowRows"
+                let-cell
+              >
+                <div class="chart-cell">
+                  <nge-chart [config]="chartFor(cell.row)" />
+                </div>
+              </ng-template>
+            </nge-table>
+          </div>
+        </div>
+        <div>
+          <h5>rowHeight: 96</h5>
+          <div class="table-container">
+            <nge-table [config]="tallRowConfig">
+              <ng-template
+                ngeCell="series"
+                [ngeCellOf]="tallRowRows"
+                let-cell
+              >
+                <div class="chart-cell">
+                  <nge-chart [config]="chartFor(cell.row)" />
+                </div>
+              </ng-template>
+            </nge-table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

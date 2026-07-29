@@ -1,0 +1,79 @@
+// The story panel takes its surface from the same `--nge-table-surface` /
+// `--nge-table-on-surface` the table reads, so prose and table always move
+// together: under one of the ten domain themes that bridge `--nge-table-*`
+// (ARCH-277) both follow the toolbar, and under a theme that does not bridge them
+// both fall back to the library's light-mode defaults.
+.nge-table-cell-select-interaction-stories {
+  display: block;
+  padding: 20px;
+  color: var(--nge-table-on-surface, #1d1b20);
+  background: var(--nge-table-surface, #ffffff);
+
+  .stories-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    margin-bottom: 8px;
+  }
+
+  .intro-text {
+    margin-bottom: 32px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 16px;
+  }
+
+  // Section 2 needs a table narrow enough that the panel has an edge to overhang,
+  // and short enough that the last row is near the bottom of it. Bounding the
+  // WIDTH on a wrapper is fine — it is the HEIGHT that must go on `nge-table`
+  // itself, which the demo binds inline from its `maxHeight` input.
+  .narrow-container {
+    max-width: 560px;
+  }
+
+  .story-section {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+
+    h4 {
+      margin-bottom: 8px;
+      color: var(--nge-table-on-surface, #1d1b20);
+    }
+
+    // Applies to the `ul` and `ol` variants too — the keyboard and two-stage
+    // `esc` sections are ordered steps and read better as lists than as
+    // paragraphs of semicolons.
+    .story-description {
+      margin-bottom: 16px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 14px;
+
+      &:is(ol, ul) {
+        padding-left: 20px;
+      }
+
+      li {
+        margin-bottom: 6px;
+      }
+
+      code {
+        padding: 1px 4px;
+        border-radius: 3px;
+        background: var(--nge-table-surface-variant, #f5f5f5);
+        font-size: 12px;
+      }
+
+      kbd {
+        margin: 0 1px;
+        padding: 1px 5px;
+        border: 1px solid var(--nge-table-border-color, #e0e0e0);
+        border-radius: 3px;
+        background: var(--nge-table-surface-variant, #f5f5f5);
+        font-family: inherit;
+        font-size: 12px;
+      }
+    }
+  }
+}

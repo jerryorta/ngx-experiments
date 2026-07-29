@@ -1,0 +1,353 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Column Selection (Interaction)</h2>
+    <p class="intro-text">
+      Selecting a column is <strong>not a new concept</strong>: it writes the same
+      <code>ngeRange</code> slice a cell drag writes, as a rectangle whose row endpoints are
+      <code>null</code> — "every row of the view". <strong>Everything here is a gesture.</strong>
+      Hover a header to reveal the strip on its leading edge, click it to take the column,
+      shift-click another to take the span, cmd/ctrl-click to add or drop one. jsdom lays nothing
+      out, so this page — not a spec — is where the affordance's position, its reveal, and its
+      clearance from the resize grip are actually verified.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. Click the strip on a header's leading edge</h4>
+      <p class="story-description">
+        Move the pointer onto any header. A thin strip appears on its <strong>leading</strong>
+        edge — the opposite end from ARCH-244's resize grip, which half-overhangs the trailing one.
+        Click it and the whole column is selected, painted by the very same overlay that paints a
+        dragged block.
+      </p>
+      <p class="story-description">
+        Read the slice below: <code>anchorRowId</code> and <code>focusRowId</code> are
+        <code>null</code>. The mark names <em>no record at all</em>, which is what makes it one
+        object whatever the row count — and what no sort can move.
+      </p>
+
+      <div class="controls">
+        <button
+          type="button"
+          (click)="seedColumn()"
+          >Select "amount" from outside the table</button
+        >
+      </div>
+
+      <nge-table-range-demo
+        [config]="basicConfig"
+        [rows]="basicRows"
+        [showColumnHandles]="true"
+        [(state)]="basicState"
+      />
+
+      <div class="state-readout">
+        <h5>state.ngeRange</h5>
+        <pre>{{ basicRangeJson() }}</pre>
+      </div>
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. The strip selects; the header still sorts</h4>
+      <p class="story-description">
+        This is the conflict the story exists to resolve, so drive both. Click the header's
+        <strong>label</strong> — it sorts, and nothing is selected. Click its <strong>strip</strong>
+        — the column is selected, and the sort does not move. Alternate between them and watch the
+        two slices below change independently.
+      </p>
+      <p class="story-description">
+        A modifier-based split was rejected because <kbd>shift</kbd> and <kbd>cmd</kbd> are already
+        spent on span-and-disjoint; moving the sort onto an explicit control was rejected as too
+        large a change to established behaviour. The cost of the strip is a target to find, which
+        the hover reveal is there to pay.
+      </p>
+      <p class="story-description">
+        ⚠️
+        <strong>This table also has resizing on, which makes it the crowded-header case.</strong>
+        Three affordances now share one element: the sort on the label, the resize grip
+        half-overhanging the <strong>trailing</strong> edge, and the selection strip on the
+        <strong>leading</strong> one. Drag a column boundary and then click a strip on the same
+        header — neither takes the other's gesture, and the strip carries no <code>z-index</code>
+        precisely so the grip keeps the few pixels where they meet.
+      </p>
+
+      <nge-table-range-demo
+        [config]="sortConflictConfig"
+        [rows]="sortConflictRows"
+        [showColumnHandles]="true"
+        [(state)]="sortConflictState"
+      />
+
+      <div class="state-readout">
+        <h5>state.ngeRange + state.sorting</h5>
+        <pre>{{ sortConflictJson() }}</pre>
+      </div>
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. Shift takes the span of columns</h4>
+      <p class="story-description">
+        Click one strip, then shift-click another. Everything between them, in
+        <strong>visual</strong> order, is selected. Shift-click <em>back</em> towards the first and
+        the span <strong>shrinks</strong> — the anchor column stays put, exactly as an anchor cell
+        does for a dragged block.
+      </p>
+      <p class="story-description">
+        Try it after dragging out a cell block first: the shift-click
+        <strong>unbounds the row axis</strong>, so a two-row band becomes full columns. That is the
+        one place anything moves an anchor, and it is deliberate — a user who shift-clicks a header
+        is asking for columns.
+      </p>
+
+      <nge-table-range-demo
+        [config]="spanConfig"
+        [rows]="spanRows"
+        [showColumnHandles]="true"
+        [(state)]="spanState"
+      />
+
+      <div class="state-readout">
+        <h5>state.ngeRange.ranges</h5>
+        <pre>{{ spanRangeJson() }}</pre>
+      </div>
+    </section>
+
+    <!-- 4 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>4. cmd/ctrl adds a disjoint column — and drops it again</h4>
+      <p class="story-description">
+        Hold <kbd>cmd</kbd> (<kbd>ctrl</kbd> on Windows) and click several strips. Each column is
+        added. Now cmd-click one of them again: it is <strong>removed</strong>.
+      </p>
+      <p class="story-description">
+        ⚠️ That toggle is a deliberate asymmetry with a cmd-clicked <em>cell</em>, which only ever
+        appends. A column is a named thing a user picks off a list, so un-picking it by clicking
+        again is the obvious reading; a cmd-clicked cell is the corner of a rectangle they are about
+        to drag, and removing it would fight the drag that follows.
+      </p>
+
+      <div class="stat-row">
+        <span class="stat"
+          >rectangles held: <strong>{{ disjointCount() }}</strong></span
+        >
+      </div>
+
+      <nge-table-range-demo
+        [config]="disjointConfig"
+        [rows]="disjointRows"
+        [showColumnHandles]="true"
+        [(state)]="disjointState"
+      />
+
+      <div class="state-readout">
+        <h5>state.ngeRange.ranges</h5>
+        <pre>{{ disjointRangeJson() }}</pre>
+      </div>
+    </section>
+
+    <!-- 5 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>5. The keyboard route — cmd/ctrl + Space</h4>
+      <p class="story-description">
+        Tab until a header cell has focus, then press <kbd>cmd</kbd>/<kbd>ctrl</kbd> +
+        <kbd>space</kbd>. The column is selected; add <kbd>shift</kbd> to extend the span. It is the
+        spreadsheet standard, and it reaches what the strip reaches without the strip being a tab
+        stop of its own.
+      </p>
+      <p class="story-description">
+        ⚠️ It cannot collide with the header's own <kbd>enter</kbd> / <kbd>space</kbd> sort toggle,
+        and that is <strong>structural rather than lucky</strong>: Angular's
+        <code>keydown.space</code> binding matches only when no modifiers are held, so a modified
+        press never reaches it. Press plain <kbd>space</kbd> on the same header to see the sort take
+        it instead.
+      </p>
+      <p class="story-description">
+        This is also the only one of the addon's three shortcuts scoped by
+        <strong>focus</strong> rather than by engagement — a header cell is a real tab stop, so
+        "which column did the user mean" has an answer here that <kbd>cmd</kbd>-A never has.
+      </p>
+
+      <nge-table-range-demo
+        [config]="keyboardConfig"
+        [rows]="keyboardRows"
+        [showColumnHandles]="true"
+        [(state)]="keyboardState"
+      />
+
+      <div class="state-readout">
+        <h5>state.ngeRange.ranges</h5>
+        <pre>{{ keyboardRangeJson() }}</pre>
+      </div>
+    </section>
+
+    <!-- 6 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>6. A sort cannot shrink it</h4>
+      <p class="story-description">
+        Select a column, then sort the table from outside with the buttons below. Every cell of that
+        column is still selected — and the slice has not changed at all.
+      </p>
+      <p class="story-description">
+        ⚠️ This is the acceptance criterion the nullable row endpoints exist for. Stored as a span
+        between the first and last <em>records</em>, a column selection would follow those two rows
+        through the sort and quietly become whatever now lies between them. Naming no record is what
+        makes the re-sort a no-op here.
+      </p>
+
+      <div class="controls">
+        <button
+          type="button"
+          (click)="sortExternally('amount', false)"
+          >Sort by amount ↑</button
+        >
+        <button
+          type="button"
+          (click)="sortExternally('amount', true)"
+          >Sort by amount ↓</button
+        >
+        <button
+          type="button"
+          (click)="clearSort()"
+          >Clear sort</button
+        >
+      </div>
+
+      <nge-table-range-demo
+        [config]="sortableConfig"
+        [rows]="sortableRows"
+        [showColumnHandles]="true"
+        [(state)]="sortableState"
+      />
+
+      <div class="state-readout">
+        <h5>state.ngeRange.ranges — unchanged by every sort above</h5>
+        <pre>{{ sortableRangeJson() }}</pre>
+      </div>
+    </section>
+
+    <!-- 7 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>7. A pinned column selects the cells under its own header</h4>
+      <p class="story-description">
+        Select a span of columns, then pin <code>status</code> to the left lane. It moves
+        <strong>out</strong> from between the endpoints rather than joining them, so the block
+        narrows — because the column axis resolves against <strong>visual</strong> order across the
+        three lanes, not declaration order.
+      </p>
+      <p class="story-description">
+        A pinned lane is <code>position: sticky</code> and scrolls over the center lane, so a
+        selected pinned header and its cells must stay <strong>opaque</strong>. Scroll sideways and
+        check nothing shows through.
+      </p>
+
+      <div class="controls">
+        <button
+          type="button"
+          (click)="toggleStatusPin()"
+          >{{ statusPinned() ? "Unpin" : "Pin" }} "status" to the left lane</button
+        >
+      </div>
+
+      <div class="table-container table-container--narrow">
+        <nge-table-range-demo
+          [config]="pinnedConfig"
+          [rows]="pinnedRows"
+          [showColumnHandles]="true"
+          [(state)]="pinnedState"
+        />
+      </div>
+    </section>
+
+    <!-- 8 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>8. Ten thousand rows, and four strings</h4>
+      <p class="story-description">
+        Select a column, scroll to row 9,000, and it is selected there too. Nothing was enumerated:
+        a recycled node re-derives from <code>state</code> on every pass and holds no mark of its
+        own. Scroll back and the selection is exactly where it was.
+      </p>
+      <p class="story-description">
+        Enumerating one column of this table as a per-cell map would be roughly 270 KB of JSON
+        re-emitted on every <code>stateChange</code>, and a few such columns would exceed
+        Firestore's 1 MiB document limit — which does not merely cost frames, it destroys the "a
+        user's view can be persisted and restored" property the descriptor exists for.
+      </p>
+
+      <div class="stat-row">
+        <span class="stat"
+          >rectangles: <strong>{{ virtualCounts().ranges }}</strong></span
+        >
+        <span class="stat"
+          >slice size: <strong>{{ virtualCounts().bytes }} bytes</strong></span
+        >
+      </div>
+
+      <nge-table-range-demo
+        [config]="virtualConfig"
+        [rows]="virtualRows"
+        [showColumnHandles]="true"
+        [(state)]="virtualState"
+      />
+    </section>
+
+    <!-- 9 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>9. One slice, so export composes for free</h4>
+      <p class="story-description">
+        Select whole columns from the header, drag out cell blocks in the body, or both at once —
+        they land in the same array of rectangles. Then export what is selected.
+        <code>readNgeExportData({{ "{" }} cellPredicate {{ "}" }})</code> has never heard of column
+        selection, and nothing in this addon imports the export seam; they meet on the table and
+        nowhere else.
+      </p>
+      <p class="story-description">
+        ⚠️ Not one file under <code>src/lib/export/</code> changed for this story, and neither did
+        ARCH-269's own path. That is the point of expressing a column as a range rather than as a
+        second kind of mark.
+      </p>
+
+      <div class="controls">
+        <button
+          type="button"
+          (click)="exportSelected()"
+          >Export selected</button
+        >
+        <button
+          type="button"
+          (click)="exportEverything()"
+          >Export everything</button
+        >
+        <button
+          type="button"
+          [disabled]="exportResult() === null"
+          (click)="clearExportResult()"
+          >Clear result</button
+        >
+      </div>
+
+      <nge-table-range-demo
+        #exportDemo
+        [config]="exportConfig"
+        [rows]="exportRows"
+        [showColumnHandles]="true"
+        [(state)]="exportState"
+      />
+
+      <div class="stat-row">
+        <span class="stat">{{ exportSummary() }}</span>
+      </div>
+
+      @if (exportPreview()) {
+        <div class="state-readout">
+          <h5>readNgeExportData — first three rows</h5>
+          <pre>{{ exportPreview() }}</pre>
+        </div>
+      }
+    </section>
+  </div>
+</nge-storybook-review-container>

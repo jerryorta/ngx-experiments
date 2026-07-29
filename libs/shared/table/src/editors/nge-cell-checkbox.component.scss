@@ -1,0 +1,42 @@
+// =============================================================================
+// The table's own boolean cell editor (ARCH-293).
+//
+// Every token carries a literal fallback at its use site, per the consumption
+// rule in `libs/shared/table/AGENTS.md`, so the box renders correctly with no
+// theme applied.
+//
+// ⚠️ The control stays NATIVE and is tinted with `accent-color` rather than
+// replaced — the same call ARCH-268 made for the selection checkbox, and for the
+// same reason: it keeps the box keyboard-, screen-reader- and
+// high-contrast-correct for free, which a composed div never is without work.
+//
+// ⚠️ The focus ring is INSET. `.nge-table__cell` carries `overflow: hidden` and
+// is deliberately unpositioned (ARCH-243, both staying), so a ring drawn outside
+// the box is clipped and a keyboard user loses their only cue.
+//
+// NEVER reference --mat-sys-* or mat-*. Angular Material is banned in this library.
+// =============================================================================
+
+.nge-cell-checkbox {
+  display: flex;
+  align-items: center;
+}
+
+.nge-cell-checkbox__field {
+  width: var(--nge-table-editor-control-size, 16px);
+  height: var(--nge-table-editor-control-size, 16px);
+  margin: 0;
+  accent-color: var(--nge-table-editor-accent, #1565c0);
+
+  &:focus-visible {
+    box-shadow: inset 0 0 0 var(--nge-table-focus-ring-width, 2px) var(--nge-table-focus-ring-color, #1565c0);
+    outline: none;
+  }
+}
+
+// The read-only half of the activation model. Dimmed rather than hidden: a value
+// a user can read but not yet change is the whole point of the state, and a box
+// that vanished until clicked would read as a rendering fault.
+.nge-cell-checkbox__field--readonly {
+  opacity: var(--nge-table-editor-readonly-opacity, 0.75);
+}

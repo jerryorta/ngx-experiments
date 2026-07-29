@@ -1,0 +1,194 @@
+// ⚠️ The substance of this story lives HERE, not in its TypeScript. There is no
+// `config.theme` on `NgeTableConfig` — the table themes exclusively through
+// `--nge-table-*` custom properties, so each section is a scoped wrapper class
+// re-declaring tokens, which is exactly what a consumer overriding them writes.
+//
+// ⚠️ Nothing here targets a `.nge-table__*` class. Under `ViewEncapsulation.None`
+// such a rule would actually land, and that is styling the library rather than
+// theming it — the difference this whole file exists to demonstrate.
+.nge-table-row-expansion-theming {
+  display: block;
+  padding: 20px;
+  color: var(--nge-table-on-surface, #1d1b20);
+  background: var(--nge-table-surface, #ffffff);
+
+  .stories-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    margin-bottom: 8px;
+  }
+
+  .intro-text {
+    margin-bottom: 32px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 16px;
+  }
+
+  .story-section {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+
+    h4 {
+      margin-bottom: 8px;
+      color: var(--nge-table-on-surface, #1d1b20);
+    }
+
+    .story-description {
+      margin-bottom: 16px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 14px;
+    }
+  }
+
+  .theme-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .theme-sample {
+    flex: 1 1 340px;
+    min-width: 0;
+
+    &__label {
+      display: block;
+      margin-bottom: 8px;
+      font-family: ui-monospace, monospace;
+      font-size: 12px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+    }
+  }
+
+  // ⚠️ The height belongs on `nge-table` itself, never on this wrapper. The host
+  // is a flex column whose viewport is `flex: 1 1 auto; min-height: 0`, so a
+  // `max-height` on an ancestor div is simply overflowed.
+  .table-container {
+    margin-bottom: 16px;
+
+    nge-table {
+      max-height: 400px;
+    }
+  }
+
+  // The band's CONTENT is this story's markup and carries this story's styles.
+  .detail-body {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .token-tiers {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+
+    th,
+    td {
+      padding: 8px 12px;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+    }
+
+    th {
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-weight: 600;
+    }
+  }
+
+  // ─── Section 1: the band's surface ─────────────────────────────────────────
+
+  .theme-warm {
+    --nge-table-row-detail-surface: #fff3e0;
+  }
+
+  .theme-cool {
+    --nge-table-row-detail-surface: #e8eaf6;
+  }
+
+  // ─── Section 2: the chevron's colour ───────────────────────────────────────
+  //
+  // The disclosure control shares `--nge-table-on-surface-variant` with the sort
+  // indicator, so this moves both — which is the intended coupling rather than a
+  // side effect.
+
+  .theme-vivid-glyph {
+    --nge-table-on-surface-variant: #6a1b9a;
+  }
+
+  // ─── Section 3: the band's height ──────────────────────────────────────────
+  //
+  // ⚠️ ONE class, applied to two tables, deliberately producing two different
+  // results. Off virtualization nothing is positioned by arithmetic, so the class
+  // wins. On virtualization `applyGeometry` writes the resolved height INLINE on
+  // the host, and an inline declaration outranks a class selector regardless of
+  // specificity — so the same class does nothing, because the virtualizer has
+  // already positioned the row beneath at `rowHeight + rowDetailHeight` and a band
+  // that disagreed would overlap it.
+
+  .theme-tall-band {
+    --nge-table-row-detail-height: 200px;
+  }
+
+  // ─── Section 4: the band against the row marks ─────────────────────────────
+  //
+  // Loud values on purpose: the band has to stay legible against every mark a row
+  // can carry, and a subtle palette would not show whether it does.
+
+  .theme-marks {
+    --nge-table-row-detail-surface: #ede7f6;
+    --nge-table-row-surface-alt: #f1f8e9;
+    --nge-table-row-surface-hover: #fff8e1;
+    --nge-table-row-surface-selected: #e3f2fd;
+  }
+
+  // ─── Section 5: dark ───────────────────────────────────────────────────────
+  //
+  // Every surface restated rather than inherited. A band left on the light default
+  // is a pale rectangle punched through a dark table — the same failure a missed
+  // pinned lane produces, and for the same reason: both are opaque by requirement.
+
+  .theme-dark {
+    --nge-table-border-color: #3a3a42;
+    --nge-table-header-border-color: #45454f;
+    --nge-table-header-on-surface: #e6e1e5;
+    --nge-table-on-surface: #e6e1e5;
+    --nge-table-on-surface-variant: #a8a4ad;
+    --nge-table-row-detail-surface: #202027;
+    --nge-table-row-surface-alt: #1f1f25;
+    --nge-table-row-surface-hover: #2a2a32;
+    --nge-table-row-surface-selected: #263447;
+    --nge-table-surface: #17171b;
+    --nge-table-surface-variant: #22222a;
+
+    padding: 12px;
+    border-radius: 8px;
+    background: var(--nge-table-surface, #17171b);
+
+    .theme-sample__label {
+      color: var(--nge-table-on-surface-variant, #a8a4ad);
+    }
+  }
+
+  // ─── Section 6: how long the band takes ────────────────────────────────────
+  //
+  // Slow enough to watch rather than a plausible product value — 600ms exists to
+  // make the clip legible frame by frame beside the same table with the motion
+  // switched off. The library's own default is 180ms.
+  //
+  // ⚠️ Neither class can reach the ACCESSIBILITY switch, and that is the design.
+  // `prefers-reduced-motion: reduce` is a `transition: none` declaration in the
+  // library's own stylesheet rather than a value of this token, so a theme cannot
+  // reintroduce motion a user has asked not to see.
+
+  .theme-slow-band {
+    --nge-table-row-detail-duration: 600ms;
+  }
+
+  .theme-no-motion {
+    --nge-table-row-detail-duration: 0ms;
+  }
+}

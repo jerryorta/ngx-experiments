@@ -1,0 +1,286 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Export &amp; CSV (Interaction)</h2>
+    <p class="intro-text">
+      The CSV writer is an <strong>addon</strong> — a plain function over the neutral export shape,
+      with no table instance, no Angular, and no knowledge that highlighting exists.
+      Highlighted-cell export is therefore not a feature anybody built: it is what happens when the
+      highlight addon's predicate is handed to the export seam and the result is handed to the
+      formatter. That is the epic's extensibility gate (ARCH-251). Click cells to mark them,
+      shift-click to extend a block, then export.
+    </p>
+    <p class="intro-text">
+      The Storybook controls drive the formatter's whole option surface — delimiter, header,
+      <code>formatted</code> / <code>raw</code>, the byte-order mark, and formula escaping. Change
+      one and every CSV below re-renders without the table being read again.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. Highlight cells, export them as CSV</h4>
+      <p class="story-description">
+        <strong>Three pieces, none of which imports another.</strong> The highlight addon supplies a
+        <code>NgeCellContext → boolean</code>; the export seam takes it as an anonymous
+        <code>cellPredicate</code> and narrows both ways — a row with no surviving cell is dropped,
+        and a column with no surviving cell leaves the header; the formatter reads what comes back.
+        Export everything for the contrast.
+      </p>
+
+      <div class="code-block">
+        <pre>
+const data = table.readNgeExportData({{ "{" }} cellPredicate: highlight.predicate() {{ "}" }});
+const csv = toNgeCsv(data);</pre>
+      </div>
+
+      <div class="controls">
+        <button
+          type="button"
+          (click)="exportHighlighted()"
+          >Export highlighted only</button
+        >
+        <button
+          type="button"
+          (click)="exportEverything()"
+          >Export everything</button
+        >
+        <button
+          type="button"
+          [disabled]="!exportData()"
+          (click)="clearExport()"
+          >Clear result</button
+        >
+      </div>
+
+      <nge-table-highlight-demo
+        #mainDemo
+        [config]="mainConfig"
+        [rows]="mainRows"
+        [(state)]="mainState"
+      />
+
+      <div class="readout-pair">
+        <div class="state-readout">
+          <h5>state.ngeHighlight</h5>
+          <pre>{{ mainHighlightJson() }}</pre>
+        </div>
+        <div class="state-readout">
+          <h5>CSV — {{ exportSummary() }}</h5>
+          <pre>{{ csv() }}</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. <code>formatted</code> vs <code>raw</code></h4>
+      <p class="story-description">
+        Every exported cell carries both readings, and one CSV cannot be both.
+        <code>formatted</code> is what a person reads — the column's own
+        <code>meta.ngeExport.format</code>, so <code>Amount</code> comes out as
+        <code>$1,802.44</code> and has to be quoted because it carries a comma. <code>raw</code> is
+        what a machine reads — the same cell is <code>1802.44</code>, bare, and still summable in a
+        spreadsheet. Which one is wanted is a property of the destination, not of the table.
+      </p>
+      <p class="story-description">
+        Export something in section 1 first. Note that the quoting is <strong>conditional</strong>:
+        an amount under a thousand carries no comma and so needs no quotes.
+      </p>
+
+      @if (exportData()) {
+        <div class="readout-pair">
+          <div class="state-readout">
+            <h5>values: 'formatted'</h5>
+            <pre>{{ formattedCsv() }}</pre>
+          </div>
+          <div class="state-readout">
+            <h5>values: 'raw'</h5>
+            <pre>{{ rawCsv() }}</pre>
+          </div>
+        </div>
+      } @else {
+        <p class="story-description"><em>Export something in section 1 to populate this.</em></p>
+      }
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. Quoting follows the delimiter, not a literal comma</h4>
+      <p class="story-description">
+        RFC 4180 says a field is quoted when it contains the delimiter, a double quote, or a line
+        break — and <strong>the delimiter is whichever one was configured</strong>. Testing for a
+        comma instead is the classic bug in a CSV writer, and it fails in both directions at once: a
+        comma gets needlessly quoted (harmless) and a semicolon is left bare, which silently splits
+        one field into two on the reader's side.
+      </p>
+      <p class="story-description">
+        The same export below, written both ways. Under <code>,</code> the currency column is
+        quoted; under <code>;</code> it is not, because a comma is now just an ordinary character.
+      </p>
+
+      @if (exportData()) {
+        <div class="readout-pair">
+          <div class="state-readout">
+            <h5>delimiter: ','</h5>
+            <pre>{{ commaCsv() }}</pre>
+          </div>
+          <div class="state-readout">
+            <h5>delimiter: ';'</h5>
+            <pre>{{ semicolonCsv() }}</pre>
+          </div>
+        </div>
+      } @else {
+        <p class="story-description"><em>Export something in section 1 to populate this.</em></p>
+      }
+    </section>
+
+    <!-- 4 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>4. The CSV reflects what the user currently sees</h4>
+      <p class="story-description">
+        The export reads the <strong>processed</strong> row model — post-filter, post-sort, in the
+        column order and visibility on screen. So a sort reorders the CSV and hiding a column drops
+        it, without a line of the formatter knowing that sorting or visibility exist. Sort, hide
+        <code>Quantity</code>, then re-export and read the records.
+      </p>
+
+      <div class="controls">
+        <button
+          type="button"
+          (click)="sortExternally('amount', false)"
+          >Sort amount ↑</button
+        >
+        <button
+          type="button"
+          (click)="sortExternally('amount', true)"
+          >Sort amount ↓</button
+        >
+        <button
+          type="button"
+          (click)="clearSort()"
+          >Clear sort</button
+        >
+        <button
+          type="button"
+          (click)="toggleQuantityColumn()"
+          >Toggle Quantity column</button
+        >
+        <button
+          type="button"
+          (click)="exportView()"
+          >Export this view</button
+        >
+      </div>
+
+      <nge-table-highlight-demo
+        #viewDemo
+        [config]="viewConfig"
+        [showClear]="false"
+        [rows]="viewRows"
+        [(state)]="viewState"
+      />
+
+      @if (viewCsv()) {
+        <div class="state-readout">
+          <h5>CSV of the current view</h5>
+          <pre>{{ viewCsv() }}</pre>
+        </div>
+      }
+    </section>
+
+    <!-- 5 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>5. A ragged block comes out rectangular</h4>
+      <p class="story-description">
+        Mark cells in <strong>different columns on different rows</strong>, then export. The
+        narrowed shape is deliberately ragged — each row carries only its surviving cells — but the
+        CSV is rectangular, because the formatter re-aligns every row against the export's columns
+        and writes an empty field where a row has no cell. That is why each cell carries its
+        <code>columnId</code>, and it is what lets highlighted-cell export need no row or column
+        bookkeeping of its own.
+      </p>
+
+      <div class="controls">
+        <button
+          type="button"
+          (click)="exportRagged()"
+          >Export highlighted only</button
+        >
+      </div>
+
+      <nge-table-highlight-demo
+        #raggedDemo
+        [config]="raggedConfig"
+        [rows]="raggedRows"
+        [(state)]="raggedState"
+      />
+
+      @if (raggedCsv()) {
+        <div class="state-readout">
+          <h5>CSV</h5>
+          <pre>{{ raggedCsv() }}</pre>
+        </div>
+      }
+    </section>
+
+    <!-- 6 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>6. Handing it to the host</h4>
+      <p class="story-description">
+        <code>toNgeCsvBlob</code> is where the formatter stops. The object URL, the anchor, the
+        filename and the revoke are all application decisions — a library reaching for
+        <code>document</code> would stop working under SSR for no benefit. ⚠️ Turn the
+        <strong>byte-order mark</strong> control on for anything a user will open by
+        double-clicking: without one, Excel on Windows reads a UTF-8 file as the ambient code page
+        and every non-ASCII character arrives mojibake.
+      </p>
+
+      <div class="code-block">
+        <pre>
+const url = URL.createObjectURL(toNgeCsvBlob(data, {{ "{" }} byteOrderMark: true {{ "}" }}));
+const link = document.createElement('a');
+
+link.download = 'export.csv';
+link.href = url;
+link.click();
+URL.revokeObjectURL(url);</pre>
+      </div>
+
+      <div class="controls">
+        <button
+          type="button"
+          [disabled]="!exportData()"
+          (click)="downloadCsv()"
+          >Download the section 1 export</button
+        >
+      </div>
+    </section>
+
+    <!-- 7 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>7. Formula-injection escaping</h4>
+      <p class="story-description">
+        ⚠️ Excel and Sheets evaluate a field beginning <code>=</code>, <code>+</code>,
+        <code>-</code>, <code>&#64;</code>, a tab or a carriage return as a
+        <strong>formula</strong> on open, so an export can run the source system's text as code on
+        the reader's machine. The <strong>escapeFormulas</strong> control prefixes such a field with
+        <code>'</code>. It is <strong>off by default</strong> because escaping alters the user's
+        data — the field no longer round-trips.
+      </p>
+      <p class="story-description">
+        ⚠️ Toggling the control against the tables above changes <strong>nothing</strong>: no
+        fixture value is formula-shaped, so the flag is a no-op over ordinary data and a host can
+        adopt it without auditing its columns. This section supplies its own values so the toggle
+        has something to do. Watch the last row — an ordinary negative that a prefix-only check
+        would corrupt, and the reason the guard is prefix <em>and not-a-number</em>.
+      </p>
+
+      <div class="state-readout">
+        <h5>escapeFormulas: {{ escapeFormulas() }}</h5>
+        <pre>{{ dangerousCsv() }}</pre>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

@@ -1,0 +1,37 @@
+{
+  "name": "shared-table-addon-conformance",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/table-addon-conformance/src",
+  "prefix": "nge",
+  "projectType": "library",
+  "tags": ["lib"],
+  "targets": {
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/shared/table-addon-conformance/jest.config.cts",
+        "tsConfig": "libs/shared/table-addon-conformance/tsconfig.spec.json"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "^default",
+        {
+          "externalDependencies": ["typescript"]
+        }
+      ],
+      "options": {
+        "cwd": "libs/shared/table-addon-conformance",
+        "command": "tsc --noEmit -p tsconfig.lib.json && tsc --noEmit -p tsconfig.spec.json",
+        "forwardAllArgs": false
+      }
+    }
+  }
+}

@@ -1,0 +1,174 @@
+// The table's own long-text cell editor (ARCH-296).
+//
+// Every token is paired with a literal fallback, per the consumption rule in
+// `libs/shared/table/AGENTS.md` — a consumer who has not loaded
+// `_table-tokens.scss` still gets a panel that looks like one.
+//
+// ⚠️ The panel rules below style an element that is NOT inside this component's
+// DOM: the CDK attaches it to a container on `<body>`. They work because the
+// component is `ViewEncapsulation.None`, so its styles are global — the same
+// reason the rest of this library can be themed at all. What does not follow the
+// panel out is the table's own token scoping, which is why the component copies
+// resolved values onto the pane (`applyNgeEditorPanelTokens`).
+//
+// ⚠️ Neither the trigger nor the field draws a focus RING, and that is a
+// deliberate departure from the three sibling editors. Those are the focused
+// control themselves, so a ring is their only "you are here". Here the focused
+// control is the panel's field, and the panel is already an unmissable affordance
+// sitting over the table — so a ring on the trigger and a ring on the field stack
+// with each element's own border and read as a heavy double frame around the same
+// text, especially under a theme whose accent is saturated. A 1px border carries
+// the boundary; the caret and the panel carry the focus.
+//
+// Any ring that IS added back must be drawn INSET on anything inside a cell:
+// `.nge-table__cell` carries `overflow: hidden` and is deliberately unpositioned
+// (ARCH-243, both staying), so an outer ring is clipped on all four sides. The
+// panel is under no such constraint — it is not in the cell.
+
+.nge-cell-textarea {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.nge-cell-textarea__text {
+  overflow: hidden;
+  width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// The activated cell — an origin and a marker rather than a control, since the
+// panel is already open by the time it exists.
+//
+// ⚠️ **This is the one element that takes the theme's accent, and it is the only
+// one that should.** It sits in a table full of cells that look like it, so the
+// accent is what says WHICH cell the floating panel belongs to — the panel can
+// overhang several rows, and without it a user has to infer the anchor from
+// position alone. The field inside the panel needs no such marking: it is the only
+// control there, it holds focus for the whole life of the panel, and an accent
+// border on it would be a permanent alert around ordinary prose.
+.nge-cell-textarea__trigger {
+  display: flex;
+  box-sizing: border-box;
+  align-items: center;
+  overflow: hidden;
+  width: 100%;
+  min-width: 0;
+  padding: 0 var(--nge-table-editor-padding-x, 6px);
+  // One pixel, in the accent — the marker, not a ring. Width stays on the shared
+  // token so a theme that thickens every editor border thickens this one too.
+  border: var(--nge-table-editor-border-width, 1px) solid var(--nge-table-editor-border-color-focus, #1565c0);
+  border-radius: var(--nge-table-editor-radius, 4px);
+  background: var(--nge-table-editor-surface, #ffffff);
+  color: var(--nge-table-editor-on-surface, #1d1b20);
+  font-family: inherit;
+  font-size: var(--nge-table-editor-font-size, inherit);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  // Height is deliberately not a token of its own — the trigger fills the row the
+  // theme or the config already sized, so a table at any density gets a control
+  // that matches it without a second number to keep in step. Same call
+  // `.nge-cell-input__field` and `.nge-cell-select__trigger` make.
+  height: calc(var(--nge-table-row-height, 40px) - 8px);
+
+  &:focus,
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+// ─── Panel — rendered on the body, not here ─────────────────────────────────
+
+.nge-cell-textarea__panel {
+  display: flex;
+  box-sizing: border-box;
+  flex-direction: column;
+  gap: var(--nge-table-editor-panel-padding, 8px);
+
+  // A dropdown is sized to its trigger because its content is short labels; prose
+  // sized to a cell would be unusable, so the panel takes a floor of its own. It
+  // grows no further — the position strategy has `withFlexibleDimensions(false)`.
+  min-width: var(--nge-table-editor-panel-min-width, 280px);
+  padding: var(--nge-table-editor-panel-padding, 8px);
+  border: var(--nge-table-editor-border-width, 1px) solid var(--nge-table-editor-panel-border-color, #b6b6bd);
+  border-radius: var(--nge-table-editor-radius, 4px);
+  background: var(--nge-table-editor-panel-surface, #ffffff);
+  box-shadow: var(--nge-table-editor-panel-shadow, 0 4px 12px rgb(0 0 0 / 15%));
+  color: var(--nge-table-editor-on-surface, #1d1b20);
+  font-family: var(--nge-table-font-family, inherit);
+  font-size: var(--nge-table-editor-font-size, inherit);
+}
+
+.nge-cell-textarea__field {
+  box-sizing: border-box;
+  width: 100%;
+
+  // Height comes from the `rows` attribute rather than a token, so a column asking
+  // for six lines gets six lines at whatever type size the theme resolved.
+  padding: 4px var(--nge-table-editor-padding-x, 6px);
+  border: var(--nge-table-editor-border-width, 1px) solid var(--nge-table-editor-border-color, #b6b6bd);
+  border-radius: var(--nge-table-editor-radius, 4px);
+  background: var(--nge-table-editor-surface, #ffffff);
+  color: var(--nge-table-editor-on-surface, #1d1b20);
+  font-family: inherit;
+  font-size: inherit;
+
+  // Vertical only. A horizontal drag would fight the panel's own min-width and can
+  // pull the field out from under the button row.
+  resize: vertical;
+
+  // ⚠️ **No focus treatment at all — not a ring, and not a border colour.** The
+  // field is focused from the instant the panel opens until it closes, so anything
+  // keyed to `:focus` is this control's RESTING state rather than a signal, and a
+  // border in the theme's accent reads as a permanent alert around ordinary text.
+  // What says "you are here" is the panel itself and the caret in it. The three
+  // sibling editors do the opposite because they sit in a table full of unfocused
+  // cells and have nothing else to distinguish them.
+  &:focus {
+    outline: none;
+  }
+}
+
+.nge-cell-textarea__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+// Pushed hard left so it reads as a status about the panel rather than as a label
+// on the button next to it.
+.nge-cell-textarea__hint {
+  margin-inline-end: auto;
+  opacity: var(--nge-table-editor-readonly-opacity, 0.75);
+  font-size: 0.85em;
+}
+
+.nge-cell-textarea__button {
+  padding: 4px 12px;
+  border: var(--nge-table-editor-border-width, 1px) solid var(--nge-table-editor-border-color, #b6b6bd);
+  border-radius: var(--nge-table-editor-radius, 4px);
+  background: var(--nge-table-editor-surface, #ffffff);
+  color: var(--nge-table-editor-on-surface, #1d1b20);
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+
+  &:focus-visible {
+    box-shadow: inset 0 0 0 var(--nge-table-focus-ring-width, 2px) var(--nge-table-focus-ring-color, #1565c0);
+    outline: none;
+  }
+
+  // Filled, because this editor's whole thesis is that the commit is explicit — a
+  // pair of identical buttons would put the decision back on the user to work out
+  // which one proposes something.
+  &--apply {
+    border-color: var(--nge-table-editor-accent, #1565c0);
+    background: var(--nge-table-editor-accent, #1565c0);
+    color: var(--nge-table-editor-on-accent, #ffffff);
+    font-weight: 600;
+  }
+}

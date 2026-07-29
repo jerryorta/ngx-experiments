@@ -1,0 +1,165 @@
+// The story panel takes its surface from the same `--nge-table-surface` /
+// `--nge-table-on-surface` the table reads, so prose and table always move
+// together: under one of the ten domain themes that bridge `--nge-table-*`
+// (ARCH-277) both follow the toolbar, and under a theme that does not bridge
+// them (`nge-*`, `gy-*`) both fall back to the library's light-mode defaults.
+.nge-table-selection-theming {
+  display: block;
+  padding: 20px;
+  color: var(--nge-table-on-surface, #1d1b20);
+  background: var(--nge-table-surface, #ffffff);
+
+  .stories-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    margin-bottom: 8px;
+  }
+
+  .intro-text {
+    margin-bottom: 32px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 16px;
+  }
+
+  .story-section {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+
+    h4 {
+      margin-bottom: 8px;
+      color: var(--nge-table-on-surface, #1d1b20);
+    }
+
+    .story-description {
+      margin-bottom: 16px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 14px;
+    }
+  }
+
+  .code-block {
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    background: var(--nge-table-surface-variant, #f5f5f5);
+    border-radius: 6px;
+
+    pre {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+  }
+
+  // ⚠️ The height belongs on `nge-table` itself, never on this wrapper — the host
+  // is a flex column and a `max-height` on an ancestor div is simply overflowed.
+  .table-container {
+    margin-bottom: 16px;
+
+    nge-table {
+      max-height: 320px;
+    }
+
+    // The fixture's columns plus the selection column come to ~1164px, which fits
+    // the story panel — so a section about the PINNED lanes has nothing to scroll
+    // at full width and demonstrates none of what it claims.
+    &--narrow {
+      max-width: 720px;
+    }
+  }
+
+  .comparison-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+
+    h5 {
+      margin: 0 0 8px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+  }
+
+  .variant-label {
+    margin: 0 0 8px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .token-tiers {
+    margin: 0;
+    padding-left: 20px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 14px;
+    line-height: 1.8;
+
+    strong {
+      color: var(--nge-table-on-surface, #1d1b20);
+    }
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // The theme sections. Each is nothing but a scoped re-declaration of tokens —
+  // which is precisely what a consuming domain writes. Nothing in TypeScript
+  // differs between them; they wrap the SAME config object.
+  // ───────────────────────────────────────────────────────────────────────────
+
+  // A warmer accent. Both tokens move together: tinting the row without tinting
+  // the checkbox leaves the affordance reading as someone else's brand.
+  .theme-brand {
+    --nge-table-row-surface-selected: #fff1e6;
+    --nge-table-selection-accent: #c2410c;
+  }
+
+  // A near-neutral tint, for a table where selection is incidental rather than
+  // the point. Still distinguishable from the hover surface, which is the one
+  // constraint a subtle scheme must not break — a selected row and a hovered row
+  // reading identically is worse than no tint at all.
+  .theme-subtle {
+    --nge-table-row-surface-selected: #f0f0f4;
+    --nge-table-selection-accent: #52525b;
+  }
+
+  // Only visible under a gesture: tab into the table to see it.
+  .theme-focus {
+    --nge-table-focus-ring-color: #b3261e;
+    --nge-table-focus-ring-width: 3px;
+  }
+
+  // The shape a domain bridge takes. Every surface is restated rather than left to
+  // inherit — a pinned surface left light shows up as a pale rectangle punched
+  // through a dark table, because pinned lanes are opaque by requirement. The
+  // selected tint is re-derived rather than reused: the light-mode #e3f2fd against
+  // a dark row is not a tint, it is an inversion.
+  .theme-dark {
+    --nge-table-surface: #17171b;
+    --nge-table-surface-variant: #222228;
+    --nge-table-on-surface: #e8e8ea;
+    --nge-table-on-surface-variant: #a0a0aa;
+    --nge-table-header-on-surface: #f2f2f7;
+    --nge-table-border-color: #33333c;
+    --nge-table-header-border-color: #43434e;
+    --nge-table-row-surface-hover: #26262e;
+    --nge-table-pinned-surface: #17171b;
+    --nge-table-pinned-surface-hover: #26262e;
+    --nge-table-pinned-header-surface: #222228;
+
+    --nge-table-row-surface-selected: #16324a;
+    --nge-table-selection-accent: #6ea8fe;
+    --nge-table-focus-ring-color: #6ea8fe;
+
+    // The section's own chrome follows the table, or the prose sits on white.
+    padding: 16px;
+    color: var(--nge-table-on-surface, #e8e8ea);
+    background: var(--nge-table-surface, #17171b);
+    border-radius: 8px;
+  }
+}

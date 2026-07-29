@@ -1,0 +1,195 @@
+// The story panel takes its surface from the same `--nge-table-surface` /
+// `--nge-table-on-surface` the table reads, matching `core/` and `highlight/`,
+// so prose and table always move together: under one of the ten domain themes
+// that bridge `--nge-table-*` (ARCH-277) both follow the toolbar, and under a
+// theme that does not bridge them (`nge-*`, `gy-*`) both fall back to the
+// library's light-mode defaults.
+.nge-table-export-theming {
+  display: block;
+  padding: 20px;
+  color: var(--nge-table-on-surface, #1d1b20);
+  background: var(--nge-table-surface, #ffffff);
+
+  .stories-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    margin-bottom: 8px;
+  }
+
+  .intro-text {
+    margin-bottom: 16px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 16px;
+  }
+
+  .story-section {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+
+    h4 {
+      margin-bottom: 8px;
+      color: var(--nge-table-on-surface, #1d1b20);
+    }
+
+    .story-description {
+      margin-bottom: 16px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 14px;
+    }
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+
+    button {
+      padding: 6px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      background: var(--nge-table-surface, #ffffff);
+      border: 1px solid var(--nge-table-border-color, #e0e0e0);
+      border-radius: 4px;
+    }
+  }
+
+  .verdict {
+    margin-bottom: 16px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .theme-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+  }
+
+  .theme-panel {
+    h5 {
+      margin: 0 0 8px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+  }
+
+  .state-readout {
+    margin-top: 12px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    background: var(--nge-table-surface-variant, #f5f5f5);
+    border-radius: 6px;
+
+    // `pre-wrap` rather than the default: the three CSVs are read side by side, and a
+    // horizontal scrollbar per panel would make the comparison impossible.
+    pre {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  }
+
+  .token-table {
+    overflow: hidden;
+    font-size: 13px;
+    border: 1px solid var(--nge-table-border-color, #e0e0e0);
+    border-radius: 6px;
+
+    .token-row {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 16px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &--head {
+        font-weight: 600;
+        background: var(--nge-table-surface-variant, #f5f5f5);
+      }
+    }
+  }
+
+  // ── The themes themselves ──────────────────────────────────────────────────
+  //
+  // Each is a scoped wrapper class re-declaring `--nge-table-*` — which is exactly
+  // what a consumer writes, because there is no `config.theme` on `NgeTableConfig`.
+  //
+  // ⚠️ Only tokens the components actually READ appear here (verified against
+  // `nge-table.component.scss` and `nge-highlight-overlay.component.scss`). A
+  // section for a token nothing consumes renders as a no-op and teaches a false
+  // contract.
+  //
+  // ⚠️ `--nge-table-row-height` / `-header-height` are deliberately absent: the
+  // config carries them, and `applyGeometry` publishes both INLINE on the host, where
+  // an inline declaration outranks any class regardless of specificity. Setting them
+  // here would fail silently.
+
+  .theme-light {
+    // Left at the library's literal defaults on purpose — this panel is the control.
+    // A "theme" that restated the defaults would make the comparison meaningless.
+    display: block;
+  }
+
+  // The shape a domain's `--nge-table-*` bridge will take. ⚠️ Every surface is
+  // restated rather than left to inherit — the pinned ones especially, which are
+  // opaque by requirement, so a missed one shows up as a pale rectangle punched
+  // through the table.
+  .theme-dark {
+    --nge-table-border-color: #3a3a40;
+    --nge-table-header-border-color: #46464e;
+    --nge-table-header-on-surface: #e6e1e5;
+    --nge-table-highlight-on-surface: #f7f2fa;
+    --nge-table-highlight-outline: #d0bcff;
+    --nge-table-highlight-surface: #4a3a6b;
+    --nge-table-loading-scrim: rgb(20 20 24 / 60%);
+    --nge-table-on-surface: #e6e1e5;
+    --nge-table-on-surface-variant: #a8a2ab;
+    --nge-table-pinned-header-surface: #2b2b31;
+    --nge-table-pinned-surface: #232329;
+    --nge-table-pinned-surface-hover: #2f2f36;
+    --nge-table-resize-handle-color-active: #d0bcff;
+    --nge-table-resize-handle-color-hover: #8f8f99;
+    --nge-table-row-detail-surface: #232329;
+    --nge-table-row-surface: #1c1b1f;
+    --nge-table-row-surface-hover: #2a2930;
+    --nge-table-surface: #141318;
+    --nge-table-surface-variant: #232329;
+  }
+
+  // Wider borders, a stronger focus ring, and a highlight that reads as a block
+  // rather than a tint. The point on this page is that a table can look this
+  // different and export the same bytes.
+  .theme-contrast {
+    --nge-table-border-color: #000000;
+    --nge-table-border-width: 2px;
+    --nge-table-focus-ring-color: #0b57d0;
+    --nge-table-focus-ring-width: 3px;
+    --nge-table-header-border-color: #000000;
+    --nge-table-header-font-weight: 700;
+    --nge-table-header-on-surface: #000000;
+    --nge-table-highlight-on-surface: #ffffff;
+    --nge-table-highlight-outline: #000000;
+    --nge-table-highlight-surface: #0b57d0;
+    --nge-table-on-surface: #000000;
+    --nge-table-on-surface-variant: #2c2c2c;
+    --nge-table-pinned-header-surface: #ececec;
+    --nge-table-pinned-surface: #f3f3f3;
+    --nge-table-row-surface: #ffffff;
+    --nge-table-row-surface-hover: #dbe7fb;
+    --nge-table-surface: #ffffff;
+    --nge-table-surface-variant: #ececec;
+  }
+}

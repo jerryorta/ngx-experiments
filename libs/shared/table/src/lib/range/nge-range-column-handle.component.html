@@ -1,0 +1,21 @@
+@let columnId = header().columnId;
+
+<!--
+  The selection strip. Pointer-only and `aria-hidden` on purpose — exactly the call
+  ARCH-244 made about the resize grip. The keyboard route is cmd/ctrl + `Space` on
+  the header cell, which is already a tab stop, so this adds none and gives a screen
+  reader nothing to announce.
+
+  Both handlers are bound HERE rather than on the delegated table root, and that is
+  what keeps the two header gestures apart: the whole header cell carries
+  `data-nge-range-column`, so a delegated pointer test against it would select the
+  column from a plain header click — which is the sort.
+-->
+<span
+  class="nge-range-column-handle__grip"
+  aria-hidden="true"
+  data-testid="nge-range-column-handle"
+  [attr.data-column-id]="columnId"
+  (click)="select($event)"
+  (mousedown)="suppressTextSelection($event)"
+></span>

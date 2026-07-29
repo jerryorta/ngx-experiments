@@ -1,0 +1,85 @@
+@let tableState = state();
+@let currentRows = rows();
+
+<div class="nge-table-select-demo__controls">
+  <button
+    type="button"
+    [disabled]="lastIntent() === null"
+    (click)="undo()"
+    >Undo last edit</button
+  >
+  <span class="nge-table-select-demo__hint"
+    >click a status cell, or press <kbd>enter</kbd> on a focused row · <kbd>↑</kbd><kbd>↓</kbd> and
+    type-ahead move · <kbd>enter</kbd> commits · <kbd>esc</kbd> closes, then cancels</span
+  >
+</div>
+
+<!--
+  ⚠️ One editable column, no `[ngeCell]` template, and no `<nge-cell-select>` tag
+  anywhere in this markup. `status` names the component in `meta.ngeEdit.editor`
+  (through `ngeCellSelectEdit`) and the table resolves it through the same registry a
+  projected template goes through — so `<nge-table>`'s own markup gains no branch for
+  editing, and none for overlays either.
+-->
+<nge-table
+  [config]="config()"
+  [state]="tableState"
+  [style.max-height.px]="maxHeight()"
+  (ngeTableEvent)="onEvent($event)"
+  (stateChange)="state.set($event)"
+>
+  <!--
+    The acceptance criterion, as a switch. A projected template for a column the
+    library also has an editor for WINS — `NgeTableStore.cellTemplate` consults the
+    projected registrations first — so this badge is what renders and
+    `<nge-cell-select>` is never reached for `status`.
+  -->
+  @if (overrideStatus()) {
+    <ng-template
+      ngeCell="status"
+      [ngeCellOf]="currentRows"
+      let-cell
+    >
+      <strong class="nge-table-select-demo__override">{{ cell.row.status }}</strong>
+    </ng-template>
+  }
+
+  @if (enableCellRange()) {
+    <ng-template
+      ngeTableSlot="cell-overlay"
+      [ngeTableSlotOf]="currentRows"
+      let-cell
+    >
+      <nge-range-overlay
+        [cell]="cell"
+        [state]="tableState"
+      />
+    </ng-template>
+  }
+</nge-table>
+
+<div class="nge-table-select-demo__readouts">
+  <div class="nge-table-select-demo__readout">
+    <h5>last edit-intent — {{ intentSummary() }}</h5>
+    @if (lastIntent()) {
+      <pre>{{ intentJson() }}</pre>
+    }
+    @if (!applyIntents()) {
+      <p class="nge-table-select-demo__ignored"
+        >This host is ignoring the event — the proposal arrives and the table does not change.</p
+      >
+    }
+  </div>
+
+  <!--
+    ⚠️ The range readout is what turns "the drag did nothing" into evidence. A range
+    drag started on the select's trigger must leave this empty, which is only
+    convincing if a drag started on a NEIGHBOURING cell fills it.
+  -->
+  @if (enableCellRange()) {
+    <div class="nge-table-select-demo__readout">
+      <h5>state.ngeRange</h5>
+      <pre>{{ rangeJson() }}</pre>
+    </div>
+  }
+</div>

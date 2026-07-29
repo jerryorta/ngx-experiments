@@ -1,0 +1,105 @@
+@let context = cell();
+@let ariaLabel = label() ?? "Edit " + context.columnId;
+@let text = displayLabel();
+@let open = isOpen();
+
+<!--
+  ⚠️ The activation model, in one branch — the same shape `<nge-cell-input>` uses.
+  The cell is read-only text until `isEditing()` says otherwise, so thirty visible
+  rows across three editable columns cost zero triggers, zero overlays and zero
+  option lists until someone engages one. `isEditing` is a SIGNAL because the
+  context it rides on is memoised against the engine cell; a plain boolean would be
+  read once here and this branch would never flip (ARCH-291, ARCH-292).
+
+  ⚠️ `role="combobox"` is not decoration. `INTERACTIVE_ROLES` matches on it
+  (`src/lib/interactive/`), so declaring it is the whole cost of the "a range drag
+  started on the trigger selects no cells" criterion — and it buys the same
+  containment for cmd/ctrl-A and Shift+arrow at the same time.
+
+  The click is stopped because the row's click selects and the cell's click
+  activates; without it a click on the trigger also reads as a click on the table.
+-->
+@if (context.isEditing()) {
+  <button
+    #trigger
+    class="nge-cell-select__trigger"
+    type="button"
+    role="combobox"
+    aria-haspopup="listbox"
+    [attr.aria-label]="ariaLabel"
+    [attr.aria-expanded]="open"
+    [attr.aria-controls]="open ? panelId : null"
+    (click)="$event.stopPropagation(); toggle()"
+    (keydown.escape)="onTriggerEscape($event)"
+    (keydown.enter)="onTriggerOpenKey($event)"
+    (keydown.space)="onTriggerOpenKey($event)"
+    (keydown.arrowdown)="onTriggerOpenKey($event)"
+    (keydown.arrowup)="onTriggerOpenKey($event)"
+  >
+    <span class="nge-cell-select__value">{{ text }}</span>
+    <span
+      class="nge-cell-select__arrow"
+      aria-hidden="true"
+    ></span>
+  </button>
+} @else {
+  <span class="nge-cell-select__text">{{ text }}</span>
+}
+
+<!--
+  The panel, rendered into a CDK overlay on the body rather than here.
+
+  ⚠️ `tabindex="-1"` plus `aria-activedescendant` rather than a roving `tabindex`
+  over the options: focus has to sit INSIDE the panel for its keys to reach CDK's
+  `body` listener (see the component doc on the two-stage `Escape`), while the
+  option a keyboard user is on is a matter of announcement rather than of focus.
+  One focus target also means one place for the keydown stream to arrive.
+-->
+<ng-template #panel>
+  <div
+    class="nge-cell-select__panel"
+    role="listbox"
+    tabindex="-1"
+    [id]="panelId"
+    [attr.aria-label]="ariaLabel"
+    [attr.aria-activedescendant]="activeOptionId()"
+  >
+    @for (option of options(); track option.value; let index = $index) {
+      <!--
+        An option is deliberately NOT a tab stop and binds no key of its own, so both
+        a11y rules are suppressed rather than satisfied — and both suppressions are
+        the same decision seen twice.
+
+        Focus stays on the listbox above, which is what lets its keydowns reach CDK's
+        `body` listener and makes stage one of the two-stage `Escape` possible at all;
+        a roving `tabindex` over the options would move focus per keystroke and put
+        each one on the bubble path instead. `aria-activedescendant` is how the active
+        option is announced, which is the supported pattern for exactly this trade.
+        The keyboard route to choosing an option is therefore `Enter` on the listbox,
+        not a handler here.
+      -->
+      <!-- eslint-disable-next-line @angular-eslint/template/interactive-supports-focus, @angular-eslint/template/click-events-have-key-events -->
+      <div
+        class="nge-cell-select__option"
+        role="option"
+        [id]="optionId(index)"
+        [class.nge-cell-select__option--active]="index === activeIndex()"
+        [class.nge-cell-select__option--selected]="index === selectedIndex()"
+        [class.nge-cell-select__option--disabled]="option.disabled === true"
+        [attr.aria-selected]="index === selectedIndex()"
+        [attr.aria-disabled]="option.disabled === true ? true : null"
+        (click)="choose(option)"
+        (mouseenter)="activeIndex.set(index)"
+      >
+        {{ option.label }}
+      </div>
+    } @empty {
+      <!--
+        A column that opted into editing but declared no options. Said out loud
+        because the alternative is an empty box that reads as a rendering fault
+        rather than as a column still waiting to be configured.
+      -->
+      <div class="nge-cell-select__empty">No options</div>
+    }
+  </div>
+</ng-template>

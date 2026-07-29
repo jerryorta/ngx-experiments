@@ -1,5 +1,23 @@
 /* Global styles — apply all @nge/themes personas + the ledger --ldg-* layer
    so both shared dlc- and ledger ldg- stories render themed. */
+
+// NgeChart token defaults (`:root`). MUST come before the theme mixins below:
+// `:root` and a theme class (`.dlc-professional-light`) have EQUAL specificity (0,1,0),
+// so source order — not specificity — decides the winner, and a bridge has to be able
+// to override. Without this, every --nge-chart-* token is unset except the ones the
+// active bridge happens to declare, so charts never render in their no-theme baseline
+// and any token a bridge does not carry silently resolves to nothing. That is not
+// hypothetical here: the personas deliberately bridge 18 of the contract's 22 tokens,
+// leaving --nge-chart-white/black and the two label typography defaults to come from
+// `:root` alone.
+@use '../../../libs/shared/charts/theming' as nge-chart-theming;
+
+// NgeTable token defaults (`:root`). Same ordering rule and the same reason as the
+// chart line above: the table's --nge-table-* defaults must be declared before any
+// persona's table bridge so a bridge can win the source-order tie. The personas bridge
+// the palette only; all 33 geometry tokens resolve from here.
+@use '../../../libs/shared/table/theming' as nge-table-theming;
+
 @use 'dlc-themes';
 @use 'ldg-themes';
 

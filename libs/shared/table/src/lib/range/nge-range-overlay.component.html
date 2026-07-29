@@ -1,0 +1,15 @@
+<!--
+  Deliberately empty.
+
+  This component renders no content of its own: the host element exists to carry
+  `.nge-range-overlay--on` / `--focus` and to publish its cell's id pair, and the
+  stylesheet paints the enclosing `.nge-table__cell` around it with `:has()`.
+  Putting a tinted box here instead would not work — `.nge-table__cell` is neither
+  positioned nor a stacking context (both deliberate, see ARCH-243), so an
+  absolutely-positioned child would escape to the table host, and the `cell-overlay`
+  band is a trailing badge slot (`inline-flex; margin-left: auto`) rather than a
+  full-cell layer.
+
+  A marker element with no content is also what keeps this compatible with
+  virtualization: there is nothing here to hold a stale value between recycles.
+-->

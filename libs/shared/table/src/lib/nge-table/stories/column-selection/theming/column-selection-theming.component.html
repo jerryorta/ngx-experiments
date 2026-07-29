@@ -1,0 +1,226 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Column Selection Theming</h2>
+    <p class="intro-text">
+      There is <strong>no <code>config.theme</code></strong
+      >. Column selection themes through <code>--nge-table-range-column-*</code> custom properties,
+      so every section below is one scoped wrapper class — the same thing a consuming app writes.
+      Each table is <strong>seeded</strong> with a selection rather than driven, because the subject
+      here is colour rather than gesture; drive it in the Interaction story.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. The defaults, with nothing declared</h4>
+      <p class="story-description">
+        Every token carries a literal fallback at its use site, so the addon renders correctly with
+        no theme applied and adds nothing to <code>_table-tokens.scss</code> — editing that partial
+        would be a core edit, which this feature needed none of.
+      </p>
+      <p class="story-description">
+        ⚠️ The strip is <code>transparent</code> at rest by design and appears on header hover.
+        <strong>Hover a header</strong> to see it; a still screenshot of this section shows only the
+        selected column's tint.
+      </p>
+
+      <nge-table-range-demo
+        [config]="config"
+        [rows]="rows"
+        [showColumnHandles]="true"
+        [showControls]="false"
+        [(state)]="defaultState"
+      />
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. An always-visible strip</h4>
+      <p class="story-description">
+        Setting the rest colour trades discoverability for quiet: the affordance no longer has to be
+        found, at the cost of a permanent rule down every header's leading edge. Worth doing in an
+        app whose users select columns constantly, and not in one where it is occasional.
+      </p>
+      <div class="code-block">
+        <pre>
+.always-visible {{ "{" }}
+  --nge-table-range-column-handle-color: #cfd4dc;
+{{ "}" }}</pre>
+      </div>
+
+      <div class="always-visible">
+        <nge-table-range-demo
+          [config]="config"
+          [rows]="rows"
+          [showColumnHandles]="true"
+          [showControls]="false"
+          [(state)]="alwaysVisibleState"
+        />
+      </div>
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. A wider target</h4>
+      <p class="story-description">
+        The strip is 8px by default, inside the header's 12px padding so it never clips a label.
+        Widening it past the padding starts to overlap the label, so this is a knob with a real
+        ceiling rather than a free win.
+      </p>
+      <div class="code-block">
+        <pre>
+.wide-handle {{ "{" }}
+  --nge-table-range-column-handle-width: 12px;
+  --nge-table-range-column-handle-color: #e3e6ea;
+{{ "}" }}</pre>
+      </div>
+
+      <div class="wide-handle">
+        <nge-table-range-demo
+          [config]="config"
+          [rows]="rows"
+          [showColumnHandles]="true"
+          [showControls]="false"
+          [(state)]="wideState"
+        />
+      </div>
+    </section>
+
+    <!-- 4 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>4. A branded accent</h4>
+      <p class="story-description">
+        Four tokens carry a domain's colour: the strip when a column is selected, the header tint,
+        the text on it, and — from ARCH-269, because the body paint is the same overlay — the cell
+        surface and outline.
+      </p>
+      <div class="code-block">
+        <pre>
+.theme-branded {{ "{" }}
+  --nge-table-range-column-handle-color-active: #7c3aed;
+  --nge-table-range-column-surface: #ede9fe;
+  --nge-table-range-column-on-surface: #2e1065;
+
+  // ARCH-269's tokens paint the BODY of the same selection.
+  --nge-table-range-surface: #f5f3ff;
+  --nge-table-range-outline: #c4b5fd;
+  --nge-table-range-on-surface: #2e1065;
+{{ "}" }}</pre>
+      </div>
+
+      <div class="theme-branded">
+        <nge-table-range-demo
+          [config]="config"
+          [rows]="rows"
+          [showColumnHandles]="true"
+          [showControls]="false"
+          [(state)]="brandedState"
+        />
+      </div>
+    </section>
+
+    <!-- 5 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>5. Dark</h4>
+      <p class="story-description">
+        The shape a domain's <code>--nge-table-*</code> bridge will take when a consumer adopts the
+        library. Every surface is restated rather than left to inherit — the pinned surfaces
+        especially, which are opaque by requirement, so a missed one shows up as a pale rectangle
+        punched through the table.
+      </p>
+      <div class="code-block">
+        <pre>
+.theme-dark {{ "{" }}
+  --nge-table-surface: #1c1b1f;
+  --nge-table-surface-variant: #2b2930;
+  --nge-table-on-surface: #e6e1e5;
+  --nge-table-header-on-surface: #e6e1e5;
+  --nge-table-border-color: #49454f;
+  --nge-table-pinned-surface: #2b2930;
+
+  --nge-table-range-column-handle-color-active: #7dd3fc;
+  --nge-table-range-column-surface: #0c4a6e;
+  --nge-table-range-column-on-surface: #e0f2fe;
+  --nge-table-range-surface: #075985;
+  --nge-table-range-outline: #38bdf8;
+  --nge-table-range-on-surface: #e0f2fe;
+{{ "}" }}</pre>
+      </div>
+
+      <div class="theme-dark">
+        <nge-table-range-demo
+          [config]="config"
+          [rows]="rows"
+          [showColumnHandles]="true"
+          [showControls]="false"
+          [(state)]="darkState"
+        />
+      </div>
+    </section>
+
+    <!-- 6 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>6. A selected pinned column stays opaque</h4>
+      <p class="story-description">
+        <code>status</code> is pinned to the left lane and selected. A pinned lane is
+        <code>position: sticky</code> and scrolls over the center lane, so its header tint and its
+        cell tint must both be opaque or the center columns show through them.
+      </p>
+      <p class="story-description">
+        ⚠️ That is a requirement <strong>on the token</strong>, not a rule in the stylesheet. No
+        pinned-lane rule exists for this addon and adding one would be dead code — the tint is on
+        the header cell and on the body cell, each of which paints over its own lane's background. A
+        theme that made either translucent would be fixed on the token.
+      </p>
+      <p class="story-description">Scroll this table sideways and check nothing bleeds through.</p>
+
+      <div class="table-container--narrow">
+        <nge-table-range-demo
+          [config]="pinnedConfig"
+          [rows]="rows"
+          [showColumnHandles]="true"
+          [showControls]="false"
+          [(state)]="pinnedState"
+        />
+      </div>
+    </section>
+
+    <!-- 7 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>7. The token surface</h4>
+      <p class="story-description">
+        Six tokens are this feature's own; the rest of a selected column's appearance comes from
+        ARCH-269's, because the body paint is the same overlay.
+      </p>
+      <div class="code-block">
+        <pre>
+// This feature (--nge-table-range-column-*)
+--nge-table-range-column-handle-width          8px
+--nge-table-range-column-handle-color          transparent   ← at rest
+--nge-table-range-column-handle-color-hover    #b6b6bd       ← header hover
+--nge-table-range-column-handle-color-active   #1d4ed8       ← column selected
+--nge-table-range-column-surface               #dbeafe       ← header tint
+--nge-table-range-column-on-surface            #0b2545
+
+// Inherited from ARCH-269, painting the body of the same selection
+--nge-table-range-surface                      #dbeafe
+--nge-table-range-outline                      #93c5fd
+--nge-table-range-on-surface                   #0b2545
+--nge-table-range-focus-outline                #1d4ed8       ← no focus cell on a
+                                                                 whole-column mark</pre>
+      </div>
+      <p class="story-description">
+        ⚠️ <code>--nge-table-range-focus-outline</code> is listed for completeness and does nothing
+        for a column: a whole-column mark has no single focus cell, which falls out of the
+        descriptor rather than being suppressed. It applies once a user shift-clicks into the body.
+      </p>
+      <p class="story-description">
+        None of these are in <code>_table-tokens.scss</code>, and that is deliberate — an addon that
+        edited the core token partial would not be an addon. Every use site carries its literal
+        fallback instead.
+      </p>
+    </section>
+  </div>
+</nge-storybook-review-container>

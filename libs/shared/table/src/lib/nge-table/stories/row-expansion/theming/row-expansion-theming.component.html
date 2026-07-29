@@ -1,0 +1,335 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Row Expansion (Theming)</h2>
+    <p class="intro-text">
+      There is no <code>config.theme</code> on <code>NgeTableConfig</code>. The table themes
+      exclusively through <code>--nge-table-*</code> custom properties, so every section below is a
+      <strong>scoped wrapper class re-declaring tokens</strong> — exactly what a consumer overriding
+      them would write. Most share one config, because theming changes nothing about configuration.
+    </p>
+
+    <section class="story-section">
+      <h4>1. The band's surface</h4>
+      <p class="story-description">
+        <code>--nge-table-row-detail-surface</code> exists so an open band reads as attached to its
+        row rather than as a new one. It has been part of the contract since Wave 0 and is bridged
+        across all ten domain themes.
+      </p>
+      <div class="theme-row">
+        <div class="theme-sample">
+          <span class="theme-sample__label">default</span>
+          <div class="table-container">
+            <nge-table
+              [config]="config"
+              [state]="expandedState()"
+              (stateChange)="onExpandedState($event)"
+            >
+              <ng-template
+                ngeTableSlot="row-detail"
+                [ngeTableSlotOf]="rows"
+                let-detail
+              >
+                <div class="detail-body">{{ detail.row.owner.name }}</div>
+              </ng-template>
+            </nge-table>
+          </div>
+        </div>
+
+        <div class="theme-sample theme-warm">
+          <span class="theme-sample__label">--nge-table-row-detail-surface: #fff3e0</span>
+          <div class="table-container">
+            <nge-table
+              [config]="config"
+              [state]="expandedState()"
+              (stateChange)="onExpandedState($event)"
+            >
+              <ng-template
+                ngeTableSlot="row-detail"
+                [ngeTableSlotOf]="rows"
+                let-detail
+              >
+                <div class="detail-body">{{ detail.row.owner.name }}</div>
+              </ng-template>
+            </nge-table>
+          </div>
+        </div>
+
+        <div class="theme-sample theme-cool">
+          <span class="theme-sample__label">--nge-table-row-detail-surface: #e8eaf6</span>
+          <div class="table-container">
+            <nge-table
+              [config]="config"
+              [state]="expandedState()"
+              (stateChange)="onExpandedState($event)"
+            >
+              <ng-template
+                ngeTableSlot="row-detail"
+                [ngeTableSlotOf]="rows"
+                let-detail
+              >
+                <div class="detail-body">{{ detail.row.owner.name }}</div>
+              </ng-template>
+            </nge-table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>2. The chevron takes the muted foreground</h4>
+      <p class="story-description">
+        The disclosure control reads <code>--nge-table-on-surface-variant</code> — the same token
+        the sort indicator takes, rather than a colour of its own. Both are a small monochrome glyph
+        beside content, so a theme with an opinion about one has the same opinion about the other,
+        and a token of its own would mean ten bridge entries teaching nothing this one already says.
+      </p>
+      <div class="theme-row">
+        <div class="theme-sample">
+          <span class="theme-sample__label">default</span>
+          <div class="table-container">
+            <nge-table [config]="config" />
+          </div>
+        </div>
+
+        <div class="theme-sample theme-vivid-glyph">
+          <span class="theme-sample__label">--nge-table-on-surface-variant: #6a1b9a</span>
+          <div class="table-container">
+            <nge-table [config]="config" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>3. The band's height — the one that is conditional</h4>
+      <p class="story-description">
+        ⚠️ <strong>This is the geometry trap in a new place, and it fails silently.</strong> While
+        virtualization is on, <code>&lt;nge-table&gt;</code> publishes the resolved
+        <code>--nge-table-row-detail-height</code> as an <strong>inline</strong> custom property on
+        the host — where it beats a wrapper class outright, because an inline declaration outranks a
+        class selector regardless of specificity.
+      </p>
+      <p class="story-description">
+        That is deliberate rather than an oversight: a virtualized row is <em>positioned</em> as
+        <code>rowHeight + rowDetailHeight</code>, so a theme moving the band alone would not restyle
+        the table — it would put the band and the row beneath it in disagreement about where the row
+        ends, and the result is an overlap rather than a different look.
+      </p>
+      <p class="story-description">
+        <strong>Off virtualization a theme owns the token outright.</strong> The left table below is
+        hand-authored with <code>rowDetailHeight</code> omitted — the supported path, since the
+        factory fills it in unconditionally — and its wrapper class moves the band. The right table
+        is virtualized, and the identical wrapper class does nothing.
+      </p>
+      <p class="story-description">
+        The band takes that value as a <strong>definite height in both regimes</strong>, and content
+        taller than it scrolls rather than growing the band. That is what makes the open animatable
+        at all (section 6): a transition needs two definite endpoints, and a band sized by its own
+        content has none.
+      </p>
+      <div class="theme-row">
+        <div class="theme-sample theme-tall-band">
+          <span class="theme-sample__label">
+            not virtualized · class sets 200px · <strong>moves</strong>
+          </span>
+          <div class="table-container">
+            <nge-table
+              [config]="themableBandConfig"
+              [state]="expandedState()"
+            >
+              <ng-template
+                ngeTableSlot="row-detail"
+                [ngeTableSlotOf]="rows"
+                let-detail
+              >
+                <div class="detail-body">{{ detail.row.owner.name }}</div>
+              </ng-template>
+            </nge-table>
+          </div>
+        </div>
+
+        <div class="theme-sample theme-tall-band">
+          <span class="theme-sample__label">
+            virtualized · same class · <strong>stays at the config's 140px</strong>
+          </span>
+          <div class="table-container">
+            <nge-table
+              [config]="virtualizedBandConfig"
+              [state]="virtualizedState()"
+              (stateChange)="onVirtualizedState($event)"
+            >
+              <ng-template
+                ngeTableSlot="row-detail"
+                [ngeTableSlotOf]="virtualRows"
+                let-detail
+              >
+                <div class="detail-body">{{ detail.row.owner.name }}</div>
+              </ng-template>
+            </nge-table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>4. A band against the row marks</h4>
+      <p class="story-description">
+        The detail surface is its own token rather than a tint of the row's, so it stays legible
+        against every mark a row can carry — hover, selection, and the alternate stripe. Hover the
+        rows below and click one: the band keeps its own surface while the row takes the mark.
+      </p>
+      <div class="theme-sample theme-marks">
+        <div class="table-container">
+          <nge-table
+            [config]="config"
+            [state]="expandedState()"
+            (stateChange)="onExpandedState($event)"
+          >
+            <ng-template
+              ngeTableSlot="row-detail"
+              [ngeTableSlotOf]="rows"
+              let-detail
+            >
+              <div class="detail-body">{{ detail.row.owner.name }}</div>
+            </ng-template>
+          </nge-table>
+        </div>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>5. Dark</h4>
+      <p class="story-description">
+        The shape a domain's <code>--nge-table-*</code> bridge takes when it adopts the library.
+        Every surface is restated rather than left to inherit — the band above all, since a missed
+        one shows up as a pale rectangle punched through a dark table.
+      </p>
+      <div class="theme-sample theme-dark">
+        <div class="table-container">
+          <nge-table
+            [config]="config"
+            [state]="expandedState()"
+            (stateChange)="onExpandedState($event)"
+          >
+            <ng-template
+              ngeTableSlot="row-detail"
+              [ngeTableSlotOf]="rows"
+              let-detail
+            >
+              <div class="detail-body">{{ detail.row.owner.name }}</div>
+            </ng-template>
+          </nge-table>
+        </div>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>6. How long the band takes to get there</h4>
+      <p class="story-description">
+        <code>--nge-table-row-detail-duration</code> is the band's other token, and the easiest
+        tier of the four: nothing in TypeScript reads it, so a wrapper class always wins. Both
+        tables below share one state, so a single chevron opens both bands in the same frame — the
+        comparison is an A/B rather than two openings to time by eye.
+      </p>
+      <p class="story-description">
+        <strong><code>0ms</code> is a supported value, not an edge case.</strong> It is how a
+        consumer with a house rule against motion opts out without writing a media query, and how a
+        test gets the band at its final height on the next frame. The accessibility switch is
+        separate and cannot be overridden by a theme: under
+        <code>prefers-reduced-motion: reduce</code> the library declares
+        <code>transition: none</code> on the band and on the chevron, which an inline duration
+        cannot outrank.
+      </p>
+      <div class="theme-row">
+        <div class="theme-sample theme-slow-band">
+          <span class="theme-sample__label">--nge-table-row-detail-duration: 600ms</span>
+          <div class="table-container">
+            <nge-table
+              [config]="config"
+              [state]="motionState()"
+              (stateChange)="onMotionState($event)"
+            >
+              <ng-template
+                ngeTableSlot="row-detail"
+                [ngeTableSlotOf]="rows"
+                let-detail
+              >
+                <div class="detail-body">{{ detail.row.owner.name }}</div>
+              </ng-template>
+            </nge-table>
+          </div>
+        </div>
+
+        <div class="theme-sample theme-no-motion">
+          <span class="theme-sample__label">--nge-table-row-detail-duration: 0ms</span>
+          <div class="table-container">
+            <nge-table
+              [config]="config"
+              [state]="motionState()"
+              (stateChange)="onMotionState($event)"
+            >
+              <ng-template
+                ngeTableSlot="row-detail"
+                [ngeTableSlotOf]="rows"
+                let-detail
+              >
+                <div class="detail-body">{{ detail.row.owner.name }}</div>
+              </ng-template>
+            </nge-table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>7. Which of these tokens are yours</h4>
+      <p class="story-description">
+        Row expansion touches all four of the contract's tiers, and the third one is the reason this
+        story has a section 3.
+      </p>
+      <table class="token-tiers">
+        <thead>
+          <tr>
+            <th>Tier</th>
+            <th>Tokens</th>
+            <th>Themeable from a wrapper class?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Read from CSS</td>
+            <td
+              ><code>--nge-table-row-detail-surface</code>,
+              <code>--nge-table-on-surface-variant</code></td
+            >
+            <td>Yes</td>
+          </tr>
+          <tr>
+            <td>Overwritten inline while virtualizing</td>
+            <td><code>--nge-table-row-detail-height</code></td>
+            <td>Only when the config omits <code>rowDetailHeight</code> — see section 3</td>
+          </tr>
+          <tr>
+            <td>Read from CSS, with no TypeScript counterpart at all</td>
+            <td><code>--nge-table-row-detail-duration</code></td>
+            <td>
+              Yes, always — the animation is CSS end to end, which is also why it costs the scroll
+              nothing and why reduced motion can switch it off without the engine hearing about it
+            </td>
+          </tr>
+          <tr>
+            <td>Mirrored in TypeScript</td>
+            <td><code>--nge-table-expansion-column-width</code></td>
+            <td>
+              No — the injected column's <code>size</code> reads <code>NGE_TABLE_DEFAULTS</code>,
+              so the token alone would style a lane the engine still measured at another width
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</nge-storybook-review-container>

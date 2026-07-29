@@ -75,7 +75,7 @@
     --dlc-transition-duration: 160ms;
 
     // --- Chart token bridge ---
-    // Maps --nge-chart-* contract tokens (libs/shared/charts) to CG theme values.
+    // Maps --nge-chart-* contract tokens (libs/shared/charts) to this persona's values.
     // Tokens without a direct CG equivalent use the closest semantic match.
     --nge-chart-surface: var(--dlc-surface);
     --nge-chart-surface-variant: var(--dlc-surface-container-high);
@@ -95,6 +95,77 @@
     --nge-chart-secondary-container: var(--dlc-secondary-container);
     --nge-chart-tertiary: var(--dlc-warning);
     --nge-chart-error: var(--dlc-error);
+
+    // --- Table token bridge ---
+    // Maps --nge-table-* contract tokens (libs/shared/table) to this persona's values.
+    // Geometry, --nge-table-internal-*, z-indexes and sticky offsets are deliberately
+    // absent: they are layout rather than palette, and density belongs to NgeTableConfig.
+    --nge-table-surface: var(--dlc-surface);
+    --nge-table-surface-variant: var(--dlc-surface-container-high);
+    --nge-table-row-surface-alt: var(--dlc-surface-container-low);
+    --nge-table-row-surface-hover: var(--dlc-surface-container);
+    --nge-table-row-surface-selected: var(--dlc-secondary-container);
+    // A pinned lane is `position: sticky` and scrolls over the center lane, so every
+    // pinned surface must be opaque — one left on the light default reads as a pale
+    // rectangle punched through the dark table.
+    --nge-table-pinned-surface: var(--dlc-surface);
+    --nge-table-pinned-surface-hover: var(--dlc-surface-container);
+    --nge-table-pinned-header-surface: var(--dlc-surface-container-high);
+    --nge-table-row-detail-surface: var(--dlc-surface-container-low);
+    // Surface at 72%, so the overlay follows the theme's polarity and still reads as
+    // "these rows are going stale". --dlc-overlay is a modal dim, a different intent.
+    --nge-table-loading-scrim: color-mix(in srgb, var(--dlc-surface) 72%, transparent);
+    --nge-table-on-surface: var(--dlc-on-surface);
+    // Nudge muted cell text (empty-state copy, secondary values) brighter for dark-mode legibility
+    --nge-table-on-surface-variant: color-mix(in srgb, var(--dlc-on-surface-variant), var(--dlc-on-surface) 40%);
+    --nge-table-header-on-surface: var(--dlc-on-surface);
+    --nge-table-border-color: var(--dlc-outline-variant);
+    --nge-table-header-border-color: var(--dlc-outline);
+    --nge-table-resize-handle-color-hover: var(--dlc-outline);
+    --nge-table-resize-handle-color-active: var(--dlc-secondary);
+    --nge-table-focus-ring-color: var(--dlc-secondary);
+    --nge-table-selection-accent: var(--dlc-secondary);
+
+    // Cell editors (ARCH-293). A field has to read as sitting ON the row rather
+    // than as part of it — on a themed table the row and the field routinely
+    // resolve to the same colour — so its surface is a container step away from
+    // the row's own, not a reuse of it.
+    --nge-table-editor-surface: var(--dlc-surface-container);
+    --nge-table-editor-on-surface: var(--dlc-on-surface);
+    --nge-table-editor-border-color: var(--dlc-outline);
+    --nge-table-editor-border-color-focus: var(--dlc-secondary);
+    --nge-table-editor-accent: var(--dlc-secondary);
+    --nge-table-editor-on-accent: var(--dlc-on-secondary);
+    // The select's panel (ARCH-294). It renders in a CDK overlay attached to
+    // <body>, so it inherits none of the table's own scoping —
+    // <nge-cell-select> resolves this family at its trigger and copies the
+    // values onto the pane. A member added here that the component does not
+    // forward will work from :root and silently not under this theme.
+    //
+    // The panel FLOATS above the table where a field SITS on a row, so its
+    // surface is the elevated container rather than a reuse of the field's.
+    --nge-table-editor-panel-surface: var(--dlc-surface-container-high);
+    --nge-table-editor-panel-border-color: var(--dlc-outline);
+    // The option under the cursor, and the option currently set — the same two
+    // answers this theme already gives for a hovered and a selected ROW, because
+    // it is the identical question one level down.
+    --nge-table-editor-option-hover-surface: var(--dlc-surface-container);
+    --nge-table-editor-option-selected-surface: var(--dlc-secondary-container);
+    // Structural like the pinned shadows; only the alpha is themed, since a
+    // light-mode black is invisible on a dark ground. No theme declares a shadow
+    // variable. --nge-table-editor-panel-max-height is GEOMETRY and stays
+    // unbridged, on ARCH-277's test.
+    --nge-table-editor-panel-shadow: 0 4px 12px rgb(0 0 0 / 0.5);
+    // Offsets stay structural; only the colour is themed. No theme declares a shadow
+    // variable, and a 0.08 black is invisible on a dark ground, so the alpha is raised.
+    --nge-table-pinned-left-shadow: 2px 0 6px rgb(0 0 0 / 0.45);
+    --nge-table-pinned-right-shadow: -2px 0 6px rgb(0 0 0 / 0.45);
+    --nge-table-font-family: var(--dlc-font-family-body);
+    --nge-table-header-font-weight: var(--dlc-font-weight-bold);
+    // Left on the library defaults on purpose: --nge-table-row-surface and
+    // --nge-table-resize-handle-color are `transparent` as a design decision (a row
+    // shows the surface through it; the grip is invisible at rest), and the font SIZES
+    // have no theme equivalent — CG declares no type scale.
 
     // --- Storybook review token bridge ---
     // Maps --sb-review-* contract tokens (libs/shared/storybook) to CG home dark values.

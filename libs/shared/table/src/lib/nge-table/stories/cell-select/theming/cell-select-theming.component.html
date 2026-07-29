@@ -1,0 +1,170 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Cell Select Theming</h2>
+    <p class="intro-text"
+      >The <code>--nge-table-editor-*</code> panel family, demonstrated the way a consumer would
+      override it: a scoped wrapper class re-declaring tokens. There is no
+      <code>config.theme</code> on <code>NgeTableConfig</code> — the table themes exclusively
+      through CSS custom properties.</p
+    >
+
+    <section class="story-section">
+      <h4>1. No wrapper — the literal defaults</h4>
+      <p class="story-description"
+        >Open a status select. The panel is white with a grey border and a soft shadow, from the
+        <code>:root</code> declarations in <code>_table-tokens.scss</code>.</p
+      >
+      <p class="story-description"
+        >⚠️ <strong>This is the least informative section, and it is here to say why.</strong> The
+        overlay container is a child of <code>&lt;body&gt;</code>, itself a descendant of
+        <code>:root</code> — so <code>:root</code> defaults reach the panel by ordinary inheritance
+        and would do so even if every mechanism below were broken. A panel that looks right with no
+        theme loaded proves nothing about a panel under one.</p
+      >
+      <nge-table-select-demo
+        [(rows)]="defaultRows"
+        [(state)]="defaultState"
+        [maxHeight]="200"
+      />
+    </section>
+
+    <section class="story-section">
+      <h4>2. Panel surface, border and shadow</h4>
+      <div class="code-block">
+        <pre>
+.my-panel-theme {{ "{" }}
+  --nge-table-editor-panel-surface: #fffdf5;
+  --nge-table-editor-panel-border-color: #b08968;
+  --nge-table-editor-panel-shadow: 0 8px 24px rgb(112 79 51 / 28%);
+{{ "}" }}</pre>
+      </div>
+      <p class="story-description"
+        >⚠️
+        <strong>The wrapper is on the table, and the panel is not inside the wrapper.</strong> This
+        section works only because <code>&lt;nge-cell-select&gt;</code> resolves the family off its
+        trigger — which <em>is</em> inside the wrapper — and copies the values onto the overlay
+        pane. Delete that step and the trigger would restyle while the panel stayed white. Check the
+        panel itself, not the trigger.</p
+      >
+      <div class="theme-parchment">
+        <nge-table-select-demo
+          [(rows)]="surfaceRows"
+          [(state)]="surfaceState"
+          [maxHeight]="200"
+        />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>3. Option states — hover and selected</h4>
+      <div class="code-block">
+        <pre>
+.my-panel-theme {{ "{" }}
+  --nge-table-editor-option-hover-surface: #e8f5e9;
+  --nge-table-editor-option-selected-surface: #a5d6a7;
+{{ "}" }}</pre>
+      </div>
+      <p class="story-description"
+        >Two tokens rather than one, because "where I am" and "what is set" have to stay legible at
+        the same time. Hover down the list and note the option matching the cell's current value
+        keeps its own tint underneath the cursor. <strong>Arrow through it as well</strong> — the
+        keyboard cursor uses the hover token deliberately, since a user drives with one pointer or
+        the other and two colours would claim there were two cursors.</p
+      >
+      <div class="theme-garden">
+        <nge-table-select-demo
+          [(rows)]="optionRows"
+          [(state)]="optionState"
+          [maxHeight]="200"
+        />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>4. Panel height cap</h4>
+      <div class="code-block">
+        <pre>
+.my-panel-theme {{ "{" }}
+  --nge-table-editor-panel-max-height: 140px;
+{{ "}" }}</pre>
+      </div>
+      <p class="story-description"
+        >Twenty options against a 140px cap, so the panel scrolls internally rather than growing to
+        fit. The flexible position strategy's resizing is deliberately off: a panel that changed
+        height as a user arrowed through it would be harder to read than one that scrolls.</p
+      >
+      <p class="story-description"
+        >⚠️ This section swaps in a longer option list on purpose. A height cap demonstrated over
+        four options is a section whose prose claims something the box cannot do — the same trap as
+        a pinning section over a table that fits its panel.</p
+      >
+      <div class="theme-short-panel">
+        <nge-table-select-demo
+          [(rows)]="heightRows"
+          [(state)]="heightState"
+          [maxHeight]="200"
+          [selectOptions]="longOptions"
+        />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>5. Dark — the shape a domain bridge takes</h4>
+      <p class="story-description"
+        >What a domain's <code>--nge-table-*</code> bridge looks like when it reaches the editor
+        family. Every surface is restated rather than left to inherit: a missed one shows up as a
+        pale rectangle punched through a dark panel, and the panel has three of them (its own
+        surface, the hover tint and the selected tint) where a field has one.</p
+      >
+      <div class="theme-dark">
+        <nge-table-select-demo
+          [(rows)]="darkRows"
+          [(state)]="darkState"
+          [maxHeight]="200"
+        />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>6. What does <em>not</em> reach the panel</h4>
+      <p class="story-description">The token tiers, for this family specifically:</p>
+      <ul class="story-description">
+        <li
+          ><strong>Copied onto the pane</strong> — the whole
+          <code>--nge-table-editor-*</code> family plus <code>--nge-table-font-family</code> and
+          <code>--nge-table-row-height</code>. Themeable from a wrapper class, as sections 2–5
+          show, because the component resolves and forwards them.</li
+        >
+        <li
+          ><strong>Inherited from <code>:root</code> only</strong> — anything the component does not
+          forward. It reaches the panel when declared globally and silently does not when scoped to
+          a theme class. If you add a token the panel reads, add it to <code>PANEL_TOKENS</code> in
+          the same change.</li
+        >
+        <li
+          ><strong>Never reaches it</strong> — <code>&lt;nge-table&gt;</code>'s inline host
+          geometry (<code>--nge-table-row-height</code> and <code>-header-height</code> as the
+          component publishes them) and the <code>--nge-table-internal-*</code> family. The first
+          is why the resolved read happens at the <em>trigger</em>, which sits inside the table and
+          therefore sees them; the second is runtime lane geometry that was never yours to set.</li
+        >
+        <li
+          ><strong>Not a token at all</strong> — the option list's contents. Options are data on the
+          column, not styling.</li
+        >
+      </ul>
+      <p class="story-description"
+        >⚠️ <strong>Measure the rendered panel, never the wrapper's declared token.</strong> A
+        wrapper can declare a value the panel never receives, and devtools shows it on the wrapper
+        either way:</p
+      >
+      <div class="code-block">
+        <pre>
+getComputedStyle(document.querySelector('.nge-cell-select__panel')).backgroundColor</pre>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

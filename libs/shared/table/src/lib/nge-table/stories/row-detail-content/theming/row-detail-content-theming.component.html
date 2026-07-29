@@ -1,0 +1,349 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Row-Detail Content (Theming)</h2>
+    <p class="intro-text">
+      There is no <code>config.theme</code> on <code>NgeTableConfig</code>, so
+      <strong>the substance of this story is its SCSS</strong>. Each section is a scoped wrapper
+      class re-declaring tokens — exactly what a consumer overriding them would write.
+    </p>
+    <p class="intro-text">
+      A band is the one surface in the table where a <strong>second</strong> token family turns up:
+      the band is the table's, the chart on it is the charts library's, and a theme that moves only
+      one of them is visible from across the room.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. The band's own surface</h4>
+      <p class="story-description">
+        <code>--nge-table-row-detail-surface</code> paints the band behind whatever the consumer
+        projects into it. It is the band's only colour token — everything else you can see below
+        belongs either to the story's markup or to the chart.
+      </p>
+      <div class="code-block">
+        <pre>
+.theme-parchment {{ "{" }}
+  --nge-table-row-detail-surface: #fdf6e3;
+{{ "}" }}</pre>
+      </div>
+      <div class="theme-parchment table-container">
+        <nge-table
+          [config]="config"
+          [state]="surfaceState()"
+          (stateChange)="onSurfaceState($event)"
+        >
+          <ng-template
+            ngeTableSlot="row-detail"
+            [ngeTableSlotOf]="rows"
+            let-detail
+          >
+            @if (detail.isExpanded) {
+              <div class="detail-band">
+                <div class="detail-band__chart">
+                  <h5 class="detail-band__title">{{ detail.row.name }} — trend over 12 days</h5>
+                  <div class="detail-band__plot">
+                    <nge-chart [config]="trendConfigFor(detail.row)" />
+                  </div>
+                </div>
+                <div class="detail-band__chart">
+                  <h5 class="detail-band__title">Same series against itself, at three lags</h5>
+                  <div class="detail-band__plot">
+                    <nge-chart [config]="lagConfigFor(detail.row)" />
+                  </div>
+                </div>
+              </div>
+            }
+          </ng-template>
+        </nge-table>
+      </div>
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. Two token contracts meet in the band — and both have to be told</h4>
+      <p class="story-description">
+        The chart inside the band reads <code>--nge-chart-*</code> and knows nothing about the
+        table. Below are the same band and the same chart under two wrapper classes: on the left the
+        chart family sits at the <strong>charts library's own light defaults</strong>, on the right
+        it is bridged to match. The left is what a half-finished bridge looks like — a dark band
+        with a bright white panel punched through it.
+      </p>
+      <p class="story-description">
+        ⚠️ The left block writes those light values out rather than omitting the family, and it has
+        to: <strong>Storybook bridges <code>--nge-chart-*</code> globally</strong> for its theme
+        toolbar, so a wrapper that simply left them out would inherit the toolbar's dark values and
+        both tables would look themed. The literals are exactly the fallbacks
+        <code>nge-chart</code>'s own SCSS declares — so this is what an application that bridged
+        <code>--nge-table-*</code> and stopped really renders.
+      </p>
+      <div class="code-block">
+        <pre>
+/* ❌ Table bridged, charts left at their own defaults. */
+.theme-half {{ "{" }}
+  --nge-table-surface: #16161a;
+  --nge-table-row-detail-surface: #1d1d24;
+  --nge-table-on-surface: #e8e8ed;
+
+  --nge-chart-surface: #ffffff;          /* the charts library's literal default */
+  --nge-chart-on-surface: #1d1b20;
+  --nge-chart-outline-variant: #e0e0e0;
+{{ "}" }}
+
+/* ✅ Both families — the band and what sits on it agree. */
+.theme-whole {{ "{" }}
+  --nge-table-surface: #16161a;
+  --nge-table-row-detail-surface: #1d1d24;
+  --nge-table-on-surface: #e8e8ed;
+
+  --nge-chart-surface: #1d1d24;
+  --nge-chart-on-surface: #e8e8ed;
+  --nge-chart-on-surface-variant: #9a9aa5;
+  --nge-chart-outline-variant: #3a3a45;
+{{ "}" }}</pre>
+      </div>
+      <div class="split">
+        <div>
+          <h5>Charts left at their defaults</h5>
+          <div class="theme-half table-container">
+            <nge-table
+              [config]="config"
+              [state]="unbridgedState()"
+              (stateChange)="onUnbridgedState($event)"
+            >
+              <ng-template
+                ngeTableSlot="row-detail"
+                [ngeTableSlotOf]="rows"
+                let-detail
+              >
+                @if (detail.isExpanded) {
+                  <div class="detail-band">
+                    <div class="detail-band__chart">
+                      <h5 class="detail-band__title">
+                        {{ detail.row.name }} — trend over 12 days
+                      </h5>
+                      <div class="detail-band__plot">
+                        <nge-chart [config]="trendConfigFor(detail.row)" />
+                      </div>
+                    </div>
+                  </div>
+                }
+              </ng-template>
+            </nge-table>
+          </div>
+        </div>
+        <div>
+          <h5>Both families</h5>
+          <div class="theme-whole table-container">
+            <nge-table
+              [config]="config"
+              [state]="bridgedState()"
+              (stateChange)="onBridgedState($event)"
+            >
+              <ng-template
+                ngeTableSlot="row-detail"
+                [ngeTableSlotOf]="rows"
+                let-detail
+              >
+                @if (detail.isExpanded) {
+                  <div class="detail-band">
+                    <div class="detail-band__chart">
+                      <h5 class="detail-band__title">
+                        {{ detail.row.name }} — trend over 12 days
+                      </h5>
+                      <div class="detail-band__plot">
+                        <nge-chart [config]="trendConfigFor(detail.row)" />
+                      </div>
+                    </div>
+                  </div>
+                }
+              </ng-template>
+            </nge-table>
+          </div>
+        </div>
+      </div>
+      <p class="story-description">
+        Neither library is at fault here and neither should reach into the other: a band is a place
+        where a consumer's markup lives, and a consumer theming that markup owns both ends of it.
+        ARCH-277 bridges <code>--nge-table-*</code> across every domain theme; a domain that also
+        renders charts in bands bridges <code>--nge-chart-*</code> in the same file.
+      </p>
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. The band's height is a config concern — until the config declines it</h4>
+      <p class="story-description">
+        ⚠️ <code>createNgeTableConfig()</code> fills <code>rowDetailHeight</code> in from
+        <code>NGE_TABLE_DEFAULTS</code> unconditionally, and <code>&lt;nge-table&gt;</code> then
+        publishes it as an <strong>inline</strong> custom property on the host — where it beats a
+        wrapper class outright, because an inline declaration outranks a class selector regardless
+        of specificity. So a theme cannot move the band height of a factory-built table, and that is
+        deliberate: a virtualized row is <em>positioned</em> as
+        <code>rowHeight + rowDetailHeight</code>, so a theme moving the band alone would not restyle
+        the table, it would put the band and the row beneath it in disagreement about where the row
+        ends.
+      </p>
+      <p class="story-description">
+        Hand-author the config and omit the field, and the token is the theme's again. Both tables
+        below share that one config; only the wrapper class differs — and because the band's content
+        reads <code>--nge-table-row-detail-height</code> rather than a number, the charts follow.
+      </p>
+      <div class="code-block">
+        <pre>
+// `rowDetailHeight` deliberately absent — the factory would fill it in.
+themableHeightConfig: NgeTableConfig&lt;Row&gt; = {{ "{" }}
+  columns, data, enableRowExpansion: true, getRowId: row =&gt; row.id,
+{{ "}" }};</pre>
+      </div>
+      <div class="code-block">
+        <pre>
+.theme-short {{ "{" }} --nge-table-row-detail-height: 170px; {{ "}" }}
+.theme-tall  {{ "{" }} --nge-table-row-detail-height: 340px; {{ "}" }}</pre>
+      </div>
+      <div class="split">
+        <div>
+          <h5>170px</h5>
+          <div class="theme-short table-container">
+            <nge-table
+              [config]="themableHeightConfig"
+              [state]="shortState()"
+              (stateChange)="onShortState($event)"
+            >
+              <ng-template
+                ngeTableSlot="row-detail"
+                [ngeTableSlotOf]="rows"
+                let-detail
+              >
+                @if (detail.isExpanded) {
+                  <div class="detail-band">
+                    <div class="detail-band__chart">
+                      <h5 class="detail-band__title">
+                        {{ detail.row.name }} — trend over 12 days
+                      </h5>
+                      <div class="detail-band__plot">
+                        <nge-chart [config]="trendConfigFor(detail.row)" />
+                      </div>
+                    </div>
+                  </div>
+                }
+              </ng-template>
+            </nge-table>
+          </div>
+        </div>
+        <div>
+          <h5>340px</h5>
+          <div class="theme-tall table-container">
+            <nge-table
+              [config]="themableHeightConfig"
+              [state]="tallState()"
+              (stateChange)="onTallState($event)"
+            >
+              <ng-template
+                ngeTableSlot="row-detail"
+                [ngeTableSlotOf]="rows"
+                let-detail
+              >
+                @if (detail.isExpanded) {
+                  <div class="detail-band">
+                    <div class="detail-band__chart">
+                      <h5 class="detail-band__title">
+                        {{ detail.row.name }} — trend over 12 days
+                      </h5>
+                      <div class="detail-band__plot">
+                        <nge-chart [config]="trendConfigFor(detail.row)" />
+                      </div>
+                    </div>
+                  </div>
+                }
+              </ng-template>
+            </nge-table>
+          </div>
+        </div>
+      </div>
+      <p class="story-description">
+        ⚠️ This only holds <strong>off virtualization</strong>. Switch the window on and the
+        component pins the resolved height inline again whether the config named one or not, because
+        the arithmetic that places every row beneath needs the number in TypeScript.
+      </p>
+    </section>
+
+    <!-- 4 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>4. Dark — the shape a domain bridge takes</h4>
+      <p class="story-description">
+        Every surface restated rather than left to inherit, across <strong>both</strong> families.
+        This is the section to copy when adopting the table into a domain that also draws charts.
+      </p>
+      <div class="theme-dark table-container">
+        <nge-table
+          [config]="config"
+          [state]="darkState()"
+          (stateChange)="onDarkState($event)"
+        >
+          <ng-template
+            ngeTableSlot="row-detail"
+            [ngeTableSlotOf]="rows"
+            let-detail
+          >
+            @if (detail.isExpanded) {
+              <div class="detail-band">
+                <div class="detail-band__chart">
+                  <h5 class="detail-band__title">{{ detail.row.name }} — trend over 12 days</h5>
+                  <div class="detail-band__plot">
+                    <nge-chart [config]="trendConfigFor(detail.row)" />
+                  </div>
+                </div>
+                <div class="detail-band__chart">
+                  <h5 class="detail-band__title">Same series against itself, at three lags</h5>
+                  <div class="detail-band__plot">
+                    <nge-chart [config]="lagConfigFor(detail.row)" />
+                  </div>
+                </div>
+              </div>
+            }
+          </ng-template>
+        </nge-table>
+      </div>
+    </section>
+
+    <!-- 5 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>5. What a band's theme can and cannot reach</h4>
+      <p class="story-description">The four tiers, as they apply to a band:</p>
+      <table class="tier-table">
+        <thead>
+          <tr>
+            <th>Tier</th>
+            <th>Tokens</th>
+            <th>Themeable from a wrapper class?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Read from CSS</td>
+            <td><code>--nge-table-row-detail-surface</code></td>
+            <td>Yes</td>
+          </tr>
+          <tr>
+            <td>Another library's contract</td>
+            <td><code>--nge-chart-*</code>, on whatever the band holds</td>
+            <td>Yes — and it is on you to, as Section 2 shows</td>
+          </tr>
+          <tr>
+            <td>Overwritten inline by the component</td>
+            <td><code>--nge-table-row-detail-height</code></td>
+            <td>Only when the config omits it, and only off virtualization</td>
+          </tr>
+          <tr>
+            <td>Never yours to set</td>
+            <td>the <code>--nge-table-internal-*</code> family</td>
+            <td>No — runtime lane geometry</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</nge-storybook-review-container>

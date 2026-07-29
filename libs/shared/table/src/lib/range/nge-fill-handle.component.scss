@@ -1,0 +1,94 @@
+// =============================================================================
+// Fill handle (ARCH-271) — an ADDON stylesheet, part of ARCH-269's addon.
+//
+// Every token carries a literal fallback at its use site, so the handle renders
+// correctly with no theme applied and without adding anything to
+// `_table-tokens.scss` — editing that partial is a core edit.
+//
+// ⚠️ The namespace is `--nge-table-fill-*`. Not `--nge-table-range-*`: a fill is an
+// operation ON a range rather than a kind of range, and a theme will want the grip and
+// the pending outline to read differently from the selection they extend.
+//
+// NEVER reference --mat-sys-* or mat-*. Angular Material is banned in this library.
+// =============================================================================
+
+// The host carries the state classes and occupies no space; the grip inside it is
+// what a user grabs.
+.nge-fill-handle {
+  display: contents;
+}
+
+// ⚠️ **The grip sits at the corner cell's TRAILING EDGE, not overhanging its
+// bottom-right corner, and that is a constraint rather than a preference.**
+//
+// A spreadsheet's handle overhangs the block's corner. Two rules make that
+// unreachable from an addon, and both are load-bearing elsewhere:
+//
+// - `.nge-table__cell` carries `overflow: hidden` (ARCH-245 — a cell's content is
+//   arbitrary and must not spill into its neighbour), so anything outside the cell box
+//   is clipped no matter how it is positioned. The ticket rules out relaxing it, and
+//   rightly.
+// - `.nge-table__cell` is deliberately NOT positioned (ARCH-243 keeps it that way so
+//   pinned lanes stay sticky), so an absolutely-positioned grip would escape to the
+//   table host rather than anchor to the cell. The nearest positioned ancestor is the
+//   LANE, which spans many cells and offers no per-cell offset without measuring.
+//
+// So the grip rides the `cell-overlay` slot's own flow position — the trailing edge of
+// the cell, vertically centred — which is unclipped, needs no geometry arithmetic, and
+// is a real 10px target. It reads as "the end of the block" rather than "its corner".
+// Moving it to the true corner needs a core change, and is worth its own story rather
+// than a quiet exemption here.
+.nge-fill-handle__grip {
+  width: var(--nge-table-fill-handle-size, 10px);
+  height: var(--nge-table-fill-handle-size, 10px);
+  background: var(--nge-table-fill-handle-color, #1d4ed8);
+  border: 1px solid var(--nge-table-fill-handle-outline, #ffffff);
+  border-radius: var(--nge-table-fill-handle-radius, 2px);
+  cursor: crosshair;
+  // REQUIRED, not cosmetic — the ARCH-244 lesson. Without it a touch drag is claimed
+  // by the browser for scrolling and no `pointermove` is ever delivered, so the handle
+  // simply does nothing on a touchscreen with no error to explain why.
+  //
+  // ⚠️ Safe HERE and forbidden on a cell: this is a 10px grip, where ARCH-269's drag
+  // surface was every cell — which is why cell ranges are pointer-only and this is the
+  // gesture that gives the library a touch story at all.
+  touch-action: none;
+  user-select: none;
+}
+
+// The block a drag would write into, outlined while the gesture is in flight.
+//
+// Reached outward with `:has()` onto the CELL, the same indirection (and the same
+// documented dependency on core's BEM names) that `nge-range-overlay.component.scss`
+// explains — and for the same reason: the cell is neither positioned nor a stacking
+// context, so there is no layer to draw on.
+//
+// A dashed inset ring rather than a fill, so the pending region reads as *proposed*
+// against the solid tint of the selection it extends from. Inset rather than a border
+// because a real border would add two pixels the lane arithmetic has not accounted for
+// and every column would drift.
+.nge-table__cell:has(> .nge-table__cell-overlay > .nge-fill-handle--target) {
+  box-shadow: inset 0 0 0 1px var(--nge-table-fill-target-outline, #1d4ed8);
+  background-color: var(--nge-table-fill-target-surface, #eff6ff);
+}
+
+// The cells a drag back INTO the block is about to drop from the selection.
+//
+// ⚠️ Styled as *leaving*, not as *filling* — the two regions are opposite outcomes and
+// the user is deciding between them mid-gesture, so they must not look alike. The
+// selection tint is overridden rather than merely layered on, because these cells are
+// still inside `state.ngeRange` until the drag is released.
+.nge-table__cell:has(> .nge-table__cell-overlay > .nge-fill-handle--drop) {
+  background-color: var(--nge-table-fill-drop-surface, #ffffff);
+  box-shadow: inset 0 0 0 1px var(--nge-table-fill-drop-outline, #d4d4d8);
+  color: var(--nge-table-fill-drop-on-surface, #71717a);
+}
+
+// While a fill drag is in flight the crosshair applies table-wide — the pointer spends
+// the drag over cells that each have opinions about the cursor, and without this it
+// flickers as it crosses them. Scoped to the gesture by the class `NgeRangeBridge`
+// adds and removes, the same arrangement ARCH-244 uses for `col-resize`.
+.nge-range-dragging:has(.nge-fill-handle--target),
+.nge-range-dragging:has(.nge-fill-handle--target) * {
+  cursor: crosshair;
+}

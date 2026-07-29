@@ -1,0 +1,192 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Chart Cells (Usage)</h2>
+    <p class="intro-text">
+      A chart in a cell is an ordinary application of the render-slot seam (ARCH-246): a
+      <code>[ngeCell]</code> template branching on <code>cell.isSettled()</code>. The library
+      defines nothing about chart data — the column below is entirely consumer code, and no example
+      imports <code>&#64;tanstack/*</code>.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. Basic usage</h4>
+      <p class="story-description">
+        <code>&#64;if (cell.isSettled())</code> draws the real thing; <code>&#64;else</code> draws
+        <code>&lt;nge-cell-shell&gt;</code>, a flat, un-animated placeholder the table ships for
+        exactly this branch. This table is not virtualized, so <code>isSettled()</code> is always
+        <code>true</code> here and only the chart branch ever runs — see the
+        <strong>Interaction</strong> story for the shell actually appearing.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }}
+  columns: [seriesColumn, ...NGE_TABLE_FIXTURE_COLUMNS.slice(0, 3)],
+  data: createNgeTableFixture({{ "{" }} rows: 8 {{ "}" }}),
+  getRowId: row =&gt; row.id,
+  rowHeight: 96,
+{{ "}" }});
+
+&lt;ng-template ngeCell="series" [ngeCellOf]="rows" let-cell&gt;
+  &#64;if (cell.isSettled()) {{ "{" }}
+    &lt;div class="chart-cell"&gt;&lt;nge-chart [config]="chartFor(cell.row)" /&gt;&lt;/div&gt;
+  {{ "}" }} &#64;else {{ "{" }}
+    &lt;nge-cell-shell /&gt;
+  {{ "}" }}
+&lt;/ng-template&gt;</pre>
+      </div>
+      <div class="table-container">
+        <nge-table [config]="config">
+          <ng-template
+            ngeCell="series"
+            [ngeCellOf]="exampleRows"
+            let-cell
+          >
+            @if (cell.isSettled()) {
+              <div class="chart-cell">
+                <nge-chart [config]="chartFor(cell.row)" />
+              </div>
+            } @else {
+              <nge-cell-shell />
+            }
+          </ng-template>
+        </nge-table>
+      </div>
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. The transform must be memoised</h4>
+      <p class="story-description">
+        The library defines nothing about chart data; the consumer supplies a pure transform and
+        memoises it. A factory called straight from the template — <code>chartFor(cell.row)</code> —
+        runs on every change-detection pass, and a fresh object every time would change
+        <code>&lt;nge-chart&gt;</code>'s <code>config</code> input identity, which re-renders the
+        chart. Under virtualization that is exactly the cost <code>isSettled</code> exists to avoid,
+        so the cache below is not an optimisation on top of the pattern — it is the pattern.
+      </p>
+      <div class="code-block">
+        <pre>
+private readonly chartConfigs = new Map&lt;string, NgeChartConfig&gt;();
+
+chartFor(row: Row): NgeChartConfig {{ "{" }}
+  const cached = this.chartConfigs.get(row.id);
+  if (cached) {{ "{" }} return cached; {{ "}" }}
+
+  const config = createSparklineChartConfig({{ "{" }}
+    animationMs: 0,                              // no per-slide strobe under virtualization
+    data: row.series.map((y, x) =&gt; ({{ "{" }} x, y {{ "}" }})),
+    yDomain: [0, 100],                            // the fixture's shared, comparable range
+  {{ "}" }});
+
+  this.chartConfigs.set(row.id, config);
+  return config;
+{{ "}" }}</pre>
+      </div>
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. The array-valued column's opt-outs</h4>
+      <p class="story-description">
+        A cell reading a <code>readonly number[]</code> forces two decisions no other column in the
+        fixture has to make. Sorting a <code>number[]</code> is meaningless, so the column declares
+        <code>enableSorting: false</code>. And the export seam's default formatter is
+        <code>String(value)</code>, which comma-joins an array — legible, but not what belongs in an
+        exported file — so the column declares its own <code>meta.ngeExport.format</code> instead.
+      </p>
+      <div class="code-block">
+        <pre>
+const seriesColumn: NgeTableColumn&lt;Row&gt; = {{ "{" }}
+  accessorKey: 'series',
+  enableSorting: false,
+  header: 'Trend',
+  id: 'series',
+  meta: {{ "{" }}
+    ngeExport: {{
+            "{"
+          }} format: value =&gt; (Array.isArray(value) ? value.length + ' points' : '') {{ "}" }},
+  {{ "}" }},
+{{ "}" }};</pre>
+      </div>
+      <p class="story-description">
+        Called against the first row's series above: <code>{{ sampleFormattedSeries }}</code
+        >. Without the override, <code>String(value)</code> would instead comma-join all twelve
+        numbers into the field.
+      </p>
+    </section>
+
+    <!-- 4 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>4. Row height is what gives the sparkline room</h4>
+      <p class="story-description">
+        <code>rowHeight</code> is presentational everywhere else in this library; here it decides
+        whether the sparkline has room to draw at all. <code>&lt;nge-chart&gt;</code> attaches a
+        shadow root that injects
+        <code>:host, svg {{ "{" }} width: 100%; height: 100% {{ "}" }}</code
+        >, and that percentage resolves against <code>.nge-table__cell</code>'s own height — always
+        definite (the row's <code>--nge-table-row-height</code>), never <code>auto</code>. A chart
+        does not collapse in a table cell; it is simply squeezed into whatever the row allows. The
+        <strong>Interaction</strong> story renders the library's 40px default beside
+        <code>rowHeight: 96</code> so the difference is visible.
+      </p>
+      <p class="story-description">
+        The <code>.chart-cell</code> wrapper below is still worth keeping, for a different reason
+        than avoiding a collapse: <code>align-self: stretch</code> is the same sizing
+        <code>&lt;nge-cell-shell&gt;</code> already uses against this identical cell, so the shell
+        and the chart share one convention rather than two.
+      </p>
+      <p class="story-description">
+        ⚠️ <strong>That convention is a cell's, and it does not carry to every surface.</strong> It
+        works here because a cell is a flex <em>item</em> on a row whose height is already definite,
+        so stretching resolves it. A <code>row-detail</code> band declares a height of its own
+        (<code>config.rowDetailHeight</code>) but is a plain <em>block</em> on its own line — there
+        is no flex line to stretch against, so content there claims the height by reading
+        <code>--nge-table-row-detail-height</code> instead. See
+        <strong>Row Detail Content → Usage</strong> for that case.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }} columns, data, getRowId, rowHeight: 96 {{
+            "}"
+          }});
+
+.chart-cell {{ "{" }} flex: 1 1 auto; align-self: stretch; min-width: 0; {{ "}" }}</pre>
+      </div>
+    </section>
+
+    <!-- 5 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>5. The shared domain keeps rows comparable</h4>
+      <p class="story-description">
+        Every sparkline in the table above shares <code>yDomain: [0, 100]</code> — the fixture's own
+        bound on <code>series</code> (ARCH-290). Reading down the column, a row that climbs draws a
+        taller line than a row that stays flat, because both are plotted against the same scale.
+        Drop <code>yDomain</code> and each cell auto-scales to its own row's min and max instead — a
+        flat-looking walk between 40 and 45 would fill the cell exactly as fully as a dramatic one
+        between 0 and 100, and the column would stop being twelve comparable pictures and become
+        twelve unrelated ones.
+      </p>
+    </section>
+
+    <!-- 6 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>6. The shell is generic, not chart-specific</h4>
+      <p class="story-description">
+        <code>&lt;nge-cell-shell&gt;</code> belongs to the table rather than to charts, and nothing
+        about it names a chart. It is the cheap thing <em>any</em> expensive cell can draw while the
+        table is busy — an image, a map, a third-party widget — with no cooperation from whatever
+        renders once <code>isSettled()</code> is <code>true</code>.
+      </p>
+      <div class="code-block">
+        <pre>&lt;nge-cell-shell /&gt;</pre>
+      </div>
+      <div class="shell-showcase">
+        <nge-cell-shell />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

@@ -1,0 +1,34 @@
+@let context = cell();
+@let text = display();
+
+<!--
+  ⚠️ The activation model, in one branch. The cell is read-only text until
+  `isEditing()` says otherwise, at which point the field exists — so thirty visible
+  rows across three editable columns cost zero field instances until someone engages
+  one. `isEditing` is a SIGNAL because the context it rides on is memoised against
+  the engine cell; a plain boolean would be read once here and this branch would
+  never flip (ARCH-291, ARCH-292).
+
+  `Enter` blurs rather than committing directly, so both routes into a commit are the
+  same route — there is one handler to keep correct, and `Escape`'s teardown blur is
+  guarded in the same place.
+
+  The click is stopped because the row's click selects and the cell's click
+  activates; without it a click inside the field re-enters activation and reads as a
+  click on the table. Same arrangement the resize grip and the select-all checkbox
+  already use.
+-->
+@if (context.isEditing()) {
+  <input
+    #field
+    class="nge-cell-input__field"
+    [attr.aria-label]="label() ?? 'Edit ' + context.columnId"
+    [type]="type()"
+    [value]="text"
+    (blur)="commit(field.value)"
+    (click)="$event.stopPropagation()"
+    (keydown.enter)="field.blur()"
+  />
+} @else {
+  <span class="nge-cell-input__text">{{ text }}</span>
+}

@@ -1,0 +1,214 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Cell Highlighting (Interaction)</h2>
+    <p class="intro-text">
+      Highlighting is an <strong>addon</strong>, not a table feature. Everything on this page is
+      registered with one line of providers and modifies no file in the library core — which is what
+      makes it the epic's extensibility gate (ARCH-250). Click a cell to mark it; shift-click to
+      extend a block.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. Click to highlight, shift-click to extend</h4>
+      <p class="story-description">
+        A plain click toggles one cell and makes it the anchor. A shift-click extends from that
+        anchor to the cell you clicked, spanning every column between them in visual order. Watch
+        the state below: individually-picked cells are <strong>enumerated</strong>, a block is
+        stored as a single <strong>descriptor</strong>.
+      </p>
+
+      <nge-table-highlight-demo
+        [config]="basicConfig"
+        [rows]="basicRows"
+        [(state)]="basicState"
+      />
+
+      <div class="state-readout">
+        <h5>state.ngeHighlight</h5>
+        <pre>{{ basicHighlightJson() }}</pre>
+      </div>
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. Persist and restore</h4>
+      <p class="story-description">
+        The slice is plain JSON, so a user's highlighting persists and restores with the rest of
+        their view. Mark some cells above, save, change the marks, then restore. Pushing state back
+        in is <strong>silent</strong> — restoring a saved view is not the user doing something, so
+        it announces nothing on the event stream.
+      </p>
+
+      <div class="controls">
+        <button
+          type="button"
+          (click)="saveView()"
+          >Save view</button
+        >
+        <button
+          type="button"
+          [disabled]="!savedView()"
+          (click)="restoreView()"
+          >Restore view</button
+        >
+      </div>
+
+      @if (savedView(); as saved) {
+        <div class="state-readout">
+          <h5>Saved payload</h5>
+          <pre>{{ saved }}</pre>
+        </div>
+      }
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. Ten thousand rows — highlighting survives a virtualized scroll</h4>
+      <p class="story-description">
+        <strong>The acceptance criterion only a browser can check.</strong> Highlight a cell, scroll
+        it far out of view, and scroll back — it is still highlighted. Virtualization recycles DOM,
+        so the node that draws row 12 drew row 4 a moment ago; the mark survives because it lives in
+        state and every render re-derives from there, never because an element remembered anything.
+      </p>
+      <p class="story-description">
+        Shift-click a long way down a column and watch <code>slice size</code> barely move. A
+        descriptor is one object whatever the row count — the same block enumerated per cell would
+        be ~270&nbsp;KB of JSON re-emitted on every state change, and a few such columns would
+        exceed Firestore's 1&nbsp;MiB document limit.
+      </p>
+
+      <div class="stat-row">
+        <span class="stat"
+          >picked cells: <strong>{{ virtualCounts().cells }}</strong></span
+        >
+        <span class="stat"
+          >ranges: <strong>{{ virtualCounts().ranges }}</strong></span
+        >
+        <span class="stat"
+          >slice size: <strong>{{ virtualCounts().bytes }} bytes</strong></span
+        >
+      </div>
+
+      <nge-table-highlight-demo
+        [config]="virtualConfig"
+        [maxHeight]="520"
+        [rows]="virtualRows"
+        [(state)]="virtualState"
+      />
+    </section>
+
+    <!-- 4 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>4. Highlighting a pinned column</h4>
+      <p class="story-description">
+        <code>name</code> is pinned left and <code>owner</code> right. Highlight cells in both, then
+        scroll sideways. A pinned lane is <code>position: sticky</code> and scrolls over the center
+        lane, so a highlighted pinned cell must stay <strong>opaque</strong> — a translucent tint
+        would show the center cells sliding underneath it.
+      </p>
+
+      <nge-table-highlight-demo
+        [config]="pinnedConfig"
+        [rows]="pinnedRows"
+        [(state)]="pinnedState"
+      />
+    </section>
+
+    <!-- 5 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>5. A range follows the view, a picked cell follows its record</h4>
+      <p class="story-description">
+        Shift-click out a block, then sort. The <strong>descriptor</strong>'s endpoints are row ids,
+        so they follow their records — but which rows lie between them is resolved against the
+        current sort order, so the block re-shapes rather than travelling intact. Individually
+        picked cells, being enumerated by id, stay exactly where they were put.
+      </p>
+      <p class="story-description">
+        This is a deliberate reading of "the block the user dragged out", and it is the one AG
+        Grid's coordinate-based ranges get wrong in the other direction — theirs survive a scroll
+        but not a sort. ARCH-269 and ARCH-270 inherit this decision.
+      </p>
+
+      <div class="controls">
+        <button
+          type="button"
+          (click)="sortExternally('amount', false)"
+          >Sort amount ↑</button
+        >
+        <button
+          type="button"
+          (click)="sortExternally('amount', true)"
+          >Sort amount ↓</button
+        >
+        <button
+          type="button"
+          (click)="clearSort()"
+          >Clear sort</button
+        >
+      </div>
+
+      <nge-table-highlight-demo
+        [config]="sortableConfig"
+        [rows]="sortableRows"
+        [(state)]="sortableState"
+      />
+
+      <div class="state-readout">
+        <h5>state.ngeHighlight.ranges</h5>
+        <pre>{{ sortableRangeJson() }}</pre>
+      </div>
+    </section>
+
+    <!-- 6 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>6. Exporting only the highlighted cells</h4>
+      <p class="story-description">
+        <strong>Two independent addons composing without importing each other.</strong> The export
+        seam takes a <code>cellPredicate</code> and has never heard of highlighting; the highlight
+        addon supplies one and has never heard of exporting. They meet on the table instance and
+        nowhere else — which is exactly what ARCH-251's CSV formatter will build on.
+      </p>
+
+      <div class="code-block">
+        <pre>
+table.readNgeExportData({{ "{" }} cellPredicate: highlight.predicate() {{ "}" }});</pre>
+      </div>
+
+      <div class="controls">
+        <button
+          type="button"
+          (click)="exportHighlighted()"
+          >Export highlighted only</button
+        >
+        <button
+          type="button"
+          (click)="exportEverything()"
+          >Export everything</button
+        >
+        <button
+          type="button"
+          (click)="clearExportResult()"
+          >Clear result</button
+        >
+      </div>
+
+      <nge-table-highlight-demo
+        #exportDemo
+        [config]="exportConfig"
+        [rows]="exportRows"
+        [(state)]="exportState"
+      />
+
+      <div class="state-readout">
+        <h5>{{ exportSummary() }}</h5>
+        @if (exportPreview()) {
+          <pre>{{ exportPreview() }}</pre>
+        }
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

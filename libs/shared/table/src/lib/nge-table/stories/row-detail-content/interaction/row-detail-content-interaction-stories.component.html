@@ -1,0 +1,196 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Row-Detail Content (Interaction)</h2>
+    <p class="intro-text">
+      A <code>row-detail</code> band is the only surface in the table as wide as the table itself,
+      which is what lets it hold content a cell cannot. Below, one band carries
+      <strong>two independent charts side by side</strong> — a crosshair trend and a lag cloud, both
+      built from the same twelve numbers on the row. Expand a row to see them.
+    </p>
+    <p class="intro-text">
+      <strong>Drag <code>rowDetailHeight</code> in the Controls panel.</strong> Both charts follow
+      it, because neither carries a height of its own — the band declares one and the content claims
+      it by reading <code>--nge-table-row-detail-height</code>. That single CSS rule is this
+      story's subject; everything else is the two charts being ordinary charts.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. Two charts in a band, over a windowed table</h4>
+      <p class="story-description">
+        10,000 rows with virtualization on — the regime where the band's height is
+        <em>arithmetic</em> rather than decoration. The virtualizer was told an expanded row is
+        <code>rowHeight + rowDetailHeight</code> tall and placed every row beneath it on that basis,
+        so the band takes a fixed height and scrolls anything past it. Open a row, then scroll: the
+        rows below stay exactly where the window put them.
+      </p>
+      <div class="hint">
+        Move the pointer across the <strong>left</strong> chart — the dashed guide snaps to the
+        nearest day and the shared card lists all three series at that x. Hover a point on the
+        <strong>right</strong> chart for its own tooltip, and click a legend entry to isolate a lag.
+        Two charts, two independent interaction surfaces, one band.
+      </div>
+      <div class="table-container">
+        <nge-table
+          [config]="windowedConfig()"
+          [state]="windowedState()"
+          (stateChange)="onWindowedState($event)"
+        >
+          <ng-template
+            ngeTableSlot="row-detail"
+            [ngeTableSlotOf]="windowedRows"
+            let-detail
+          >
+            @if (detail.isExpanded) {
+              <div
+                class="detail-band"
+                [style.gap.px]="chartGap()"
+              >
+                <div class="detail-band__chart">
+                  <h5 class="detail-band__title">{{ detail.row.name }} — trend over 12 days</h5>
+                  <div class="detail-band__plot">
+                    <nge-chart
+                      [config]="trendConfigFor(detail.row)"
+                      [chromelessTooltip]="true"
+                    >
+                      <ng-template
+                        #ngeChartTooltip
+                        let-content
+                      >
+                        <div class="crosshair-tip">
+                          <div class="crosshair-tip__header">{{ content?.label }}</div>
+                          @for (tipRow of rowsOf(content); track tipRow.label) {
+                            <div class="crosshair-tip__row">
+                              <span
+                                class="crosshair-tip__swatch"
+                                [style.background]="tipRow.color"
+                              ></span>
+                              <span class="crosshair-tip__label">{{ tipRow.label }}</span>
+                              <span class="crosshair-tip__value">{{ tipRow.value }}</span>
+                            </div>
+                          }
+                        </div>
+                      </ng-template>
+                    </nge-chart>
+                  </div>
+                </div>
+
+                <div class="detail-band__chart">
+                  <h5 class="detail-band__title">Same series against itself, at three lags</h5>
+                  <div class="detail-band__plot">
+                    <nge-chart [config]="lagConfigFor(detail.row)" />
+                  </div>
+                </div>
+              </div>
+            }
+          </ng-template>
+        </nge-table>
+      </div>
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. The state, which is what the contract actually moves</h4>
+      <p class="story-description">
+        Expansion is an ordinary slice of <code>NgeTableState</code> — id-keyed, JSON-serialisable,
+        and persistable like the rest of a user's view. A band full of charts changes nothing about
+        that: the charts are markup the slice decides whether to render.
+      </p>
+      <div class="state-row">
+        <div class="state-readout">
+          <span class="state-readout__label">state.expanded — {{ windowedOpenCount() }} open</span>
+          <pre>{{ windowedExpandedJson() }}</pre>
+        </div>
+        <div class="host-controls">
+          <p class="story-description">
+            Writing the slice from OUTSIDE the table proves the other half of the round trip, which
+            a click on the chevron never shows. Host-pushed state is deliberately
+            <strong>silent</strong> — it emits no <code>NgeTableEvent</code>.
+          </p>
+          <button
+            type="button"
+            (click)="openFromHost(0)"
+          >
+            Open row 1
+          </button>
+          <button
+            type="button"
+            (click)="openFromHost(4)"
+          >
+            Open row 5
+          </button>
+          <button
+            type="button"
+            (click)="openFromHost(2500)"
+          >
+            Open row 2501 (off-screen)
+          </button>
+          <button
+            type="button"
+            (click)="collapseAll()"
+          >
+            Collapse all
+          </button>
+          <p class="story-description">
+            The third one opens a row the window has not rendered. Scroll down to it — the band is
+            already open when it arrives, because the state named the row rather than the element.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. The same band, un-windowed</h4>
+      <p class="story-description">
+        Six rows, virtualization off. The band takes the token as a definite height here too, and
+        content past it scrolls exactly as it does in a window — the two regimes agree, which is
+        what let the open be animated (a transition needs two definite endpoints). The band markup
+        is <strong>character-for-character the same</strong>; only the table's config differs. That
+        is what makes the height rule below portable rather than a fix for one mode.
+      </p>
+      <div class="table-container table-container--flow">
+        <nge-table
+          [config]="flowConfig()"
+          [state]="flowState()"
+          (stateChange)="onFlowState($event)"
+        >
+          <ng-template
+            ngeTableSlot="row-detail"
+            [ngeTableSlotOf]="flowRows"
+            let-detail
+          >
+            @if (detail.isExpanded) {
+              <div
+                class="detail-band"
+                [style.gap.px]="chartGap()"
+              >
+                <div class="detail-band__chart">
+                  <h5 class="detail-band__title">{{ detail.row.name }} — trend over 12 days</h5>
+                  <div class="detail-band__plot">
+                    <nge-chart [config]="trendConfigFor(detail.row)" />
+                  </div>
+                </div>
+
+                <div class="detail-band__chart">
+                  <h5 class="detail-band__title">Same series against itself, at three lags</h5>
+                  <div class="detail-band__plot">
+                    <nge-chart [config]="lagConfigFor(detail.row)" />
+                  </div>
+                </div>
+              </div>
+            }
+          </ng-template>
+        </nge-table>
+      </div>
+      <p class="story-description">
+        A band can also close itself — <code>detail.toggleExpanded</code> is on the context for
+        exactly that, because a projected template resolves DI from its <em>declaration</em>
+        injector and so cannot reach the table to ask.
+      </p>
+    </section>
+  </div>
+</nge-storybook-review-container>

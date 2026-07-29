@@ -1,0 +1,92 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Cell Textarea Usage</h2>
+    <p class="intro-text"
+      >A column names <code>&lt;nge-cell-textarea&gt;</code> and the table renders it — there is no
+      template to write. It is the library's long-text editor and the first whose commit is
+      <strong>explicit</strong>: a panel with <strong>Cancel</strong> and <strong>Apply</strong>,
+      because <kbd>enter</kbd> has to stay a newline and blur has to stay harmless.</p
+    >
+
+    <section class="story-section">
+      <h4>1. Declaring the column</h4>
+      <p class="story-description"
+        >One <code>meta.ngeEdit</code> entry. The cell shows read-only truncated text until it is
+        activated, then the panel opens with the caret already in the field.</p
+      >
+      <pre class="code-block">{{ declareSnippet }}</pre>
+      <nge-table-textarea-demo
+        [(rows)]="basicRows"
+        [(state)]="basicState"
+      />
+    </section>
+
+    <section class="story-section">
+      <h4>2. ⚠️ <code>getRowId</code> stops being optional</h4>
+      <p class="story-description"
+        >The moment any column opts into editing, the config must identify its rows. This is the one
+        mistake in this story that looks like data corruption rather than a bug, so the library
+        throws in dev instead of degrading.</p
+      >
+      <pre class="code-block">{{ getRowIdSnippet }}</pre>
+    </section>
+
+    <section class="story-section">
+      <h4>3. The options a column can declare</h4>
+      <p class="story-description"
+        >All optional. They ride <code>editorInputs</code> rather than a top-level meta key, because
+        a cell context carries a column <em>id</em> and no column — an editor cannot read column
+        meta by any route. <code>ngeCellTextareaEdit()</code> exists because that bag is
+        <code>Record&lt;string, unknown&gt;</code> and the adapter drops a misspelled key in
+        silence; going through the helper turns it into a compile error.</p
+      >
+      <pre class="code-block">{{ optionsSnippet }}</pre>
+      <nge-table-textarea-demo
+        [(rows)]="optionsRows"
+        [(state)]="optionsState"
+        [editorRows]="8"
+        [maxlength]="120"
+        placeholder="Describe this item…"
+      />
+    </section>
+
+    <section class="story-section">
+      <h4>4. The host's side — the table proposes, the host applies</h4>
+      <p class="story-description"
+        >Pressing <strong>Apply</strong> emits an <code>edit-intent</code> carrying
+        <code>columnId</code>, <code>rowId</code>, <code>value</code> and
+        <code>previousValue</code>. Nothing changes until you apply it and hand new
+        <code>data</code> back in.</p
+      >
+      <p class="story-description"
+        ><code>edit-intent</code> shares its payload shape with <code>fill-intent</code> (ARCH-271),
+        so one <code>applyPatches</code> serves both — and they stay two separate kinds, so a host
+        may accept one and decline the other.</p
+      >
+      <pre class="code-block">{{ hostSnippet }}</pre>
+      <nge-table-textarea-demo
+        [(rows)]="hostRows"
+        [(state)]="hostState"
+      />
+    </section>
+
+    <section class="story-section">
+      <h4>5. When to reach for something else</h4>
+      <p class="story-description"
+        >This editor is a <strong>default</strong>, not a fixture. A
+        <code>[ngeCell]</code> template for the same column shadows it entirely — the slot registry
+        consults projected templates first — so a consumer who needs a resize grip, markdown,
+        autosize-to-content or per-column validation writes their own control and this is simply
+        never reached. That seam is what keeps the library's own editors small.</p
+      >
+      <p class="story-description"
+        >For short single-line values use <code>&lt;nge-cell-input&gt;</code>; for a fixed set of
+        choices use <code>&lt;nge-cell-select&gt;</code>. Reach for this one when the column holds
+        prose.</p
+      >
+    </section>
+  </div>
+</nge-storybook-review-container>

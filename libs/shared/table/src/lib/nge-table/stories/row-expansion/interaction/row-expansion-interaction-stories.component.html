@@ -1,0 +1,469 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Row Expansion (Interaction)</h2>
+    <p class="intro-text">
+      Wave 0 shipped the <code>row-detail</code> slot and left <code>state.expanded</code> for a
+      host to write. What was missing was something a <strong>user</strong> could touch, and an
+      answer to what an expanded band costs a virtualized table.
+      <strong>Example 2 is that answer</strong>, and it cannot be checked anywhere but a browser:
+      rows are positioned from sizes the virtualizer was handed, so a band the arithmetic does not
+      know about puts its row on top of the next one — a failure that is visual rather than thrown,
+      and invisible to jsdom, which lays nothing out at all.
+    </p>
+
+    <section class="story-section">
+      <h4>1. The flag, on and off</h4>
+      <p class="story-description">
+        <code>enableRowExpansion</code> defaults to <strong>false</strong>, and with it off the
+        table renders exactly as it did before the feature existed — no injected column, no chevron,
+        nothing added to the tab order. Toggle the control in the Storybook panel and only the
+        leading column appears.
+      </p>
+      <div class="table-container">
+        <nge-table
+          [config]="toggleConfig()"
+          [state]="toggleState()"
+          (stateChange)="onToggleState($event)"
+        >
+          <ng-template
+            ngeTableSlot="row-detail"
+            [ngeTableSlotOf]="rows"
+            let-detail
+          >
+            @if (detail.isExpanded) {
+              <div class="detail-body">
+                <strong>{{ detail.row.name }}</strong>
+                <span>owner: {{ detail.row.owner.name }}</span>
+                <span>quantity: {{ detail.row.quantity }}</span>
+              </div>
+            }
+          </ng-template>
+        </nge-table>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>2. A detail band in a virtualized table</h4>
+      <p class="story-description">
+        Ten thousand rows at 40px each, with a band declared at <strong>160px</strong> — four times
+        a row's height, so an overlap would be unmistakable rather than a subtle seam. The band's
+        height is <em>declared</em> (<code>config.rowDetailHeight</code>) rather than measured,
+        because virtualization needs every row's size to be computable before it is rendered.
+      </p>
+      <p class="story-description">
+        <strong>Open a row near the top.</strong> The row beneath it moves <em>down</em> by the
+        band's height rather than being covered by it, and the scrollbar grows by exactly that much.
+        Then scroll: the band travels with its row and the spacing below stays correct the whole
+        way.
+      </p>
+      <p class="story-description">
+        <strong>What proves it rather than suggesting it:</strong> open a row, scroll to the very
+        bottom, and confirm the last row is still fully reachable. A window whose total size had not
+        grown would end one band short.
+      </p>
+      <div class="stat-row">
+        <span class="stat">rows: {{ largeRows.length }}</span>
+        <span class="stat">open: {{ virtualOpenCount() }}</span>
+        <span class="stat">band height: 160px · row height: 40px</span>
+      </div>
+      <div class="table-container table-container--tall">
+        <nge-table
+          [config]="virtualConfig"
+          [state]="virtualState()"
+          (stateChange)="onVirtualState($event)"
+        >
+          <ng-template
+            ngeTableSlot="row-detail"
+            [ngeTableSlotOf]="largeRows"
+            let-detail
+          >
+            @if (detail.isExpanded) {
+              <div class="detail-body detail-body--tall">
+                <strong>{{ detail.row.name }}</strong>
+                <span>
+                  A band four times a row's height. If the arithmetic were wrong, this block would
+                  be sitting on top of the next row rather than pushing it down.
+                </span>
+                <span
+                  >owner: {{ detail.row.owner.name }} · quantity: {{ detail.row.quantity }}</span
+                >
+              </div>
+            }
+          </ng-template>
+        </nge-table>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>3. Expand-all writes a shorthand, not ten thousand keys</h4>
+      <p class="story-description">
+        <code>state.expanded</code> is <code>Record&lt;string, boolean&gt; | true</code>, and the
+        <code>true</code> is not a convenience — it is what makes expand-all affordable at scale.
+        Press the header chevron and read the state below: <strong>one boolean</strong>, not a map
+        with an entry per row.
+      </p>
+      <p class="story-description">
+        The consequence every reader carries: a predicate treating this slice as a
+        <code>Record</code> is wrong for exactly the gesture most likely to produce a large payload.
+        The band arithmetic, the chevron rendering and the emitted event all handle it.
+      </p>
+      <div class="table-container">
+        <nge-table
+          [config]="expandAllConfig"
+          [state]="expandAllState()"
+          (stateChange)="onExpandAllState($event)"
+        >
+          <ng-template
+            ngeTableSlot="row-detail"
+            [ngeTableSlotOf]="rows"
+            let-detail
+          >
+            @if (detail.isExpanded) {
+              <div class="detail-body">
+                <strong>{{ detail.row.name }}</strong>
+                <span>{{ detail.row.owner.name }}</span>
+              </div>
+            }
+          </ng-template>
+        </nge-table>
+      </div>
+      <pre class="state-readout">state.expanded = {{ expandAllJson() }}</pre>
+    </section>
+
+    <section class="story-section">
+      <h4>4. Disabled, never absent</h4>
+      <p class="story-description">
+        <code>enableRowExpansion</code> also takes a <strong>predicate over the row datum</strong>,
+        so only some rows can be opened — here, the {{ gatedOpenableCount() }} of
+        {{ rows.length }} whose quantity is above 250. The rows it rejects keep their chevron and
+        render it <strong>disabled</strong>: a control that silently vanished would read as a
+        rendering bug, where a disabled one reads as a rule.
+      </p>
+      <div class="table-container">
+        <nge-table
+          [config]="gatedConfig"
+          [state]="gatedState()"
+          (stateChange)="onGatedState($event)"
+        >
+          <ng-template
+            ngeTableSlot="row-detail"
+            [ngeTableSlotOf]="rows"
+            let-detail
+          >
+            @if (detail.isExpanded) {
+              <div class="detail-body">
+                <strong>{{ detail.row.name }}</strong>
+                <span>quantity {{ detail.row.quantity }} — above the threshold, so it opens.</span>
+              </div>
+            }
+          </ng-template>
+        </nge-table>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>5. The band collapses itself</h4>
+      <p class="story-description">
+        A projected <code>ng-template</code> resolves DI from its <strong>declaration</strong>
+        injector — the consumer's — so a detail band cannot inject the table and ask it to close.
+        <code>toggleExpanded</code> therefore rides on <code>NgeRowContext</code> beside
+        <code>isExpanded</code>, the same arrangement the swappable selection control and the
+        editing callbacks use. The <em>Close</em> button below is calling it.
+      </p>
+      <div class="table-container">
+        <nge-table
+          [config]="selfCloseConfig"
+          [state]="selfCloseState()"
+          (stateChange)="onSelfCloseState($event)"
+        >
+          <ng-template
+            ngeTableSlot="row-detail"
+            [ngeTableSlotOf]="rows"
+            let-detail
+          >
+            @if (detail.isExpanded) {
+              <div class="detail-body">
+                <strong>{{ detail.row.name }}</strong>
+                <span>owner: {{ detail.row.owner.name }}</span>
+                <button
+                  type="button"
+                  (click)="detail.toggleExpanded()"
+                  >Close this row</button
+                >
+              </div>
+            }
+          </ng-template>
+        </nge-table>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>6. A domain's own disclosure control</h4>
+      <p class="story-description">
+        The native chevron is the <strong>default</strong>, not the only option. Project
+        <code>expand-cell</code> and <code>expand-header</code> and the table wears the consuming
+        app's control instead. The context carries <code>isExpanded</code>,
+        <code>canExpand</code> and a <code>toggle</code> callback, so a projected control inherits
+        the capability check without knowing it exists.
+      </p>
+      <p class="story-description">
+        ⚠️ The projected template is consulted <strong>first</strong> and the native control is the
+        <code>&#64;else</code>. Written the other way round a consumer's template would be silently
+        ignored — a central switch standing in front of a seam, which is exactly what the epic's
+        extensibility gate audits for. A projected control also owes itself a
+        <code>$event.stopPropagation()</code>, since it sits inside a row whose click may select.
+      </p>
+      <div class="table-container">
+        <nge-table
+          [config]="projectedConfig"
+          [state]="projectedState()"
+          (stateChange)="onProjectedState($event)"
+        >
+          <ng-template
+            ngeTableSlot="expand-cell"
+            [ngeTableSlotOf]="rows"
+            let-expand
+          >
+            <button
+              class="domain-chevron"
+              type="button"
+              [class.domain-chevron--open]="expand.isExpanded"
+              [disabled]="!expand.canExpand"
+              (click)="$event.stopPropagation(); expand.toggle()"
+            >
+              {{ expand.isExpanded ? "−" : "+" }}
+            </button>
+          </ng-template>
+
+          <ng-template
+            ngeTableSlot="expand-header"
+            let-expand
+          >
+            <button
+              class="domain-chevron domain-chevron--header"
+              type="button"
+              (click)="$event.stopPropagation(); expand.toggleAll()"
+            >
+              {{ expand.allExpanded ? "−" : "+" }}
+            </button>
+          </ng-template>
+
+          <ng-template
+            ngeTableSlot="row-detail"
+            [ngeTableSlotOf]="rows"
+            let-detail
+          >
+            @if (detail.isExpanded) {
+              <div class="detail-body">
+                <strong>{{ detail.row.name }}</strong>
+                <span>opened by a projected control, not the library's own</span>
+              </div>
+            }
+          </ng-template>
+        </nge-table>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>7. The host drives it, and the table stays quiet</h4>
+      <p class="story-description">
+        Expansion is ordinary controlled state, so a host can write the slice with no gesture at all
+        — which is what Wave 0 shipped, and what restoring a saved view does. The buttons below
+        write <code>state.expanded</code> from outside the table.
+      </p>
+      <p class="story-description">
+        ⚠️ <strong>Host-driven state emits nothing.</strong> Only changes the engine routed announce
+        themselves, or restoring a saved layout would replay as user activity in a consumer's log.
+        Watch the event list: it moves for a chevron and stays still for a button.
+      </p>
+      <div class="controls">
+        <button
+          type="button"
+          (click)="openFirstTwo()"
+          >Open the first two</button
+        >
+        <button
+          type="button"
+          (click)="openEverything()"
+          >Write the true shorthand</button
+        >
+        <button
+          type="button"
+          (click)="closeAllHostDriven()"
+          >Close everything</button
+        >
+        <button
+          type="button"
+          (click)="clearHostDrivenEvents()"
+          >Clear the log</button
+        >
+      </div>
+      <div class="table-container">
+        <nge-table
+          [config]="hostDrivenConfig"
+          [state]="hostDrivenState()"
+          (ngeTableEvent)="onHostDrivenEvent($event)"
+          (stateChange)="onHostDrivenState($event)"
+        >
+          <ng-template
+            ngeTableSlot="row-detail"
+            [ngeTableSlotOf]="rows"
+            let-detail
+          >
+            @if (detail.isExpanded) {
+              <div class="detail-body">
+                <strong>{{ detail.row.name }}</strong>
+                <span>{{ detail.row.owner.name }}</span>
+              </div>
+            }
+          </ng-template>
+        </nge-table>
+      </div>
+      <div class="event-log">
+        @for (entry of hostDrivenEvents(); track $index) {
+          <span class="event-log__entry">{{ entry }}</span>
+        } @empty {
+          <span class="event-log__entry event-log__entry--empty">
+            no events yet — press a chevron, then a button
+          </span>
+        }
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>8. All of it at once</h4>
+      <p class="story-description">
+        Expansion, selection, pinning and virtualization composed over ten thousand rows — every
+        axis a band has to survive. ⚠️ Note the column order: the
+        <strong>chevron leads the checkbox</strong>, because it describes the row's own shape where
+        a checkbox describes its membership in a set the user is building. Both columns are
+        injected, and they agree on the order rather than each forcing itself to the front.
+      </p>
+      <p class="story-description">
+        Open a few rows near the top, select some, sort by <strong>Name</strong>, then scroll: the
+        bands stay with their records, the ticks stay with theirs, and the pinned lanes keep sliding
+        over the center lane without either coming apart.
+      </p>
+      <div class="stat-row">
+        <span class="stat">selected: {{ composedSelectedCount() }}</span>
+      </div>
+      <div class="table-container table-container--tall table-container--narrow">
+        <nge-table
+          [config]="composedConfig"
+          [state]="composedState()"
+          (stateChange)="onComposedState($event)"
+        >
+          <ng-template
+            ngeTableSlot="row-detail"
+            [ngeTableSlotOf]="largeRows"
+            let-detail
+          >
+            @if (detail.isExpanded) {
+              <div class="detail-body">
+                <strong>{{ detail.row.name }}</strong>
+                <span>owner: {{ detail.row.owner.name }}</span>
+              </div>
+            }
+          </ng-template>
+        </nge-table>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>9. The band animates; the rows beneath do not</h4>
+      <p class="story-description">
+        The band's height is <em>declared</em>, and a declared height is a transitionable one — so
+        the open is a plain CSS transition with no measurement anywhere. The usual accordion blocker
+        is that <code>height: auto</code> cannot be animated, which is what pushes implementations
+        into JavaScript measurement or a FLIP library; example 2's decision removed it.
+      </p>
+      <p class="story-description">
+        <strong>The rows beneath jump, deliberately.</strong> Animating them means transitioning
+        <code>top</code>, and <code>transform</code> is banned in this library because it creates a
+        stacking context that breaks the sticky pinned lanes. That is also what rules out GSAP: its
+        FLIP plugin — the standard tool for exactly this problem — animates by applying transforms,
+        so it lands on the same wall as a hand-rolled version, having added a runtime dependency.
+        <code>top</code> transitions layout rather than the compositor, on every rendered row,
+        against the frame budget the performance baseline froze.
+      </p>
+      <p class="story-description">
+        ⚠️ <strong>Open and close a row in each table.</strong> The two regimes differ, and the
+        difference is not a bug. The left table is in normal flow, so the rows beneath simply follow
+        the band — free from the layout, no code involved — and both directions animate. The right
+        table is windowed: its rows take their new positions in one frame and the band grows into
+        the space they made, so the <strong>close is instant</strong>. A closing band would go on
+        painting underneath a row that has already moved back over it. The band animates in the
+        direction where the space already exists.
+      </p>
+      <p class="story-description">
+        Two independent switches turn it off. Drive <strong>duration</strong> to <code>0ms</code>
+        for the consumer's escape — no media query needed. For the accessibility one, set
+        <code>prefers-reduced-motion: reduce</code> in DevTools → Rendering →
+        <em>Emulate CSS media feature prefers-reduced-motion</em>; the band and the chevron both
+        stop moving, whatever the token says.
+      </p>
+      <div class="stat-row">
+        <span class="stat">--nge-table-row-detail-duration: {{ durationCss() }}</span>
+      </div>
+      <div class="regime-pair">
+        <div class="regime">
+          <span class="regime__label">In flow — opens and closes, rows follow</span>
+          <div
+            class="table-container"
+            [style.--nge-table-row-detail-duration]="durationCss()"
+          >
+            <nge-table
+              [config]="flowAnimationConfig"
+              [state]="flowAnimationState()"
+              (stateChange)="onFlowAnimationState($event)"
+            >
+              <ng-template
+                ngeTableSlot="row-detail"
+                [ngeTableSlotOf]="rows"
+                let-detail
+              >
+                @if (detail.isExpanded) {
+                  <div class="detail-body detail-body--tall">
+                    <strong>{{ detail.row.name }}</strong>
+                    <span>owner: {{ detail.row.owner.name }}</span>
+                    <span>quantity: {{ detail.row.quantity }}</span>
+                  </div>
+                }
+              </ng-template>
+            </nge-table>
+          </div>
+        </div>
+        <div class="regime">
+          <span class="regime__label">Windowed — opens only, rows jump</span>
+          <div
+            class="table-container"
+            [style.--nge-table-row-detail-duration]="durationCss()"
+          >
+            <nge-table
+              [config]="windowAnimationConfig"
+              [state]="windowAnimationState()"
+              (stateChange)="onWindowAnimationState($event)"
+            >
+              <ng-template
+                ngeTableSlot="row-detail"
+                [ngeTableSlotOf]="largeRows"
+                let-detail
+              >
+                @if (detail.isExpanded) {
+                  <div class="detail-body detail-body--tall">
+                    <strong>{{ detail.row.name }}</strong>
+                    <span>owner: {{ detail.row.owner.name }}</span>
+                    <span>quantity: {{ detail.row.quantity }}</span>
+                  </div>
+                }
+              </ng-template>
+            </nge-table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

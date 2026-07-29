@@ -1,0 +1,86 @@
+// One table edited with the library's own editors. The height is bound inline on
+// `nge-table` itself (see the template) rather than set here — the host is a flex
+// column whose viewport is `flex: 1 1 auto; min-height: 0`, so a `max-height` on a
+// wrapper is simply overflowed and nothing scrolls.
+//
+// ⚠️ Nothing here styles a field. The editors carry their own stylesheets and read
+// `--nge-table-editor-*`, which is the whole difference from ARCH-292's demo — a
+// consumer adopting them writes no CSS either.
+.nge-table-editors-demo {
+  display: block;
+  margin-bottom: 16px;
+
+  .nge-table-editors-demo__controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+
+    button {
+      padding: 6px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      background: var(--nge-table-surface, #ffffff);
+      border: 1px solid var(--nge-table-border-color, #e0e0e0);
+      border-radius: 4px;
+
+      &:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+      }
+    }
+  }
+
+  .nge-table-editors-demo__hint {
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 12px;
+
+    kbd {
+      padding: 1px 5px;
+      font-family: inherit;
+      font-size: 11px;
+      background: var(--nge-table-surface-variant, #f5f5f5);
+      border: 1px solid var(--nge-table-border-color, #e0e0e0);
+      border-radius: 3px;
+    }
+  }
+
+  .nge-table-editors-demo__override {
+    letter-spacing: 0.06em;
+  }
+
+  .nge-table-editors-demo__readouts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 8px;
+  }
+
+  .nge-table-editors-demo__readout {
+    margin-top: 8px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    background: var(--nge-table-surface-variant, #f5f5f5);
+    border-radius: 6px;
+
+    h5 {
+      margin: 0;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    pre {
+      margin: 8px 0 0;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+  }
+
+  .nge-table-editors-demo__ignored {
+    margin: 8px 0 0;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 12px;
+  }
+}

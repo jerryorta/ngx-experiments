@@ -1,0 +1,182 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Inline Editing (Interaction)</h2>
+    <p class="intro-text">
+      Inline editing is a <strong>cell pattern, not a table feature</strong>. A column opts in with
+      <code>meta.ngeEdit.enabled</code>; the cell renders read-only text until
+      <code>cell.isEditing()</code> flips, and the control that appears is the consumer's own
+      <code>[ngeCell]</code> template. No editor ships from the library in this story — those are
+      ARCH-293 and ARCH-294.
+    </p>
+    <p class="intro-text">
+      <strong>Nothing here writes your data.</strong> Committing announces an
+      <code>edit-intent</code> and stops; the demo component wrapping each table applies the patch
+      to its own rows. Section 2 turns that listener off to show what the library does on its own.
+    </p>
+    <p class="intro-text">
+      ⚠️ <strong>This page needs a human in a foregrounded tab.</strong> An untrusted event triggers
+      no browser default, so a scripted <kbd>space</kbd> never types a character and a scripted drag
+      never selects text — and an automation tab is <code>visibilityState: 'hidden'</code>, which
+      suspends <code>requestAnimationFrame</code> so zoneless change detection never flushes and
+      activation reads as broken when it is not.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. Activation is the default</h4>
+      <p class="story-description">
+        Click a cell in <strong>Name</strong> or <strong>Description</strong>. An input appears,
+        focused and holding the current value. <kbd>enter</kbd> or clicking away commits;
+        <kbd>esc</kbd> abandons it. Everything else in the row is read-only and behaves as it always
+        did.
+      </p>
+      <p class="story-description">
+        Also try <kbd>tab</kbd> to a row and press <kbd>enter</kbd>. The row is a tab stop because
+        the table is editable — the same terms on which selection makes it one. ⚠️ It opens the
+        row's <em>first</em> editable column, because without arrow-key grid navigation a focused
+        row carries no notion of which cell. That is what "activate on <kbd>enter</kbd>" can
+        honestly mean until that story lands.
+      </p>
+      <p class="story-description">
+        The reason activation is the default is arithmetic: thirty visible rows across three
+        editable columns would be ninety control instances nobody asked to edit. Activation never
+        builds them.
+      </p>
+
+      <nge-table-edit-demo
+        [(rows)]="activateRows"
+        [(state)]="activateState"
+      />
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. A host that ignores the intent</h4>
+      <p class="story-description">
+        The same table with the <code>edit-intent</code> handler switched off. Edit a cell and
+        commit it: the editor opens, the value is collected, the proposal arrives in the readout —
+        and the table does not change.
+      </p>
+      <p class="story-description">
+        ⚠️ <strong>This is correct behaviour, not a bug.</strong> The library owns no data, so it
+        announces the patch and waits. A host that has not opted into editing sees no edit. It is
+        the same contract <code>fill-intent</code> established in ARCH-271, and both kinds carry the
+        same <code>NgeCellPatch</code> — so one <code>applyPatches</code> serves both while the two
+        kinds stay distinct, letting a host accept a fill and reject a hand-typed edit.
+      </p>
+
+      <nge-table-edit-demo
+        [applyIntents]="false"
+        [(rows)]="ignoreRows"
+        [(state)]="ignoreState"
+      />
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. Always-live, and the control the guard exists for</h4>
+      <p class="story-description">
+        <strong>Quantity</strong> declares <code>meta.ngeEdit.alwaysLive</code>, so its slider is
+        there without being activated. That is the case the opt-out exists for — a column whose
+        control <em>is</em> the reading, scanned down rather than opened one cell at a time — and it
+        is a per-column decision, never a table-wide mode.
+      </p>
+      <p class="story-description">
+        ⚠️
+        <strong
+          >The slider is a <code>div</code> carrying <code>role="slider"</code>, deliberately not an
+          <code>&lt;input type="range"&gt;</code>.</strong
+        >
+        A native range input was already matched by the old tag-list guard and would demonstrate
+        nothing. This is the shape a design-library control actually takes. Cell ranges are switched
+        on below — drag the thumb and confirm the value moves and
+        <strong>no cells are selected</strong>. Then drag on the plain text of a read-only cell
+        beside it: that <em>does</em> sweep a range, which is the contrast.
+      </p>
+      <p class="story-description">
+        Arrow keys step it too, so the control is reachable without a pointer.
+      </p>
+
+      <nge-table-edit-demo
+        [alwaysLiveQuantity]="true"
+        [editableColumns]="['name', 'quantity']"
+        [enableCellRange]="true"
+        [(rows)]="sliderRows"
+        [(state)]="sliderState"
+      />
+    </section>
+
+    <!-- 4 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>4. The four keyboard collisions</h4>
+      <p class="story-description">
+        Row selection and cell ranges are both switched on here, so every shortcut an open editor
+        can collide with is live. Open an editor in <strong>Name</strong> and work through them:
+      </p>
+      <ul class="story-description">
+        <li>
+          <kbd>space</kbd> — types a space. It does <strong>not</strong> toggle the row's selection,
+          and the page does not scroll. Press it on the row itself (not in the input) and selection
+          toggles as it always did.
+        </li>
+        <li>
+          <kbd>esc</kbd> — cancels the edit and <strong>leaves your cell range alone</strong>.
+          Select a block of cells first, then open an editor and press it: the block is still there.
+          Three addons bind <kbd>esc</kbd> at the document; the cell stops the event before any of
+          them sees it.
+        </li>
+        <li>
+          <kbd>cmd</kbd>/<kbd>ctrl</kbd> + <kbd>a</kbd> — selects the field's text, not every cell
+          in the table.
+        </li>
+        <li>
+          <kbd>cmd</kbd>/<kbd>ctrl</kbd> + <kbd>space</kbd> — reaches neither the editor nor the
+          column selection. The column route is scoped to a focused header, which an in-cell editor
+          never is.
+        </li>
+      </ul>
+      <p class="story-description">
+        ⚠️ Also check the thing that would be easy to break: a plain click into an input must
+        <em>focus</em> it. The row suppresses the browser's text-drag on <kbd>shift</kbd>-click
+        only, precisely because an unconditional suppression would take focus with it.
+      </p>
+
+      <nge-table-edit-demo
+        [enableCellRange]="true"
+        [enableRowSelection]="true"
+        [(rows)]="keyboardRows"
+        [(state)]="keyboardState"
+      />
+    </section>
+
+    <!-- 5 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>5. Scrolling an in-progress edit out of the window</h4>
+      <p class="story-description">
+        Two thousand rows, virtualized. Open an editor near the top, then scroll it well out of view
+        and come back.
+      </p>
+      <p class="story-description">
+        ⚠️ <strong>The edit is cancelled, and that is the point.</strong> Virtualization recycles
+        DOM — the element that rendered your row now renders a different one — so a draft that
+        survived would land on whichever record took the slot. That failure reads as data corruption
+        rather than as a bug, which is why the edit is abandoned instead. Nothing is proposed: the
+        readout stays as it was.
+      </p>
+      <p class="story-description">
+        The same rule covers a row leaving the row model for any other reason — a filter, a sort
+        that drops it, or new <code>data</code> arriving.
+      </p>
+
+      <nge-table-edit-demo
+        [enableVirtualization]="true"
+        [maxHeight]="420"
+        [(rows)]="virtualRows"
+        [(state)]="virtualState"
+      />
+    </section>
+  </div>
+</nge-storybook-review-container>

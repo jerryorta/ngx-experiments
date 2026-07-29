@@ -1,0 +1,113 @@
+// The story panel takes its surface from the same `--nge-table-surface` /
+// `--nge-table-on-surface` the table reads, so prose and table always move
+// together: under one of the ten domain themes that bridge `--nge-table-*`
+// (ARCH-277) both follow the toolbar, and under a theme that does not bridge
+// them (`nge-*`, `gy-*`) both fall back to the library's light-mode defaults.
+.nge-table-usage-stories {
+  display: block;
+  padding: 20px;
+  color: var(--nge-table-on-surface, #1d1b20);
+  background: var(--nge-table-surface, #ffffff);
+
+  .stories-container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    margin-bottom: 8px;
+  }
+
+  .intro-text {
+    margin-bottom: 32px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 16px;
+  }
+
+  .story-section {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+
+    h4 {
+      margin-bottom: 8px;
+      color: var(--nge-table-on-surface, #1d1b20);
+    }
+
+    .story-description {
+      margin-bottom: 16px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 14px;
+    }
+  }
+
+  .code-block {
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    background: var(--nge-table-surface-variant, #f5f5f5);
+    border-radius: 6px;
+
+    pre {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+  }
+
+  // The table owns its own scrolling, so the story only bounds its box. The height
+  // goes on `nge-table` itself, not on this wrapper: the host is a flex column and
+  // the scroller inside it shrinks to fit, whereas a max-height here would simply
+  // be overflowed and nothing would ever scroll vertically.
+  .table-container {
+    nge-table {
+      max-height: 420px;
+    }
+
+    // The fixture's 7 columns come to 1120px, which barely overflows the 1100px
+    // panel. Pinning is only legible against a real horizontal scroll, so the
+    // pinning examples take a narrower box on purpose.
+    &--narrow {
+      max-width: 720px;
+    }
+  }
+
+  // ─── Render-slot examples (ARCH-246) ───────────────────────────────────────
+  //
+  // These styles belong to the STORY, not to the library. What a slot renders is
+  // the consumer's markup carrying the consumer's styles — the whole point of the
+  // seam — so the table ships the band and the story dresses what goes in it.
+
+  // Two lines inside a 40px row: the sizes are chosen to fit, because the cell
+  // clips and a row height is the library's to set, not the story's to fight.
+  .slotted-amount {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 15px;
+
+    small {
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 11px;
+    }
+  }
+
+  .slotted-empty {
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-style: italic;
+  }
+
+  .slotted-footer {
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+  }
+
+  .slotted-toolbar {
+    display: flex;
+    gap: 12px;
+    align-items: baseline;
+
+    small {
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+    }
+  }
+}

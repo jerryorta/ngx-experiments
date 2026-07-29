@@ -1,0 +1,120 @@
+// The story panel takes its surface from the same `--nge-table-surface` /
+// `--nge-table-on-surface` the table reads, so prose and table always move together:
+// under one of the ten domain themes that bridge `--nge-table-*` (ARCH-277) both
+// follow the toolbar, and under a theme that does not bridge them both fall back to the
+// library's light-mode defaults.
+//
+// ⚠️ **Every section's substance is in this file**, not in the component. There is no
+// `config.theme` on `NgeTableConfig`; the table themes exclusively through custom
+// properties, so a theming section IS a scoped wrapper class. Do not "align" this with
+// the charts theming stories, which are TypeScript because charts has a theme object.
+//
+// ⚠️ **Nothing here declares a `--nge-table-editor-*` token.** ARCH-292 ships no
+// editor, so such a token would describe nothing and would have to be bridged inert into
+// ten domain themes — which is exactly what ARCH-277 removed and ARCH-286 had to put
+// back with the feature that reads it. The sections move the tokens the table already
+// publishes and let the control inherit; ARCH-293 adds the editor namespace alongside
+// the editors that consume it.
+.nge-table-inline-edit-theming {
+  display: block;
+  padding: 20px;
+  color: var(--nge-table-on-surface, #1d1b20);
+  background: var(--nge-table-surface, #ffffff);
+
+  .stories-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    margin-bottom: 8px;
+  }
+
+  .intro-text {
+    margin-bottom: 32px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 16px;
+  }
+
+  .story-section {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+
+    h4 {
+      margin-bottom: 8px;
+      color: var(--nge-table-on-surface, #1d1b20);
+    }
+
+    .story-description {
+      margin-bottom: 16px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 14px;
+
+      kbd {
+        padding: 1px 5px;
+        font-family: inherit;
+        font-size: 12px;
+        background: var(--nge-table-surface-variant, #f5f5f5);
+        border: 1px solid var(--nge-table-border-color, #e0e0e0);
+        border-radius: 3px;
+      }
+    }
+
+    // Height is NOT set here: `<nge-table-edit-demo>` binds it inline on `nge-table`
+    // from its `maxHeight` input, and an inline declaration outranks any class. On a
+    // wrapper it would be worse than dead code, because the host is a flex column whose
+    // viewport is `flex: 1 1 auto; min-height: 0` — an ancestor's bound is simply
+    // overflowed and nothing scrolls.
+    .code-example {
+      margin-bottom: 16px;
+      padding: 12px 16px;
+      overflow-x: auto;
+      background: var(--nge-table-surface-variant, #f5f5f5);
+      border-radius: 6px;
+
+      pre {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.6;
+      }
+    }
+  }
+
+  // ─── the themed sections ───────────────────────────────────────────────────
+  //
+  // Each is one scoped class re-declaring tokens, and none of them names an editor.
+  // That is the claim the page is making: an activated cell follows a theme because it
+  // reads the table's own contract, not a vocabulary of its own.
+
+  .branded {
+    --nge-table-focus-ring-color: #7c3aed;
+    --nge-table-focus-ring-width: 3px;
+    --nge-table-surface: #faf5ff;
+    --nge-table-surface-variant: #f3e8ff;
+    --nge-table-border-color: #ddd6fe;
+    --nge-table-row-surface-hover: #f3e8ff;
+  }
+
+  .dark {
+    --nge-table-surface: #18181b;
+    --nge-table-surface-variant: #27272a;
+    --nge-table-on-surface: #f4f4f5;
+    --nge-table-on-surface-variant: #a1a1aa;
+    --nge-table-header-on-surface: #f4f4f5;
+    --nge-table-border-color: #3f3f46;
+    --nge-table-header-border-color: #52525b;
+    --nge-table-pinned-surface: #18181b;
+    --nge-table-pinned-header-surface: #27272a;
+    --nge-table-row-surface-hover: #27272a;
+    --nge-table-focus-ring-color: #60a5fa;
+  }
+
+  .compact {
+    --nge-table-row-height: 30px;
+    --nge-table-header-height: 34px;
+    --nge-table-cell-padding-x: 8px;
+    --nge-table-font-size: 12px;
+    --nge-table-line-height: 16px;
+  }
+}

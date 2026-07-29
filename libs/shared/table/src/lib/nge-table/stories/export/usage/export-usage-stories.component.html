@@ -1,0 +1,299 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Export &amp; CSV (Usage)</h2>
+    <p class="intro-text">
+      Exporting is two independent halves. <code>readNgeExportData()</code> is a
+      <strong>seam</strong> in the library — a pure read over the processed row model that produces
+      one neutral shape and knows no output format at all. <code>toNgeCsv()</code> is an
+      <strong>addon</strong> over that shape — a plain function that knows CSV and nothing else.
+      Adding XLSX or JSON later is a second addon, not a change to the seam.
+    </p>
+    <p class="intro-text">
+      ⚠️ No example on this page imports <code>&#64;tanstack/*</code>. That insulation is what keeps
+      a future engine migration internal to the library.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. Read the table, write a CSV</h4>
+      <p class="story-description">
+        <code>readNgeExportData()</code> is an ordinary method on <code>&lt;nge-table&gt;</code>,
+        so an application reaches it through a <code>viewChild</code> without naming an engine type.
+        The result goes straight to the formatter.
+      </p>
+
+      <div class="code-block">
+        <pre>
+private readonly table = viewChild.required&lt;NgeTableComponent&lt;Row&gt;&gt;('table');
+
+download(): void {{ "{" }}
+  const data = this.table().readNgeExportData();
+  const csv = toNgeCsv(data);
+{{ "}" }}</pre>
+      </div>
+
+      <div class="controls">
+        <button
+          type="button"
+          (click)="read()"
+          >Read this table</button
+        >
+      </div>
+
+      <div class="table-container">
+        <nge-table
+          #basicTable
+          [config]="basicConfig"
+          [(state)]="basicState"
+        />
+      </div>
+
+      @if (defaultCsv()) {
+        <div class="state-readout">
+          <h5>toNgeCsv(data)</h5>
+          <pre>{{ defaultCsv() }}</pre>
+        </div>
+      } @else {
+        <p class="story-description"
+          ><em>Press “Read this table” to populate every example below.</em></p
+        >
+      }
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. The neutral shape</h4>
+      <p class="story-description">
+        Columns in the order the user currently sees them, rows from the processed model, and every
+        cell carrying <strong>both</strong> readings of its value. A formatter reads this and
+        nothing else — which is why one export can serve CSV, XLSX and JSON without the seam knowing
+        which is being written.
+      </p>
+
+      <div class="code-block">
+        <pre
+          >{{ "{" }}
+  columns: {{ "{" }} id: string; header: string {{ "}" }}[];
+  rows: {{ "{" }} id: string; cells: {{ "{" }} columnId: string; raw: unknown; formatted: string {{
+            "}"
+          }}[] {{ "}" }}[];
+{{ "}" }}</pre>
+      </div>
+
+      @if (shapePreview()) {
+        <div class="state-readout">
+          <h5>First two rows of the read above</h5>
+          <pre>{{ shapePreview() }}</pre>
+        </div>
+      }
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. <code>formatted</code> for a person, <code>raw</code> for a machine</h4>
+      <p class="story-description">
+        A column says how it reads through its own namespaced meta key. The fixture's currency and
+        date columns declare one; the other five fall back to <code>String(value)</code>. ⚠️ Keeping
+        that formatter in step with the column's cell renderer is the consumer's job — the library
+        sees a template on one side and a function on the other and cannot compare them.
+      </p>
+
+      <div class="code-block">
+        <pre
+          >{{ "{" }} accessorKey: 'amount', header: 'Amount', id: 'amount',
+  meta: {{ "{" }} ngeExport: {{ "{" }} format: value =&gt; formatCurrency(value) {{ "}" }} {{
+            "}"
+          }} {{ "}" }}
+
+toNgeCsv(data);                      // "$1,802.44"  — quoted, it carries a comma
+toNgeCsv(data, {{ "{" }} values: 'raw' {{ "}" }});   // 1802.44     — bare, still a number</pre>
+      </div>
+
+      @if (rawCsv()) {
+        <div class="state-readout">
+          <h5>values: 'raw'</h5>
+          <pre>{{ rawCsv() }}</pre>
+        </div>
+      }
+    </section>
+
+    <!-- 4 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>4. Delimiter, header, line ending, byte-order mark</h4>
+      <p class="story-description">
+        The defaults are RFC 4180: comma-separated, CRLF between records, a header row, no BOM, and
+        no trailing separator. ⚠️ Quoting is decided against the
+        <strong>configured</strong> delimiter — under <code>;</code> a value containing a comma is
+        left bare, because a comma is then just an ordinary character.
+      </p>
+
+      <div class="code-block">
+        <pre>
+toNgeCsv(data, {{ "{" }}
+  byteOrderMark: true,   // Excel on Windows needs it to read UTF-8 as UTF-8
+  delimiter: ';',
+  header: false,
+  newline: '\n',
+  values: 'raw',
+{{ "}" }});</pre>
+      </div>
+
+      @if (semicolonCsv()) {
+        <div class="readout-pair">
+          <div class="state-readout">
+            <h5>delimiter: ';'</h5>
+            <pre>{{ semicolonCsv() }}</pre>
+          </div>
+          <div class="state-readout">
+            <h5>header: false</h5>
+            <pre>{{ headerlessCsv() }}</pre>
+          </div>
+        </div>
+      }
+    </section>
+
+    <!-- 5 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>5. Which rows — <code>slice</code></h4>
+      <p class="story-description">
+        <code>all</code> covers every row that survived the active filters, in the current sort
+        order. <code>page</code> covers only the rendered ones — identical to <code>all</code> until
+        pagination is switched on, which is the correct degradation rather than a special case.
+        <code>selected</code> covers the selected rows, still filtered and still sorted.
+      </p>
+
+      <div class="code-block">
+        <pre>toNgeCsv(table.readNgeExportData({{ "{" }} slice: 'selected' {{ "}" }}));</pre>
+      </div>
+    </section>
+
+    <!-- 6 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>6. Exporting only the highlighted cells</h4>
+      <p class="story-description">
+        <strong>The composition, and the whole of it.</strong> <code>cellPredicate</code> is
+        deliberately anonymous in both directions: the export seam takes a
+        <code>NgeCellContext → boolean</code> and never learns highlighting exists, and the
+        highlight addon supplies one and never learns exporting exists. They meet on the table
+        instance and nowhere else. The formatter, for its part, sees only the shape that comes back.
+      </p>
+      <p class="story-description">
+        Supplying a predicate narrows the export both ways — a row with no surviving cell is dropped
+        and a column with no surviving cell leaves <code>columns</code> — so a highlighted-cell CSV
+        needs no row or column bookkeeping of its own. Mark some cells and export.
+      </p>
+
+      <div class="code-block">
+        <pre>
+const csv = toNgeCsv(
+  table.readNgeExportData({{ "{" }} cellPredicate: highlight.predicate() {{ "}" }})
+);</pre>
+      </div>
+
+      <div class="controls">
+        <button
+          type="button"
+          (click)="exportHighlighted()"
+          >Export highlighted only</button
+        >
+      </div>
+
+      <nge-table-highlight-demo
+        #compositionDemo
+        [config]="compositionConfig"
+        [rows]="compositionRows"
+        [(state)]="compositionState"
+      />
+
+      @if (compositionCsv()) {
+        <div class="state-readout">
+          <h5>CSV</h5>
+          <pre>{{ compositionCsv() }}</pre>
+        </div>
+      }
+    </section>
+
+    <!-- 7 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>7. Downloading is the host's concern</h4>
+      <p class="story-description">
+        <code>toNgeCsvBlob</code> is as far as the formatter goes. The object URL, the anchor, the
+        filename and the revoke are application decisions — a library reaching for
+        <code>document</code> here would stop working under SSR for no benefit.
+      </p>
+
+      <div class="code-block">
+        <pre>
+const url = URL.createObjectURL(toNgeCsvBlob(data, {{ "{" }} byteOrderMark: true {{ "}" }}));
+const link = document.createElement('a');
+
+link.download = 'export.csv';
+link.href = url;
+link.click();
+URL.revokeObjectURL(url);</pre>
+      </div>
+    </section>
+
+    <!-- 8 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>8. Formula injection — <code>escapeFormulas</code></h4>
+      <p class="story-description">
+        ⚠️ Excel and Sheets read a field beginning <code>=</code>, <code>+</code>, <code>-</code>,
+        <code>&#64;</code>, a tab or a carriage return as a <strong>formula</strong> and evaluate it
+        on open. The value in that cell usually came from whoever typed into the source system, so
+        an export is a way to run their text as code on the reader's machine.
+        <code>escapeFormulas: true</code> prefixes such a field with <code>'</code> — Excel's own
+        text marker, invisible in the rendered cell and honoured by Sheets.
+      </p>
+      <p class="story-description">
+        <strong>It is off by default, and the default is the decision.</strong> Escaping alters the
+        user's data: the field no longer round-trips, and anything parsing the CSV as data rather
+        than opening it as a spreadsheet sees the <code>'</code>. A library should not make that
+        trade without being asked — so turn it on for anything a person will open, and leave it off
+        for anything another program will parse.
+      </p>
+      <p class="story-description">
+        ⚠️ The guard is prefix <strong>and not-a-number</strong>, which is the whole difficulty:
+        <code>-</code> and <code>+</code> are also how every negative and signed number begins, so a
+        naive prefix test corrupts an entire currency column while the file still opens. Note the
+        last row below staying bare. The cost lands instead on a <em>formatted</em> negative such as
+        <code>-$1,234.50</code>, which is not a plain number and is escaped — it was already text a
+        spreadsheet could not sum.
+      </p>
+
+      <div class="code-block">
+        <pre>toNgeCsv(data, {{ "{" }} escapeFormulas: true {{ "}" }});</pre>
+      </div>
+
+      <div class="readout-pair">
+        <div class="state-readout">
+          <h5>escapeFormulas: false (default)</h5>
+          <pre>{{ unescapedCsv }}</pre>
+        </div>
+        <div class="state-readout">
+          <h5>escapeFormulas: true</h5>
+          <pre>{{ escapedCsv }}</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>9. What this addon deliberately does not do</h4>
+      <p class="story-description">
+        There is only <strong>one</strong> formatter. A second format is a second addon over the
+        same neutral shape, never a branch inside this one and never a change to the seam — that
+        separation is the property the extensibility gate exists to verify.
+      </p>
+      <p class="story-description">
+        ⚠️ The read is <strong>eager</strong> and proportional to rows × columns: the 10,000-row
+        fixture (70,000 cells) takes roughly 170–230&nbsp;ms in one synchronous pass. That is a
+        visible pause rather than a freeze, and it is the documented limit — a host exporting
+        materially more should export in chunks, because the seam will not yield.
+      </p>
+    </section>
+  </div>
+</nge-storybook-review-container>

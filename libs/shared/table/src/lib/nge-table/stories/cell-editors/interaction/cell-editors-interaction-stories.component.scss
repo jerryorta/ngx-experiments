@@ -1,0 +1,81 @@
+// The story panel takes its surface from the same `--nge-table-surface` /
+// `--nge-table-on-surface` the table reads, so prose and table always move together:
+// under one of the ten domain themes that bridge `--nge-table-*` (ARCH-277) both
+// follow the toolbar, and under a theme that does not bridge them both fall back to the
+// library's light-mode defaults.
+.nge-table-cell-editors-interaction-stories {
+  display: block;
+  padding: 20px;
+  color: var(--nge-table-on-surface, #1d1b20);
+  background: var(--nge-table-surface, #ffffff);
+
+  .stories-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    margin-bottom: 8px;
+  }
+
+  .intro-text {
+    margin-bottom: 32px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 16px;
+  }
+
+  .story-section {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+
+    h4 {
+      margin-bottom: 8px;
+      color: var(--nge-table-on-surface, #1d1b20);
+    }
+
+    // Applies to the `ul` variant too — the keyboard section is a list of keys and
+    // reads better as one than as a paragraph of semicolons.
+    .story-description {
+      margin-bottom: 16px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 14px;
+
+      &:is(ul) {
+        padding-left: 20px;
+      }
+
+      li {
+        margin-bottom: 6px;
+      }
+
+      kbd {
+        padding: 1px 5px;
+        font-family: inherit;
+        font-size: 12px;
+        background: var(--nge-table-surface-variant, #f5f5f5);
+        border: 1px solid var(--nge-table-border-color, #e0e0e0);
+        border-radius: 3px;
+      }
+    }
+
+    // Height is NOT set here: `<nge-table-edit-demo>` binds it inline on `nge-table`
+    // from its `maxHeight` input, and an inline declaration outranks any class. On a
+    // wrapper it would be worse than dead code, because the host is a flex column whose
+    // viewport is `flex: 1 1 auto; min-height: 0` — an ancestor's bound is simply
+    // overflowed and nothing scrolls.
+    .code-example {
+      margin-bottom: 16px;
+      padding: 12px 16px;
+      overflow-x: auto;
+      background: var(--nge-table-surface-variant, #f5f5f5);
+      border-radius: 6px;
+
+      pre {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.6;
+      }
+    }
+  }
+}

@@ -1,0 +1,318 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Row Selection (Interaction)</h2>
+    <p class="intro-text">
+      Interaction is the primary facet for a table feature, and selection is the clearest case: none
+      of the examples below shows anything until you drive it. Every table supplies
+      <code>getRowId</code> — selection is id-keyed state, and without a stable identity the engine
+      keys it by array index, so Example 4's sort would move the ticks onto different records.
+    </p>
+
+    <section class="story-section">
+      <h4>1. Click, cmd/ctrl-click, shift-click</h4>
+      <p class="story-description">
+        Click a row to <strong>replace</strong> the selection, cmd/ctrl-click to
+        <strong>add or remove</strong> one, shift-click to <strong>take the range</strong> from the
+        row you last chose. The anchor does not move on a shift-click, so repeated shift-clicks
+        pivot around the same row — the range can be grown and shrunk, not only ratcheted.
+      </p>
+      <p class="story-description">
+        The checkbox is the <em>same</em> affordance, not a separate one: shift-clicking it extends
+        the range exactly as shift-clicking the row body does. It differs in one deliberate respect
+        — a <strong>plain</strong> checkbox click is additive, where a plain click on the row body
+        replaces. A per-item switch must never clear the rest.
+      </p>
+      <div class="table-container">
+        <nge-table
+          [config]="gesturesConfig"
+          [state]="gesturesState()"
+          (stateChange)="onGesturesState($event)"
+        />
+      </div>
+      <div class="state-readout">
+        <h5>state.rowSelection — {{ gesturesSelectedIds().length }} row(s)</h5>
+        <pre>{{ gesturesSelectedIds().join("\n") || "(nothing selected)" }}</pre>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>2. Select all, select none, indeterminate</h4>
+      <p class="story-description">
+        The header checkbox reads all three states. Tick one row and it goes indeterminate; tick
+        every row and it goes checked. Clicking it when it is checked clears the selection.
+      </p>
+      <div class="table-container">
+        <nge-table
+          [config]="selectAllConfig"
+          [state]="selectAllState()"
+          (stateChange)="onSelectAllState($event)"
+        />
+      </div>
+      <div class="stat-row">
+        <span class="stat"
+          >{{ selectAllCount() }} of {{ selectAllConfig.data.length }} selected</span
+        >
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>3. The host drives the selection</h4>
+      <p class="story-description">
+        The other half of the controlled-state contract, and the half a gesture never demonstrates:
+        these buttons write <code>state</code> from outside and the checkboxes follow. Host-driven
+        state is deliberately <strong>silent</strong> — it emits no <code>NgeTableEvent</code>,
+        because an echo of the host's own write is not news and would make a two-way binding read as
+        user activity.
+      </p>
+      <div class="controls">
+        <button
+          type="button"
+          (click)="selectFirstThree()"
+        >
+          Select first three
+        </button>
+        <button
+          type="button"
+          (click)="clearHostSelection()"
+        >
+          Clear
+        </button>
+      </div>
+      <div class="table-container">
+        <nge-table
+          [config]="hostDrivenConfig"
+          [state]="hostDrivenState()"
+          (stateChange)="onHostDrivenState($event)"
+        />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>4. A selection survives a sort</h4>
+      <p class="story-description">
+        Select a few rows, then click a header to re-sort. The <em>same records</em> stay ticked and
+        move with the sort — the ticks follow the data, not the positions. Shift-clicking after a
+        sort also takes the range the user can <em>see</em> between the two clicks, because the
+        range is cut from the processed row model rather than from the source array.
+      </p>
+      <div class="table-container">
+        <nge-table
+          [config]="sortConfig"
+          [state]="sortState()"
+          (stateChange)="onSortState($event)"
+        />
+      </div>
+      <div class="state-readout">
+        <h5>Selected records</h5>
+        <pre>{{ sortSelectedNames().join("\n") || "(nothing selected)" }}</pre>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>5. One row at a time</h4>
+      <p class="story-description">
+        <code>enableMultiRowSelection: false</code> reduces the whole feature to a single row: no
+        header checkbox, no range, and cmd/ctrl-click and shift-click both fall through to a plain
+        replace. None of that costs the library any code — the engine clears the other keys itself
+        when a row cannot multi-select.
+      </p>
+      <div class="table-container">
+        <nge-table
+          [config]="singleConfig"
+          [state]="singleState()"
+          (stateChange)="onSingleState($event)"
+        />
+      </div>
+      <div class="stat-row">
+        <span class="stat">selected: {{ singleSelectedIds().join(", ") || "(none)" }}</span>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>6. Selection across a virtualized scroll — 10,000 rows</h4>
+      <p class="story-description">
+        ⚠️ The example that cannot be written as a unit test. Select some rows near the top, scroll
+        all the way down and back, and they are still ticked. Virtualization <em>recycles</em> DOM,
+        so a mark held on an element would belong to whichever row that element happens to be
+        showing after the scroll; these marks were never on an element at all.
+      </p>
+      <div class="table-container table-container--tall">
+        <nge-table
+          [config]="virtualConfig"
+          [state]="virtualState()"
+          (stateChange)="onVirtualState($event)"
+        />
+      </div>
+      <div class="stat-row">
+        <span class="stat">{{ virtualCount() }} of 10,000 selected</span>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>7. Selection and pinned columns</h4>
+      <p class="story-description">
+        Select a row, then scroll horizontally. The pinned lanes are <code>position: sticky</code>
+        and opaque by requirement — a transparent pinned lane would show the center cells bleeding
+        through — so the selected tint has to be repainted on them explicitly. If it were not, a
+        selected row would read as selected in the middle and unselected at both edges.
+      </p>
+      <div class="table-container table-container--narrow">
+        <nge-table
+          [config]="pinnedConfig"
+          [state]="pinnedState()"
+          (stateChange)="onPinnedState($event)"
+        />
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>8. The selection-change event</h4>
+      <p class="story-description">
+        One kind for every route into the slice — checkbox, click, cmd-click, range,
+        <code>Space</code>, select-all. Note what a <strong>range</strong> produces: shift-click
+        across five rows and exactly <em>one</em> line appears below, because the gesture writes the
+        whole slice once rather than once per row.
+      </p>
+      <div class="table-container">
+        <nge-table
+          [config]="eventConfig"
+          [state]="eventState()"
+          (ngeTableEvent)="onEventEmitted($event)"
+          (stateChange)="onEventState($event)"
+        />
+      </div>
+      <div class="state-readout">
+        <h5>Events (most recent first)</h5>
+        <pre>{{ selectionEvents().join("\n") || "(drive the table)" }}</pre>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>9. Exporting exactly what the user picked</h4>
+      <p class="story-description">
+        <code>readNgeExportData(&#123; slice: 'selected' &#125;)</code> is ARCH-248's reader,
+        unchanged. It filters the <em>processed</em> rows, so an export follows the active sort, and
+        it has never heard of the selection UI — the two features meet on the table instance and
+        nowhere else.
+      </p>
+      <div class="controls">
+        <button
+          type="button"
+          (click)="exportSelected()"
+        >
+          Export selected
+        </button>
+      </div>
+      <div class="table-container">
+        <nge-table
+          #exportTable
+          [config]="exportConfig"
+          [state]="exportState()"
+          (stateChange)="onExportState($event)"
+        />
+      </div>
+      <div class="stat-row">
+        <span class="stat">
+          exported rows:
+          {{ exportedRowCount() === null ? "(not run)" : exportedRowCount() }}
+        </span>
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>10. A consuming app's own control</h4>
+      <p class="story-description">
+        The native checkbox is the <strong>default</strong>, not the only option. Projecting
+        <code>selection-cell</code> and <code>selection-header</code> replaces it with whatever the
+        consuming domain ships — <code>cg-checkbox</code>, <code>gy-checkbox</code> — bound to a
+        context carrying <code>isSelected</code>, <code>canSelect</code>, and a
+        <code>toggle</code> callback. Drive it: the pills below write the same
+        <code>state.rowSelection</code> the native checkbox would.
+      </p>
+      <p class="story-description">
+        ⚠️ The pill is a local stand-in rather than a real design-library import, because
+        <code>libs/shared/table</code> importing a domain library would invert the dependency graph
+        and drag that domain into every consumer of the table. What it exercises — the context and
+        the callback — is identical either way. Note also that this table's
+        <code>enableRowSelection</code> is a <strong>predicate</strong>, so archived rows report
+        <code>canSelect: false</code> and render disabled rather than absent: a control that
+        silently vanishes reads as a rendering bug, a disabled one reads as a rule.
+      </p>
+      <div class="code-block">
+        <pre>
+&lt;nge-table [config]="config" [(state)]="state"&gt;
+  &lt;ng-template ngeTableSlot="selection-cell" [ngeTableSlotOf]="rows" let-selection&gt;
+    &lt;cg-checkbox
+      [checked]="selection.isSelected"
+      [disabled]="!selection.canSelect"
+      (click)="$event.stopPropagation(); selection.toggle($event)" /&gt;
+  &lt;/ng-template&gt;
+&lt;/nge-table&gt;</pre>
+      </div>
+      <div class="table-container">
+        <nge-table
+          [config]="projectedConfig"
+          [state]="projectedState()"
+          (stateChange)="onProjectedState($event)"
+        >
+          <ng-template
+            ngeTableSlot="selection-cell"
+            [ngeTableSlotOf]="fixtureRows"
+            let-selection
+          >
+            <!--
+              A projected control sits inside a row whose click selects, so it owes
+              itself a `stopPropagation()` exactly as the native checkbox does —
+              without it a click toggles and is then immediately replaced by the
+              row's own handler.
+            -->
+            <button
+              class="spec-pill"
+              type="button"
+              [attr.aria-pressed]="selection.isSelected"
+              [disabled]="!selection.canSelect"
+              (click)="$event.stopPropagation(); selection.toggle($event)"
+            >
+              {{ selection.isSelected ? "✓" : "" }}
+            </button>
+          </ng-template>
+
+          <ng-template
+            ngeTableSlot="selection-header"
+            let-selection
+          >
+            <button
+              class="spec-pill spec-pill--header"
+              type="button"
+              [attr.aria-pressed]="selection.allSelected"
+              (click)="$event.stopPropagation(); selection.toggleAll()"
+            >
+              {{ selection.selectedCount }}
+            </button>
+          </ng-template>
+        </nge-table>
+      </div>
+      <div class="stat-row">
+        <span class="stat"
+          >{{ projectedSelectedCount() }} selected — archived rows are disabled</span
+        >
+      </div>
+    </section>
+
+    <section class="story-section">
+      <h4>11. Keyboard</h4>
+      <p class="story-description">
+        Tab into the table from Example 1 and note what is focusable: the <strong>row</strong>, not
+        the checkbox inside it. <code>Space</code> on a focused row toggles it. The per-row checkbox
+        is a pointer affordance only (<code>tabindex="-1"</code>, <code>aria-hidden</code>) — the
+        row already carries <code>aria-selected</code>, so a focusable checkbox would double the tab
+        stops and announce the same fact twice. The header's select-all checkbox <em>is</em> a tab
+        stop, because it is the only keyboard route to select-all and there is exactly one of it.
+        Full arrow-key grid navigation over a roving tabindex belongs to the later a11y story.
+      </p>
+    </section>
+  </div>
+</nge-storybook-review-container>

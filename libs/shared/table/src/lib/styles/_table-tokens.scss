@@ -1,0 +1,359 @@
+// =============================================================================
+// NgeTable Design Tokens — Default Values (light theme)
+//
+// This file defines the visual token contract for the nge-table library.
+// All --nge-table-* tokens are set here with sensible light-theme defaults so
+// tables render correctly even when no domain theme is active.
+//
+// Domain themes override these defaults by re-declaring the same custom
+// properties inside their theme class selectors.
+//
+// ORDER MATTERS, specificity does not: `:root` is a pseudo-class, so it scores
+// (0,1,0) — exactly the same as a single class like `.cg-professional-dark`. A
+// tie is broken by source order, so a host MUST load this file BEFORE its theme
+// mixins or the defaults here override the theme instead of the other way
+// round. `apps/storybook-app/src/styles.scss` does this for both the table and
+// charts; charts paid for the lesson once already (ARCH-236).
+//
+// NEVER reference --mat-sys-* or mat-* here. Angular Material is banned in this
+// library; the whole point of an own-namespace contract is that the library has
+// no dependency on any theme system to render correctly.
+//
+// The `--nge-table-*` namespace matches charts' `--nge-chart-*` — every
+// shared library owns a `--nge-<lib>-*` prefix. It earns its keep here more
+// than most: "table" is a far more common word in app CSS than "chart", so the
+// namespace is what keeps collisions at zero.
+//
+// Metric tokens that layout code must also know about in TypeScript are
+// mirrored in `NGE_TABLE_DEFAULTS` (src/lib/nge-table-defaults.ts). The two
+// must stay in sync — a spec asserts the numeric values.
+//
+// NOT declared here: the `--nge-table-internal-*` family. Those carry live lane
+// geometry that `<nge-table>` writes onto its own host element on every state
+// change (see nge-table.component.ts § syncLaneGeometry), so they have no
+// meaningful default and overriding them from a theme would break layout rather
+// than restyle it. Everything in this file is the opposite: a value a consumer
+// is invited to change.
+// =============================================================================
+
+:root {
+  // ---------------------------------------------------------------------------
+  // Surface tokens
+  // Used for: the table viewport, header/footer bands, row backgrounds
+  // ---------------------------------------------------------------------------
+
+  // Primary background — the scroll viewport behind all rows
+  --nge-table-surface: #ffffff;
+
+  // Header / footer band background
+  --nge-table-surface-variant: #f5f5f5;
+
+  // Default row background
+  --nge-table-row-surface: transparent;
+
+  // Alternate row background — zebra striping when enabled
+  --nge-table-row-surface-alt: #fafafa;
+
+  // Row background on pointer hover
+  --nge-table-row-surface-hover: #f0f0f0;
+
+  // Row background when the row is selected
+  --nge-table-row-surface-selected: #e3f2fd;
+
+  // Pinned lane background — MUST be opaque. A pinned lane is `position: sticky`
+  // and scrolls over the center lane; a transparent background shows the center
+  // cells bleeding through underneath.
+  --nge-table-pinned-surface: #ffffff;
+
+  // Pinned lane background when the row is hovered — mirrors the row hover so a
+  // hovered row reads as one continuous band across all three lanes.
+  --nge-table-pinned-surface-hover: #f0f0f0;
+
+  // Pinned lane background inside the HEADER band. Separate from
+  // --nge-table-pinned-surface because a pinned header lane sits on the header
+  // band, not on a row: reusing the row-flavoured white would leave two pale
+  // rectangles punched through the grey band.
+  --nge-table-pinned-header-surface: #f5f5f5;
+
+  // ---------------------------------------------------------------------------
+  // Content tokens
+  // Used for: cell text, header labels, secondary/muted values
+  // ---------------------------------------------------------------------------
+
+  // Primary content color — cell text
+  --nge-table-on-surface: #1d1b20;
+
+  // Secondary content — muted cell text, placeholder / empty-state copy
+  --nge-table-on-surface-variant: #5f5f66;
+
+  // Header label color
+  --nge-table-header-on-surface: #1d1b20;
+
+  // ---------------------------------------------------------------------------
+  // Border tokens
+  // Used for: row separators, column separators, the header rule
+  // ---------------------------------------------------------------------------
+
+  --nge-table-border-color: #e0e0e0;
+  --nge-table-border-width: 1px;
+
+  // The rule under the header band — usually stronger than a row separator
+  --nge-table-header-border-color: #cfcfcf;
+
+  // ---------------------------------------------------------------------------
+  // Metric tokens
+  // Used for: lane and row geometry. Mirrored in NGE_TABLE_DEFAULTS — row
+  // height in particular is read by TypeScript, because virtualization computes
+  // scroll offsets from it and cannot measure a row that is not in the DOM.
+  // ---------------------------------------------------------------------------
+
+  --nge-table-row-height: 40px;
+  --nge-table-header-height: 44px;
+  --nge-table-cell-padding-x: 12px;
+  --nge-table-cell-padding-y: 0px;
+
+  // Column width bounds — the clamp applied while the user drags a column edge
+  --nge-table-column-min-width: 60px;
+  --nge-table-column-default-width: 160px;
+  --nge-table-column-max-width: 800px;
+
+  // Width of the injected selection column (ARCH-268). Mirrored in
+  // NGE_TABLE_DEFAULTS because the column's `size` is a TypeScript number the
+  // engine clamps against — a theme moving this alone would leave the checkbox
+  // and its lane disagreeing about how wide the column is.
+  --nge-table-selection-column-width: 44px;
+
+  // Width of the injected expansion column (ARCH-298). Mirrored in
+  // NGE_TABLE_DEFAULTS for the reason the selection width above is: the column's
+  // `size` is a TypeScript number the engine clamps against.
+  --nge-table-expansion-column-width: 44px;
+
+  // ---------------------------------------------------------------------------
+  // Typography tokens
+  // ---------------------------------------------------------------------------
+
+  --nge-table-font-family: inherit;
+  --nge-table-font-size: 14px;
+  --nge-table-line-height: 20px;
+  --nge-table-header-font-size: 13px;
+  --nge-table-header-font-weight: 600;
+
+  // ---------------------------------------------------------------------------
+  // Pinning tokens
+  // Used for: the sticky lane wrappers. Pinning is applied to the LANE WRAPPER,
+  // never per-cell — see docs/architecture/table.md § Substrate.
+  // ---------------------------------------------------------------------------
+
+  // Edge shadows cast by a pinned lane over the scrolling center lane. Two
+  // tokens rather than one because the offsets mirror: the left lane casts
+  // rightward, the right lane leftward.
+  --nge-table-pinned-left-shadow: 2px 0 4px rgb(0 0 0 / 0.08);
+  --nge-table-pinned-right-shadow: -2px 0 4px rgb(0 0 0 / 0.08);
+
+  // Where a pinned lane anchors itself within the scroll viewport. Zero is
+  // correct for a plain table; the tokens exist so an app that puts something
+  // permanently at an edge (a frozen gutter, an overlaid rail) can shift the
+  // anchor without patching the library. Following ag-grid's
+  // `--ag-internal-pinned-left-sticky-offset` idiom: the offset is read from a
+  // custom property by ONE authored CSS rule, never written as an inline `left`
+  // on each of N lanes per row.
+  --nge-table-pinned-left-sticky-offset: 0px;
+  --nge-table-pinned-right-sticky-offset: 0px;
+
+  // Stacking order for pinned lanes. Kept low and explicit so an app can lift
+  // its own overlays above the table without fighting an opaque magic number.
+  --nge-table-pinned-z-index: 2;
+
+  // Stacking order for the header band. Must outrank the pinned lanes: the band
+  // is sticky vertically while the lanes are sticky horizontally, and where they
+  // cross — the top-left corner cell — the header has to win.
+  --nge-table-header-z-index: 3;
+
+  // ---------------------------------------------------------------------------
+  // Interaction tokens
+  // Used for: the column resize affordance and keyboard focus
+  // ---------------------------------------------------------------------------
+
+  // The column-resize grip. Invisible at rest so the header band stays quiet —
+  // a permanent rule between every pair of columns is noise, and the affordance
+  // is the cursor. It surfaces on hover over the header cell and takes the
+  // active colour for the duration of a drag.
+  --nge-table-resize-handle-width: 5px;
+  --nge-table-resize-handle-color: transparent;
+  --nge-table-resize-handle-color-hover: #b6b6bd;
+  --nge-table-resize-handle-color-active: #1565c0;
+
+  --nge-table-focus-ring-color: #1565c0;
+  --nge-table-focus-ring-width: 2px;
+
+  // The selection checkboxes (ARCH-268). `accent-color` tints a native control
+  // rather than replacing it, which is what keeps the checkbox keyboard-, screen-
+  // reader-, and high-contrast-correct for free. Paired with
+  // --nge-table-row-surface-selected above, which tints the row itself.
+  --nge-table-selection-accent: #1565c0;
+
+  // ---------------------------------------------------------------------------
+  // Cell editor tokens (ARCH-293)
+  // Used for: the table's own cell editors, which a column names through
+  // `meta.ngeEdit.editor`.
+  //
+  // A separate family rather than a reuse of the surface/content tokens above,
+  // because a field has to read as SITTING ON the row rather than as part of it:
+  // on a themed table the row surface and the field surface are routinely the
+  // same colour, and a field that inherited it would have only its border to say
+  // it is a control.
+  //
+  // No focus-ring tokens of their own — both editors draw
+  // --nge-table-focus-ring-* INSET, because `.nge-table__cell` carries
+  // `overflow: hidden` and is unpositioned (ARCH-243) so a ring outside the box
+  // is simply clipped away.
+  // ---------------------------------------------------------------------------
+
+  --nge-table-editor-surface: #ffffff;
+  --nge-table-editor-on-surface: #1d1b20;
+  --nge-table-editor-border-color: #b6b6bd;
+
+  // The border while the field holds focus. Distinct from the inset focus ring
+  // rather than redundant with it: the ring is the a11y affordance and the border
+  // is what makes an active field legible against a tinted row.
+  --nge-table-editor-border-color-focus: #1565c0;
+
+  --nge-table-editor-border-width: 1px;
+  --nge-table-editor-radius: 4px;
+  --nge-table-editor-padding-x: 6px;
+
+  // `inherit` so a field matches the table's own type by default — the same
+  // arrangement --nge-table-font-family uses, and the reason no bridge sets it.
+  --nge-table-editor-font-size: inherit;
+
+  // Tints the native checkbox rather than replacing it, which is what keeps it
+  // keyboard-, screen-reader- and high-contrast-correct for free. Separate from
+  // --nge-table-selection-accent because ARCH-268's selection box and an editing
+  // box mean different things and a theme may well want to say so.
+  --nge-table-editor-accent: #1565c0;
+
+  // The foreground for a surface filled with --nge-table-editor-accent: the
+  // Apply button fills with the accent colour to read as the commit action, so
+  // it needs a paired foreground the way any filled surface does — every other
+  // editor colour sits on a neutral surface, so none needs one. Precedent:
+  // --nge-calendar-on-accent, paired the same way with --nge-calendar-accent.
+  --nge-table-editor-on-accent: #ffffff;
+
+  --nge-table-editor-control-size: 16px;
+
+  // The read-only half of the activation model: a checkbox showing a value the
+  // user has not engaged yet. Dimmed rather than hidden, because a box that
+  // vanished until clicked would read as a rendering fault.
+  --nge-table-editor-readonly-opacity: 0.75;
+
+  // ---------------------------------------------------------------------------
+  // Editor panel tokens (ARCH-294)
+  // Used for: the floating panel of an overlay-panel cell editor —
+  // `<nge-cell-select>`'s dropdown, `<nge-cell-textarea>`'s panel — each
+  // rendering in a CDK overlay attached to `<body>` rather than inside the
+  // table.
+  //
+  // ⚠️ These reach the panel from HERE and only from here. `:root` is an ancestor
+  // of the overlay container as much as it is of the table, so the literal
+  // defaults below inherit into the panel and it renders correctly with no theme
+  // loaded. Anything scoped tighter does NOT follow it out of the table — a theme
+  // class on a wrapper, or `<nge-table>`'s inline host geometry — which is why
+  // each overlay-panel editor resolves this family off its own trigger/host and
+  // copies the values onto its pane. A bridge that set these on a theme class
+  // alone would look correct in devtools and change nothing on screen.
+  //
+  // Surface is separate from --nge-table-editor-surface because a panel floats
+  // above the table while a field sits on a row: on a themed table the two want
+  // different elevation treatment even when they resolve to the same colour.
+  // ---------------------------------------------------------------------------
+
+  --nge-table-editor-panel-surface: #ffffff;
+  --nge-table-editor-panel-border-color: #b6b6bd;
+  --nge-table-editor-panel-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+
+  // A dropdown sizes to its trigger because its content is short labels; a
+  // prose editor sized to a cell would be unusable, so it takes a floor of its
+  // own and grows no further — the position strategy has
+  // withFlexibleDimensions(false).
+  --nge-table-editor-panel-min-width: 280px;
+
+  // The select's panel is a list whose options carry their own padding, so the
+  // panel itself needs none; `<nge-cell-textarea>`'s panel is a form — a field
+  // plus a button row — and needs breathing room around the whole thing.
+  // Distinct from --nge-table-editor-padding-x, which is the inline padding
+  // INSIDE a control.
+  --nge-table-editor-panel-padding: 8px;
+
+  // Caps the list rather than the viewport. A panel taller than this scrolls
+  // internally, which keeps a 40-option column usable without the flexible
+  // position strategy resizing it to fit — deliberately disabled, since a panel
+  // that changes height as the user arrows through it is harder to read.
+  --nge-table-editor-panel-max-height: 240px;
+
+  // The option under the keyboard's cursor OR the pointer — one token, because a
+  // user drives with one at a time and two colours would say there are two
+  // cursors.
+  --nge-table-editor-option-hover-surface: #f1f1f4;
+
+  // The option the cell currently holds. Distinct from hover so "where I am" and
+  // "what is set" stay legible at the same time.
+  --nge-table-editor-option-selected-surface: #e3f0fc;
+
+  // ---------------------------------------------------------------------------
+  // Render-slot tokens (ARCH-246)
+  // Used for: the bands a consumer's `[ngeTableSlot]` templates render into.
+  //
+  // Only the CHROME is tokenised — the padding around a toolbar, the scrim
+  // behind a loading overlay. What a slot renders is the consumer's own markup
+  // and carries the consumer's own styles; the library has nothing to say about
+  // it, and a token that tried to would be dictating rather than theming.
+  //
+  // No `--nge-table-footer-*` surface: a footer band is the same band as the
+  // header, so it reuses --nge-table-surface-variant and a theme restyling one
+  // gets the other for free.
+  // ---------------------------------------------------------------------------
+
+  --nge-table-toolbar-padding: 8px 12px;
+
+  // The row-detail band sits inside the row, below its lanes, so it needs a
+  // surface of its own to read as attached to the row rather than as a new one.
+  --nge-table-row-detail-surface: #fafafa;
+
+  // How tall an expanded row's detail band is (ARCH-298). Mirrored in
+  // NGE_TABLE_DEFAULTS because the virtualizer sizes an expanded row as
+  // `rowHeight + rowDetailHeight` and cannot measure a row it has not rendered —
+  // the same reason --nge-table-row-height is mirrored. While virtualization is
+  // on the component writes the resolved value inline on the host, so a theme
+  // moving this one would only make the band disagree with the arithmetic that
+  // placed the row beneath it.
+  --nge-table-row-detail-height: 120px;
+
+  // How long the band takes to reach that height (ARCH-300). A token rather than
+  // a literal for one reason that matters: `0ms` turns the animation off without
+  // a media query, so a consumer with a house rule against motion — or a test
+  // that needs the band at its final height on the next frame — opts out by
+  // setting a custom property, not by overriding a rule.
+  //
+  // Longer than the chevron's own 120ms because it moves a whole box rather than
+  // a glyph. The two are deliberately not the same token: the chevron rotates on
+  // every table with expansion on, the band only exists where a `row-detail`
+  // template does, and a single duration would tie an affordance to a slot.
+  //
+  // ⚠️ NOT mirrored into NGE_TABLE_DEFAULTS, and the asymmetry with the band's
+  // HEIGHT above is the interesting part. The height is mirrored because the
+  // virtualizer sizes an expanded row from it and cannot measure a row it has not
+  // rendered — arithmetic in TypeScript has to agree with a number in CSS. Nothing
+  // in TypeScript reads a duration: the animation is CSS end to end, which is why
+  // it cannot move ARCH-289's scroll figures and why `prefers-reduced-motion` can
+  // switch it off without the engine ever hearing about it.
+  --nge-table-row-detail-duration: 180ms;
+
+  // The loading overlay's backdrop. Translucent on purpose: a refresh over
+  // existing rows should read as "these are going stale", not as an empty table.
+  --nge-table-loading-scrim: rgb(255 255 255 / 0.72);
+
+  // Must outrank --nge-table-header-z-index: the overlay covers the whole
+  // viewport, and a loading state the sticky header punched a hole through would
+  // be a worse lie than no overlay at all.
+  --nge-table-loading-z-index: 4;
+}

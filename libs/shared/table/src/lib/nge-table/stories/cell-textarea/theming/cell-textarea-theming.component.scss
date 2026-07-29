@@ -1,0 +1,116 @@
+// Theming sections for `<nge-cell-textarea>` (ARCH-296).
+//
+// ⚠️ Every rule below sets `--nge-table-editor-*` on a WRAPPER and nothing else.
+// No rule targets `.nge-cell-textarea__*` or `.nge-table__*` — under
+// `ViewEncapsulation.None` such a rule would actually land, and it would be
+// styling the library from a story rather than theming it.
+//
+// ⚠️ The wrappers only reach the PANEL because the component resolves this family
+// at its trigger and copies the values onto the overlay pane. A theme class on a
+// wrapper does not inherit into a container on `<body>`; the `:root` defaults do,
+// which is why the no-override section proves nothing about forwarding.
+
+.nge-table-cell-textarea-theming {
+  display: block;
+  padding: 20px;
+  color: var(--nge-table-on-surface, #1d1b20);
+  background: var(--nge-table-surface, #ffffff);
+
+  .stories-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    margin-bottom: 8px;
+  }
+
+  code {
+    padding: 1px 4px;
+    border-radius: 3px;
+    background: var(--nge-table-surface-variant, #f5f5f5);
+    font-size: 12px;
+  }
+
+  .intro-text {
+    margin-bottom: 32px;
+    color: var(--nge-table-on-surface-variant, #5f5f66);
+    font-size: 16px;
+  }
+
+  .story-section {
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--nge-table-border-color, #e0e0e0);
+
+    h4 {
+      margin-bottom: 8px;
+      color: var(--nge-table-on-surface, #1d1b20);
+    }
+
+    .story-description {
+      margin-bottom: 16px;
+      color: var(--nge-table-on-surface-variant, #5f5f66);
+      font-size: 14px;
+    }
+  }
+
+  // ─── Section 2 — the accent pair ──────────────────────────────────────────
+  //
+  // Both members together. The Apply button fills with the accent, so its label
+  // needs the paired foreground; setting one without the other is what makes a
+  // filled button unreadable, and is why the ten domain themes bridge them as a
+  // pair.
+  .theme-accent {
+    --nge-table-editor-accent: #6a1b9a;
+    --nge-table-editor-on-accent: #f7ecff;
+    --nge-table-editor-border-color-focus: #6a1b9a;
+  }
+
+  // ─── Section 3 — panel geometry ───────────────────────────────────────────
+  //
+  // Deliberately unbridged in the domain themes (ARCH-277's test), so a story is
+  // the only place these two are exercised at all.
+  .theme-geometry {
+    --nge-table-editor-panel-min-width: 420px;
+    --nge-table-editor-panel-padding: 16px;
+  }
+
+  // ─── Section 4 — panel surface apart from field surface ───────────────────
+  .theme-surface {
+    --nge-table-editor-panel-surface: #f3f0ff;
+    --nge-table-editor-panel-border-color: #6a1b9a;
+    --nge-table-editor-panel-shadow: 0 8px 24px rgb(106 27 154 / 25%);
+    --nge-table-editor-surface: #ffffff;
+  }
+
+  // ─── Section 5 — a dark wrapper, the shape every domain theme takes ───────
+  //
+  // ⚠️ The section that actually tests the forwarding. Table dark + panel light
+  // is the exact failure ARCH-294 shipped and caught. Every member the panel
+  // reads is set here, including the ones only the hint and the buttons use —
+  // those are the easiest to leave out of the forwarded list and the last to be
+  // noticed.
+  .theme-dark {
+    --nge-table-surface: #1a1a1f;
+    --nge-table-surface-variant: #26262e;
+    --nge-table-on-surface: #ece8f0;
+    --nge-table-on-surface-variant: #a9a3b5;
+    --nge-table-border-color: #3a3a45;
+    --nge-table-header-border-color: #4a4a57;
+    --nge-table-header-on-surface: #ece8f0;
+    --nge-table-row-surface-hover: #26262e;
+    --nge-table-focus-ring-color: #b388ff;
+
+    --nge-table-editor-surface: #26262e;
+    --nge-table-editor-on-surface: #ece8f0;
+    --nge-table-editor-border-color: #4a4a57;
+    --nge-table-editor-border-color-focus: #b388ff;
+    --nge-table-editor-accent: #b388ff;
+    --nge-table-editor-on-accent: #1a1a1f;
+    --nge-table-editor-panel-surface: #2f2f39;
+    --nge-table-editor-panel-border-color: #4a4a57;
+    --nge-table-editor-panel-shadow: 0 4px 12px rgb(0 0 0 / 50%);
+    --nge-table-editor-readonly-opacity: 0.7;
+  }
+}

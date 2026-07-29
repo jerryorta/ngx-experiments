@@ -1,0 +1,181 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Inline Editing (Usage)</h2>
+    <p class="intro-text">
+      Two lines of integration, and one obligation. The column opts in with a namespaced meta key;
+      the cell branches on <code>cell.isEditing()</code> and renders whatever control you want. Then
+      — because the library owns no data — <strong>you</strong> apply the change.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. Switching a column on</h4>
+      <p class="story-description">
+        <code>ngeEdit</code> is a namespaced <code>meta</code> key, beside
+        <code>ngeExport</code> (ARCH-248) and <code>ngeFill</code> (ARCH-271).
+        <code>ColumnMeta</code> is a single globally-merged interface shared by every addon and
+        every domain in the workspace, so a bare <code>editable</code> field would be claimed by
+        whoever declared it first.
+      </p>
+      <div class="code-example">
+        <pre>
+const columns: NgeTableColumn&lt;Row&gt;[] = [
+  {{ "{" }} accessorKey: 'name', header: 'Name', id: 'name',
+    meta: {{ "{" }} ngeEdit: {{ "{" }} enabled: true {{ "}" }} {{ "}" }} {{ "}" }},
+];</pre>
+      </div>
+      <p class="story-description">
+        ⚠️ <strong><code>config.getRowId</code> stops being optional.</strong> An edit is keyed by
+        <code>rowId</code> + <code>columnId</code>, so without one the engine keys rows by array
+        index and a sort would land the patch on a different record. The library throws in dev
+        rather than degrade — the same call ARCH-268 made for row selection.
+      </p>
+
+      <nge-table-edit-demo
+        [(rows)]="basicRows"
+        [(state)]="basicState"
+      />
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. The cell template, and the four members it is handed</h4>
+      <p class="story-description">
+        <code>NgeCellContext</code> carries <code>isEditing()</code>, <code>beginEdit()</code>,
+        <code>commitEdit(value)</code> and <code>cancelEdit()</code>. They are callbacks on the
+        context rather than a service to inject, for the reason
+        <code>NgeSelectionCellContext.toggle</code> is (ARCH-278): a projected
+        <code>ng-template</code> resolves DI from its own declaration injector — yours — and can
+        never reach the table.
+      </p>
+      <div class="code-example">
+        <pre>
+&lt;ng-template ngeCell="name" [ngeCellOf]="rows" let-cell&gt;
+  &#64;if (cell.isEditing()) {{ "{" }}
+    &lt;input #field [value]="cell.row.name"
+           (blur)="commit(cell, field.value)"
+           (keydown.enter)="field.blur()"
+           (click)="$event.stopPropagation()" /&gt;
+  {{ "}" }} &#64;else {{ "{" }}
+    {{ "{{" }} cell.row.name {{ "}}" }}
+  {{ "}" }}
+&lt;/ng-template&gt;
+
+commit(cell: NgeCellContext&lt;Row&gt;, value: string): void {{ "{" }}
+  if (cell.isEditing()) {{ "{" }} cell.commitEdit(value); {{ "}" }}
+{{ "}" }}</pre>
+      </div>
+      <p class="story-description">
+        ⚠️
+        <strong>The <code>isEditing()</code> guard is load-bearing, not defensive filler.</strong>
+        Removing a focused element from the DOM fires a native <code>blur</code> on it, and
+        <kbd>esc</kbd> does exactly that — it clears the edit, which flips
+        <code>isEditing()</code> false and tears this very <code>&lt;input&gt;</code> down. Without
+        the guard, that teardown-triggered blur commits the draft <kbd>esc</kbd> was meant to
+        discard, so cancelling silently means saving.
+      </p>
+      <p class="story-description">
+        <kbd>enter</kbd> routes through <code>blur()</code> rather than committing directly, so
+        there is one commit path instead of two that can both fire. And read
+        <code>cell.row.&lt;field&gt;</code> rather than <code>cell.value</code>: the latter is
+        <code>unknown</code>, because a cell's value type depends on which column it belongs to and
+        the column id is a string — <code>row</code> is typed.
+      </p>
+      <p class="story-description">
+        ⚠️ <strong><code>isEditing</code> is a <em>signal</em>, not a boolean.</strong> Cell
+        contexts are memoised against the engine cell — deliberately, because that memo is what
+        keeps ten thousand rows affordable — so a plain field would be read once at first build and
+        served stale forever. The cell would render, the read-only text would stay, and activation
+        would simply never appear.
+      </p>
+      <p class="story-description">
+        ⚠️
+        <strong
+          >A control inside a cell owes itself <code>$event.stopPropagation()</code> on its
+          click</strong
+        >, the same arrangement the resize grip (ARCH-244), the header slots (ARCH-246) and the
+        select-all checkbox (ARCH-268) already use. Without it a click inside the control also reads
+        as a click on the cell and the row.
+      </p>
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. The obligation — applying the intent</h4>
+      <p class="story-description">
+        Committing emits <code>edit-intent</code>. It carries the same <code>NgeCellPatch</code>
+        <code>fill-intent</code> does, so one handler serves both:
+      </p>
+      <div class="code-example">
+        <pre>
+onEvent(event: NgeTableEvent&lt;Row&gt;): void {{ "{" }}
+  if (event.kind !== 'edit-intent' &amp;&amp; event.kind !== 'fill-intent') return;
+  this.rows.update(rows =&gt; applyPatches(rows, event.cells));   // your write
+{{ "}" }}</pre>
+      </div>
+      <p class="story-description">
+        The kinds stay distinct so a host may accept a fill and reject a hand-typed edit, or the
+        reverse. Each patch carries <code>previousValue</code> as well as <code>value</code>, which
+        is what makes undo yours to implement in one more line — the same walk, reading the other
+        field. Try the button below.
+      </p>
+
+      <nge-table-edit-demo
+        [(rows)]="undoRows"
+        [(state)]="undoState"
+      />
+    </section>
+
+    <!-- 4 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>4. Always-live, for the column that wants it</h4>
+      <p class="story-description">
+        Activation is the default because thirty visible rows across three editable columns would
+        otherwise be ninety control instances nobody asked for.
+        <code>meta.ngeEdit.alwaysLive</code> opts one column out of that saving, for the case where
+        the control <em>is</em> the reading — a value scanned down a column rather than opened a
+        cell at a time.
+      </p>
+      <div class="code-example">
+        <pre>
+meta: {{ "{" }} ngeEdit: {{ "{" }} enabled: true, alwaysLive: true {{ "}" }} {{ "}" }}</pre>
+      </div>
+      <p class="story-description">
+        ⚠️ <strong>Per column, never table-wide.</strong> Every other column keeps paying exactly
+        what activation exists to avoid.
+      </p>
+      <p class="story-description">
+        The slider below is a composed <code>div</code> carrying <code>role="slider"</code> — which
+        is also what makes the table leave its drag alone. Any control declaring a widget
+        <code>role</code>, or carrying <code>data-nge-interactive</code>, is recognised; the
+        library never names your components.
+      </p>
+
+      <nge-table-edit-demo
+        [alwaysLiveQuantity]="true"
+        [editableColumns]="['name', 'quantity']"
+        [(rows)]="liveRows"
+        [(state)]="liveState"
+      />
+    </section>
+
+    <!-- 5 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>5. What this story does not ship</h4>
+      <p class="story-description">
+        No editor components. The controls above are the demo's own, which is what a consumer writes
+        today. ARCH-293 adds the library's own input and checkbox, and ARCH-294 a select over a CDK
+        overlay — and a projected <code>[ngeCell]</code> template will still win over them, the
+        same resolution order ARCH-278 fixed for the selection control.
+      </p>
+      <p class="story-description">
+        Export's <code>formatted</code> staying in step with what an editable cell renders remains
+        yours: the library sees a template on one side and a format function on the other, and
+        cannot compare them.
+      </p>
+    </section>
+  </div>
+</nge-storybook-review-container>

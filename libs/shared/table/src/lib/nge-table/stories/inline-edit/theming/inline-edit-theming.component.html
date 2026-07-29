@@ -1,0 +1,155 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Inline Editing (Theming)</h2>
+    <p class="intro-text">
+      An activated cell has no theme vocabulary of its own, and in this story it should not:
+      ARCH-292 ships no editor, so a <code>--nge-table-editor-*</code> namespace declared here
+      would sit inert across all ten domain themes — the mistake ARCH-277 had to undo and ARCH-286
+      had to finish. The controls below read what the table already publishes:
+      <code>--nge-table-surface</code>, <code>--nge-table-border-color</code>,
+      <code>--nge-table-focus-ring-color</code> and <code>--nge-table-focus-ring-width</code>.
+      ARCH-293 introduces the editor tokens together with the editors that consume them.
+    </p>
+    <p class="intro-text">
+      ⚠️ <strong>Click a cell in each section.</strong> Activation is the default, so an editable
+      table at rest looks exactly like a read-only one — there is nothing to review until an editor
+      is open.
+    </p>
+    <p class="intro-text">
+      Every section below is a scoped wrapper class re-declaring tokens. There is no
+      <code>config.theme</code>; this is the whole theming surface, and it is what a consuming app
+      writes.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. Library defaults</h4>
+      <p class="story-description">
+        No overrides at all. The input takes the table's own surface and border, and its focus ring
+        is the same one a sortable header shows — so an editable table looks like the table it is
+        part of before anyone themes anything.
+      </p>
+      <p class="story-description">
+        ⚠️ <strong>The ring is inset.</strong> <code>.nge-table__cell</code> carries
+        <code>overflow: hidden</code> — an ARCH-243 decision that stays, because a cell's content is
+        arbitrary and must not spill — so an outer ring is clipped on whichever edge meets the cell
+        wall.
+      </p>
+
+      <nge-table-edit-demo
+        [(rows)]="defaultRows"
+        [(state)]="defaultState"
+      />
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. A branded ring and surface</h4>
+      <p class="story-description">
+        Three declarations move the editor: the focus ring, the surface it sits on, and the border
+        it carries. Nothing in the section names an editor — the control inherits because it reads
+        the table's tokens rather than tokens of its own.
+      </p>
+      <div class="code-example">
+        <pre>
+.branded {{ "{" }}
+  --nge-table-focus-ring-color: #7c3aed;
+  --nge-table-focus-ring-width: 3px;
+  --nge-table-surface: #faf5ff;
+  --nge-table-border-color: #ddd6fe;
+{{ "}" }}</pre>
+      </div>
+
+      <div class="branded">
+        <nge-table-edit-demo
+          [alwaysLiveQuantity]="true"
+          [editableColumns]="['name', 'quantity']"
+          [(rows)]="brandedRows"
+          [(state)]="brandedState"
+        />
+      </div>
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. Dark</h4>
+      <p class="story-description">
+        The whole dark treatment, and no editor-specific line in it. An input on a dark surface
+        needs the surface and the text colour to move together, which they do because both are the
+        table's own tokens — the property that makes "the editor follows the theme" true rather than
+        a thing each app re-derives.
+      </p>
+
+      <div class="dark">
+        <nge-table-edit-demo
+          [alwaysLiveQuantity]="true"
+          [editableColumns]="['name', 'quantity']"
+          [(rows)]="darkRows"
+          [(state)]="darkState"
+        />
+      </div>
+    </section>
+
+    <!-- 4 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>4. Compact rows</h4>
+      <p class="story-description">
+        A shorter row and tighter padding. ⚠️ <strong>Watch the input, not the text</strong>: a
+        control that set its own height would break out of a shortened row, and the reason this one
+        does not is that it takes its box from the cell rather than declaring one.
+      </p>
+      <div class="code-example">
+        <pre>
+.compact {{ "{" }}
+  --nge-table-row-height: 30px;
+  --nge-table-cell-padding-x: 8px;
+  --nge-table-font-size: 12px;
+{{ "}" }}</pre>
+      </div>
+
+      <p class="story-description">
+        ⚠️
+        <strong
+          >This section passes <code>themableGeometry</code>, and without it the wrapper below would
+          do nothing at all.</strong
+        >
+        <code>createNgeTableConfig</code> resolves <code>rowHeight</code> and
+        <code>headerHeight</code> unconditionally, and <code>&lt;nge-table&gt;</code> writes the
+        resolved numbers as <em>inline</em> custom properties on its host — which outrank a class
+        regardless of specificity. A theming section built on the factory renders at the library
+        default no matter what the class declares, and fails silently. Omitting the two fields is
+        what hands the say back to the theme.
+      </p>
+
+      <div class="compact">
+        <nge-table-edit-demo
+          [themableGeometry]="true"
+          [(rows)]="compactRows"
+          [(state)]="compactState"
+        />
+      </div>
+    </section>
+
+    <!-- 5 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>5. An always-live column, themed</h4>
+      <p class="story-description">
+        The slider is the one control on this page visible without a gesture, which makes it the one
+        place a theme change can be judged at a glance. It reads the same focus-ring token for its
+        fill and its thumb, so a brand colour moves the whole control rather than one part of it.
+      </p>
+
+      <div class="branded">
+        <nge-table-edit-demo
+          [alwaysLiveQuantity]="true"
+          [editableColumns]="['quantity']"
+          [(rows)]="liveRows"
+          [(state)]="liveState"
+        />
+      </div>
+    </section>
+  </div>
+</nge-storybook-review-container>

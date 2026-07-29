@@ -1,0 +1,290 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Cell Range Selection (Usage)</h2>
+    <p class="intro-text">
+      Cell ranges are an addon over <code>&lt;nge-table&gt;</code>: a <code>TableFeature</code> for
+      the state and the export predicate, the existing <code>cell-overlay</code> slot for the paint,
+      and a per-table bridge that owns the pointer gesture. It touches no file in the library core.
+      Two lines switch it on; the third — binding <code>state</code> — is what makes it work.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. Switch it on</h4>
+      <p class="story-description">
+        One entry in <code>providers</code>. It registers three things: the feature that owns the
+        state slice and the export predicate, the <code>NgeRangeBridge</code> a projected template
+        resolves, and the hand-off between them.
+      </p>
+      <div class="code-block">
+        <pre>
+&#64;Component({{ "{" }}
+  providers: [provideNgeCellRange()],
+  …
+{{ "}" }})</pre>
+      </div>
+      <p class="story-description">
+        ⚠️ Put it on the component that hosts the table,
+        <strong>never in an application's root providers</strong> — a range is per-table, exactly as
+        <code>NgeTableStore</code> is. See section 8.
+      </p>
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. Project the overlay</h4>
+      <p class="story-description">
+        One template covers every column: the slot registry falls back to a shared registration when
+        a column has none of its own. The overlay renders nothing — it carries a class and publishes
+        its cell's id pair, and the addon's stylesheet paints the cell around it with
+        <code>:has()</code>.
+      </p>
+      <div class="code-block">
+        <pre>
+&lt;nge-table [config]="config" [(state)]="state"&gt;
+  &lt;ng-template ngeTableSlot="cell-overlay" [ngeTableSlotOf]="rows" let-cell&gt;
+    &lt;nge-range-overlay [cell]="cell" [state]="state()" /&gt;
+  &lt;/ng-template&gt;
+&lt;/nge-table&gt;</pre>
+      </div>
+      <p class="story-description">
+        ⚠️ <strong>The overlay is not optional if the gesture is wanted.</strong> It stamps the
+        <code>data-nge-range-cell</code> attribute every hit-test reads, and it is what hands the
+        bridge the table root the pointer listeners are delegated from. A table that provides the
+        addon and projects no overlay has state and export composition and no pointer behaviour at
+        all — which is a supported arrangement, but rarely the intended one. See section 9.
+      </p>
+      <p class="story-description">
+        <code>[ngeTableSlotOf]</code> is the <strong>type carrier</strong>, not decoration. Without
+        it <code>TRow</code> resolves to <code>unknown</code> and any field access on
+        <code>let-cell</code> fails to compile.
+      </p>
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. <code>getRowId</code> and <code>state</code> are both compulsory</h4>
+      <p class="story-description">
+        Every rectangle names its corners by row id. Without <code>getRowId</code> the engine keys
+        rows by array index, so a sort, a filter or a re-fetch moves the selection onto different
+        records — so this one <strong>throws</strong> in development rather than degrading quietly.
+        And the rectangles live in <code>state</code>, so a table with no <code>state</code> binding
+        has nowhere to keep them across a rebuild.
+      </p>
+      <div class="code-block">
+        <pre>
+config = createNgeTableConfig&lt;Row&gt;({{ "{" }}
+  columns: NGE_TABLE_FIXTURE_COLUMNS,
+  data: createNgeTableFixture({{ "{" }} rows: 25 {{ "}" }}),
+  getRowId: row =&gt; row.id,          // ⚠️ mandatory
+{{ "}" }});</pre>
+      </div>
+
+      <nge-table-range-demo
+        [config]="config"
+        [maxHeight]="320"
+        [rows]="exampleRows"
+        [(state)]="state"
+      />
+
+      <div class="state-readout">
+        <h5>state.ngeRange</h5>
+        <pre>{{ stateJson() }}</pre>
+      </div>
+    </section>
+
+    <!-- 4 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>4. What the state looks like</h4>
+      <p class="story-description">
+        A rectangle is a <strong>descriptor</strong> — four ids naming two opposite corners — never
+        a map of the cells it covers. Which cells lie between the corners is resolved at read time,
+        rows against the processed row model and columns against the visible leaf columns in visual
+        order. That is what makes the slice four strings regardless of how much it covers, and what
+        makes a sort or a pin re-shape a block rather than strand it.
+      </p>
+      <div class="code-block">
+        <pre>
+interface NgeCellRange {{ "{" }}
+  anchorColumnId: string;   // the corner the block is anchored on
+  anchorRowId: string;
+  focusColumnId: string;    // the moving corner — drag, shift-click, keyboard
+  focusRowId: string;
+{{ "}" }}
+
+interface NgeRangeState {{ "{" }}
+  ranges: NgeCellRange[];  // disjoint rectangles, oldest first; the LAST is active
+{{ "}" }}</pre>
+      </div>
+      <p class="story-description">
+        It is plain JSON by construction, so it inherits the persistability promise
+        <code>NgeTableState</code> makes — a user's selection saves and restores with the rest of
+        their view.
+      </p>
+    </section>
+
+    <!-- 5 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>5. Per-table options</h4>
+      <p class="story-description"> Four, all optional, all resolved per provider scope. </p>
+      <div class="code-block">
+        <pre>
+provideNgeCellRange({{ "{" }}
+  autoScrollSpeed: 12,          // px per frame at the viewport boundary (the ceiling, not a constant)
+  autoScrollThreshold: 48,      // how close to an edge a drag starts scrolling
+  clearOnEscape: true,          // give up the selection on Escape
+  selectAllOnModifierA: true,   // take cmd/ctrl-A once the user has engaged with this table
+{{ "}" }})</pre>
+      </div>
+      <p class="story-description">
+        ⚠️ <strong>Both key listeners are on the document</strong>, because nothing in a table body
+        is focusable and a scoped handler would never fire. So on a page with several range-enabled
+        tables, one <kbd>Esc</kbd> clears them all — pass <code>clearOnEscape: false</code> on every
+        table but the one that should own the key. This story's own tables do exactly that.
+      </p>
+      <p class="story-description">
+        <code>autoScrollSpeed</code> is a ceiling rather than a constant: the speed ramps from
+        nothing at the edge of the threshold up to this at the boundary, so a nudge creeps and a
+        shove runs.
+      </p>
+    </section>
+
+    <!-- 6 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>6. Driving it from your own controls</h4>
+      <p class="story-description">
+        The gesture needs no wiring, but a toolbar might. Inject the bridge and call it with the
+        same ids the render slots and the <code>cell-click</code> event carry — no
+        <code>@tanstack/*</code> type crosses the boundary.
+      </p>
+      <div class="code-block">
+        <pre>
+private readonly range = inject(NgeRangeBridge);
+
+start(rowId: string, columnId: string): void {{ "{" }}
+  this.range.start(rowId, columnId);                      // a 1×1 rectangle, replacing
+  this.range.start(rowId, columnId, {{ "{" }} additive: true {{
+            "}"
+          }});   // …or appending a disjoint one
+{{ "}" }}
+
+extend(rowId: string, columnId: string): void {{ "{" }}
+  this.range.extendTo(rowId, columnId);   // moves the ACTIVE rectangle's focus; the anchor stays
+{{ "}" }}
+
+selectAll(): void {{ "{" }} this.range.selectAll(); {{ "}" }}
+clear(): void {{ "{" }} this.range.clear(); {{ "}" }}</pre>
+      </div>
+      <p class="story-description">
+        ⚠️ <strong>There is deliberately no <code>hasRanges()</code> on the bridge.</strong> It
+        holds the raw engine instance, whose options refresh only when the adapter's proxy is read —
+        an application reads the proxy constantly so the staleness would be invisible, and a spec
+        does not. Derive a disabled state from the <code>state</code> you already own:
+      </p>
+      <div class="code-block">
+        <pre>
+readonly hasRanges = computed(() =&gt; (this.state().ngeRange?.ranges.length ?? 0) &gt; 0);</pre>
+      </div>
+    </section>
+
+    <!-- 7 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>7. Exporting only what is selected</h4>
+      <p class="story-description">
+        The bridge hands over a predicate in exactly the shape the export seam takes. Neither addon
+        imports the other; they meet on the table instance and nowhere else.
+      </p>
+      <div class="code-block">
+        <pre>
+private readonly table = viewChild.required(NgeTableComponent&lt;Row&gt;);
+
+exportSelected(): NgeTableExportData {{ "{" }}
+  return this.table().readNgeExportData({{ "{" }} cellPredicate: this.range.predicate() {{ "}" }});
+{{ "}" }}</pre>
+      </div>
+      <p class="story-description">
+        Select a block below, then export. A predicate-narrowed export is <strong>ragged</strong> by
+        design — a column with no selected cell contributes nothing to that row. Feed the result to
+        <code>toNgeCsv()</code> and the composition is three addons deep with no coupling between
+        any of them.
+      </p>
+
+      <div class="controls">
+        <button
+          type="button"
+          (click)="exportSelected()"
+          >Export selection</button
+        >
+      </div>
+
+      <nge-table-range-demo
+        #exportDemo
+        [config]="config"
+        [maxHeight]="320"
+        [rows]="exampleRows"
+        [(state)]="exportState"
+      />
+
+      <div class="state-readout">
+        <h5>{{ exportSummary() }}</h5>
+        @if (exportPreview()) {
+          <pre>{{ exportPreview() }}</pre>
+        }
+      </div>
+    </section>
+
+    <!-- 8 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>8. One provider scope per table</h4>
+      <p class="story-description">
+        <code>provideNgeCellRange()</code> registers one bridge per <strong>injector</strong>, and
+        that bridge holds both the engine instance and the table root its pointer listeners are
+        delegated from. A component rendering several range-enabled tables therefore needs one
+        provider scope each — the last table to attach wins, so a drag in the first would resolve
+        its cells against the last one's rows.
+      </p>
+      <div class="code-block">
+        <pre>
+// ❌ one bridge, three tables — the last to attach wins
+&#64;Component({{ "{" }} providers: [provideNgeCellRange()] {{ "}" }})
+class Dashboard {{ "{" }} /* renders three &lt;nge-table&gt; */ {{ "}" }}
+
+// ✅ a small component owning ONE table, its state, and its interactions
+&#64;Component({{ "{" }} providers: [provideNgeCellRange()], selector: 'my-range-table' {{ "}" }})
+class MyRangeTable {{ "{" }} /* renders one &lt;nge-table&gt; */ {{ "}" }}</pre>
+      </div>
+      <p class="story-description">
+        The second shape is what a real consumer converges on anyway, and it is what every table on
+        these three story pages uses. One further consequence worth knowing: options are a
+        <code>useValue</code> on the provider scope, so per-instance option differences mean a
+        second component class rather than an input.
+      </p>
+    </section>
+
+    <!-- 9 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>9. State and export without a gesture</h4>
+      <p class="story-description">
+        The three registrations are separable. A consumer who wants range-narrowed export driven by
+        their own logic — a saved query, a rule engine — can register the feature alone and project
+        no overlay: the slice, <code>readNgeRangeState()</code> and the export predicate all work,
+        and there is no pointer behaviour and no paint.
+      </p>
+      <div class="code-block">
+        <pre>
+&#64;Component({{ "{" }}
+  providers: [provideNgeTableFeatures(ngeCellRange)],
+  …
+{{ "}" }})</pre>
+      </div>
+      <p class="story-description">
+        Nothing in these examples imports <code>&#64;tanstack/*</code>, including this one — the
+        feature is re-exported behind the <code>nge</code> surface, which is what keeps a future
+        engine major internal to the library.
+      </p>
+    </section>
+  </div>
+</nge-storybook-review-container>

@@ -1,0 +1,178 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <div class="stories-container">
+    <h2>NgeTable — Fill Handle Usage</h2>
+    <p class="intro-text">
+      The fill handle is one more component in the <code>cell-overlay</code> template — but unlike
+      every other feature here, <strong>switching it on is not enough</strong>. The library owns no
+      data, so it proposes a change and stops. A host that does not listen gets a handle that drags,
+      outlines, and changes nothing. No example below imports <code>&#64;tanstack/*</code>.
+    </p>
+
+    <!-- 1 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>1. The template — both components, one slot</h4>
+      <p class="story-description">
+        ⚠️ <code>cell-overlay</code> resolves to
+        <strong>one template per column plus one shared fallback</strong>, so a second
+        <code>ngeTableSlot="cell-overlay"</code> would silently replace the first rather than
+        compose with it. With three cell-marking components in the library, the consumer hosts them
+        together.
+      </p>
+      <div class="code-block">
+        <pre>
+&lt;nge-table [config]="config()" [(state)]="state" (ngeTableEvent)="onEvent($event)"&gt;
+  &lt;ng-template ngeTableSlot="cell-overlay" [ngeTableSlotOf]="rows()" let-cell&gt;
+    &lt;nge-range-overlay [cell]="cell" [state]="state()" /&gt;
+    &lt;nge-fill-handle  [cell]="cell" [state]="state()" /&gt;
+  &lt;/ng-template&gt;
+&lt;/nge-table&gt;</pre>
+      </div>
+      <p class="story-description">
+        Providers are the ones you already have for cell ranges — the fill feature registers
+        alongside them and is inert until a handle is projected.
+      </p>
+      <div class="code-block">
+        <pre>
+&#64;Component({{ "{" }}
+  providers: [provideNgeCellRange()],
+  imports: [NgeTableComponent, NgeTableSlotDirective,
+            NgeRangeOverlayComponent, NgeFillHandleComponent],
+{{ "}" }})</pre>
+      </div>
+    </section>
+
+    <!-- 2 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>2. Applying the intent — the part only you can write</h4>
+      <p class="story-description">
+        <code>fill-intent</code> is the one event kind you are expected to <strong>act</strong> on.
+        Every other kind reports something already done; this one reports something the table will
+        not do on its own.
+      </p>
+      <div class="code-block">
+        <pre>
+onEvent(event: NgeTableEvent&lt;Row&gt;): void {{ "{" }}
+  if (event.kind !== 'fill-intent') {{ "{" }} return; {{ "}" }}
+
+  const patches = new Map&lt;string, Record&lt;string, unknown&gt;&gt;();
+  for (const cell of event.cells) {{ "{" }}
+    const patch = patches.get(cell.rowId) ?? {{ "{" }}{{ "}" }};
+    patch[cell.columnId] = cell.value;
+    patches.set(cell.rowId, patch);
+  {{ "}" }}
+
+  // New objects only where something changed, so untouched rows keep their
+  // identity and the engine's memoisation survives the edit.
+  this.rows.update(rows =&gt; rows.map(row =&gt; {{ "{" }}
+    const patch = patches.get(row.id);
+    return patch ? {{ "{" }} ...row, ...patch {{ "}" }} : row;
+  {{ "}" }}));
+{{ "}" }}</pre>
+      </div>
+
+      <nge-table-fill-demo
+        [(rows)]="basicRows"
+        [(state)]="basicState"
+      />
+    </section>
+
+    <!-- 3 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>3. Undo — the same walk, the other field</h4>
+      <p class="story-description">
+        Every proposed cell carries <code>previousValue</code>, so reversing a fill is the same loop
+        reading the other field. Undo belongs to you because the data does.
+      </p>
+      <div class="code-block">
+        <pre>
+undo(): void {{ "{" }}
+  const cells = this.lastIntent();
+  if (cells) {{ "{" }} this.applyFill(cells, cell =&gt; cell.previousValue); {{ "}" }}
+{{ "}" }}</pre>
+      </div>
+      <p class="story-description">
+        ⚠️ It is not a guarantee of reversibility: if your data moved between the emission and the
+        undo, you are reversing against a table that no longer matches. That is inherent to owning
+        the data.
+      </p>
+
+      <nge-table-fill-demo
+        [(rows)]="undoRows"
+        [(state)]="undoState"
+      />
+    </section>
+
+    <!-- 4 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>4. Opting a column out</h4>
+      <p class="story-description">
+        A derived or read-only column must never be a fill target. It stays usable as a
+        <em>source</em> — its values can seed a neighbour's series.
+      </p>
+      <div class="code-block">
+        <pre
+          >{{ "{" }}
+  id: 'total',
+  header: 'Total',
+  accessorFn: row =&gt; row.price * row.quantity,
+  meta: {{ "{" }} ngeFill: {{ "{" }} enabled: false {{ "}" }} {{ "}" }},
+{{ "}" }}</pre>
+      </div>
+      <p class="story-description">
+        Namespaced under <code>ngeFill</code> beside ARCH-248's <code>ngeExport</code>, because
+        <code>ColumnMeta</code> is one globally-merged interface every addon shares.
+      </p>
+    </section>
+
+    <!-- 5 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>5. What the fill infers</h4>
+      <p class="story-description">
+        Two behaviours, inferred from the source rather than configured:
+      </p>
+      <div class="code-block">
+        <pre>
+[7]              → 7, 7, 7        copy — one cell is not a series
+['a','b']        → a, b, a, b     copy, cycling the pattern
+[10, 20]         → 30, 40, 50     linear, step (last − first) / (n − 1)
+[1, 3, 5]        → 7, 9           the step spans the WHOLE source
+[5, 5, 5]        → 5, 5           a series whose step is zero
+[10, 20] upward  → …, −10, 0      backwards changes the arithmetic</pre>
+      </div>
+      <p class="story-description">
+        The drag is <strong>two-dimensional</strong> — each axis resolves independently, so one
+        gesture can grow the rows and shrink the columns. Growing both at once fills in two passes:
+        rows from the real source, then columns across every row including the new ones, which is
+        what gives the corner quadrant its values.
+      </p>
+      <div class="code-block">
+        <pre>
+2×2 source dragged out to 4×3
+
+   A    B    C          [ ] = source
+0 [10] [20]  30         ↧   = pass 1 (rows, from A–B)
+1 [15] [25]  35         ↦   = pass 2 (columns, from each row's A–B)
+2  20   30   40         ⇘   = the corner: pass 2 reading pass 1
+3  25   35   45</pre>
+      </div>
+      <p class="story-description">
+        Date series, text patterns (<code>Q1</code> → <code>Q2</code>) and custom handlers are
+        deliberately out of scope — they are mintable once this write path has proven itself.
+      </p>
+    </section>
+
+    <!-- 6 ────────────────────────────────────────────────────────────────── -->
+    <section class="story-section">
+      <h4>6. When there is no handle</h4>
+      <p class="story-description">
+        The grip appears on the active range's trailing-bottom corner — and
+        <strong>not at all</strong> when that range is unbounded on the row axis: a whole column, or
+        <kbd>cmd</kbd>/<kbd>ctrl</kbd>-<kbd>A</kbd>. Such a range covers every row, so there is no
+        corner and nothing below it to fill into.
+      </p>
+    </section>
+  </div>
+</nge-storybook-review-container>
