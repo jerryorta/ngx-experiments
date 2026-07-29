@@ -50,3 +50,14 @@ storybook-static
 .nx/migrate-runs
 # direnv (local env overrides — never commit)
 .envrc
+
+# Firebase — deploy credentials must NEVER be committed. This repo is PUBLIC, so a
+# service-account key landing here is a disclosure, not just a mistake. The key lives
+# in a GitHub Actions repository secret; nothing on disk should hold it.
+# (`firebase.json` and `.firebaserc` ARE committed — a project/site id is not secret.)
+*firebase-adminsdk*.json
+firebase-service-account*.json
+.firebase/
+
+# Assembled Firebase Hosting payload for the demo target (built, never committed).
+_site/

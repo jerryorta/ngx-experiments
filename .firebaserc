@@ -1,0 +1,13 @@
+{
+  "projects": {
+    "default": "gigasoft-svc-prd"
+  },
+  "targets": {
+    "gigasoft-svc-prd": {
+      "hosting": {
+        "storybook": ["jerryorta-storybook"],
+        "demo": ["jerryorta-ledger"]
+      }
+    }
+  }
+}

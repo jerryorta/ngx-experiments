@@ -9,7 +9,7 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06B6D4?logo=tailwindcss&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)
 
-**🔗 Live:** [Ledger demo](https://jerryorta.github.io/ngx-experiments/demo/) · [Storybook](https://jerryorta.github.io/ngx-experiments/storybook/)
+**🔗 Live:** [Ledger demo](https://jerryorta-ledger.web.app/demo/) · [Storybook](https://jerryorta-storybook.web.app/)
 
 ## What it is
 

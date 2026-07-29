@@ -1,0 +1,78 @@
+name: Deploy Storybook (Firebase Hosting)
+
+# Publishes Storybook to https://jerryorta-storybook.web.app
+#
+# Why Firebase rather than the Pages job next door: GitHub Pages serves EVERY file
+# with a fixed `Cache-Control: max-age=600` and gives no way to change it. For ten
+# minutes after each deploy a returning browser can hold a stale `index.html` /
+# `index.json` pointing at content-hashed chunks the new build renamed — those 404,
+# Pages answers a 404 with the site-wide `404.html` (the Ledger shell), and the
+# browser tries to parse HTML as a JS module. That is the "story route is blank until
+# I refresh" bug. Firebase lets `firebase.json` set the headers that fix it.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Least privilege. `pull-requests: write` is only so the deploy action can leave the
+# preview-channel URL as a PR comment.
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+# One deploy at a time per ref. Superseded PR builds are worth cancelling; a live
+# deploy is not.
+concurrency:
+  group: storybook-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  deploy:
+    # ⚠️ THIS REPO IS PUBLIC, AND THIS LINE IS THE REASON THAT IS SAFE.
+    #
+    # GitHub withholds repository secrets from `pull_request` runs whose head is a
+    # FORK, so a drive-by contributor cannot exfiltrate the Firebase key by editing
+    # this workflow — their run simply gets an empty secret. Without this guard the
+    # job would still be safe but would FAIL noisily on every outside PR, which
+    # trains people to ignore a red check.
+    #
+    # ⚠️ Never switch this trigger to `pull_request_target`. That variant runs with
+    # secrets against the BASE repo while checking out the fork's code, which is
+    # exactly the combination that turns an outside PR into arbitrary code execution
+    # holding a production service-account key.
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # Clean, lockfile-exact install — matches the Pages job.
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Storybook (static)
+        run: npx nx run storybook-app:build-storybook
+
+      # `channelId: live` publishes to the real site; an empty channelId makes the
+      # action mint a per-PR preview channel and comment the URL on the PR. That
+      # preview is most of why this migration is worth doing — a reviewer opens a
+      # link instead of building Storybook locally.
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_STORYBOOK }}
+          projectId: gigasoft-svc-prd
+          target: storybook
+          channelId: ${{ github.event_name == 'push' && 'live' || '' }}
+          expires: 7d

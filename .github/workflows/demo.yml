@@ -1,0 +1,73 @@
+name: Deploy Ledger demo (Firebase Hosting)
+
+# Publishes the landing hub + Ledger demo to https://jerryorta-ledger.web.app
+#   /       -> landing hub
+#   /demo/  -> Ledger demo (Angular SPA)
+#
+# Replaces the old GitHub Pages job. Pages serves every file with a fixed
+# `Cache-Control: max-age=600` and offers no way to change it, so for ten minutes
+# after a deploy a returning browser could hold a stale `index.html` pointing at
+# content-hashed chunks the new build had renamed. Firebase lets `firebase.json` set
+# `no-cache` on the entry points and `immutable` on the hashed assets, which is the
+# fix. It also replaces the Pages 404.html hack with a scoped SPA rewrite, so a
+# deep link resolves without every missing asset site-wide answering with app HTML.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+concurrency:
+  group: demo-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  deploy:
+    # ⚠️ THIS REPO IS PUBLIC — see the identical guard in storybook.yml. GitHub
+    # withholds secrets from fork PRs, so this keeps an outside PR skipping cleanly
+    # rather than failing red. Never switch the trigger to `pull_request_target`.
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ⚠️ `--base-href=/demo/` must match the `_site` layout below AND the rewrite in
+      # firebase.json. The app is served from a subpath of its own site, so a bare `/`
+      # would make every asset request resolve one directory too high.
+      - name: Build Ledger demo
+        run: npx nx build ledger-app --configuration=production --base-href=/demo/
+
+      - name: Assemble site
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          mkdir -p _site/demo
+          cp landing/index.html _site/index.html
+          cp -r dist/apps/ledger/app/browser/. _site/demo/
+
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_STORYBOOK }}
+          projectId: gigasoft-svc-prd
+          target: demo
+          channelId: ${{ github.event_name == 'push' && 'live' || '' }}
+          expires: 7d
