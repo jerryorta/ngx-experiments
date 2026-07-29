@@ -1114,3 +1114,43 @@ and the only way to find out is to build the whole and look, because the combina
 rarely the one anyone would have thought to write a pairwise test for. Eight waves of correct,
 independently-shipped features had never once shared a table before this story put them there, and
 the very first time they did, one of the eight silently made two others unusable.
+
+## The test that cannot see the bug it is meant to catch (first app consumer)
+
+The library shipped eleven waves, 1,034 specs, a `typecheck` target, a lint target and a full
+Storybook, all green. The first Angular **application** to put `<nge-table>` on a page failed to
+build, on six errors, in the library's own template.
+
+### Angular types `$event` by name, and a key binding has no name
+
+Five bindings in `nge-table.component.html` are key pseudo-events — `(keydown.space)`,
+`(keydown.escape)`, `(keydown.shift.arrowleft)` — each wired to a handler declaring
+`event: KeyboardEvent`. That reads as obviously right, and it is obviously wrong. Angular's template
+type-checker types `$event` by looking the binding name up in `HTMLElementEventMap` and falling back
+to `Event` on a miss. `"keydown.space"` is not a DOM event name — it is Angular's own key-modifier
+syntax, resolved at runtime by `KeyEventsPlugin` — so it always misses, and under `strictTemplates`
+every one of those handlers is being handed an `Event` where it asked for a `KeyboardEvent`.
+
+The narrowing turned out to cost exactly nothing: not one of the five handlers reads a key-specific
+member. They want `preventDefault`, `stopPropagation` and `target`, all of which are `Event`'s own,
+because *which* key arrived was already decided by the binding. The types were aspirational rather
+than load-bearing, which is precisely why nobody noticed they were unsatisfiable.
+
+### Why every gate passed anyway
+
+`tsc --noEmit` never opens a template. The `typecheck` target is therefore structurally incapable of
+seeing a template type error, however strict its tsconfig — and the tsconfig here *was* strict, with
+`strictTemplates: true` sitting in it the whole time, describing a check nothing in the library's own
+CI actually ran. Jest compiles templates through `jest-preset-angular`, which does not run the
+template type-checker either; a spec exercising these very keystrokes passes because the runtime
+behaviour was never in question. Only AOT — an application build — does the check, and the library
+has no application.
+
+### The generalisable line
+
+**A configuration flag is not a gate.** `strictTemplates: true` in a library's tsconfig is a claim
+about a check that only ever runs in a consumer's build, so a library that has no consumer has, on
+that axis, no coverage at all — and the longer it goes unconsumed the more confidently wrong the
+green checkmarks become. The failure was not that the bug was subtle; it was that every mechanism the
+library had for catching bugs was blind to the entire category. Shipping a library and integrating a
+library are different verbs, and only the second one runs some of the compiler.
