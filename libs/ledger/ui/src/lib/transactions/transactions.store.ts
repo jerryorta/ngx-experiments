@@ -8,6 +8,7 @@ import type { IsoDateRange } from '@nge/ledger-utils';
 import type { DlcSelectOption } from '@nge/ui-design-library';
 
 import { LedgerFacade } from '@nge/ledger-store';
+import { categoryTrendSeries } from '@nge/ledger-utils';
 
 /** The Transactions table's sortable dimensions. */
 export type TransactionSortField = 'amount' | 'date' | 'merchant';
@@ -121,12 +122,27 @@ export const TransactionsStore = signalStore(
       facade.accounts().map(acc => ({ label: acc.name, value: acc.id }))
     );
 
+    /**
+     * Transaction id → the trailing run of spend in that transaction's category,
+     * which is what the table's in-cell sparkline column draws.
+     *
+     * Derived from `facade.transactions()` — the WHOLE ledger, deliberately, not
+     * `visibleTransactions()`. A filter narrows which rows are on screen; it does
+     * not change what the recent history of a category *was*, and recomputing the
+     * windows per filter would redraw every sparkline on each keystroke while
+     * telling the user something less true.
+     */
+    const trendSeries = computed<Map<string, number[]>>(() =>
+      categoryTrendSeries(facade.transactions())
+    );
+
     return {
       accountOptions,
       activeFilterCount,
       categoryOptions,
       hasActiveFilters,
       selectedRow,
+      trendSeries,
       visibleTransactions,
     };
   }),

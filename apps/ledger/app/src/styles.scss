@@ -1,5 +1,16 @@
 /* Global styles — apply the @nge/themes personas so the app renders themed,
    then layer the ledger --ldg-* semantic aliases + money/category tokens. */
+
+// NgeChart and NgeTable token defaults (`:root`). BOTH must come before the theme
+// mixins below: `:root` and a theme class (`.dlc-professional-dark`) have EQUAL
+// specificity (0,1,0), so source order — not specificity — decides the winner, and a
+// persona's bridge has to be able to override. Without these, every --nge-chart-* /
+// --nge-table-* token a persona does not itself carry resolves to nothing: the
+// personas bridge the palettes only, so all 33 of the table's geometry tokens (row
+// height, cell padding, column bounds) come from here alone.
+@use '../../../../libs/shared/charts/theming' as nge-chart-theming;
+@use '../../../../libs/shared/table/theming' as nge-table-theming;
+
 @use 'dlc-themes';
 @use 'ldg-themes';
 

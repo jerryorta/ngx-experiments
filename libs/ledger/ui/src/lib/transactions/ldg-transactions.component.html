@@ -69,72 +69,75 @@
   </div>
 
   @if (_visibleTransactions.length > 0) {
-    <dlc-data-table
+    <!--
+      The height lives on `<nge-table>` itself (see the SCSS), never on a wrapper:
+      the host is a flex column whose scroller shrinks to fit, and virtualization
+      has no window to compute without a bounded viewport. A click anywhere on a
+      row opens the drawer — `row-click` off the one event stream, which is why no
+      cell here wraps its content in a button.
+    -->
+    <nge-table
       class="ldg-transactions__table"
-      [columns]="columns"
-      [rows]="_visibleTransactions"
+      [config]="tableConfig()"
+      (ngeTableEvent)="onTableEvent($event)"
     >
       <ng-template
-        dlcCell="date"
-        let-row
-        let-value="value"
+        ngeCell="merchant"
+        let-cell
+        [ngeCellOf]="_visibleTransactions"
       >
-        <button
-          type="button"
-          class="ldg-transactions__cell-btn"
-          (click)="store.selectRow(row.id)"
-        >
-          {{ value }}
-        </button>
-      </ng-template>
-
-      <ng-template
-        dlcCell="merchant"
-        let-row
-        let-value="value"
-      >
-        <button
-          type="button"
-          class="ldg-transactions__cell-btn"
-          (click)="store.selectRow(row.id)"
-        >
-          {{ value }}
-          @if (row.pending) {
+        <span class="ldg-transactions__merchant">
+          {{ cell.row.merchant }}
+          @if (cell.row.pending) {
             <span class="ldg-transactions__pending-badge">Pending</span>
           }
-        </button>
+        </span>
       </ng-template>
 
       <ng-template
-        dlcCell="categoryId"
-        let-row
-        let-value="value"
+        ngeCell="categoryId"
+        let-cell
+        [ngeCellOf]="_visibleTransactions"
       >
-        <button
-          type="button"
-          class="ldg-transactions__cell-btn"
-          (click)="store.selectRow(row.id)"
-        >
-          {{ categoryName(value) }}
-        </button>
+        {{ categoryName(cell.row.categoryId) }}
+      </ng-template>
+
+      <!--
+        The in-cell chart. `isSettled()` is false while the scroll is moving, so a
+        fast flick draws the table's own flat placeholder instead of asking d3 to
+        lay out a chart per row per frame; the real sparkline arrives the moment
+        the viewport goes quiet. `chartFor` is memoised per row — a factory called
+        straight from a binding would rebuild the config on every pass and undo
+        exactly what the settle signal buys.
+      -->
+      <ng-template
+        ngeCell="trend"
+        let-cell
+        [ngeCellOf]="_visibleTransactions"
+      >
+        @if (cell.isSettled()) {
+          <div class="ldg-transactions__chart-cell">
+            <nge-chart [config]="chartFor(cell.row)" />
+          </div>
+        } @else {
+          <nge-cell-shell />
+        }
       </ng-template>
 
       <ng-template
-        dlcCell="amountCents"
-        let-row
-        let-value="value"
+        ngeCell="amountCents"
+        let-cell
+        [ngeCellOf]="_visibleTransactions"
       >
-        <button
-          type="button"
-          class="ldg-transactions__cell-btn ldg-transactions__amount"
-          [class.ldg-transactions__amount--positive]="value >= 0"
-          [class.ldg-transactions__amount--negative]="value < 0"
-          (click)="store.selectRow(row.id)"
+        <span
+          class="ldg-transactions__amount"
+          [class.ldg-transactions__amount--positive]="cell.row.amountCents >= 0"
+          [class.ldg-transactions__amount--negative]="cell.row.amountCents < 0"
         >
-          {{ formatAmount(value) }}
-        </button>
+          {{ formatAmount(cell.row.amountCents) }}
+        </span>
       </ng-template>
-    </dlc-data-table>
+    </nge-table>
   } @else {
     <ldg-empty-state
       icon="receipt_long"

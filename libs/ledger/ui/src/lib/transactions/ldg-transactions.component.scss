@@ -7,16 +7,49 @@
     flex: 1 1 220px;
   }
 
-  // Reset the per-cell click target to a plain, full-width row surface —
-  // `dlc-data-table` has no row-click output of its own, so each templated
-  // cell is its own button (see the report's row-click deviation note).
-  &__cell-btn {
-    all: unset;
-    box-sizing: border-box;
-    cursor: pointer;
+  // ─── The table (@nge/table) ────────────────────────────────────────────────
+  //
+  // A SET height, and it belongs on `nge-table` itself rather than on a wrapper.
+  // The host is a flex column whose viewport shrinks to fit and scrolls inside
+  // it; a height on an ancestor would simply be overflowed, the sticky header
+  // would have nothing to stick against, and virtualization would have no
+  // bounded viewport to compute a window from.
+  //
+  // 560px against 72px rows is ~7 rows on screen out of the whole seed ledger —
+  // enough that the window is obviously a window, and short enough to leave the
+  // filter bar and the drawer room on a laptop.
+  &__table {
+    height: 560px;
+  }
+
+  &__merchant {
     display: flex;
     align-items: center;
-    width: 100%;
+    min-width: 0;
+  }
+
+  // The sizing `<nge-cell-shell>` uses against this identical cell, so the shell
+  // and the chart it hands off to share one convention rather than two.
+  // `.nge-table__cell` always carries a definite height (`--nge-table-row-height`,
+  // never `auto`), and `align-self: stretch` is what turns that into a definite
+  // height here for `<nge-chart>`'s own `height: 100%` to resolve against.
+  &__chart-cell {
+    flex: 1 1 auto;
+    align-self: stretch;
+    min-width: 0;
+
+    // ⚠️ The shell's inset, matched exactly — `align-self: stretch` subtracts
+    // margin from the used height, so without this the settled chart is a full
+    // 72px where the shell it replaced was 60px, and the row visibly grows the
+    // instant the scroll settles.
+    margin: var(--nge-table-shell-inset, 6px) 0;
+
+    // ⚠️ `<nge-chart>` debounces its render by 16ms, so nothing paints in the
+    // frame it mounts. Without the shell's own surface underneath, the
+    // shell → chart handoff reads as a flash rather than as content arriving in
+    // place. Same token and fallback chain as `nge-cell-shell.component.scss`.
+    background: var(--nge-table-shell-surface, var(--nge-table-surface-variant, #f5f5f5));
+    border-radius: var(--nge-table-shell-radius, 4px);
   }
 
   &__amount {

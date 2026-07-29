@@ -131,13 +131,22 @@
   <section class="mt-6">
     <h2 class="mb-3 text-lg font-semibold text-(--dlc-on-surface)">Recent Transactions</h2>
     @if (store.recentTransactions().length) {
-      <dlc-data-table [columns]="transactionColumns" [rows]="store.recentTransactions()">
-        <ng-template dlcCell="amountCents" let-value="value">
-          <span [style.color]="value >= 0 ? 'var(--ldg-money-positive)' : 'var(--ldg-money-negative)'">
-            {{ formatMoney(value) }}
+      <!--
+        Deliberately NOT virtualized and deliberately unbounded in height: this is
+        the eight most recent transactions, so there is no window worth computing
+        and the card sizes to its rows.
+      -->
+      <nge-table [config]="tableConfig()">
+        <ng-template ngeCell="amountCents" let-cell [ngeCellOf]="store.recentTransactions()">
+          <span
+            [style.color]="
+              cell.row.amountCents >= 0 ? 'var(--ldg-money-positive)' : 'var(--ldg-money-negative)'
+            "
+          >
+            {{ formatMoney(cell.row.amountCents) }}
           </span>
         </ng-template>
-      </dlc-data-table>
+      </nge-table>
     } @else {
       <ldg-empty-state
         icon="receipt_long"
