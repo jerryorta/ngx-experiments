@@ -140,6 +140,9 @@ export class NgeTableChartCellsInteractionStoriesComponent {
     }
 
     const config = createSparklineChartConfig({
+      // The warm trend accent, resolved from `.chart-cell` — a `var()` REFERENCE so the
+      // browser re-resolves it when the persona changes. See the SCSS for the pair.
+      seriesColors: ['var(--nge-trend-accent, #c2410c)'],
       // ⚠️ animationMs: 0 — virtualization recreates the cell on every window
       // slide, so an entrance animation replays per slide and reads as a strobe.
       animationMs: 0,
