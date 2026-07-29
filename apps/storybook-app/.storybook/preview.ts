@@ -2,12 +2,21 @@ import { applicationConfig, type Preview } from '@storybook/angular';
 import { provideZonelessChangeDetection } from '@angular/core';
 
 import {
+  getDefaultThemeConfig,
   resolveThemeForGroup,
   STORYBOOK_THEME_CONFIGS,
   type ThemeGroupKey,
 } from '@nge/storybook';
 
 const ALL_THEME_CLASSES = STORYBOOK_THEME_CONFIGS.map(t => t.cssClass);
+
+/**
+ * The theme a visitor sees before touching the picker, derived from the single
+ * `isDefault: true` entry in the theme catalog rather than named here. Hardcoding a
+ * class in this file silently outranks that flag, which is how the catalog can claim
+ * one default while Storybook boots into another.
+ */
+const DEFAULT_THEME_CLASS = getDefaultThemeConfig(STORYBOOK_THEME_CONFIGS).cssClass;
 
 // Load persona + icon fonts once at startup (dlc personas: Manrope/DM Sans,
 // Literata/Nunito Sans, Epilogue/IBM Plex Sans) plus Material Symbols for dlc-icon.
@@ -29,7 +38,7 @@ const preview: Preview = {
     applicationConfig({ providers: [provideZonelessChangeDetection()] }),
     (storyFn, context) => {
       const selected =
-        (context.globals as Record<string, string>)['theme'] ?? 'dlc-home-light';
+        (context.globals as Record<string, string>)['theme'] ?? DEFAULT_THEME_CLASS;
 
       // Scope the theme to the story's group: a story declares
       // `parameters: { themeGroup: 'cg' }` to restrict which themes apply.
@@ -48,7 +57,7 @@ const preview: Preview = {
     // The theme global default; the SWITCHER UI is the custom manager toolbar
     // (.storybook/manager.tsx → ThemeSelectorTool), so no `toolbar` here.
     theme: {
-      defaultValue: 'dlc-home-light',
+      defaultValue: DEFAULT_THEME_CLASS,
       name: 'Theme',
     },
   },
