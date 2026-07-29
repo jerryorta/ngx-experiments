@@ -5,6 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ngx-experiments — @nge · a clean-room Angular design system</title>
   <meta name="description" content="A standalone Nx + Angular reference workspace: a clean-room design system, extensible charts and calendar libraries, and a Ledger demo — built under the @nge namespace, with zero Angular Material." />
+  <!-- Google Analytics (GA4), property G-EQ7TZ5SH90 — deliberately the SAME property
+       as jerryorta.dev. The portfolio is where visits start and this is where they
+       are meant to continue, so one property keeps that journey in a single data set
+       rather than three disconnected ones. Hostname-gated so local development never
+       reports; mirrors `shouldEnableAnalytics` in the portfolio repo. Identical
+       copies live in apps/ledger/app/src/index.html and
+       apps/storybook-app/.storybook/manager-head.html — change all three together. -->
+  <script>
+    (function () {
+      var host = (window.location.hostname || '').toLowerCase();
+      if (host === 'localhost' || host === '127.0.0.1' || host === '::1' || host.endsWith('.local')) {
+        return;
+      }
+      var id = 'G-EQ7TZ5SH90';
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () {
+        window.dataLayer.push(arguments);
+      };
+      window.gtag('js', new Date());
+      window.gtag('config', id);
+      var tag = document.createElement('script');
+      tag.async = true;
+      tag.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
+      document.head.appendChild(tag);
+    })();
+  </script>
   <style>
     :root {
       --bg: #0b0f1a; --bg-2: #0f1524; --surface: #141b2d;

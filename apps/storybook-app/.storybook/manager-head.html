@@ -1,0 +1,35 @@
+<!-- Injected into the head of Storybook's MANAGER frame — the chrome the visitor
+     actually navigates. The preview iframe is deliberately left alone: tagging it too
+     would raise a second page_view for every story render and double-count the same
+     visit.
+
+     Google Analytics (GA4), property G-EQ7TZ5SH90 — deliberately the SAME property as
+     jerryorta.dev. The portfolio is where visits start and this is where they are
+     meant to continue, so one property keeps that journey in a single data set rather
+     than three disconnected ones. Hostname-gated so a local `npm run storybook` never
+     reports; mirrors `shouldEnableAnalytics` in the portfolio repo. Storybook moves
+     between stories by rewriting `?path=` through the History API, and GA4 enhanced
+     measurement raises a page_view on history changes, so per-story navigation is
+     covered without any Storybook-specific wiring here.
+
+     Identical copies live in landing/index.html and apps/ledger/app/src/index.html —
+     change all three together. -->
+<script>
+  (function () {
+    var host = (window.location.hostname || '').toLowerCase();
+    if (host === 'localhost' || host === '127.0.0.1' || host === '::1' || host.endsWith('.local')) {
+      return;
+    }
+    var id = 'G-EQ7TZ5SH90';
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () {
+      window.dataLayer.push(arguments);
+    };
+    window.gtag('js', new Date());
+    window.gtag('config', id);
+    var tag = document.createElement('script');
+    tag.async = true;
+    tag.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
+    document.head.appendChild(tag);
+  })();
+</script>
