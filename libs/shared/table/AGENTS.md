@@ -3,11 +3,13 @@
 > **Table guide**: `docs/architecture/table.md`
 > **Epic plan (ARCH-239)**: `~/Dev/gigasoftware-plans/arch/ARCH-239.md`
 > **Workspace invariants**: `docs/ai/CONSTRAINTS.md`
-> **Blog notes**: `docs/reference/table-architecture-blog.md` — ⚠️ **append to it when a story
-> surfaces something worth writing about.** The interesting parts of an epic are the places the
-> obvious answer was wrong, and those are exactly what gets smoothed out of the source once
-> settled: a comment records what is *true*, deliberately not what was *tried*. That file is where
-> the second one lives, and it is only accurate if it is written while the reasoning is fresh.
+> **Published write-up**: <https://jerryorta.dev/concepts/table-library-architecture> — the
+> architecture essay, authored in the source monorepo alongside the library. ⚠️ **It is the
+> destination when a story surfaces something worth writing about.** The interesting parts of an
+> epic are the places the obvious answer was wrong, and those are exactly what gets smoothed out of
+> the source once settled: a comment records what is *true*, deliberately not what was *tried*.
+> There is no scratch notes file — a finding either earns a paragraph in the essay or belongs in the
+> guide above as a live constraint. Write it while the reasoning is fresh either way.
 
 ## This file is ported, not authored — and that is deliberate
 
@@ -16,8 +18,9 @@ repo names the wrong libraries, prefixes and personas. This one is the exception
 is the library's **design record**, not a thin pointer, and re-authoring it would throw away the
 reasoning behind every locked decision. So it is copied, put through the `nge`→`nge` transform, and
 then hand-corrected wherever the source repo's own shape leaked through — the theme-bridge table,
-the design-library component names used as examples, and a Storybook secrets warning that has no
-meaning here. If you re-port it after an upstream change, redo those corrections; the transform
+the design-library component names used as examples, a Storybook secrets warning that has no
+meaning here, and the **published write-up** pointer above, which is a URL here because the essay
+is authored in the source monorepo and its repo-relative path means nothing in this one. If you re-port it after an upstream change, redo those corrections; the transform
 alone will not.
 
 **ngx deltas that no transform can derive:**
