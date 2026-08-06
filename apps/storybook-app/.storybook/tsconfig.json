@@ -7,6 +7,7 @@
   "files": [],
   "exclude": ["../**/*.spec.ts", "../../../libs/**/*.spec.ts"],
   "include": [
+    "../src/**/*.stories.ts",
     "../../../libs/shared/ui-design-library/src/**/*.stories.ts",
     "../../../libs/shared/charts/src/**/*.stories.ts",
     "../../../libs/shared/table/src/**/*.stories.ts",

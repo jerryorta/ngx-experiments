@@ -1,0 +1,46 @@
+<article class="nge-welcome__inner">
+  <header class="nge-welcome__header">
+    <p class="nge-welcome__eyebrow">ngx-experiments · &#64;nge</p>
+    <h1 class="nge-welcome__title">An Angular design system, built in the open</h1>
+    <p class="nge-welcome__lede">
+      Five libraries maintained as one system: a framework-free component library and the three
+      data-presentation libraries built against its token contract. Every component here is
+      standalone, OnPush, signal-based, and themed entirely through CSS custom properties — no
+      Angular Material, and no third-party component dependency.
+    </p>
+    <p class="nge-welcome__hint">
+      Use the theme control in the toolbar above to re-theme any story. Nothing in a story changes
+      but the tokens.
+    </p>
+  </header>
+
+  <ul class="nge-welcome__list">
+    @for (library of libraries; track library.name) {
+      <li class="nge-welcome__item">
+        <h2 class="nge-welcome__item-title">{{ library.name }}</h2>
+        <p class="nge-welcome__item-count">{{ library.storyCount }} stories</p>
+        <p class="nge-welcome__item-blurb">{{ library.blurb }}</p>
+        <a
+          class="nge-welcome__item-link"
+          [href]="storyHref(library.startStoryId)"
+          target="_top"
+          >Start with {{ library.startStoryName }} →</a
+        >
+      </li>
+    }
+  </ul>
+
+  <footer class="nge-welcome__footer">
+    <p class="nge-welcome__footer-copy">
+      Storybook shows each component running. For what each library contains and why it is built
+      this way, the annotated catalog lives on the portfolio.
+    </p>
+    <a
+      class="nge-welcome__footer-link"
+      [href]="overviewHref"
+      target="_blank"
+      rel="noopener"
+      >Browse the library catalog on jerryorta.com ↗</a
+    >
+  </footer>
+</article>

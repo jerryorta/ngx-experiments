@@ -1,0 +1,113 @@
+// Every token carries a literal fallback: this page renders under all six persona
+// themes, and under none of them if a story is opened before a theme class lands
+// on <body>. It must stay readable in that gap rather than falling back to
+// unstyled black-on-white.
+.nge-welcome {
+  display: block;
+  padding: 2.5rem 2rem 3rem;
+  font-family: var(--dlc-font-family-body, system-ui, -apple-system, sans-serif);
+  color: var(--dlc-on-surface, #1b1b1f);
+  background: var(--dlc-surface, #ffffff);
+
+  &__inner {
+    max-width: 62rem;
+    margin: 0 auto;
+  }
+
+  &__eyebrow {
+    margin: 0 0 0.5rem;
+    font-size: 0.75rem;
+    font-weight: var(--dlc-font-weight-medium, 500);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dlc-primary, #4a5eb5);
+  }
+
+  &__title {
+    margin: 0 0 1rem;
+    font-family: var(--dlc-font-family-display, inherit);
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: var(--dlc-font-weight-bold, 700);
+    line-height: 1.15;
+  }
+
+  &__lede {
+    max-width: 65ch;
+    margin: 0 0 1rem;
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    color: var(--dlc-on-surface-variant, #45464f);
+  }
+
+  &__hint {
+    max-width: 65ch;
+    margin: 0 0 2.5rem;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--dlc-on-surface-variant, #45464f);
+    opacity: 0.85;
+  }
+
+  &__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+    gap: 1rem;
+    margin: 0 0 2.5rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem;
+    border: 1px solid var(--dlc-outline, #c5c6d0);
+    border-radius: var(--dlc-radius-lg, 16px);
+    background: var(--dlc-surface-container, #f2f0f4);
+  }
+
+  &__item-title {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: var(--dlc-font-weight-bold, 700);
+  }
+
+  &__item-count {
+    margin: 0.125rem 0 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--dlc-primary, #4a5eb5);
+  }
+
+  &__item-blurb {
+    flex: 1;
+    margin: 0 0 1rem;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--dlc-on-surface-variant, #45464f);
+  }
+
+  &__item-link,
+  &__footer-link {
+    font-size: 0.9375rem;
+    font-weight: var(--dlc-font-weight-medium, 500);
+    color: var(--dlc-primary, #4a5eb5);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__footer {
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--dlc-outline-variant, #e2e1ec);
+  }
+
+  &__footer-copy {
+    max-width: 65ch;
+    margin: 0 0 0.5rem;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--dlc-on-surface-variant, #45464f);
+  }
+}

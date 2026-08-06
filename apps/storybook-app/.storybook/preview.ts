@@ -63,6 +63,15 @@ const preview: Preview = {
   },
   parameters: {
     layout: 'fullscreen',
+    options: {
+      // Storybook selects the FIRST sidebar story when no `?path=` is supplied, so
+      // this order decides what a visitor arriving at the root actually sees.
+      // Welcome leads; the design library follows it because it holds the token
+      // contract the other three bridge onto.
+      storySort: {
+        order: ['Welcome', 'UI Design Library', 'Charts', 'Table', 'Calendar'],
+      },
+    },
   },
 };
 
