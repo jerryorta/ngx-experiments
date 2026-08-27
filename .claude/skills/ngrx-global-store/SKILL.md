@@ -68,23 +68,23 @@ Read only the guide sections that map to what you're building. Paths under `$NGR
 
 ### `store/` — core primitives
 
-| Concern | File |
-|---|---|
-| Actions, `createActionGroup` | `store/actions.md` |
-| Reducers, `createReducer`, `on` | `store/reducers.md` |
-| Selectors, `createSelector`, `createFeature` | `store/selectors.md` |
-| Feature state, `provideState` | `store/feature-creators.md` or `store/providing-store.md` |
-| Meta-reducers | `store/metareducers.md` |
-| Typed-actions conventions | `store/walkthrough.md` (start here if building the first slice in a new project) |
+| Concern                                      | File                                                                             |
+| -------------------------------------------- | -------------------------------------------------------------------------------- |
+| Actions, `createActionGroup`                 | `store/actions.md`                                                               |
+| Reducers, `createReducer`, `on`              | `store/reducers.md`                                                              |
+| Selectors, `createSelector`, `createFeature` | `store/selectors.md`                                                             |
+| Feature state, `provideState`                | `store/feature-creators.md` or `store/providing-store.md`                        |
+| Meta-reducers                                | `store/metareducers.md`                                                          |
+| Typed-actions conventions                    | `store/walkthrough.md` (start here if building the first slice in a new project) |
 
 ### `effects/` — action-driven side effects
 
-| Concern | File |
-|---|---|
-| `createEffect`, `ofType`, subscribing to actions | `effects/index.md` |
-| Lifecycle (`ROOT_EFFECTS_INIT`), dispatch control, filtering | siblings of above |
-| Testing effects with `provideMockActions` + marbles | `effects/testing.md` |
-| Integrating cloud function / HTTP side-effects | use the effect patterns, then wrap with workspace's `firestoreWriteEffect` (see Phase 3) |
+| Concern                                                      | File                                                                                     |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| `createEffect`, `ofType`, subscribing to actions             | `effects/index.md`                                                                       |
+| Lifecycle (`ROOT_EFFECTS_INIT`), dispatch control, filtering | siblings of above                                                                        |
+| Testing effects with `provideMockActions` + marbles          | `effects/testing.md`                                                                     |
+| Integrating cloud function / HTTP side-effects               | use the effect patterns, then wrap with workspace's `firestoreWriteEffect` (see Phase 3) |
 
 ### `entity/` — collection adapters
 
@@ -184,18 +184,18 @@ Three slices, three watch services. No merging them into one denormalized slice.
 
 Write files in dependency order so each can reference the previous:
 
-1. `<feature>.model.ts` — types (doc shape) + `extends WriteStateSlice` on the state interface if writes are involved.
-2. `<feature>.actions.ts` — `createActionGroup({ source: 'Feature', events: { ... } })`. Include `loadedFromSnapshotChanges({ doc })`, `snapshotMissing()`, plus dedicated `update*` / `create*` / `delete*` action + Success + Failure triples.
-3. `<feature>.reducer.ts` — `<feature>FeatureKey = 'kebab-case'`; initial state via `createWriteStateInitial()` + feature-specific fields; handlers using `onWriteStarted/Succeeded/Failed`.
-4. `<feature>.selectors.ts` — `createFeature({ name, reducer })` gives auto-generated selectors; add derived `selectWriteError`, `selectAnyWriteInFlight`, `selectIsWriteInFlight(writeId)` via `extraSelectors`.
-5. `<feature>-write.service.ts` (if writes) — `@Injectable({ providedIn: 'root' })` class, inject `GigaFirestoreService` + `Store` (for `selectUid`), expose `update<X>$(patch): Observable<void>` methods that wrap `firestoreService.upsertDoc$(path, payload)`.
-6. `<feature>-firestore-watch.service.ts` (if subscription) — implements `WebsocketConnectableService`, has `connectionKey = <feature>FeatureKey`, constructs `connection = new WebsocketServiceConnector(this, this.store)`, `onConnect({ uid })` opens `onSnapshot(path)` → dispatches `loadedFromSnapshotChanges` or `snapshotMissing`, `onDisconnect()` unsubscribes.
-7. `<feature>.effects.ts` — wrap each write in `firestoreWriteEffect({ trigger, work, onSuccess, onFailure })`. Add cross-slice effects (e.g. clear-on-signout) here, not in the reducer.
+1. `<feature>-seed.model.ts` (or `<feature>.model.ts`) — the data shape, plus the state interface carrying `status: 'idle' | 'loading' | 'loaded' | 'error'` and `error: string | null` the way `LedgerState` does. (`extends WriteStateSlice` is the source repo's shape — that helper does not exist here; see the § above.)
+2. `<feature>.actions.ts` — `createActionGroup({ source: 'Feature', events: { ... } })`. Ledger's one lifecycle is `Load` / `Load Success` / `Load Failure`; a slice with writes adds a dedicated `create*` / `update*` / `delete*` + Success + Failure triple per write. (`loadedFromSnapshotChanges` / `snapshotMissing` belong to the Firestore-subscription shape — nothing here has a snapshot to echo.)
+3. `<feature>.feature.ts` — `createFeature({ name: 'kebab-case', reducer: createReducer(initialState, on(...)) })` with one `createEntityAdapter` per collection; the handlers move `status` / `error` by hand — `load` → `'loading'`, success → `setAll` + `'loaded'`, failure → `'error'` + the message. (`createWriteStateInitial()` and `onWriteStarted/Succeeded/Failed` are source-repo helpers that do not exist here.)
+4. Selectors — the same file's `extraSelectors`: each adapter's `getSelectors()`, plus derived selectors composed with `createSelector` over pure `@nge/<domain>-utils` functions (`ledger.feature.ts` derives cashflow, net worth, spending by category and budget-vs-actual this way). (`selectWriteError` / `selectAnyWriteInFlight` / `selectIsWriteInFlight(writeId)` read the `WriteStateSlice` fields of step 1 and go with it.)
+5. `<feature>-write.service.ts` (if writes) — **source-repo-only** (there it injects the Firestore service and wraps `upsertDoc$`). This repo has no write path: Ledger is read-only over a static seed, so there is no write service to copy. If a slice needs one, make it a plain `@Injectable({ providedIn: 'root' })` service whose methods return `Observable<void>` from an in-memory source (`of(...)`, optionally behind a latency `InjectionToken` like `LEDGER_LOAD_LATENCY_MS`), called from an effect exactly as in step 7. The reducer stays free of optimistic updates — the success action carries what changed.
+6. `<feature>-firestore-watch.service.ts` — **source-repo-only** (`WebsocketConnectableService` / `onSnapshot`). Its counterpart here is the load effect: `ledger.effects.ts` resolves the `@nge/ledger-mocks` seed behind `LEDGER_LOAD_LATENCY_MS` and dispatches `loadSuccess` / `loadFailure`. There is no watch service to write.
+7. `<feature>.effects.ts` — an `@Injectable()` class of `createEffect(() => this.actions$.pipe(ofType(trigger), switchMap(() => work$.pipe(map(success), catchError(error => of(failure({ error: String(error) })))))))`. (`firestoreWriteEffect({ trigger, work, onSuccess, onFailure })` is the source repo's wrapper around this same shape; here the `switchMap` + `catchError` is written out, as in `ledger.effects.ts`.) Cross-slice effects go here, not in a reducer.
 8. `<feature>.facade.ts` (optional) — `@Injectable({ providedIn: 'root' })` wrapping the store with ergonomic methods + signals (`toSignal(store.select(...))`). Components inject the facade, not the store directly.
 9. `index.ts` — barrel re-exports.
 10. **Register** via a `provide-<feature>-store.ts` returning `makeEnvironmentProviders([provideState(<feature>Feature), provideEffects(<Feature>Effects)])`, called once at the app root (`app.config.ts`). There is no central reducers map to edit — see `provide-ledger-store.ts`.
 11. **Barrel export** from `libs/<domain>/store/src/index.ts` so consumers can `import { ... } from '@nge/<domain>-store'` (e.g. `@nge/ledger-store`).
-12. **Specs** for reducer, effects, watch service, write service, facade (follow existing spec shapes for the template slice).
+12. **Specs** for the feature (reducer + selectors), effects and facade — the shapes in `ledger.feature.spec.ts`, `ledger.effects.spec.ts` and `ledger.facade.spec.ts` — plus one for any write service. Effects specs provide the latency token as `0`; this repo is zoneless, so no `fakeAsync` / `tick`.
 
 There is no sign-out chain in this repo (no auth), so nothing needs a cross-slice reset dispatch. If one is ever added, put the clearing effect in the owning slice's `.effects.ts`, never in a reducer.
 
@@ -244,5 +244,5 @@ Don't solve it in the component with imperative hydrate effects. If the slice's 
 - **Use `.get()` for Firestore reads.** Workspace invariant — subscriptions only.
 - **Apply optimistic reducer updates for writes.** Workspace invariant (REX-278) — snapshot echo is the source of truth. Pending-merge views belong in facades or component signalStores, not in the reducer.
 - **Introduce `@ngrx/data` or `@ngrx/component-store` for new code.** Both are legacy.
-- **Skip the `firestoreWriteEffect` helper for writes.** Reuse the shared `error + inFlight` pattern — don't hand-roll.
+- **Skip the `firestoreWriteEffect` helper for writes.** Reuse the shared `error + inFlight` pattern — don't hand-roll. _(Source repo. Here there is no such helper — the written-out `switchMap` + `catchError` of Phase 4 step 7 is the pattern, and `status` / `error` on the state stand in for `error + inFlight`.)_
 - **Block on a slow / offline `git fetch`.** Phase 0b times out cleanly; stale-but-working is always better than stopping.

@@ -24,7 +24,7 @@ Single Nx workspace — Angular 22.0.7, NgRx 21.1.1, Nx 23.1.0, TypeScript 6.0.3
 
 `docs/ai/`, `docs/ai-instructions/`, most of `docs/reference/`, `docs/architecture/`, and most of `.claude/skills/` are a **one-directional mirror** from the sibling `arch` repo (`/Users/gigasoftware_developer/Dev/DEV_ARCH/arch`). Editing a mirrored file here is wasted work — the next sync reverts it; change it in `arch` instead.
 
-ngx owns and you may edit: `docs/reference/commands.md`, `docs/demos/`, every `libs/**/AGENTS.md`, `README.md`, `CLAUDE.md`, this file, `.claude/commands/`, `.claude/hooks/`, and the adapted skills listed in `CLAUDE.md` § Mirrored vs ngx-Owned (`epic-*`, the storybook generators, `ui-storybook`, both `ngrx-*`).
+ngx owns and you may edit: `docs/reference/commands.md`, `docs/reference/storybook.md`, `docs/demos/`, every `libs/**/AGENTS.md`, `README.md`, `CLAUDE.md`, this file, `.claude/commands/`, `.claude/hooks/`, and the adapted skills listed in `CLAUDE.md` § Mirrored vs ngx-Owned (`epic-*`, the storybook generators, `ui-storybook`, both `ngrx-*`).
 
 ## Build & Test
 

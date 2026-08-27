@@ -9,7 +9,7 @@ Most of `docs/` and `.claude/skills/` is a **one-directional curated mirror** pu
 **Mirrored — do NOT edit here:**
 
 - `docs/ai/CONSTRAINTS.md`, `docs/ai/ANTI-PATTERNS.json`
-- `docs/reference/`: `angular-conventions.md`, `styling-conventions.md`, `testing-strategy.md`, `storybook.md`, `domain-library-set.md`, `important-notes.md`, `ngrx/`
+- `docs/reference/`: `angular-conventions.md`, `styling-conventions.md`, `testing-strategy.md`, `domain-library-set.md`, `important-notes.md`, `ngrx/`
 - `docs/architecture/charts.md`, `docs/architecture/table.md`
 - `docs/ai-instructions/`: `README.md`, `procedures/` (minus the sync skill's `PROC_EXCL` set — its index `procedures.md` is ngx-owned and lists only the procedures this repo has), `reference/`, `standards/`
 - `.claude/skills/`: everything except the ngx-owned set below. A repo-specific skill copied in by hand is deleted on the next sync (the sync's DROP list).
@@ -17,6 +17,7 @@ Most of `docs/` and `.claude/skills/` is a **one-directional curated mirror** pu
 **ngx-owned — edit here:**
 
 - `docs/reference/commands.md` (dev servers, ports, build/lint/test invocations)
+- `docs/reference/storybook.md` (this workspace's Storybook: the `apps/storybook-app` config, story globs, the Welcome page, commands, the Firebase Hosting workflow)
 - `docs/demos/` (`ledger-build-plan.md`, `fieldwork-demo-prompt.md`, `personal-finance-demo-prompt.md`)
 - every `libs/**/AGENTS.md` (authored per library, never rsync'd), `README.md`, and this file
 - `.claude/commands/` (`ci`, `explain`, `setup`, `update`) and `.claude/hooks/inject-standards.sh`
