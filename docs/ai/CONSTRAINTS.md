@@ -13,8 +13,8 @@
 - Angular 22 uses signal-based zoneless change detection — Zone.js is deprecated
 - App config MUST use `provideZonelessChangeDetection()` — NEVER `provideZoneChangeDetection()` or Zone.js polyfills
 - Test setup MUST use `setupZonelessTestEnv` from `jest-preset-angular/setup-env/zoneless` — NEVER `setupZoneTestEnv`
-- **Legacy exceptions — do not copy them into anything new.** Five bootstraps still call `provideZoneChangeDetection()`: `apps/cognition/marketing`, `apps/evolving-cognition/auth`, `apps/evolving-cognition/marketing` (all three in `src/main.ts`), `apps/real-estate/auth` and `apps/storybook-app` (both in `src/app/app.config.ts`). Every other bootstrap in the workspace is zoneless — 154 files use `provideZonelessChangeDetection()`.
-- **Test-setup migration is partial.** 32 `test-setup.ts` files use `setupZonelessTestEnv`; 37 still use `setupZoneTestEnv` and need migration — every `libs/shared/*` library except `calendar`, `table`, `table-addon-conformance` and `ui-design-library` (`api` has no `test-setup.ts` at all), all of `libs/evolving-cognition/*`, `libs/real-estate/*` and `libs/media-workbench/*`, plus `libs/concierge/secrets` and `libs/tailwind-preset`, and the apps `cognition/marketing`, `evolving-cognition/{app,auth,marketing}`, `gigasoftware/marketing`, `real-estate/{app,auth}` and `storybook-app`. Measure with `grep -rl setupZoneTestEnv libs apps --include='test-setup.ts'`.
+- **Legacy exceptions — do not copy them into anything new.** Two bootstraps still call `provideZoneChangeDetection()`: `apps/cognition/marketing/src/main.ts` and `apps/storybook-app/src/app/app.config.ts`. Every other bootstrap in the graph is zoneless. (The frozen `evolving-cognition` / `real-estate` domains are outside the graph and outside this count.)
+- **Test-setup migration is partial.** 32 `test-setup.ts` files use `setupZonelessTestEnv`; 25 still use `setupZoneTestEnv` and need migration — every `libs/shared/*` library except `calendar`, `table`, `table-addon-conformance` and `ui-design-library` (`api` has no `test-setup.ts` at all), all of `libs/media-workbench/*`, plus `libs/concierge/secrets` and `libs/tailwind-preset`, and the apps `cognition/marketing`, `gigasoftware/marketing` and `storybook-app`. Measure with `grep -rl setupZoneTestEnv libs apps --include='test-setup.ts' | grep -vE '^(apps|libs)/(evolving-cognition|real-estate)/'`.
 
 ## Angular Conventions
 
@@ -130,8 +130,7 @@
 ## Build Verification
 
 - Do NOT run builds unless explicitly asked
-- Real Estate App: `npm run b.prod.app.re.com`
-- Evolving Cognition App: `npm run b.prod.app.ec.com`
+- **evolving-cognition and real-estate are frozen legacy domains** — `.nxignore`d, so they are not in the project graph and cannot be built, linted or tested; there is nothing to verify there and nothing to fix. Their source remains on disk only until the cognition and concierge rebuilds deploy; the removal checklist is `docs/reference/architecture.md` § Frozen legacy domains.
 
 ## Cloud Function Deploys
 
