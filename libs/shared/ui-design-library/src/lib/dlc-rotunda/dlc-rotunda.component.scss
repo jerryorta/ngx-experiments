@@ -1,0 +1,280 @@
+.dlc-rotunda {
+  // How far the anchor sits off the bottom edge. Both the oculus and the bloom's zero-size
+  // anchor read it, so they can never drift apart and skew the arc. The safe-area term is
+  // what keeps the oculus off a notched device's home indicator.
+  --dlc-rotunda-anchor-inset: calc(22px + env(safe-area-inset-bottom, 0px));
+
+  // A doorway's edge length. The host writes this from the viewport (COG-61) — it is the
+  // SAME number the arc was measured with, so the tile drawn and the geometry can never
+  // disagree. The literal is a fallback for a bare `.dlc-rotunda` outside the component.
+  --dlc-rotunda-doorway-size: 52px;
+
+  // Persona tokens, resolved once here with literal fallbacks so the rotunda renders with no
+  // theme applied. The accent chains through `--dlc-primary-graphic` first: on the dark personas
+  // `--dlc-primary` is a dark fill meant to carry `--dlc-on-primary` text and vanishes against a
+  // dark surface, while `--dlc-primary-graphic` is the brand hue lifted for use on a surface.
+  --dlc-rotunda-accent: var(--dlc-primary-graphic, var(--dlc-primary, #1b6b4a));
+  // The hover / focus step up from the accent: ink on the surface, so it reads on either theme.
+  --dlc-rotunda-accent-bright: var(--dlc-on-surface, #161a22);
+  --dlc-rotunda-scrim: var(--dlc-scrim, rgb(15 13 11 / 62%));
+  --dlc-rotunda-surface-raised: var(--dlc-surface-container-high, #e3e9ef);
+  --dlc-rotunda-surface-inset: var(--dlc-surface-container-low, #f5f7f9);
+  --dlc-rotunda-radius: var(--dlc-radius-md, 0.5rem);
+  --dlc-rotunda-font-display: var(--dlc-font-family-display, Georgia, serif);
+  --dlc-rotunda-font-body: var(--dlc-font-family-body, system-ui, sans-serif);
+  --dlc-rotunda-caption-color: var(--dlc-on-surface-variant, #5b6472);
+  --dlc-rotunda-caption-hover-color: var(--dlc-on-surface, #161a22);
+
+  position: absolute;
+  inset: 0;
+  // Above the shell chrome (top bar / any page's own bottom bar, both at 100) so the scrim
+  // dims them and the oculus is never painted over; below a modal overlay, which owns the
+  // screen while it is up.
+  z-index: 150;
+  // Overlays the shell without swallowing taps meant for the page beneath.
+  pointer-events: none;
+
+  // ─── Scrim ───
+  // The reading room dims while the rotunda is open; it never disappears.
+  // Opacity is the timeline's to animate — only the hit area is stated here.
+  &__scrim {
+    // The one scrim value every COG overlay shares — warm ink, and light enough in the
+    // light theme that parchment falls into shade rather than turning grey.
+    background: var(--dlc-rotunda-scrim);
+    opacity: 0;
+    pointer-events: none;
+
+    &--visible {
+      pointer-events: auto;
+    }
+  }
+
+  // ─── Bloom anchor ───
+  // Shares the oculus's inset so the arc is measured from the oculus's own centre.
+  &__bloom {
+    bottom: var(--dlc-rotunda-anchor-inset);
+  }
+
+  // ─── Doorways ───
+  // Resting state only. Once the bloom runs, GSAP owns transform and opacity.
+  &__doorway {
+    // Centres the tile on the zero-size anchor, whatever size the host has set it to.
+    margin: calc(var(--dlc-rotunda-doorway-size) / -2);
+    opacity: 0;
+    pointer-events: auto;
+    transform: scale(0.4);
+
+    &:focus-visible {
+      outline: 2px solid var(--dlc-rotunda-accent);
+      outline-offset: 2px;
+    }
+  }
+
+  &__doorway-glyph {
+    display: grid;
+    place-items: center;
+  }
+
+  // The caption can never be wider than the doorway it names: the arc only guarantees the
+  // doorway's own width between adjacent centres, so an overflowing caption lands on top of
+  // the neighbouring hall. Two lines is the ceiling — a third would push up under the tile
+  // above it on the arc.
+  &__doorway-label {
+    width: 100%;
+    padding: 0 2px;
+    line-height: 1.15;
+    text-align: center;
+    // `anywhere` rather than `break-word`: the long names here are single words
+    // ("Classrooms", "Investigations") with no space to break at.
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+
+  // Belt-and-braces with `inert`: a collapsed doorway must never catch a tap.
+  &__bloom[inert] &__doorway {
+    pointer-events: none;
+  }
+
+  // ─── Oculus ───
+  // A light well, not a button that happens to be round.
+  &__oculus {
+    bottom: var(--dlc-rotunda-anchor-inset);
+    // Centres on `left: 50%` without claiming `transform`, which the bloom animates.
+    margin-left: -29px;
+    color: var(--dlc-rotunda-accent);
+    background: radial-gradient(
+      circle at 50% 40%,
+      var(--dlc-rotunda-surface-raised),
+      var(--dlc-rotunda-surface-inset)
+    );
+    border-radius: 50%;
+    // Candlelight, not elevation — the glow is the oculus's whole identity.
+    box-shadow: 0 -2px 26px -8px var(--dlc-rotunda-accent);
+    // Only the hover tint transitions here; `transform` belongs to the timeline, and
+    // a competing CSS transition on it would fight the reverse mid-gesture.
+    transition: color 200ms ease;
+
+    &:hover {
+      color: var(--dlc-rotunda-accent-bright);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--dlc-rotunda-accent-bright);
+      outline-offset: 4px;
+    }
+  }
+
+  // The candlelight itself. `opacity` belongs to the CSS loop below and `transform`
+  // to the timeline's flare — split by property so the two never fight.
+  &__oculus-glow {
+    position: absolute;
+    inset: -22px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--dlc-rotunda-accent) 32%, transparent) 0%,
+      transparent 68%
+    );
+    opacity: 0.55;
+    pointer-events: none;
+    // Irregular stops so it reads as a flame rather than a pulse. Kept to ±0.05 —
+    // the reader should feel warmth, never notice an animation.
+    animation: dlc-rotunda-candlelight 6.4s ease-in-out infinite;
+  }
+
+  // The press. It lives on the glyph rather than the button because the button's own
+  // `transform` is the bloom timeline's — a second transform there would fight the reverse
+  // mid-gesture. The timeline never touches this element (only the pupil's `opacity`,
+  // which a transform cannot disturb), so the two stay split by owner as well as property.
+  &__oculus-glyph {
+    // Positioned so it paints above the halo.
+    position: relative;
+    display: block;
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: currentcolor;
+    stroke-width: 1.6;
+    transition: transform 120ms ease;
+  }
+
+  &__oculus:active &__oculus-glyph {
+    // Shallow on purpose — the reader should feel the shutter give, not watch it shrink.
+    transform: scale(0.88);
+  }
+
+  // ─── First-run coaching (COG-60) ───
+
+  // The invitation: candlelight thrown wider than the idle halo, expanding and fading like
+  // a ring of light off the oculus. A sibling of the oculus rather than a layer inside it,
+  // so it owns `transform` and `opacity` outright — the bloom timeline never sees this
+  // element, and the halo's own flicker is left alone.
+  &__coach-pulse {
+    // Same anchor as the oculus, so the two cannot drift.
+    bottom: var(--dlc-rotunda-anchor-inset);
+    // Centres a 58px ring on `left: 50%`, matching the oculus it rings.
+    width: 58px;
+    height: 58px;
+    margin-left: -29px;
+    border: 1px solid var(--dlc-rotunda-accent);
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+    animation: dlc-rotunda-coach-pulse 2.6s ease-out infinite;
+  }
+
+  // Sits above the oculus, reading as a label attached to it rather than a floating
+  // tooltip. Ink on a raised surface — no border, per the tonal-elevation contract.
+  &__coach {
+    // Clears the 58px oculus plus its inset, with a gap for the pulse's widest frame.
+    bottom: calc(var(--dlc-rotunda-anchor-inset) + 82px);
+    transform: translateX(-50%);
+  }
+
+  &__coach-dismiss:focus-visible {
+    outline: 2px solid var(--dlc-rotunda-accent-bright);
+    outline-offset: 2px;
+  }
+
+  // Resting state only — the pupil's close is the timeline's to animate.
+  &__oculus-pupil {
+    opacity: 1;
+  }
+
+  // ─── Landscape ───
+  // A phone on its side has roughly a third the height, and the arc still reaches its full
+  // radius above the anchor. Pulling the anchor down buys that back. Only the base term is
+  // trimmed — the safe-area term still has to clear the home indicator, which does not
+  // shrink with the viewport.
+  @media (max-height: 480px) {
+    --dlc-rotunda-anchor-inset: calc(14px + env(safe-area-inset-bottom, 0px));
+
+    // Follows the anchor so the cue keeps its gap over the pulse's widest frame.
+    &__coach {
+      bottom: calc(var(--dlc-rotunda-anchor-inset) + 74px);
+    }
+  }
+}
+
+@keyframes dlc-rotunda-candlelight {
+  0% {
+    opacity: 0.55;
+  }
+  17% {
+    opacity: 0.62;
+  }
+  29% {
+    opacity: 0.52;
+  }
+  46% {
+    opacity: 0.6;
+  }
+  63% {
+    opacity: 0.54;
+  }
+  81% {
+    opacity: 0.63;
+  }
+  100% {
+    opacity: 0.55;
+  }
+}
+
+// Unlike the idle flicker, this one is meant to be noticed — it is the whole invitation.
+// It rests invisible so the ring only ever exists mid-expansion.
+@keyframes dlc-rotunda-coach-pulse {
+  0% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  70% {
+    opacity: 0;
+    transform: scale(1.85);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.85);
+  }
+}
+
+// Everything CSS owns needs its own opt-out; the bloom timeline handles reduced motion
+// itself. Dropping the pulse leaves the cue's callout standing, which is the point — the
+// reader is still told, just not waved at. The press stops travelling but the oculus still
+// answers a tap through its colour transition, which is not motion.
+@media (prefers-reduced-motion: reduce) {
+  .dlc-rotunda__coach-pulse,
+  .dlc-rotunda__oculus-glow {
+    animation: none;
+  }
+
+  .dlc-rotunda__oculus-glyph {
+    transition: none;
+  }
+
+  .dlc-rotunda__oculus:active .dlc-rotunda__oculus-glyph {
+    transform: none;
+  }
+}

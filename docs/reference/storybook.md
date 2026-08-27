@@ -54,7 +54,7 @@ numbers count _published_ stories (exports — usually several per file), so the
 
 | Library                         | Story files | Sidebar title                               |
 | ------------------------------- | ----------- | ------------------------------------------- |
-| `libs/shared/ui-design-library` | 43          | `UI Design Library` (+ `Mobile Footer Nav`) |
+| `libs/shared/ui-design-library` | 44          | `UI Design Library` (+ `Mobile Footer Nav`) |
 | `libs/shared/charts`            | 112         | `Charts`                                    |
 | `libs/shared/table`             | 52          | `Table`                                     |
 | `libs/shared/calendar`          | 16          | `Calendar`                                  |
@@ -63,7 +63,7 @@ numbers count _published_ stories (exports — usually several per file), so the
 A sixth glob, `../src/**/*.stories.@(js|jsx|ts|tsx)`, covers the app itself and matches one file —
 the Welcome story.
 
-Sidebar sections are title-driven, not library-driven: `dlc-bottom-nav`'s stories in
+Sidebar sections are title-driven, not library-driven: `dlc-bottom-nav`'s and `dlc-rotunda`'s stories in
 `libs/shared/ui-design-library` are titled `Mobile Footer Nav/…`, so they form their own top-level
 section (ordered after Calendar in `preview.ts` `storySort`) while living in the design library.
 

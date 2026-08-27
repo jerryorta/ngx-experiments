@@ -39,6 +39,8 @@ export * from './lib/dlc-property-type-filter/dlc-property-type-filter.component
 export * from './lib/dlc-radius-filter/dlc-radius-filter.component';
 export * from './lib/dlc-ratings-filter/dlc-ratings-filter.component';
 export * from './lib/dlc-role-switcher/dlc-role-switcher.component';
+export * from './lib/dlc-rotunda/dlc-rotunda-arc';
+export * from './lib/dlc-rotunda/dlc-rotunda.component';
 export * from './lib/dlc-search-input/dlc-search-input.component';
 export * from './lib/dlc-select/dlc-select.component';
 export * from './lib/dlc-sign-in/dlc-sign-in.component';

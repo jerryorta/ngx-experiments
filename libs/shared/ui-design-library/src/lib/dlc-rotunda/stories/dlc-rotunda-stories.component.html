@@ -1,0 +1,93 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <!-- Default (controlled by Storybook args) -->
+  <h4
+    class="mb-4 text-sm font-semibold tracking-wider text-(--dlc-on-surface) uppercase opacity-60"
+  >
+    Default (controlled by Storybook args)
+  </h4>
+  <div
+    class="relative mb-12 h-[420px] w-[390px] overflow-hidden rounded-[var(--dlc-radius-md)] bg-(--dlc-surface)"
+  >
+    <dlc-rotunda
+      [doorways]="doorways()"
+      [coachMark]="coachMark()"
+      [open]="open()"
+    />
+  </div>
+
+  <!-- First-run coaching -->
+  <h4
+    class="mb-4 text-sm font-semibold tracking-wider text-(--dlc-on-surface) uppercase opacity-60"
+  >
+    First run — the oculus teaches its own gesture
+  </h4>
+  <div
+    class="relative mb-12 h-[420px] w-[390px] overflow-hidden rounded-[var(--dlc-radius-md)] bg-(--dlc-surface)"
+  >
+    <dlc-rotunda [doorways]="coreHalls" [coachMark]="true" />
+  </div>
+
+  <!-- Closed: the resting oculus -->
+  <h4
+    class="mb-4 text-sm font-semibold tracking-wider text-(--dlc-on-surface) uppercase opacity-60"
+  >
+    Closed — the resting oculus
+  </h4>
+  <div
+    class="relative mb-12 h-[420px] w-[390px] overflow-hidden rounded-[var(--dlc-radius-md)] bg-(--dlc-surface)"
+  >
+    <dlc-rotunda [doorways]="coreHalls" />
+  </div>
+
+  <!-- Bloomed: five halls -->
+  <h4
+    class="mb-4 text-sm font-semibold tracking-wider text-(--dlc-on-surface) uppercase opacity-60"
+  >
+    Bloomed — five halls (the design sketch's fan)
+  </h4>
+  <div
+    class="relative mb-12 h-[420px] w-[390px] overflow-hidden rounded-[var(--dlc-radius-md)] bg-(--dlc-surface)"
+  >
+    <dlc-rotunda [doorways]="coreHalls" [open]="true" />
+  </div>
+
+  <!-- Bloomed: eight halls -->
+  <h4
+    class="mb-4 text-sm font-semibold tracking-wider text-(--dlc-on-surface) uppercase opacity-60"
+  >
+    Bloomed — eight halls (the fan widens rather than crowding)
+  </h4>
+  <div
+    class="relative mb-12 h-[420px] w-[390px] overflow-hidden rounded-[var(--dlc-radius-md)] bg-(--dlc-surface)"
+  >
+    <dlc-rotunda [doorways]="allHalls" [open]="true" />
+  </div>
+
+  <!-- Bloomed: the alternate serif-monogram treatment -->
+  <h4
+    class="mb-4 text-sm font-semibold tracking-wider text-(--dlc-on-surface) uppercase opacity-60"
+  >
+    Bloomed — alternate serif-monogram treatment
+  </h4>
+  <div
+    class="relative mb-12 h-[420px] w-[390px] overflow-hidden rounded-[var(--dlc-radius-md)] bg-(--dlc-surface)"
+  >
+    <dlc-rotunda [doorways]="monogramHalls" [open]="true" />
+  </div>
+
+  <!-- Reduced motion -->
+  <h4
+    class="mb-4 text-sm font-semibold tracking-wider text-(--dlc-on-surface) uppercase opacity-60"
+  >
+    Reduced motion
+  </h4>
+  <p class="mb-12 max-w-[390px] text-sm text-(--dlc-on-surface-variant)">
+    A story cannot force a media query. Verify by enabling
+    <code>prefers-reduced-motion: reduce</code> in the DevTools Rendering pane,
+    then reopening any bloom above — the doorways should appear in place, with
+    no fly-out and no stagger.
+  </p>
+</nge-storybook-review-container>
