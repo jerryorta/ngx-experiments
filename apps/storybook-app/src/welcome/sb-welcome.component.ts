@@ -21,7 +21,7 @@ interface WelcomeLibrary {
  * The page Storybook opens on.
  *
  * Without it a visitor lands in whichever story sorts first — a single component,
- * with no statement of what this workspace is or how its 417 stories divide. That
+ * with no statement of what this workspace is or how its 418 stories divide. That
  * is a poor first screen for someone arriving from a résumé, and it is the reason
  * the fuller catalog lives on jerryorta.com: this page orients, that one sells.
  *
@@ -89,7 +89,7 @@ export class SbWelcomeComponent {
       name: 'Mobile Footer Nav',
       startStoryId: 'mobile-footer-nav-bottom-nav--bottom-nav',
       startStoryName: 'Bottom Nav',
-      storyCount: 7,
+      storyCount: 8,
     },
   ];
 

@@ -5,32 +5,12 @@ import {
   type StoryObj,
 } from '@storybook/angular';
 
-import { DlcRotundaStoriesComponent } from './dlc-rotunda-stories.component';
-
-const CORE_HALLS = [
-  { accent: '#d4a843', icon: 'note', id: 'notes', label: 'Notes' },
-  { accent: '#2dd4bf', icon: 'quiz', id: 'quizzes', label: 'Quiz' },
-  {
-    accent: '#a78bfa',
-    icon: 'group',
-    id: 'study-groups',
-    label: 'Groups',
-  },
-  { accent: '#60a5fa', icon: 'school', id: 'classrooms', label: 'Class' },
-  { accent: '#d4a843', icon: 'book', id: 'journal', label: 'Journal' },
-];
-
-const ALL_HALLS = [
-  ...CORE_HALLS,
-  { accent: '#4ade80', icon: 'work', id: 'projects', label: 'Projects' },
-  {
-    accent: '#fb923c',
-    icon: 'search',
-    id: 'investigations',
-    label: 'Inquiry',
-  },
-  { accent: '#f87171', icon: 'science', id: 'research', label: 'Research' },
-];
+import {
+  DLC_ROTUNDA_ALL_HALLS,
+  DLC_ROTUNDA_CORE_HALLS,
+  DLC_ROTUNDA_MONOGRAM_HALLS,
+  DlcRotundaStoriesComponent,
+} from './dlc-rotunda-stories.component';
 
 const meta: Meta<DlcRotundaStoriesComponent> = {
   argTypes: {
@@ -51,9 +31,10 @@ const meta: Meta<DlcRotundaStoriesComponent> = {
 export default meta;
 type Story = StoryObj<DlcRotundaStoriesComponent>;
 
+/** The resting oculus — tap it to bloom. */
 export const Closed: Story = {
   args: {
-    doorways: CORE_HALLS,
+    doorways: DLC_ROTUNDA_CORE_HALLS,
     open: false,
   },
 };
@@ -62,28 +43,38 @@ export const Closed: Story = {
 export const Coaching: Story = {
   args: {
     coachMark: true,
-    doorways: CORE_HALLS,
+    doorways: DLC_ROTUNDA_CORE_HALLS,
     open: false,
   },
 };
 
+/** The design sketch's fan — five doorways, 96px from the anchor, spread across ±68°. */
 export const BloomedFiveHalls: Story = {
   args: {
-    doorways: CORE_HALLS,
+    doorways: DLC_ROTUNDA_CORE_HALLS,
     open: true,
   },
 };
 
+/** Eight doorways: the fan widens and pushes outward rather than crowding. */
 export const BloomedEightHalls: Story = {
   args: {
-    doorways: ALL_HALLS,
+    doorways: DLC_ROTUNDA_ALL_HALLS,
+    open: true,
+  },
+};
+
+/** The alternate serif-monogram glyph treatment. */
+export const BloomedMonograms: Story = {
+  args: {
+    doorways: DLC_ROTUNDA_MONOGRAM_HALLS,
     open: true,
   },
 };
 
 export const SingleHall: Story = {
   args: {
-    doorways: [CORE_HALLS[0]],
+    doorways: [DLC_ROTUNDA_CORE_HALLS[0]],
     open: true,
   },
 };
