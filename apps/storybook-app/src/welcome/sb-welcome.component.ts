@@ -1,4 +1,8 @@
-import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ViewEncapsulation,
+} from '@angular/core';
 
 /** One library on the welcome page. */
 interface WelcomeLibrary {
@@ -17,7 +21,7 @@ interface WelcomeLibrary {
  * The page Storybook opens on.
  *
  * Without it a visitor lands in whichever story sorts first — a single component,
- * with no statement of what this workspace is or how its 410 stories divide. That
+ * with no statement of what this workspace is or how its 418 stories divide. That
  * is a poor first screen for someone arriving from a résumé, and it is the reason
  * the fuller catalog lives on jerryorta.com: this page orients, that one sells.
  *
@@ -66,7 +70,8 @@ export class SbWelcomeComponent {
       blurb:
         'Day, week, month, year and agenda views over one event model, with drag-and-resize and consumer-typed event payloads.',
       name: 'Calendar',
-      startStoryId: 'calendar-ngecalendar-views-week-interactions--drag-and-resize',
+      startStoryId:
+        'calendar-ngecalendar-views-week-interactions--drag-and-resize',
       startStoryName: 'Week interactions',
       storyCount: 76,
     },
@@ -77,6 +82,14 @@ export class SbWelcomeComponent {
       startStoryId: 'ledger-design-library-donut-chart--primary',
       startStoryName: 'Donut chart',
       storyCount: 19,
+    },
+    {
+      blurb:
+        'Two footer navigations ported as shared primitives: the Got You tab bar, and the Cognition rotunda — one tap on the oculus fans the halls out along an arc.',
+      name: 'Mobile Footer Nav',
+      startStoryId: 'mobile-footer-nav-bottom-nav--bottom-nav',
+      startStoryName: 'Bottom Nav',
+      storyCount: 8,
     },
   ];
 

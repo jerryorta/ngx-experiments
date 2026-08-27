@@ -7,6 +7,7 @@ export * from './lib/dlc-avatar/dlc-avatar.component';
 export * from './lib/dlc-badge/dlc-badge.component';
 export * from './lib/dlc-battery-meter/dlc-battery-meter.component';
 export * from './lib/dlc-billing-toggle/dlc-billing-toggle.component';
+export * from './lib/dlc-bottom-nav/dlc-bottom-nav.component';
 export * from './lib/dlc-button/dlc-button.component';
 export * from './lib/dlc-checkbox/dlc-checkbox.component';
 export * from './lib/dlc-chip/dlc-chip.component';
@@ -38,6 +39,8 @@ export * from './lib/dlc-property-type-filter/dlc-property-type-filter.component
 export * from './lib/dlc-radius-filter/dlc-radius-filter.component';
 export * from './lib/dlc-ratings-filter/dlc-ratings-filter.component';
 export * from './lib/dlc-role-switcher/dlc-role-switcher.component';
+export * from './lib/dlc-rotunda/dlc-rotunda-arc';
+export * from './lib/dlc-rotunda/dlc-rotunda.component';
 export * from './lib/dlc-search-input/dlc-search-input.component';
 export * from './lib/dlc-select/dlc-select.component';
 export * from './lib/dlc-sign-in/dlc-sign-in.component';

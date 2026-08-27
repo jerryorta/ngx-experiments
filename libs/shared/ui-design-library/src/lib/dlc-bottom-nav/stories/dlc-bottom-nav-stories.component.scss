@@ -1,0 +1,13 @@
+.dlc-bottom-nav-stories {
+  display: block;
+  padding: 1.5rem;
+
+  // — A phone-width frame so the fixed bar reads like a real bottom nav.
+  &__frame {
+    overflow: hidden;
+    width: 22rem;
+    max-width: 100%;
+    border: 1px solid var(--dlc-outline-variant, #c6ccd6);
+    border-radius: var(--dlc-radius-lg, 1rem);
+  }
+}

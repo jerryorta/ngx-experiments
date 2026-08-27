@@ -1,0 +1,124 @@
+@let isOpen = open();
+@let placedHalls = placedDoorways();
+@let focusedHallIndex = focusedIndex();
+<!-- The cue has nothing to teach once the halls are out, so it never overlaps a bloom -->
+@let isCoaching = coachMark() && !isOpen;
+
+<!-- Scrim: dims the reading room while the rotunda is open -->
+<div
+  class="dlc-rotunda__scrim absolute inset-0"
+  [class.dlc-rotunda__scrim--visible]="isOpen"
+  role="presentation"
+  (click)="onScrimClick()"
+  (keydown)="onScrimKeydown($event)"
+></div>
+
+<div
+  class="dlc-rotunda__dock pointer-events-none absolute inset-x-0 bottom-0 h-[120px]"
+>
+  <!--
+    Zero-size anchor at the oculus; every doorway is placed off this point.
+    `inert` alone hides the collapsed bloom — deliberately NOT paired with aria-hidden,
+    which together trip axe's aria-hidden-focus rule.
+  -->
+  <div
+    class="dlc-rotunda__bloom absolute left-1/2 h-0 w-0"
+    [attr.aria-label]="menuLabel()"
+    [attr.inert]="isOpen ? null : ''"
+    [id]="bloomId"
+    role="menu"
+  >
+    @for (hall of placedHalls; track hall.doorway.id; let index = $index) {
+      <!--
+        Sized off `--dlc-rotunda-doorway-size` (the host sets it from the viewport, COG-61)
+        so the tile drawn matches the tile the arc was measured against. `-high` rather than
+        `-container`: a doorway floats above the scrim, and elevation here is colour.
+      -->
+      <button
+        class="dlc-rotunda__doorway absolute top-0 left-0 flex h-(--dlc-rotunda-doorway-size) w-(--dlc-rotunda-doorway-size) cursor-pointer flex-col items-center justify-center gap-[3px] rounded-[var(--dlc-rotunda-radius)] border-none bg-(--dlc-rotunda-surface-raised) p-0"
+        [attr.aria-label]="hall.doorway.label"
+        [tabindex]="isOpen && index === focusedHallIndex ? 0 : -1"
+        role="menuitem"
+        type="button"
+        (click)="onDoorwayClick(hall)"
+      >
+        <span
+          class="dlc-rotunda__doorway-glyph font-[family-name:var(--dlc-rotunda-font-display)] text-[15px] leading-none"
+          [style.color]="hall.doorway.accent"
+          aria-hidden="true"
+        >
+          @if (hall.doorway.monogram) {
+            {{ hall.doorway.monogram }}
+          } @else if (hall.doorway.icon) {
+            <span [dlcIcon]="hall.doorway.icon" style="font-size: 16px"></span>
+          }
+        </span>
+        <!--
+          Bounded to the tile (COG-61). A caption wider than the tile overlaps the halls
+          either side of it, because the arc only guarantees ~54px between adjacent
+          centres. Decorative — the button's aria-label carries the real name — so wrapping
+          a long one over two lines costs the reader nothing.
+        -->
+        <span
+          class="dlc-rotunda__doorway-label font-[family-name:var(--dlc-rotunda-font-body)] text-[8px] tracking-[0.04em] text-(--dlc-rotunda-caption-color) uppercase"
+          aria-hidden="true"
+          >{{ hall.doorway.shortLabel || hall.doorway.label }}</span
+        >
+      </button>
+    }
+  </div>
+
+  @if (isCoaching) {
+    <!--
+      First-run coaching (COG-60). The pulse is a sibling of the oculus rather than a
+      layer inside it, so it shares the anchor without touching anything the bloom
+      timeline animates — and it reads the same `--dlc-rotunda-anchor-inset`, so cue and
+      oculus can never drift apart.
+    -->
+    <span
+      class="dlc-rotunda__coach-pulse absolute left-1/2"
+      aria-hidden="true"
+    ></span>
+
+    <div
+      class="dlc-rotunda__coach pointer-events-auto absolute left-1/2 flex max-w-[min(280px,calc(100vw-32px))] items-center gap-2 rounded-[var(--dlc-rotunda-radius)] bg-(--dlc-rotunda-surface-raised) py-2 pr-2 pl-3"
+      role="status"
+    >
+      <span
+        class="font-[family-name:var(--dlc-rotunda-font-body)] text-[13px] leading-snug text-(--dlc-rotunda-caption-color)"
+        >{{ coachMarkLabel() }}</span
+      >
+      <button
+        class="dlc-rotunda__coach-dismiss flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-[var(--dlc-rotunda-radius)] border-none bg-transparent p-0 text-(--dlc-rotunda-caption-color) transition-colors duration-[200ms] ease-[ease] hover:text-(--dlc-rotunda-caption-hover-color)"
+        [attr.aria-label]="coachMarkDismissLabel()"
+        type="button"
+        (click)="onCoachMarkDismissClick()"
+      >
+        <span dlcIcon="close" style="font-size: 16px"></span>
+      </button>
+    </div>
+  }
+
+  <!-- The oculus: same place, same gesture, every screen -->
+  <button
+    class="dlc-rotunda__oculus pointer-events-auto absolute left-1/2 grid h-[58px] w-[58px] cursor-pointer place-items-center border-none"
+    [attr.aria-controls]="bloomId"
+    [attr.aria-expanded]="isOpen"
+    [attr.aria-label]="isOpen ? closeLabel() : openLabel()"
+    [class.dlc-rotunda__oculus--bloomed]="isOpen"
+    aria-haspopup="menu"
+    type="button"
+    (click)="onOculusClick()"
+  >
+    <!-- Candlelight halo: its own layer so it can breathe without repainting the button -->
+    <span class="dlc-rotunda__oculus-glow" aria-hidden="true"></span>
+    <svg
+      class="dlc-rotunda__oculus-glyph"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="8" />
+      <circle class="dlc-rotunda__oculus-pupil" cx="12" cy="12" r="3" />
+    </svg>
+  </button>
+</div>

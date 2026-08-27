@@ -1,0 +1,90 @@
+// Per the design-library convention, overridable tokens come FIRST — inside the
+// host class, named `--dlc-bottom-nav-<property>`, each resolving to a persona
+// token with a literal fallback so the bar renders correctly with no theme applied.
+.dlc-bottom-nav {
+  --dlc-bottom-nav-bg-color: var(--dlc-surface, #ffffff);
+  --dlc-bottom-nav-border-color: var(--dlc-outline-variant, #c6ccd6);
+  --dlc-bottom-nav-shadow: var(--dlc-shadow-md, 0 -1px 3px rgba(0, 0, 0, 0.08));
+  --dlc-bottom-nav-tab-color: var(--dlc-on-surface-variant, #5b6472);
+  --dlc-bottom-nav-tab-hover-color: var(--dlc-on-surface, #161a22);
+  // The persona's on-surface accent. Dark personas publish `--dlc-primary-graphic`
+  // (their `--dlc-primary` is a dark fill meant to carry `--dlc-on-primary` text and
+  // vanishes against a dark surface); light personas rely on `--dlc-primary` itself.
+  --dlc-bottom-nav-tab-active-color: var(
+    --dlc-primary-graphic,
+    var(--dlc-primary, #1b6b4a)
+  );
+  --dlc-bottom-nav-focus-ring-color: var(
+    --dlc-primary-graphic,
+    var(--dlc-primary, #1b6b4a)
+  );
+  --dlc-bottom-nav-transition-duration: var(--dlc-transition-duration, 150ms);
+  --dlc-bottom-nav-label-font-family: var(
+    --dlc-font-family-body,
+    system-ui,
+    sans-serif
+  );
+  --dlc-bottom-nav-label-font-weight: var(--dlc-font-weight-medium, 500);
+
+  display: block;
+
+  &__bar {
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: space-around;
+    // Clears the home indicator on a phone; zero everywhere else.
+    padding-bottom: env(safe-area-inset-bottom);
+    border-top: 1px solid var(--dlc-bottom-nav-border-color);
+    background-color: var(--dlc-bottom-nav-bg-color);
+    box-shadow: var(--dlc-bottom-nav-shadow);
+  }
+
+  // — Tab: icon stacked above label
+  &__tab {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.125rem;
+    padding: 0.625rem 0.25rem 0.5rem;
+    border: none;
+    background-color: transparent;
+    color: var(--dlc-bottom-nav-tab-color);
+    cursor: pointer;
+    transition: color var(--dlc-bottom-nav-transition-duration) ease;
+
+    &:hover {
+      color: var(--dlc-bottom-nav-tab-hover-color);
+    }
+
+    // The offset is NEGATIVE: the bar is pinned to the bottom of the viewport
+    // and pads itself by `env(safe-area-inset-bottom)`, so a ring drawn outside
+    // the tab would run off-screen on the bottom row of a phone.
+    &:focus-visible {
+      outline: 2px solid var(--dlc-bottom-nav-focus-ring-color);
+      outline-offset: -2px;
+    }
+
+    &--active {
+      color: var(--dlc-bottom-nav-tab-active-color);
+
+      &:hover {
+        color: var(--dlc-bottom-nav-tab-active-color);
+      }
+    }
+  }
+
+  &__icon {
+    font-size: 1.5rem;
+  }
+
+  &__label {
+    font-family: var(--dlc-bottom-nav-label-font-family);
+    font-size: 0.6875rem;
+    font-weight: var(--dlc-bottom-nav-label-font-weight);
+    line-height: 1.1;
+  }
+}

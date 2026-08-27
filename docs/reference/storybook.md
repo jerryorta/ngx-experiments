@@ -52,16 +52,20 @@ include in `apps/storybook-app/.storybook/tsconfig.json`. Story-file counts are
 `find libs -name '*.stories.ts' | cut -d/ -f2-3 | sort | uniq -c`; the Welcome page's per-library
 numbers count _published_ stories (exports — usually several per file), so they run higher.
 
-| Library                         | Story files | Sidebar title           |
-| ------------------------------- | ----------- | ----------------------- |
-| `libs/shared/ui-design-library` | 42          | `UI Design Library`     |
-| `libs/shared/charts`            | 112         | `Charts`                |
-| `libs/shared/table`             | 52          | `Table`                 |
-| `libs/shared/calendar`          | 16          | `Calendar`              |
-| `libs/ledger/design-library`    | 10          | `Ledger Design Library` |
+| Library                         | Story files | Sidebar title                               |
+| ------------------------------- | ----------- | ------------------------------------------- |
+| `libs/shared/ui-design-library` | 44          | `UI Design Library` (+ `Mobile Footer Nav`) |
+| `libs/shared/charts`            | 112         | `Charts`                                    |
+| `libs/shared/table`             | 52          | `Table`                                     |
+| `libs/shared/calendar`          | 16          | `Calendar`                                  |
+| `libs/ledger/design-library`    | 10          | `Ledger Design Library`                     |
 
 A sixth glob, `../src/**/*.stories.@(js|jsx|ts|tsx)`, covers the app itself and matches one file —
 the Welcome story.
+
+Sidebar sections are title-driven, not library-driven: `dlc-bottom-nav`'s and `dlc-rotunda`'s stories in
+`libs/shared/ui-design-library` are titled `Mobile Footer Nav/…`, so they form their own top-level
+section (ordered after Calendar in `preview.ts` `storySort`) while living in the design library.
 
 ## Adding a New Library
 
