@@ -37,7 +37,8 @@ regardless of semantic fit. If you want a narrative, frame them as
 ## Ground yourself first
 
 Run `/explain` (or read `.claude/commands/explain.md`), then read
-`docs/reference/` (architecture, domain-library-set, angular-conventions, styling)
+`docs/reference/domain-library-set.md`, `docs/reference/angular-conventions.md`,
+`docs/reference/styling-conventions.md`, `docs/ai/CONSTRAINTS.md`
 and `docs/ai-instructions/reference/multi-component-signal-store.instructions.md`.
 Do a **code-architect blueprint pass** before writing code.
 

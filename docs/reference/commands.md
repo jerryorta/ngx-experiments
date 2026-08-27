@@ -43,7 +43,9 @@ There are **no `npm` lint/test scripts** — go through Nx directly:
 
 - **Apps**: `storybook-app`, `ledger-app`
 - **Shared libs**: `shared-ui-design-library` (`@nge/ui-design-library`, `dlc-` prefix), `themes` (`@nge/themes`),
-  `shared-charts`, `shared-calendar`, `date`, `shared-rxjs`, `shared-storybook`
+  `shared-charts`, `shared-table` (`@nge/table`, plus the `@nge/table/editors` and `@nge/table/testing`
+  secondary entry points), `shared-table-addon-conformance` (`@nge/table-addon-conformance`),
+  `shared-calendar`, `date`, `shared-rxjs`, `shared-storybook`
 - **Ledger domain libs**: `ledger-ui`, `ledger-store`, `ledger-models`, `ledger-utils`, `ledger-mocks`,
   `ledger-design-library`, `ledger-themes`
 

@@ -2318,8 +2318,8 @@ const rows = createNgeTableFixture({ rows: NGE_TABLE_FIXTURE_SIZES.large });
 - **Secondary entry point, deliberately.** The fixture is a public API of the *library*,
   not of the *product* — keeping a 10k-row generator out of `@nge/table` stops
   demo data being one autocomplete away in application code. The alias
-  (`tsconfig.base.json`) points into `src/testing/`, matching the
-  `@nge/store/service-worker` precedent, so it is still covered by this project's
+  (`tsconfig.base.json`) points into `src/testing/`, the same shape as this library's
+  own `@nge/table/editors`, so it is still covered by this project's
   lint and type-check with no extra config.
 - **Deterministic.** Same seed ⇒ byte-identical rows. `createNgeTableFixtureRandom`
   (mulberry32) is the only source of randomness — **never `Math.random()`** — and dates

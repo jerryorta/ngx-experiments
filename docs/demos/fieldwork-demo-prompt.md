@@ -27,6 +27,7 @@ This concept was chosen because it does three things at once:
 | Library | How this app uses it |
 | --- | --- |
 | `@nge/ui-design-library` (`dlc-*`) | data-table, drawer, dialog, stepper, chips, filters, cards, inputs, selects, tooltip, header-bar |
+| `@nge/table` (`nge-table`) | reach for it instead of `dlc-data-table` wherever a grid needs sorting, column pinning, cell ranges, row selection or virtualization |
 | `@nge/themes` | the persona switcher — Professional / Home / Service Provider × light & dark |
 | `@nge/calendar` | the Schedule week/day view + date-picker + time-picker |
 | `@nge/charts` | the Dashboard revenue-trend + jobs-by-status charts |
@@ -36,7 +37,8 @@ This concept was chosen because it does three things at once:
 ## Ground yourself first
 
 Run `/explain` (or read `.claude/commands/explain.md`), then read
-`docs/reference/` (architecture, domain-library-set, angular-conventions, styling)
+`docs/reference/domain-library-set.md`, `docs/reference/angular-conventions.md`,
+`docs/reference/styling-conventions.md`, `docs/ai/CONSTRAINTS.md`
 and `docs/ai-instructions/reference/multi-component-signal-store.instructions.md`.
 Do a **code-architect blueprint pass** before writing code.
 
