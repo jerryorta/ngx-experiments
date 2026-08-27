@@ -8,7 +8,7 @@ import {
   type ThemeGroupKey,
 } from '@nge/storybook';
 
-const ALL_THEME_CLASSES = STORYBOOK_THEME_CONFIGS.map(t => t.cssClass);
+const ALL_THEME_CLASSES = STORYBOOK_THEME_CONFIGS.map((t) => t.cssClass);
 
 /**
  * The theme a visitor sees before touching the picker, derived from the single
@@ -16,7 +16,9 @@ const ALL_THEME_CLASSES = STORYBOOK_THEME_CONFIGS.map(t => t.cssClass);
  * class in this file silently outranks that flag, which is how the catalog can claim
  * one default while Storybook boots into another.
  */
-const DEFAULT_THEME_CLASS = getDefaultThemeConfig(STORYBOOK_THEME_CONFIGS).cssClass;
+const DEFAULT_THEME_CLASS = getDefaultThemeConfig(
+  STORYBOOK_THEME_CONFIGS,
+).cssClass;
 
 // Load persona + icon fonts once at startup (dlc personas: Manrope/DM Sans,
 // Literata/Nunito Sans, Epilogue/IBM Plex Sans) plus Material Symbols for dlc-icon.
@@ -38,11 +40,13 @@ const preview: Preview = {
     applicationConfig({ providers: [provideZonelessChangeDetection()] }),
     (storyFn, context) => {
       const selected =
-        (context.globals as Record<string, string>)['theme'] ?? DEFAULT_THEME_CLASS;
+        (context.globals as Record<string, string>)['theme'] ??
+        DEFAULT_THEME_CLASS;
 
       // Scope the theme to the story's group: a story declares
       // `parameters: { themeGroup: 'cg' }` to restrict which themes apply.
-      const themeGroup = (context.parameters as { themeGroup?: ThemeGroupKey }).themeGroup;
+      const themeGroup = (context.parameters as { themeGroup?: ThemeGroupKey })
+        .themeGroup;
       const theme = resolveThemeForGroup(selected, themeGroup);
 
       // Apply the selected theme class to document.body; NgeStorybookReviewContainer
@@ -69,7 +73,14 @@ const preview: Preview = {
       // Welcome leads; the design library follows it because it holds the token
       // contract the other three bridge onto.
       storySort: {
-        order: ['Welcome', 'UI Design Library', 'Charts', 'Table', 'Calendar'],
+        order: [
+          'Welcome',
+          'UI Design Library',
+          'Charts',
+          'Table',
+          'Calendar',
+          'Mobile Footer Nav',
+        ],
       },
     },
   },

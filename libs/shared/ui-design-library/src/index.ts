@@ -7,6 +7,7 @@ export * from './lib/dlc-avatar/dlc-avatar.component';
 export * from './lib/dlc-badge/dlc-badge.component';
 export * from './lib/dlc-battery-meter/dlc-battery-meter.component';
 export * from './lib/dlc-billing-toggle/dlc-billing-toggle.component';
+export * from './lib/dlc-bottom-nav/dlc-bottom-nav.component';
 export * from './lib/dlc-button/dlc-button.component';
 export * from './lib/dlc-checkbox/dlc-checkbox.component';
 export * from './lib/dlc-chip/dlc-chip.component';

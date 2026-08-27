@@ -1,0 +1,35 @@
+<nge-storybook-review-container
+  [reviewStatus]="reviewStatus"
+  [storybookFilePath]="storybookFilePath"
+>
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Interactive — tap a tab, or set the active tab from Storybook args
+  </h4>
+  <div class="dlc-bottom-nav-stories__frame mb-8">
+    <dlc-bottom-nav
+      [items]="items"
+      [activeId]="selectedId()"
+      (itemSelect)="onItemSelect($event)"
+    />
+  </div>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Keyboard — focus a tab, then Arrow keys wrap and Home / End jump
+  </h4>
+  <p class="mb-8 text-sm opacity-60">
+    The focus ring is drawn inside the tab: the bar pads itself by
+    <code>env(safe-area-inset-bottom)</code>, so an outward ring on a phone's
+    bottom row would run off-screen.
+  </p>
+
+  <h4 class="mb-4 text-sm font-semibold tracking-wider uppercase opacity-60">
+    Active states (one per tab)
+  </h4>
+  <div class="flex flex-col gap-4">
+    @for (item of items; track item.id) {
+      <div class="dlc-bottom-nav-stories__frame">
+        <dlc-bottom-nav [items]="items" [activeId]="item.id" />
+      </div>
+    }
+  </div>
+</nge-storybook-review-container>

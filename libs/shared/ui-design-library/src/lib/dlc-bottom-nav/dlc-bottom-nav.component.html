@@ -1,0 +1,20 @@
+@let _items = items();
+@let _activeId = activeId();
+
+<nav class="dlc-bottom-nav__bar" role="navigation" aria-label="Primary">
+  @for (item of _items; track item.id) {
+    <button
+      type="button"
+      class="dlc-bottom-nav__tab"
+      [class.dlc-bottom-nav__tab--active]="item.id === _activeId"
+      [attr.data-testid]="'dlc-bottom-nav-' + item.id"
+      (click)="onItemClick(item)"
+      [attr.aria-current]="item.id === _activeId ? 'page' : null"
+      [attr.aria-label]="item.label"
+      tabindex="0"
+    >
+      <span class="dlc-bottom-nav__icon" [dlcIcon]="item.icon"></span>
+      <span class="dlc-bottom-nav__label">{{ item.label }}</span>
+    </button>
+  }
+</nav>
