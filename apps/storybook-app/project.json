@@ -4,7 +4,7 @@
   "projectType": "application",
   "prefix": "sb",
   "sourceRoot": "apps/storybook-app/src",
-  "tags": ["app", "storybook"],
+  "tags": ["scope:shared", "type:app"],
   "targets": {
     "build": {
       "executor": "@angular/build:application",
@@ -25,7 +25,10 @@
           "apps/storybook-app/src/styles.scss"
         ],
         "stylePreprocessorOptions": {
-          "includePaths": ["libs/shared/themes/src/lib/styles", "libs/ledger/themes/src/lib/styles"]
+          "includePaths": [
+            "libs/shared/themes/src/lib/styles",
+            "libs/ledger/themes/src/lib/styles"
+          ]
         }
       },
       "configurations": {

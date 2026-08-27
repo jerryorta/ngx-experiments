@@ -4,7 +4,7 @@
   "sourceRoot": "libs/shared/ui-design-library/src",
   "prefix": "dlc",
   "projectType": "library",
-  "tags": ["dlc", "lib"],
+  "tags": ["scope:shared", "type:design-library"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

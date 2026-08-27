@@ -4,7 +4,7 @@
   "sourceRoot": "libs/shared/storybook/src",
   "prefix": "nge",
   "projectType": "library",
-  "tags": [],
+  "tags": ["scope:shared", "type:storybook"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",
