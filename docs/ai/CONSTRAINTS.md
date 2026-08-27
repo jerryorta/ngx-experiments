@@ -10,7 +10,7 @@
 
 ## Zoneless Change Detection
 
-- Angular 21 uses signal-based zoneless change detection — Zone.js is deprecated
+- Angular 22 uses signal-based zoneless change detection — Zone.js is deprecated
 - App config MUST use `provideZonelessChangeDetection()` — NEVER `provideZoneChangeDetection()` or Zone.js polyfills
 - Test setup MUST use `setupZonelessTestEnv` from `jest-preset-angular/setup-env/zoneless` — NEVER `setupZoneTestEnv`
 - **Known issue:** `libs/media-workbench/*`, `libs/real-estate/*`, and `libs/evolving-cognition/*` library `test-setup.ts` files still use the deprecated `setupZoneTestEnv` and need migration

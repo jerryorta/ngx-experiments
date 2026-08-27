@@ -615,7 +615,7 @@ npx nx build [project-name] --skip-nx-cache
 
 ## Integration Notes
 
-- Compatible with Nx 21.1.3+ workspace
+- Compatible with Nx 23+ workspace
 - Standalone components only (no NgModules)
 - Uses inject() function for DI
 - Signal-based inputs/outputs preferred
