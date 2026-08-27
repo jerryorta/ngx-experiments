@@ -5,6 +5,15 @@ applyTo: '**/*.component.html'
 # Accessibility Selectors Convention
 
 > **Write-time rules** (aria-label / data-testid required-on lists, naming, locator priority) are distilled in [`../standards/a11y.md`](../standards/a11y.md) and auto-injected on write. This file adds the worked HTML examples and verification steps.
+>
+> **Mechanism and measurement** — why an accessible name computes the way it does, focus-ring and
+> route-announcement patterns, and which tools give false answers — are in
+> [`../../architecture/accessibility.md`](../../architecture/accessibility.md).
+>
+> ⚠️ The examples below use **Angular Material** (`mat-icon-button`, `mat-button-toggle-group`),
+> which is legacy and NOT for new development (`docs/ai/CONSTRAINTS.md` § Angular Material). The
+> selector *strategy* still holds; the markup does not. New components use design-library
+> primitives (e.g. `gy-button`'s `ariaLabel` input).
 
 Stable selectors for Playwright browser automation and screen reader accessibility.
 

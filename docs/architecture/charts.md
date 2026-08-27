@@ -55,6 +55,16 @@ Key structural facts (all in `src/lib/`):
   panned; axes stay unclipped siblings. Created once via `createBaseLayout(root)`.
 - **Presets** `presets/*.preset.ts` — convenience factories that return a fully-formed
   `NgeChartConfig` (see table below).
+- **Geo seam** `layers/geo-base/` — the projection subsystem the map layers build on, and
+  the geographic counterpart to base-layout's shared scales. It exports pure functions
+  (`resolveNgeGeoProjection`, `createNgeGeoPath`, `projectNgeGeoPoint`,
+  `resolveNgeGeoFeatures`) and is **not** a layer type. Geo layers are *self-scaling*: they
+  ignore the shared cartesian `scales` entirely and fit a projection to
+  `context.dimensions`, the same way `bullet` builds its own value scale and the radial
+  family computes its own centre and radius. Two geo layers register with each other by
+  **determinism, not shared state** — same options + features + bounded rect gives an
+  identical projection — so a composed map passes ONE `NgeGeoProjectionOptions` object to
+  every geo layer.
 - **Tooltip is generic** `nge-chart-tooltip/` + `core/tooltip/` — layers emit a
   `NgeTooltipEvent`; the component positions the bubble via D3 (bypassing change
   detection) and renders content through the default template or a consumer-supplied
@@ -103,6 +113,10 @@ config = createBarChartConfig({
 | `createGroupedBarChartConfig`   | `grouped-bar`  | `NgeGroupedBarDataPoint` |
 | `createDivergingBarChartConfig` | `diverging-bar`| (see preset)          |
 | `createScatterChartConfig`      | `scatter`      | (see preset)          |
+| `createChoroplethChartConfig`   | `choropleth`   | `NgeChoroplethDataPoint` |
+| `createGeoSymbolChartConfig`    | `geo-symbol`   | `NgeGeoSymbolDataPoint`  |
+| `createGeoFlowChartConfig`      | `geo-flow`     | `NgeGeoFlowDataPoint`    |
+| `createCartogramChartConfig`    | `cartogram`    | `NgeCartogramDataPoint`  |
 
 Exact option surfaces live in each `presets/*.preset.ts`; config/data types in
 `core/config/nge-chart-config.models.ts`. Presets are **not uniform** — e.g. the bar
@@ -254,10 +268,13 @@ Consequences for a new layer:
 
 - Place tooltips in **container coords** and let the component translate. A layer that resolves
   host coords itself will be double-offset under a top/left legend.
-- A layer that animates the tooltip element **directly** (`skipPosition: true` plus its own
-  `select(tooltipElement).style('left', …)` — the bullet and diverging-bar enter transitions)
-  bypasses that translation and is mis-placed under a top/left legend. Prefer emitting through
-  `onTooltip`.
+- **A layer never positions the tooltip element itself** — the layer context hands it no
+  reference to one. A layer animating its tooltip emits through `onTooltip` once per frame of
+  its own transition tween, so the animated position goes through the same single translation
+  as every other emission. The bullet and diverging-bar layers work this way:
+  `computeTooltipEvent` derives the position from the interpolated value and d3 hands the tween
+  an already-eased `t`, so the per-frame emission *is* the animation — and the divot's clamp is
+  recomputed each frame rather than tweened as a CSS string, which keeps the tip on the mark.
 
 ### Legend interactivity & series selection (scatter)
 
@@ -301,13 +318,36 @@ to `circle`). Live demo: scatter interaction story, "External Legend".
 
 **A legend selection must FADE, never filter (ARCH-284).** The scatter transform above fades
 the unselected series; the pie does the same through `highlightedLabels` (named slices keep
-`theme.pie.slice.opacity`, the rest drop to `dimmedOpacity`, default 0.25). Removing the
+`theme.pie.slice.opacity`, the rest drop to `dimmedOpacity`, default 0.25), and the chord and
+sankey layers through `highlightedNodes` (node **ids**, dimming to
+`theme.<type>.node.dimmedOpacity` / `theme.<type>.link.dimmedOpacity`). Removing the
 unselected data instead is the tempting shortcut and it is wrong on any part-to-whole chart:
 drop a pie slice and `d3.pie()` re-runs, so every surviving wedge grows and the one being
-compared against changes size mid-comparison. Opacity is also the only mechanism available —
-series colours are usually unresolved `var(--nge-chart-*)` strings that JS cannot derive a
-faded colour from. The layer holds no selection state: the caller owns the set and passes it
-down, exactly as with the scatter transform.
+compared against changes size mid-comparison. A chord rescales the same way — `d3.chord()`
+sizes each arc as a share of the current matrix total. **A sankey is the worst case**: the
+layout recomputes node depth, height AND x/y placement, so a survivor does not merely regrow —
+it can land in a different column, costing the reader the thing they were comparing and its
+position at once (ARCH-314). Opacity is also the only mechanism
+available — series colours are usually unresolved `var(--nge-chart-*)` strings that JS cannot
+derive a faded colour from. The layer holds no selection state: the caller owns the set and
+passes it down, exactly as with the scatter transform.
+
+**A mark with TWO ends stays lit when EITHER end is selected (ARCH-295).** A pie slice belongs
+to one datum, so "is this selected" has one answer; a chord ribbon, a sankey link, a network
+edge each join two nodes that can disagree, and the rule has to be chosen rather than inferred.
+Choose *either*: a legend is one click per node, so requiring BOTH ends would blank the diagram
+for the ordinary single selection — every connection that node has reaches something
+unselected. Either-endpoint reduces, at one selection, to the canonical d3 chord fade
+(`filter(d => d.source.index !== i && d.target.index !== i)`), which reads as "show me this
+node's flows" — the question a relationship diagram is opened to answer. Labels are **not**
+dimmed by a selection in any layer: a receded mark still has to be identifiable, which is why
+neither pie nor chord declares a `label.dimmedOpacity`.
+
+**Dim is measured against the mark's OWN resting opacity, never copied between marks.** The
+chord layer's two dim tokens are deliberately different numbers — a node rests at `opacity: 1`
+so it takes 0.25 (a 4× drop, pie's value), while a link already rests at 0.4 and needs 0.08 to
+fall as far. Reusing the node's 0.25 on the link would be a 1.6× change that does not read as
+dimmed at all. `parallel-coords` sets the same ratio for the same reason (0.7 → 0.12).
 
 Pair it with `legend.showValues` (each `NgeLegendItem.value` beside its label) and
 `legend.showClearAction` (a "Clear highlight" button emitting `(legendClearAction)`) and the
@@ -365,6 +405,39 @@ zooms the plot along that axis (emits `range-zoom`). Independent of the plot ges
 layout, no category axis) — no meaningful zoom/pan surface, so they take no `gestures`. Live
 demos: scatter / line / bar interaction stories.
 
+### Layer-local pan — a different mechanism (ARCH-311)
+
+Everything above moves a **domain**: the chart emits a stateless event, a transform derives the
+next domain, and the re-render draws the new window. A **self-scaled** layer (workflow, sankey,
+chord, network, tree) derives every coordinate from `context.dimensions` and has no domain to
+move, so it cannot take `gestures` at all — the exclusion above is about micro-charts and is not
+the only reason a chart type is missing from that table.
+
+The `workflow` layer's `pan` option is therefore a separate thing that happens to share a verb:
+
+| | Chart-level `gestures.pan` | Layer-local `pan` |
+| --- | --- | --- |
+| Moves | a scale's domain | the drawn content, by a translate |
+| State | stateless event → consumer's transform → config | per-svg `WeakMap`, inside the layer |
+| Re-renders per frame | yes (new domains) | no — the geometry is unchanged |
+| Needs | continuous or band scales | nothing; works with no scales at all |
+
+Enabling one does not enable the other, and a chart may carry both without their interacting —
+the workflow pan probes `isGestureBrushing()` and declines to start while a plot brush is live.
+
+**Why a self-scaled layer may exceed its plot at all.** Normally it must not: the layers group
+clips, so a mark outside the plot is gone rather than cropped, which is why every such layer
+shrinks to fit. Panning is what makes the overrun recoverable, so the two are deliberately tied
+— `workflow`'s `layerSpacing` and `minLaneBreadth` are honoured beyond the plot only while `pan`
+is set, and clamp to what fits otherwise.
+
+⚠️ **A layer that overflows must clamp to its CONTENT rect, not its plot rect.** The clamp chain
+(box edges, `elbowRoute`'s bounds, the per-vertex clamp) is what keeps marks inside the picture;
+point it at the plot while the layout is larger and the overrun folds back onto the plot's edge —
+a stack of steps sharing one coordinate, which every containment assertion still passes. In the
+workflow layout both extents are single variables (`flowLength` / `flowBreadth`), so the whole
+chain moves together.
+
 ---
 
 ## Theming — the `--nge-chart-*` token contract
@@ -393,9 +466,79 @@ straight onto SVG elements. Because these are D3 `.style()` strings, a raw
 consumed by a scale) fails silently. Use a resolved color, or drive it through the
 `--nge-chart-*` token on the element rather than a JS-side `var()` string.
 
-**Adding a token:** add it to `_nge-chart-tokens.scss` with a default + comment, use
-`var(--nge-chart-<name>)` in chart SCSS or D3 style strings, then map it in every consuming
-theme's chart bridge (per-repo locations are in `libs/shared/charts/AGENTS.md`).
+**Adding a token:** add it to `_nge-chart-tokens.scss` with a default + comment, then reference
+it as `var(--nge-chart-<name>, <literal>)` — never bare — in chart SCSS, D3 style strings, and
+theme defaults, with `<literal>` matching the `:root` default exactly. The `:root` block is not
+guaranteed to be loaded — it reaches a page only when a consumer imports it — so a bare
+reference renders as the CSS-invalid value and the declaration is dropped, silently. The failure
+is a WRONG colour rather than a blank: an unresolved `fill` falls to the SVG default black. Map
+the token in every consuming theme's chart bridge (per-repo locations are in
+`libs/shared/charts/AGENTS.md`). Three specs guard this —
+`nge-chart-theme.defaults.spec.ts` (ARCH-309) over the theme object,
+`nge-chart-source-tokens.spec.ts` (ARCH-315, extended over `stories/` by ARCH-318) over the
+library's `.ts` source text, and `nge-chart-scss-tokens.spec.ts` (ARCH-319) over its
+stylesheets — so a bare reference or a fallback that drifts from `:root` fails the
+build instead of rendering silently wrong. ⚠️ This workspace's Storybook is not a live
+reproduction: `apps/storybook-app/src/styles.scss` imports the `:root` defaults, so nothing
+in-repo renders the failure and the specs are the only enforcement.
+
+**The requirement is about the fallback's VALUE, not its shape** (ARCH-320). A fallback written as
+a function call — `rgba(…)`, `color-mix(…)` — has to reproduce what `:root` declares just as a
+literal does, and is compared to it the same way. The shared parser reads a fallback by counting
+parentheses rather than by matching a regex, so there is no depth at which a fallback stops being
+checked; the one exempt shape is a **chained** reference, whose outer token names another token
+instead of stating a value (below). One practical limit: the scans read source line by line, so a
+`var()` wrapped across two lines cannot be read and fails as unterminated — keep a reference on one
+line, comments included.
+
+### A component-local alias is a third shape, and it chains
+
+Not every `--nge-chart-*` property is part of the contract above. The tooltip declares
+`--nge-chart-tooltip-background-color` / `-text-color` / `-outline-color` / `-font-weight` on its
+own host in `nge-chart-tooltip.component.scss` and consumes them from that same block's
+descendants — a **component-local alias**, the seam a consumer overrides to restyle one component
+without moving the global surface/outline/content tokens the rest of the library draws from.
+
+An alias gets **no `:root` default**: one would be shadowed by the host declaration anyway, and
+would advertise a token no theme bridge maps. That makes a defaultless token ambiguous on sight, so
+check *who declares it* before assuming: `--nge-chart-crosshair-guide` has no default because a
+consumer is meant to drive it (above), while these have none because the component itself does.
+
+Each use site repeats the whole chain — `var(--alias, var(--nge-chart-surface, #ffffff))` — rather
+than naming the alias bare. Bare resolves today, since the declaring and consuming rules are the
+same block. It stops resolving the moment a consumer points an alias at a token of its own that is
+never declared: the alias holds the guaranteed-invalid value, and CSS substitutes a fallback only
+where one is written. All four properties are inherited, so `fill` would fall through to the
+`fill="none"` on the tooltip's parent `<svg>` and the bubble would disappear entirely — measured in
+the browser, where a bare and a chained path in that same `<svg>` compute identically until the
+alias breaks and then diverge to `none` against a live colour.
+
+### Chart chrome is themed on the BASE theme, not a layer slice
+
+`axis`, `grid`, and `crosshair` sit directly on `NgeChartBaseTheme` — they are drawn by the
+chart itself, so they take no part in `renderLayers`' `theme[layer.type]` lookup and must not
+be given a layer-shaped slice.
+
+`theme.crosshair` (ARCH-265) styles the shared crosshair's guides and focus dots:
+`lineColor` / `lineDash` / `lineOpacity` / `lineWidth` for the guide, `dotRadius` /
+`dotStrokeColor` / `dotStrokeWidth` for the dots. The keys are **flat**, like `grid`'s,
+because a flat block merges a partial override with one spread — a nested slice needs
+per-sub-slice spreading, which is the clobber `axis.group` is merged separately to avoid.
+
+The guide keeps a CSS escape hatch alongside the theme object. Resolution order:
+
+| Priority | Source | Notes |
+| - | ------ | ----- |
+| 1 | `theme.crosshair.lineColor` | The author decided, in config. Wins outright. |
+| 2 | `--nge-chart-crosshair-guide` | A container recolours the guide with one custom property — the path the `Crosshair/Theming` story's Midnight and Sunset sections take. |
+| 3 | `--nge-chart-on-surface` | The theme bridge's content colour. |
+| 4 | `#1d1b20` | Literal, so the value stays valid with no tokens loaded at all. |
+
+⚠️ `--nge-chart-crosshair-guide` is deliberately **absent** from `_nge-chart-tokens.scss`.
+It is an opt-in override, and a `:root` value would pin the guide to that literal and cut
+rung 3 out of the chain — a theme bridge's `--nge-chart-on-surface` would stop reaching it.
+That is the exception to *Adding a token* above: a token that exists to be overridden by a
+consumer gets no default.
 
 ### Data-label colour — the four-rung resolution order
 

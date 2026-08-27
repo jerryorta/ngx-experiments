@@ -2,20 +2,38 @@
 
 ## Overview
 
-The Storybook app at `apps/storybook-app/` provides component documentation and interactive testing for UI libraries across the monorepo.
+The workspace has **two** Storybook apps.
 
-**Config location:** `apps/storybook-app/.storybook/`
-**Port:** `http://localhost:4400`
+| App | Nx project | Config location | Port | Covers |
+|---|---|---|---|---|
+| Workspace Storybook | `storybook-app` | `apps/storybook-app/.storybook/` | `http://localhost:4400` | 12 libraries (below) |
+| Got You Storybook | `got-you-storybook` | `apps/got-you/storybook/.storybook/` | `http://localhost:4406` | every `libs/got-you/*` library, via one glob |
 
-## Included Libraries
+Neither config serves static assets — both set `staticDirs: []`. Both load the
+`@storybook/addon-docs` and `@storybook/addon-a11y` addons.
 
-| Library | Story path | Assets |
-|---------|-----------|--------|
-| `libs/shared/ui-design-library-deprecated` | `src/**/*.stories.ts` | `src/assets` → `assets/dlc` |
-| `libs/shared/ui-design-library` | `src/**/*.stories.ts` | — |
-| `libs/shared/charts` | `src/**/*.stories.ts` | — |
-| `libs/evolving-cognition/ui` | `src/**/*.stories.ts` | `src/assets` → `assets/ec-ui` |
-| `libs/real-estate/ui` | `src/**/*.stories.ts` | — |
+## Included Libraries — workspace Storybook
+
+One glob per library in `apps/storybook-app/.storybook/main.ts`, each matched by a
+`*.stories.ts` include in `apps/storybook-app/.storybook/tsconfig.json`.
+
+| Library |
+|---|
+| `libs/shared/calendar` |
+| `libs/shared/charts` |
+| `libs/shared/table` |
+| `libs/shared/ui-design-library` |
+| `libs/media-workbench/ui` |
+| `libs/media-workbench/design-library` |
+| `libs/concierge/design-library` |
+| `libs/nge-marketing/design-library` |
+| `libs/cognition/design-library` |
+| `libs/cognition/ui` |
+| `libs/got-you/design-library` |
+| `libs/jerryorta/design-library` |
+
+`libs/got-you/design-library` is reachable from both Storybooks — the workspace config
+names it explicitly, and the Got You config's `libs/got-you/**` glob sweeps it up.
 
 ## Adding a New Library
 
@@ -29,30 +47,17 @@ Add the library's story glob to the `stories` array:
 '../../../libs/<domain>/<lib>/src/**/*.@(mdx|stories.@(js|jsx|ts|tsx))',
 ```
 
-If the library has an `src/assets` directory referenced by stories, add a `staticDirs` entry:
-
-```typescript
-{ from: '../../../libs/<domain>/<lib>/src/assets', to: 'assets/<prefix>' },
-```
-
 ### 2. `.storybook/tsconfig.json` — TypeScript compilation
 
-Add include globs (all 6 extensions):
+Add one matching include — the same path, narrowed to `*.stories.ts`:
 
 ```json
 "../../../libs/<domain>/<lib>/src/**/*.stories.ts",
-"../../../libs/<domain>/<lib>/src/**/*.stories.js",
-"../../../libs/<domain>/<lib>/src/**/*.stories.jsx",
-"../../../libs/<domain>/<lib>/src/**/*.stories.tsx",
-"../../../libs/<domain>/<lib>/src/**/*.stories.mdx",
-"../../../libs/<domain>/<lib>/src/**/*.component.ts",
 ```
 
-Add exclude glob for spec files:
-
-```json
-"../../../libs/<domain>/<lib>/src/**/*.spec.ts"
-```
+The `include` array carries exactly these story globs plus `preview.ts`; there is no
+`exclude` array and no per-extension fan-out. Stories pull their components through
+`@nge/*` path aliases, so component sources need no include of their own.
 
 **Important:** The `main.ts` globs and `tsconfig.json` includes must stay in sync. If Storybook discovers a story file that tsconfig doesn't include, the build fails with:
 
@@ -64,9 +69,12 @@ Add exclude glob for spec files:
 
 | Command | Purpose |
 |---------|---------|
-| `npm run storybook` | Start dev server at `localhost:4400` |
+| `npm run storybook` | Clear the Nx cache, then start the workspace Storybook at `localhost:4400` |
+| `npm run storybook.got-you` | Start the Got You Storybook at `localhost:4406` |
 | `npm run build-storybook` | Production build to `dist/storybook/storybook-app` |
-| `npm run chromatic` | Deploy to Chromatic for visual review |
+| `npm run chromatic` | Clean cache, build, and publish to Chromatic for visual review |
+| `npm run d.storybook.got-you` | Build + deploy the Got You Storybook to the `got-you-storybook` Hosting site (`scripts/got-you/storybook/d.storybook.got-you.sh`) |
+| `npm run d.storybook.firebase` | Build + deploy the workspace Storybook to the `ngesoft-storybook` Hosting site (`apps/nge-marketing/backend/d.storybook.prd.sh`) |
 
 ## Story File Conventions
 

@@ -6,12 +6,12 @@ A **domain** is a top-level vertical in the monorepo — it owns both its applic
 
 ```
 apps/[domain]/          ← main Angular application
-libs/[domain]/          ← the six supporting libraries
+libs/[domain]/          ← the supporting libraries
 ```
 
-Examples: `media-workbench`, `real-estate`, `evolving-cognition`.
+Examples: `concierge`, `cognition`, `got-you`, `media-workbench`, `nge-marketing`, `jerryorta`, `real-estate`, `evolving-cognition`.
 
-The `libs/[domain]/` side always contains the same six-library structure. The canonical example is `libs/media-workbench/` backed by `apps/media-workbench/app`.
+Every domain carries the same **six core libraries** — `models`, `store`, `themes`, `ui`, `design-library`, `utils` — and adds the optional ones it needs: `mocks` (cognition, concierge, jerryorta), `secrets` (cognition, concierge, got-you, evolving-cognition, real-estate) and a `docs/` folder. The canonical example is `libs/media-workbench/` backed by `apps/media-workbench/app`.
 
 ---
 
@@ -42,16 +42,18 @@ libs/
 
 ## Library Inventory
 
-| Library          | Nx project name           | Path alias                              | Component prefix | Nx tags                     |
-| ---------------- | ------------------------- | --------------------------------------- | ---------------- | --------------------------- |
-| `models`         | `[domain]-models`         | `@nge/[domain]/models`         | —                | `models`, `lib`             |
-| `store`          | `[domain]-store`          | `@nge/[domain]-store`          | —                | `lib`                       |
-| `themes`         | `[domain]-themes`         | — (SCSS only, no TS exports)            | —                | `[domain]`, `themes`, `lib` |
-| `ui`             | `[domain]-ui`             | `@nge/[domain]/ui`             | `[prefix]`       | `lib`                       |
-| `design-library` | `[domain]-design-library` | `@nge/[domain]/design-library` | `[prefix]`       | `[domain]`, `lib`           |
-| `utils`          | `[domain]-utils`          | `@nge/[domain]/utils`          | —                | `lib`                       |
+| Library          | Nx project name           | Path alias                              | Component prefix |
+| ---------------- | ------------------------- | --------------------------------------- | ---------------- |
+| `models`         | `[domain]-models`         | `@nge/[domain]-models`         | —                |
+| `store`          | `[domain]-store`          | `@nge/[domain]-store`          | —                |
+| `themes`         | `[domain]-themes`         | — (SCSS only, no TS exports)            | —                |
+| `ui`             | `[domain]-ui`             | `@nge/[domain]-ui`             | `[prefix]`       |
+| `design-library` | `[domain]-design-library` | `@nge/[domain]-design-library` | `[prefix]`       |
+| `utils`          | `[domain]-utils`          | `@nge/[domain]-utils`          | —                |
 
-> **Note on `store` path alias:** The store uses a dash separator (`[domain]-store`) rather than a slash, matching the Nx project name convention. All other libs use the slash form (`[domain]/lib-type`).
+> **Path-alias separator — use the dash form for a new domain.** The alias mirrors the Nx project name: `@nge/[domain]-[lib-type]`. `cognition`, `concierge`, `nge-marketing`, `got-you` and `jerryorta` follow it throughout. Three older domains use a slash for everything except the store, which is dash in all eight: `@nge/media-workbench/{models,ui,design-library,utils}`, `@nge/evolving-cognition/{ui,utils,api}`, `@nge/real-estate/{ui,api}`. Read the alias out of `tsconfig.base.json` rather than deriving it.
+>
+> **Nx tags** are declared in each library's `project.json` and enforced by the workspace `eslint.config.mjs` module-boundary rule — read them there.
 
 ---
 
@@ -92,7 +94,7 @@ Angular components specific to this domain that are **container/smart** — they
 - **Animations:** GSAP (`gsap`) for sophisticated animations; Angular animations for simple state transitions
 - **Styling — Tailwind first:** same priority as `design-library` — Tailwind for layout, spacing, typography, and colors; SCSS only for pseudo-selectors, child selectors, and CSS custom property definitions
 - **Tailwind availability:** picked up automatically by the app's `tailwind.config.js` via `createGlobPatternsForDependencies` — no lib-level config needed
-- **Depends on:** `models`, `store`, `design-library`, `@nge/ui-design-library-deprecated`
+- **Depends on:** `models`, `store`, `design-library`, `utils`
 
 ### `design-library` — Reusable Presentational Components
 
@@ -113,7 +115,7 @@ Reusable Angular **components, directives, and pipes** that are purely presentat
   - SCSS is used only for: pseudo-selectors (`:hover`, `:focus`, `::placeholder`), child element selectors, and CSS custom property definitions
   - If the `.scss` file contains only the root class wrapper with no rules inside, delete it and remove `styleUrl` from the decorator
 - **Tailwind availability:** Tailwind is configured at the app level via `createGlobPatternsForDependencies` in `apps/[domain]/app/tailwind.config.js` — no lib-level Tailwind config is needed; classes used in lib templates are automatically picked up
-- **Depends on:** `models` (for model types), `themes` (for CSS tokens), `@nge/ui-design-library-deprecated`
+- **Depends on:** `models` (for model types), `themes` (for CSS tokens)
 
 ### `utils` — Pure Utility Functions
 
@@ -136,7 +138,7 @@ A workspace this size has many shared libraries; the failure modes are (a) re-wr
 
 ### Place by altitude (prefer the domain's own libs)
 
-The direction is **self-contained domain apps** — each domain owns its full six-lib set, so new shared code defaults to the consuming domain rather than a cross-domain shared lib:
+The direction is **self-contained domain apps** — each domain owns its own core library set, so new shared code defaults to the consuming domain rather than a cross-domain shared lib:
 
 | What | Where |
 | ---- | ----- |
@@ -158,7 +160,7 @@ These cross-domain libs are being **phased out**. Don't treat them as the home f
 
 > All other `@nge/*` aliases in `tsconfig.base.json` remain valid shared infrastructure — reuse them rather than duplicating. Two are in transition but still supported:
 > - `@nge/api` (`libs/shared/api`) — being trimmed of deprecated-app code as those apps are removed, but the library is kept. Reuse is fine.
-> - `@nge/store` (`libs/shared/store`) — no longer the primary store, but domains may depend on it (e.g. `QueryEngineCache` is consumed by every domain store). Build on it as shared infra; just put NEW domain state slices in `libs/<domain>/store`, not here.
+> - `@nge/store` (`libs/shared/store`) — shared state infrastructure rather than the primary store; domains may depend on it (e.g. `QueryEngineCache` is consumed by every domain store). Build on it as shared infra; put NEW domain state slices in `libs/<domain>/store`, not here.
 
 > **Worked example (REX-443).** `toIsoTimestamp` had been copied into three concierge store slices. The fix extracted a single helper into `libs/concierge/store/src/lib/firestore-timestamp/` (domain-owned, store-internal concern folder), reusing the existing per-slice pattern (REX-397). The shared `convertToUnixTimestamp` in `@nge/api` was NOT reusable here anyway — it returns epoch-ms `number` (wrong type for these ISO-`string` fields) and ignores live `Timestamp` instances / already-ISO strings — but the deciding factor was the **"prefer the domain's own libs"** altitude rule: keep domain-specific logic in the domain, not in a cross-domain shared lib.
 
@@ -175,7 +177,7 @@ store          ←── models, utils
 ui             ←── models, store, design-library, utils
 ```
 
-Applications depend on all six. Libraries never depend upward in this list. The `store` must never import from `ui` or `design-library`.
+Applications depend on the whole set. Libraries never depend upward in this list. The `store` must never import from `ui` or `design-library`.
 
 ---
 
@@ -185,7 +187,7 @@ Applications depend on all six. Libraries never depend upward in this list. The 
 | ------------------ | ----------------------------------- | ---------------------------------------------- |
 | Directory          | `libs/[domain]/[lib-type]/`         | `libs/media-workbench/design-library/`         |
 | Nx project name    | `[domain]-[lib-type]`               | `media-workbench-design-library`               |
-| Path alias (most)  | `@nge/[domain]/[lib-type]` | `@nge/media-workbench/design-library` |
+| Path alias         | `@nge/[domain]-[lib-type]` | `@nge/cognition-design-library`       |
 | Path alias (store) | `@nge/[domain]-store`      | `@nge/media-workbench-store`          |
 | Component prefix   | domain initials                     | `mw`                                           |
 | Component selector | `[prefix]-[name]`                   | `mw-chip`                                      |
@@ -230,16 +232,17 @@ module.exports = {
 
 Tailwind classes used in `ui`, `design-library`, and any other lib consumed by the app are all processed through this config — no per-library Tailwind setup is needed.
 
-**Post-generation — `src/styles.scss`:** import Tailwind between the theme `@use` and the theme mixin call:
+**Post-generation — `src/styles.scss`:** load Tailwind between the theme `@use` and the theme mixin call:
 
 ```scss
 @use '[prefix]-themes';
-@import 'tailwindcss';
+
+@use 'tailwindcss';
 
 @include [prefix]-themes.[prefix]-theme-mixin();
 ```
 
-> See the themes section below for the full `[prefix]-themes` setup. The `@import 'tailwindcss'` line must sit between the `@use` and the mixin call — this matches the pattern in `apps/media-workbench/app/src/styles.scss`.
+> See the themes section below for the full `[prefix]-themes` setup. The `@use 'tailwindcss'` line sits between the `@use` and the mixin call — the pattern in `apps/media-workbench/app/src/styles.scss`, shared by cognition, concierge, nge-marketing, jerryorta and real-estate. Got You is the one variant: `apps/got-you/app/src/styles.scss` uses `@import "tailwindcss" source(none)` so Sass passes the line through to `@tailwindcss/postcss` untouched.
 
 **Custom components + GSAP:** `@angular/cdk` and `gsap` are workspace dependencies — no installation needed. Use GSAP for sophisticated animations in the app.
 
@@ -363,7 +366,8 @@ Each partial wraps its rules in a mixin — nothing emits CSS at `@use` time, on
 
 ```scss
 @use '[prefix]-themes';
-@import 'tailwindcss';
+
+@use 'tailwindcss';
 
 @include [prefix]-themes.[prefix]-theme-mixin();
 ```
@@ -448,9 +452,9 @@ This goes in the existing `includePaths` array on the build target's top-level `
 @include [prefix]-themes.[prefix]-theme-mixin();
 ```
 
-The `@use` directive must appear before `@import 'tailwindcss'`. The `@include` call must follow it, alongside the other theme mixin calls.
+The `@use` directive must appear before `@use 'tailwindcss'`. The `@include` call must follow it, alongside the other theme mixin calls.
 
-> See `apps/storybook-app/` as the canonical reference — it already wires `mw-themes` using this exact pattern.
+> See `apps/storybook-app/src/styles.scss` as the canonical reference — it wires six domain themes (`mw-`, `cg-`, `nge-`, `cog-`, `gy-`, `jo-`) using this exact pattern, with the `libs/shared/charts/theming` and `libs/shared/table/theming` `:root` defaults `@use`d ahead of them so a theme's bridge wins the source-order tie.
 
 ---
 
@@ -551,9 +555,9 @@ npx nx run [domain]-app:build
 
 ### Workspace Notes
 
-**Global component generator defaults (`nx.json`):** the workspace pre-configures `@nx/angular:component` globally with `OnPush`, `ViewEncapsulation.None`, SCSS, and `displayBlock`. These apply automatically to all generated components — no per-domain setup needed. The `design-library` `generators` block supplements this with `inlineStyle: false` and `inlineTemplate: false` to enforce separate files.
+**Global component generator defaults (`nx.json`):** the workspace pre-configures `@nx/angular:component` globally with `OnPush`, `ViewEncapsulation.None`, SCSS, `displayBlock`, `skipTests: false`, and `inlineStyle` / `inlineTemplate` both `false`. These apply automatically to all generated components — the `design-library` `generators` block restates them so the library carries its own contract even if the global default moves.
 
-**No module boundary enforcement:** the root `eslint.config.js` does not include `@nx/enforce-module-boundaries`. The dependency hierarchy documented in this file is convention only — it is not enforced by tooling. Adhere to the dependency order manually.
+**Module boundaries are enforced:** the root ESLint config carries `@nx/enforce-module-boundaries`, and every project declares a `scope:*` tag (its vertical) and a `type:*` tag (its rung in the hierarchy above) in `project.json`. The dependency order in this file is therefore checked at lint time, not left to discipline. The tag vocabulary and the constraint table are in `docs/ai/CONSTRAINTS.md` § Module Boundaries — read the rule itself from the root ESLint config.
 
 **Custom components — no Angular Material:** `ui` and `design-library` build domain-branded components from scratch. `@angular/cdk` (overlays, portals, a11y, drag-drop) is available as a construction utility — it assists in building components but is not a component library itself. `@angular/material` components are not used. `gsap` is available for sophisticated animations across `ui`, `design-library`, and the app. Both `@angular/cdk` and `gsap` are workspace dependencies — no installation needed.
 
@@ -592,14 +596,14 @@ mkdir -p apps/[domain]/mobile  && touch apps/[domain]/mobile/.gitkeep
 After all libraries are generated, add entries to `tsconfig.base.json`:
 
 ```json
-"@nge/[domain]/models":         ["libs/[domain]/models/src/index.ts"],
+"@nge/[domain]-models":         ["libs/[domain]/models/src/index.ts"],
 "@nge/[domain]-store":          ["libs/[domain]/store/src/index.ts"],
-"@nge/[domain]/ui":             ["libs/[domain]/ui/src/index.ts"],
-"@nge/[domain]/design-library": ["libs/[domain]/design-library/src/index.ts"],
-"@nge/[domain]/utils":          ["libs/[domain]/utils/src/index.ts"]
+"@nge/[domain]-ui":             ["libs/[domain]/ui/src/index.ts"],
+"@nge/[domain]-design-library": ["libs/[domain]/design-library/src/index.ts"],
+"@nge/[domain]-utils":          ["libs/[domain]/utils/src/index.ts"]
 ```
 
-> Note: `store` uses a dash separator (`[domain]-store`) not a slash — this matches the Nx project name and keeps it consistent with `real-estate-store`, `evolving-cognition-store`, and `media-workbench-store`.
+> Note: every alias uses a dash separator matching the Nx project name — the form `cognition`, `concierge`, `nge-marketing`, `got-you` and `jerryorta` use throughout. `media-workbench`, `evolving-cognition` and `real-estate` predate it and keep a slash for their non-store libs; the store is dash in all eight.
 
 > Note: `themes` has no TypeScript exports and is not registered here — it is consumed via SCSS `includePaths` in the app's build config, not via a TypeScript import.
 

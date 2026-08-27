@@ -1,8 +1,9 @@
 # Styling Conventions
 
 > **Angular Material is legacy-only — NOT for new development.** New apps and all new components do
-> NOT use Angular Material (`mat-*`, `--mat-sys-*`, `@angular/material`). Material remains only in the
-> legacy **evolving-cognition** and **real-estate** apps. New components use the own-namespace
+> NOT use Angular Material (`mat-*`, `--mat-sys-*`, `@angular/material`). Material remains only in legacy
+> code — chiefly the **evolving-cognition** and **real-estate** apps, plus the legacy marketing sites and a
+> few shared libraries (`docs/ai/CONSTRAINTS.md` § Angular Material lists them all). New components use the own-namespace
 > CSS-variable architecture proven in `libs/shared/calendar`: `ViewEncapsulation.None` +
 > `host: { class: '<prefix>-name' }`, Tailwind utilities, and a self-sufficient `--<prefix>-*` token
 > set with **literal fallbacks** (`var(--<prefix>-x, <literal>)`) — never `--mat-sys-*`. Sections below
@@ -33,11 +34,31 @@ Always use Tailwind's CSS variable syntax when working with CSS custom propertie
 ```html
 <!-- New components: own --<prefix>-* tokens with literal fallbacks -->
 <div class="text-[var(--nge-calendar-on-surface,#1a1a1a)] bg-[var(--nge-calendar-surface,#ffffff)]">
-  <button class="px-4 py-2 rounded-md bg-[var(--nge-calendar-primary,#2563eb)] text-[var(--nge-calendar-on-primary,#ffffff)] hover:opacity-90">
+  <button class="px-4 py-2 rounded-md bg-[var(--nge-calendar-accent,#2563eb)] text-[var(--nge-calendar-on-accent,#ffffff)] hover:opacity-90">
     Button
   </button>
 </div>
 ```
+
+**The literal is not decoration — it is the value the component renders** whenever the token is
+undeclared, which is any page that has not loaded the library's defaults. So a fallback that
+disagrees with the library's declared default is itself a defect: the same rule then paints two
+different colours depending on whether a consumer imported a stylesheet.
+
+Three libraries enforce this in their own test suites, each arbitrated by whatever holds its
+defaults — and each guard bans a bare reference outright:
+
+| Library | Source of truth | Guard |
+| --- | --- | --- |
+| `@nge/charts` | `:root` in `styles/_nge-chart-tokens.scss` | `core/theme/nge-chart-{theme.defaults,source-tokens,scss-tokens}.spec.ts` |
+| `@nge/calendar` | the `$tokens` SCSS map | `lib/theme/nge-calendar-token-fallback.spec.ts` |
+| `@nge/ui-design-library` | none by convention — tokens live with their component | `lib/dlc-token-fallback.spec.ts` (bare + wrapped references only) |
+
+Two shapes the guards treat specially, and both are worth knowing before writing a reference:
+a **chained** fallback (`var(--alias, var(--token, #literal))`) is exempt from the value rule,
+because the outer name is an alias rather than a declared default; and a reference **wrapped across
+two lines** is rejected, because the scans read source line by line and a split `var()` is checked
+by nothing.
 
 **Legacy (evolving-cognition / real-estate)** — existing code references Material `--mat-sys-*` tokens:
 
