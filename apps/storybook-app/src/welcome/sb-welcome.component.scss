@@ -2,7 +2,7 @@
 // themes, and under none of them if a story is opened before a theme class lands
 // on <body>. It must stay readable in that gap rather than falling back to
 // unstyled black-on-white.
-.nge-welcome {
+.sb-welcome {
   display: block;
   padding: 2.5rem 2rem 3rem;
   font-family: var(--dlc-font-family-body, system-ui, -apple-system, sans-serif);
