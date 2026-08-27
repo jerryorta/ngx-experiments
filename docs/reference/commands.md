@@ -7,10 +7,10 @@ Repo-local command reference. Skills read this file to resolve serve commands, p
 
 ## Dev servers
 
-| App | Launch command | Port | Log file (convention) |
-| --- | --- | --- | --- |
-| Storybook (`storybook-app`) | `npm run storybook` | `4400` | `/tmp/ngx-storybook.log` |
-| Ledger demo (`ledger-app`) | `npm run s.app.ledger` | `4203` | `/tmp/ledger-dev-server.log` |
+| App                         | Launch command         | Port   | Log file (convention)        |
+| --------------------------- | ---------------------- | ------ | ---------------------------- |
+| Storybook (`storybook-app`) | `npm run storybook`    | `4400` | `/tmp/ngx-storybook.log`     |
+| Ledger demo (`ledger-app`)  | `npm run s.app.ledger` | `4203` | `/tmp/ledger-dev-server.log` |
 
 When a session will drive the app in a browser, launch with stdout redirected to the log file
 (`<launch-command> > <log-file> 2>&1 &`) and arm a compile-error monitor on it — a TypeScript error in a
@@ -43,7 +43,9 @@ There are **no `npm` lint/test scripts** — go through Nx directly:
 
 - **Apps**: `storybook-app`, `ledger-app`
 - **Shared libs**: `shared-ui-design-library` (`@nge/ui-design-library`, `dlc-` prefix), `themes` (`@nge/themes`),
-  `shared-charts`, `shared-calendar`, `date`, `shared-rxjs`, `shared-storybook`
+  `shared-charts`, `shared-table` (`@nge/table`, plus the `@nge/table/editors` and `@nge/table/testing`
+  secondary entry points), `shared-table-addon-conformance` (`@nge/table-addon-conformance`),
+  `shared-calendar`, `date`, `shared-rxjs`, `shared-storybook`
 - **Ledger domain libs**: `ledger-ui`, `ledger-store`, `ledger-models`, `ledger-utils`, `ledger-mocks`,
   `ledger-design-library`, `ledger-themes`
 
@@ -56,7 +58,7 @@ There are **no `npm` lint/test scripts** — go through Nx directly:
 
 ## Deploying
 
-Push to `main` auto-deploys GitHub Pages (demo + Storybook). See README § Deploying.
+Push to `main` auto-deploys two Firebase Hosting sites — the Ledger demo (`.github/workflows/demo.yml`, target `demo`) and Storybook (`.github/workflows/storybook.yml`, target `storybook`, also previewed on pull requests). See README § Deploying.
 
 ## Jira / tickets
 

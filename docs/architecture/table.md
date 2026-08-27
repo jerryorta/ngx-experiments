@@ -1,6 +1,6 @@
 # NgeTable — `@nge/table`
 
-> **Status: Waves 0–5 complete (ARCH-239).** Wave 0 shipped the core and all four extension axes —
+> **Status: Waves 0–8 complete (ARCH-239).** Wave 0 shipped the core and all four extension axes —
 > the library shell, naming convention and `--nge-table-*` tokens (ARCH-240), the shared fixture
 > (ARCH-241), `<nge-table>` with the controlled-state contract (ARCH-242), the three-lane substrate
 > and multi-column pinning (ARCH-243), column drag-to-resize (ARCH-244), row virtualization
@@ -16,7 +16,7 @@
 > applies. Wave 4 bridged the tokens into all ten domain themes (ARCH-277), and Wave 5 honoured the
 > last unconsumed one with zebra striping (ARCH-286).
 >
-> **Wave 6 — rich cells is in flight**, where "a cell is an arbitrary Angular render target" stops
+> **Wave 6 — rich cells — is complete**, where "a cell is an arbitrary Angular render target" stops
 > being a claim. The scroll performance harness landed first so the wave's own thesis is falsifiable
 > (ARCH-289), then the fixture's rich-cell fields — a numeric series, long text and an image
 > (ARCH-290), and then the claim itself: charts in cells, with a scroll-settle signal on the cell
@@ -28,7 +28,19 @@
 > reached by a column naming a component rather than a consumer writing a template: an input and a
 > checkbox (ARCH-293), a select over a CDK overlay (ARCH-294), and a textarea whose commit is explicit
 > because every implicit moment the other three use is unavailable to it (ARCH-296). The store was
-> regrouped into six `signalStore` features along the way (ARCH-297).
+> regrouped into six `signalStore` features along the way (ARCH-297) — seven once Wave 7 added its
+> own.
+>
+> **Wave 7 — row expansion — is complete**: a disclosure column and `state.expanded` behind a detail
+> band (ARCH-298), rich content in the open band needing no library code at all (ARCH-299), the band
+> animating open with the close deliberately suppressed under virtualization (ARCH-300) and then
+> confirmed rather than assumed (ARCH-302), and the platform-gated growth affordance found still
+> blocked with an `@supports` fork refused on principle (ARCH-303). ARCH-281 fixed a re-sort defect
+> shared by both cell-marking overlays along the way.
+>
+> **Wave 8 — the showcase — is complete**: every shipped feature composed onto one 10,000-row table
+> rather than demonstrated in isolation, which is what surfaced the composition defect no pairwise
+> test would have reached (ARCH-304).
 >
 > Sections below marked _(pending)_ are deliberate placeholders — fill them in with the story that
 > ships the behaviour, never ahead of it.
@@ -202,8 +214,17 @@ therefore a *cell pattern*, not a table feature. Two consequences:
 
 Defaults live in `libs/shared/table/src/lib/styles/_table-tokens.scss` as a `:root` block of
 **literal light-mode values**, forwarded through `_theming.scss` → `_index.scss`. A domain theme
-overrides them by re-declaring the same custom properties inside its theme class selector; class
-selectors outrank `:root`, so theme values always win.
+overrides them by re-declaring the same custom properties inside its theme class selector.
+
+⚠️ **A theme wins on load order or on proximity — never on specificity, whatever the habit of saying
+so.** `:root` is a pseudo-class and scores (0,1,0), exactly what a single class scores, so a theme
+class landing on the **same** element as the defaults (the usual case: `<html class="cg-…">`) merely
+ties with them and **source order breaks the tie** — a host must load this partial *before* its theme
+mixins or the defaults override the theme. A theme class on a *descendant* of `<html>` wins for a
+different reason entirely, custom-property proximity: the nearer element's own declaration beats the
+inherited one regardless of order. `_table-tokens.scss` records this at the top of the file; charts
+paid for the lesson first (ARCH-236), and `apps/storybook-app/src/styles.scss` orders both libraries
+correctly.
 
 **Angular Material is banned in this library.** Never `--mat-sys-*`, never `mat-*`. The literal
 defaults are what let the table render correctly with **no theme applied at all** — that
@@ -264,9 +285,10 @@ and the feature-registration axis (`provideNgeTableFeatures`, `NGE_TABLE_FEATURE
 `NGE_TABLE_CORE_FEATURES`).
 
 `@nge/table/editors` — the table's own cell editors (`NgeCellInputComponent`,
-`NgeCellCheckboxComponent`). Most tables display rather than edit, so an editor is optional; keeping
-them out here is what stops a dependency one of them needs from becoming the table's. See § Cell
-editors.
+`NgeCellCheckboxComponent`, `NgeCellSelectComponent`, `NgeCellTextareaComponent`). Most tables
+display rather than edit, so an editor is optional; keeping them out here is what stops a dependency
+one of them needs from becoming the table's — and it is where `@angular/cdk` enters, for the two that
+open a body-level panel. See § Cell editors.
 
 `@nge/table/testing` — the shared fixture, kept out of the production barrel on purpose so
 a 10,000-row generator is not one autocomplete away in application code. See § Testing.
@@ -448,10 +470,14 @@ without ever knowing what is inside.
 **Cells are addressed by column, everything else by name.** `[ngeCell]` takes a column id and a
 column without one keeps rendering its `columnDef.cell` — so adopting a custom cell is a per-column
 decision, and a table nobody projected into renders exactly what it rendered before this seam
-existed. `[ngeTableSlot]` takes one of `cell-overlay`, `empty`, `footer-cell`, `header-cell`,
-`header-overlay`, `loading`, `row-detail`, `toolbar`; the four column-shaped names also accept
-`ngeTableSlotColumn`, and a column-scoped template beats the shared one, so the general case and
-its exception can be declared side by side.
+existed. `[ngeTableSlot]` takes one of `NGE_TABLE_SLOT_NAMES` — `cell-overlay`, `empty`,
+`expand-cell`, `expand-header`, `footer`, `footer-cell`, `header-cell`, `header-overlay`, `loading`,
+`row-detail`, `selection-cell`, `selection-header`, `toolbar`. Nine of those shipped with the seam;
+`selection-cell` / `selection-header` arrived with row selection (ARCH-268) and `expand-cell` /
+`expand-header` with row expansion (ARCH-298), which is the entire edit history of the file. Read the
+constant for the current list. The four column-shaped names in `NGE_TABLE_COLUMN_SLOT_NAMES` also
+accept `ngeTableSlotColumn`, and a column-scoped template beats the shared one, so the general case
+and its exception can be declared side by side.
 
 **A slot is a place, not a state.** Its template renders whenever one is registered, and whether
 anything appears is the consumer's decision, taken from the context they are handed. That is why
@@ -480,7 +506,9 @@ Two consequences worth knowing before writing one:
   *plain* field on a cell context is frozen at first build, so a field that genuinely moves travels
   as a **signal** instead — see [Charts in cells, and the settle signal](#charts-in-cells-and-the-settle-signal-arch-291).
 
-**Adding a ninth name costs a name.** An entry in `NGE_TABLE_SLOT_NAMES`, its context in
+**Adding a name costs a name, and the count is the evidence** — the seam opened with nine and carries
+thirteen, the four additions landing in two later feature stories that changed nothing else here. An
+entry in `NGE_TABLE_SLOT_NAMES`, its context in
 `NgeTableSlotContexts` — which the compiler *demands*, because `NgeTableSlotContextByName` is a
 mapping over the name union rather than a loose interface — and one `ngTemplateOutlet` at the
 position it names. Nothing in the directives, the registry, or either resolver mentions a slot by
@@ -542,7 +570,10 @@ not switch on.
 | `filter-change` | `columnFilters`, `globalFilter` | either filter slice moving |
 | `pagination-change` | `pagination` | a page or page-size change |
 | `column-resize` | `columnId`, `width`, `columnSizing` | a **committed** resize — see below |
-| `fill-intent` | `cells`, `sourceRowIds`, `sourceColumnIds` | a released fill drag — the one kind a host must **act** on (ARCH-271) |
+| `fill-intent` | `cells`, `sourceRowIds`, `sourceColumnIds` | a released fill drag — a kind a host must **act** on (ARCH-271) |
+| `edit-intent` | `cells` | a cell editor committed — the other kind a host must **act** on (ARCH-292) |
+| `selection-change` | `rowSelection` | any route into `state.rowSelection`; a range is one event, not one per row (ARCH-268) |
+| `expansion-change` | `expanded` | any route into `state.expanded` — an observation, not an intent (ARCH-298) |
 | `column-reorder` | `columnOrder` | columns reordered |
 | `column-pin` | `columnPinning` | a column frozen to an edge or released |
 | `cell-click` | `cell: NgeCellContext` | a click inside a cell |

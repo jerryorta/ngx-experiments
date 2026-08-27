@@ -4,7 +4,7 @@
   "projectType": "application",
   "prefix": "ldg",
   "sourceRoot": "apps/ledger/app/src",
-  "tags": ["ledger", "app"],
+  "tags": ["scope:ledger", "type:app"],
   "targets": {
     "build": {
       "executor": "@angular/build:application",
@@ -26,7 +26,10 @@
           "apps/ledger/app/src/styles.scss"
         ],
         "stylePreprocessorOptions": {
-          "includePaths": ["libs/shared/themes/src/lib/styles", "libs/ledger/themes/src/lib/styles"]
+          "includePaths": [
+            "libs/shared/themes/src/lib/styles",
+            "libs/ledger/themes/src/lib/styles"
+          ]
         }
       },
       "configurations": {

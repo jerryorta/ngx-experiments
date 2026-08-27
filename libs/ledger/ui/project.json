@@ -4,7 +4,7 @@
   "sourceRoot": "libs/ledger/ui/src",
   "prefix": "ldg",
   "projectType": "library",
-  "tags": ["ui", "lib"],
+  "tags": ["scope:ledger", "type:ui"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

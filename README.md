@@ -59,16 +59,21 @@ npx nx run storybook-app:build-storybook
 
 Claude Code commands (`.claude/commands/`):
 
-| Command | What it does |
-| --- | --- |
-| `/setup` | First run — install deps + clone framework refs + verify, then hand off to `/explain` |
-| `/explain` | Tour the repo's philosophy, organization, and how to make your own space |
-| `/new-domain` | Scaffold your own domain-library-set — your sandbox |
-| `/update` | Update npm dependencies (Nx-migrate flow, `--legacy-peer-deps`) |
+| Command       | What it does                                                                          |
+| ------------- | ------------------------------------------------------------------------------------- |
+| `/setup`      | First run — install deps + clone framework refs + verify, then hand off to `/explain` |
+| `/explain`    | Tour the repo's philosophy, organization, and how to make your own space              |
+| `/new-domain` | Scaffold your own domain-library-set — your sandbox                                   |
+| `/update`     | Update npm dependencies (Nx-migrate flow, `--legacy-peer-deps`)                       |
 
 ## Deploying
 
-The Ledger demo and Storybook publish to **GitHub Pages** automatically on every push to `main`, via `.github/workflows/pages.yml`:
+The Ledger demo and Storybook each publish to their own **Firebase Hosting** site automatically on every push to `main`:
+
+| Workflow                          | Hosting target (`.firebaserc`) | Site                                |
+| --------------------------------- | ------------------------------ | ----------------------------------- |
+| `.github/workflows/demo.yml`      | `demo`                         | https://jerryorta-ledger.web.app    |
+| `.github/workflows/storybook.yml` | `storybook`                    | https://jerryorta-storybook.web.app |
 
 ```bash
 git add -A
@@ -76,9 +81,9 @@ git commit -m "your message"
 git push origin main
 ```
 
-The workflow builds the Ledger app and the Storybook static site and assembles them into one Pages artifact — landing hub at `/`, the **demo** at `/demo/`, **Storybook** at `/storybook/`, plus a `404.html` SPA fallback — then deploys. **Live in ~2–4 minutes**; watch it in the repo's [Actions](https://github.com/jerryorta/ngx-experiments/actions) tab. Hard-refresh (⌘⇧R) if the browser caches the old build.
+Each workflow builds its site and deploys it with `FirebaseExtended/action-hosting-deploy`; `firebase.json` sets the cache headers (`no-cache` on `index.html` and the Storybook manager/preview shells, `immutable` on hashed chunks) so a returning browser never holds a stale entry point against renamed chunks. The Storybook workflow also runs on pull requests from this repo, publishing a 7-day preview channel, and can be run by hand from the Actions tab (`workflow_dispatch`). Watch a run in the repo's [Actions](https://github.com/jerryorta/ngx-experiments/actions) tab.
 
-Loop: **commit → push → `main`**. Pages is already configured — nothing else to run or re-enable.
+Loop: **commit → push → `main`**. Hosting is already configured — nothing else to run or re-enable.
 
 ## Architecture
 
@@ -91,20 +96,20 @@ Loop: **commit → push → `main`**. Pages is already configured — nothing el
 
 ## Tech stack
 
-| | Version |
-| --- | --- |
-| Nx | 22.7.5 |
-| Angular | 21.2 (zone-based, standalone) |
-| NgRx (store + signals) | 21.1 |
-| Storybook (Angular) | 10.4 |
-| Tailwind CSS | 4 (CSS-first) |
-| TypeScript | 5.9 |
-| Testing | Jest 30 |
-| Lint | ESLint 9 (flat config) |
+|                        | Version                       |
+| ---------------------- | ----------------------------- |
+| Nx                     | 22.7.5                        |
+| Angular                | 21.2 (zone-based, standalone) |
+| NgRx (store + signals) | 21.1                          |
+| Storybook (Angular)    | 10.4                          |
+| Tailwind CSS           | 4 (CSS-first)                 |
+| TypeScript             | 5.9                           |
+| Testing                | Jest 30                       |
+| Lint                   | ESLint 9 (flat config)        |
 
 ## Built for AI-assisted development
 
-This workspace is set up to be worked on with **Claude Code**: framework-level skills in `.claude/skills/`, the `/setup` · `/explain` · `/new-domain` · `/update` commands in `.claude/commands/`, and the `../open-source/` framework source clones give the assistant accurate, version-matched references. A fresh clone is one command (`/setup`) from being set up *and* oriented.
+This workspace is set up to be worked on with **Claude Code**: framework-level skills in `.claude/skills/`, the `/setup` · `/explain` · `/new-domain` · `/update` commands in `.claude/commands/`, and the `../open-source/` framework source clones give the assistant accurate, version-matched references. A fresh clone is one command (`/setup`) from being set up _and_ oriented.
 
 > **Optional — agent teams.** Much of this repo was built using Claude Code's experimental **agent teams** mode (a persistent lead agent coordinating a team of subagents). To work the same way, enable it once in your **global** `~/.claude/settings.json` — it's a personal, user-level opt-in, so the repo deliberately doesn't force it on cloners:
 >

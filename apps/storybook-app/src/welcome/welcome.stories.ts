@@ -1,6 +1,6 @@
 import { type Meta, type StoryObj } from '@storybook/angular';
 
-import { NgeWelcomeComponent } from './nge-welcome.component';
+import { SbWelcomeComponent } from './sb-welcome.component';
 
 /**
  * The story Storybook opens on.
@@ -10,13 +10,13 @@ import { NgeWelcomeComponent } from './nge-welcome.component';
  * no `?path=` is supplied. Reordering that list changes what a visitor sees on
  * arrival.
  */
-const meta: Meta<NgeWelcomeComponent> = {
-  component: NgeWelcomeComponent,
+const meta: Meta<SbWelcomeComponent> = {
+  component: SbWelcomeComponent,
   title: 'Welcome',
 };
 
 export default meta;
-type Story = StoryObj<NgeWelcomeComponent>;
+type Story = StoryObj<SbWelcomeComponent>;
 
 export const Welcome: Story = {
   args: {},

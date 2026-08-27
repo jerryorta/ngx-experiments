@@ -28,13 +28,13 @@ interface WelcomeLibrary {
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { class: 'nge-welcome' },
+  host: { class: 'sb-welcome' },
   imports: [],
-  selector: 'nge-welcome',
-  styleUrl: './nge-welcome.component.scss',
-  templateUrl: './nge-welcome.component.html',
+  selector: 'sb-welcome',
+  styleUrl: './sb-welcome.component.scss',
+  templateUrl: './sb-welcome.component.html',
 })
-export class NgeWelcomeComponent {
+export class SbWelcomeComponent {
   protected readonly overviewHref = 'https://jerryorta.com/libraries';
 
   protected readonly libraries: WelcomeLibrary[] = [

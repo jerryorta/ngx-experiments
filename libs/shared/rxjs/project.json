@@ -4,7 +4,7 @@
   "sourceRoot": "libs/shared/rxjs/src",
   "prefix": "nge",
   "projectType": "library",
-  "tags": [],
+  "tags": ["scope:shared", "type:utils"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

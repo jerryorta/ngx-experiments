@@ -3,7 +3,7 @@
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/ledger/models/src",
   "projectType": "library",
-  "tags": ["models", "lib"],
+  "tags": ["scope:ledger", "type:models"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

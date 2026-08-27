@@ -4,7 +4,7 @@
   "sourceRoot": "libs/ledger/design-library/src",
   "prefix": "ldg",
   "projectType": "library",
-  "tags": ["ledger", "design", "lib"],
+  "tags": ["scope:ledger", "type:design-library"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

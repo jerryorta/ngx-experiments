@@ -268,7 +268,7 @@ After completing the rename operation:
 
 ## Integration Notes
 
-- Works with Nx 21.1.3 workspace structure
+- Works with Nx 23 workspace structure
 - Compatible with Angular standalone components
 - Supports Angular Material components
 - Handles TypeScript strict mode

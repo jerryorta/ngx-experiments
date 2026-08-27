@@ -4,7 +4,7 @@
   "sourceRoot": "libs/ledger/utils/src",
   "prefix": "ldg",
   "projectType": "library",
-  "tags": ["utils", "lib"],
+  "tags": ["scope:ledger", "type:utils"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

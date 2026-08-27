@@ -4,7 +4,7 @@
   "sourceRoot": "libs/shared/calendar/src",
   "prefix": "nge",
   "projectType": "library",
-  "tags": ["lib"],
+  "tags": ["scope:shared", "type:design-library"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",

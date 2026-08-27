@@ -270,7 +270,7 @@ This is a library-wide standard. Application components in `apps/` typically use
 
 **Dialog Components** (files ending in `-dialog`):
 
-> **Legacy (EC/RE only).** The `@angular/material/dialog` imports below apply to the established evolving-cognition + real-estate apps. New components do NOT use Angular Material — build dialogs with `@angular/cdk` overlay/dialog utilities and own-namespace styling. See `docs/ai/CONSTRAINTS.md` § Angular Material.
+> **Legacy (EC/RE only).** The `@angular/material/dialog` imports below apply to the established evolving-cognition + real-estate apps. New components do NOT use Angular Material — build dialogs with `@angular/cdk` overlay/dialog utilities and own-namespace styling, or reuse the domain's own dialog primitive (`cg-dialog`, `gy-dialog`, `mw-dialog`, `cog-modal`). See `docs/ai/CONSTRAINTS.md` § Angular Material.
 
 ```typescript
 import { Component, inject, ViewEncapsulation } from '@angular/core';
@@ -296,19 +296,23 @@ export class [ComponentName]Component {
 **Page Components** (in `/pages/` directories):
 
 ```typescript
-import { fadeInAnimation } from '@nge/ui-design-library-deprecated';
-
 @Component({
-  animations: [fadeInAnimation],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: {
-    '[@fadeInAnimation]': '',
-    'class': '[prefix]-[component-name]',
-  },
+  host: { 'class': '[prefix]-[component-name]' },
+  imports: [/* the domain's own design-library components */],
+  providers: [[ComponentName]Store],
   // ...
 })
 ```
+
+A page composes its own domain's design library and delegates its reactive state to a colocated
+component-scoped SignalStore. Full shape, including the per-domain page shells: `docs/ai-instructions/reference/angular-app-component.instructions.md`.
+
+> **Legacy (EC/RE only).** Pages in evolving-cognition and real-estate additionally import
+> `fadeInAnimation` and the `dlc-header-bar` / `dlc-mobile-page-content` shell from
+> `@nge/ui-design-library-deprecated`. That library is deprecated — edit those pages in
+> place, and never import it into a new app.
 
 **UI Components** (reusable components):
 
@@ -538,14 +542,14 @@ export * from './[category]/[component-name]/[component-name].component';
 **Component-Specific:**
 
 - ✅ Dialog: MatDialogRef injected, onCancel/onConfirm methods
-- ✅ Page: fadeInAnimation imported and applied, follows [angular-app-component.instructions.md](angular-app-component.instructions.md)
+- ✅ Page: wraps the domain's own design-library components, follows [angular-app-component.instructions.md](../reference/angular-app-component.instructions.md)
 - ✅ UI Library: Follows [COMPONENT-ARCHITECTURE-BEST-PRACTICES.md](../../../libs/shared/ui-design-library/COMPONENT-ARCHITECTURE-BEST-PRACTICES.md)
 
 **Accessibility Selectors:**
 
 - ✅ Icon-only buttons have `aria-label`
 - ✅ Top-level container has `data-testid`
-- See [accessibility-selectors.instructions.md](accessibility-selectors.instructions.md) for full rules
+- See [accessibility-selectors.instructions.md](../reference/accessibility-selectors.instructions.md) for full rules
 
 **Styling Validation:**
 
@@ -603,19 +607,23 @@ npx nx build [project-name] --skip-nx-cache
 - Pages: `apps/evolving-cognition/app/src/app/pages`
 - Components: `apps/evolving-cognition/app/src/app/components`
 
-**UI Design Library:**
+**Shared UI Design Library** (`libs/shared/ui-design-library`) — flat layout, one folder per
+component under `src/lib/<dlc-name>/`, each exported from `src/index.ts`.
 
-- Components: `libs/shared/ui-design-library/src/lib/components`
-- Pipes: `libs/shared/ui-design-library/src/lib/pipes`
-- Directives: `libs/shared/ui-design-library/src/lib/directives`
+**Deprecated shared library** (`libs/shared/ui-design-library-deprecated`) — the older grouped
+layout (`src/lib/components`, `pipes`, `directives`, `dialogs`, `services`, …). Read it for
+reference; do not add to it.
 
-**Store Library:**
+**Domain design libraries** (`libs/<domain>/design-library`) — flat layout, one folder per
+component under `src/lib/<prefix>-name/`. This is where a new presentational component starts.
 
-- Services: `libs/shared/store/src/lib/+[feature-name]`
+**Shared Store Library:**
+
+- Feature slices: `libs/shared/store/src/lib/+[feature-name]` (e.g. `+common`)
 
 ## Integration Notes
 
-- Compatible with Nx 21.1.3+ workspace
+- Compatible with Nx 23+ workspace
 - Standalone components only (no NgModules)
 - Uses inject() function for DI
 - Signal-based inputs/outputs preferred
