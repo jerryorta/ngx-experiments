@@ -51,7 +51,7 @@ Invoke the `epic-triage` skill with the same board + story count: `/epic-triage 
 - 🟡 **AMBER** (next story implementable but flagged, or a *later* story in the batch is BLOCKED) → surface the finding(s). For a later-story BLOCKED in a batch, recommend reducing `<N>` so the runner stops before it (e.g. run only up to the last READY story), or fixing the blocked ticket first. Then ask the user whether to proceed; do not auto-skip the gate.
 - 🔴 **RED** (the *next* story — the one the runner implements first — is BLOCKED) → **do NOT launch the runner.** Surface the blocker + the specific ticket, recommend the fix (offer to open the ticket), and stop. Starting the runner would burn a full session and fail the success contract. The user can re-run with `--skip-triage` to override if they disagree with the verdict.
 
-**With `--auto`:** treat anything other than 🟢 GREEN as a hard stop — do NOT ask. Queue the auto-pause notification (`printf '%s' '<KEY|board> · auto-paused — triage <AMBER|RED>' > /tmp/claude-notify-message.txt`), surface the verdict + findings, and stop. An unattended run can't pause for an answer, and a non-GREEN top-of-board is exactly the case a human should eyeball before a session is spent.
+**With `--auto`:** treat anything other than 🟢 GREEN as a hard stop — do NOT ask. Queue the auto-pause notification (`~/.claude/bin/claude-notify '<KEY|board> · auto-paused — triage <AMBER|RED>'`), surface the verdict + findings, and stop. An unattended run can't pause for an answer, and a non-GREEN top-of-board is exactly the case a human should eyeball before a session is spent.
 
 This gate runs **before** Step 3 (dev server agent) and Step 4 (the CLI) — so a RED verdict aborts cheaply, before any server is spawned or any implementation session starts.
 
@@ -208,15 +208,15 @@ Epic pipeline complete — <N> / <max> stories.
 
 ## Step 6 — Handoff
 
-> **Desktop notification (do this FIRST, before the path-specific handoff below).** The user runs `/epic-pipeline` as a long unattended run and wants a macOS ping the moment it needs them. Queue one by writing a one-line status to the notification handoff file — the global Stop hook fires it (persistent terminal-notifier Alert) when this turn ends:
-> - **Hybrid path:** `printf '%s' '<KEY> · ready for actor test — /epic-cross-actor-test <board> <scenario>' > /tmp/claude-notify-message.txt`
-> - **Autonomous path:** `printf '%s' '<KEY> · PR #<N> opened — review & merge' > /tmp/claude-notify-message.txt`
-> - **Batch (N>1):** summarize, e.g. `printf '%s' '<done>/<max> stories — next: <KEY> <action>' > /tmp/claude-notify-message.txt`
+> **Desktop notification (do this FIRST, before the path-specific handoff below).** The user runs `/epic-pipeline` as a long unattended run and wants a macOS ping the moment it needs them. Queue one by passing a one-line status to `~/.claude/bin/claude-notify`, which writes this repo's handoff file — the global Stop hook fires it (persistent terminal-notifier Alert) when this turn ends:
+> - **Hybrid path:** `~/.claude/bin/claude-notify '<KEY> · ready for actor test — /epic-cross-actor-test <board> <scenario>'`
+> - **Autonomous path:** `~/.claude/bin/claude-notify '<KEY> · PR #<N> opened — review & merge'`
+> - **Batch (N>1):** summarize, e.g. `~/.claude/bin/claude-notify '<done>/<max> stories — next: <KEY> <action>'`
 > - **`--auto`:** skip this ready-for-actor-test ping — the run continues unattended, so it isn't the milestone. The terminal notification is instead `/epic-story-complete`'s story-complete ping (on auto-ship) or the auto-pause ping (on a hard-stop).
 >
 > Write exactly one message (it is consumed + deleted on read). Use the real KEY/scenario/PR values resolved in Step 5. **Message body format is `<KEY> · <task>` — lead with the Jira key (it already encodes the board, so do NOT add the board name separately). Do NOT include the repo name or path either; the Stop hook auto-stamps those as the notification title (repo basename) + subtitle (`~`-relative repo root) from the session's cwd.** If the file write fails, ignore it — never let a notification failure block the handoff.
 >
-> **Canonical notification behavior** (handoff file, `<KEY> · <task>` body, `CLAUDE · <status>` title + `~`-repo-path subtitle auto-stamped by the global Stop hook in `~/.claude/settings.json`) is shared across `/epic-pipeline`, `/epic-story-complete`, `/epic-next`, and `/notify`, and documented in the notify memory. If you change the format, update all of them together.
+> **Canonical notification behavior** (per-repo handoff file queued by `~/.claude/bin/claude-notify`, keyed by the session's git toplevel so sessions in sibling clones never take each other's message; `<KEY> · <task>` body, `CLAUDE · <status>` title + `~`-repo-path subtitle auto-stamped by the global Stop hook in `~/.claude/settings.json`) is shared across `/epic-pipeline`, `/epic-story-complete`, `/epic-next`, and `/notify`, and documented in the notify memory. If you change the format, update all of them together.
 
 ### Hybrid path
 
@@ -239,7 +239,7 @@ Do not enter the cross-actor scenario until the latest signal is a confirmed gre
 
 - **`--auto`:** do NOT ask. Invoke `/epic-cross-actor-test <board> <scenario> --auto-confirm-bracket` directly (the flag built for orchestrator contexts that own the test brokerage exclusively — it auto-runs the before/after seed brackets with no Y/Enter prompts). Then evaluate the Phase 6 outcome:
   - **Clean PASS, zero findings** — status `success`, no gaps/findings (**even non-blocking notes**), no fix-in-place, dev server stayed green throughout → **auto-ship:** invoke `/epic-story-complete --yes` (confirmation gate skipped). PR mode → commit + push + PR + ticket → In Review; surface the PR, then **stop at the merge** (`--auto` never merges — show the autonomous-path merge command). Epic-branch mode → commit onto `config.epicBranch` + push + ticket → Done; surface the commit (no per-story PR to gate on).
-  - **Anything else** — `partial` / `failed` / `blocked`, a surfaced gap or finding (**including a non-blocking one like a deploy-lag note**), a compile error, or any code fix needed mid-test → **hard-stop and report.** Do NOT auto-ship. Queue the auto-pause notification (`printf '%s' '<KEY> · auto-paused — <short reason>' > /tmp/claude-notify-message.txt`), surface the cross-actor report + exactly what tripped the stop, and leave the branch in place for the user. *Automate the boring path; escalate the interesting one.*
+  - **Anything else** — `partial` / `failed` / `blocked`, a surfaced gap or finding (**including a non-blocking one like a deploy-lag note**), a compile error, or any code fix needed mid-test → **hard-stop and report.** Do NOT auto-ship. Queue the auto-pause notification (`~/.claude/bin/claude-notify '<KEY> · auto-paused — <short reason>'`), surface the cross-actor report + exactly what tripped the stop, and leave the branch in place for the user. *Automate the boring path; escalate the interesting one.*
 
 For a **batch** (`--max-stories N > 1`) under `--auto`: process each story the runner produced in wave order with the per-story logic above, and **hard-stop on the first non-nominal story** (remaining produced branches are left for the user). `--auto` is most predictable at `N = 1` (the default).
 
@@ -265,7 +265,7 @@ After surfacing the banner:
 
 ## Error handling
 
-> **On any failure that stops the run, queue a desktop notification before surfacing the error** so the user is pinged away from the terminal: `printf '%s' '<KEY> · PIPELINE FAILED — <short reason>' > /tmp/claude-notify-message.txt`. Lead with the failing story's Jira key when one is in play; if the failure is pre-story (no key yet — e.g. board config missing, dev server port in use), fall back to the board name: `printf '%s' '<board> · PIPELINE FAILED — <short reason>'`. Keep `<short reason>` to a few words. The Stop hook auto-stamps the repo name + path, so never put those in the body. Then proceed with the detailed surfacing below. Ignore write failures.
+> **On any failure that stops the run, queue a desktop notification before surfacing the error** so the user is pinged away from the terminal: `~/.claude/bin/claude-notify '<KEY> · PIPELINE FAILED — <short reason>'`. Lead with the failing story's Jira key when one is in play; if the failure is pre-story (no key yet — e.g. board config missing, dev server port in use), fall back to the board name: `~/.claude/bin/claude-notify '<board> · PIPELINE FAILED — <short reason>'`. Keep `<short reason>` to a few words. The Stop hook auto-stamps the repo name + path, so never put those in the body. Then proceed with the detailed surfacing below. Ignore write failures.
 
 - **Board config missing** → list available boards from the skill directory, stop.
 - **`--board` missing** → ask the user via AskUserQuestion (do not default).
