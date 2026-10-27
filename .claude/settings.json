@@ -18,13 +18,20 @@
     "feature-dev@claude-code-plugins": true,
     "ralph-wiggum@claude-code-plugins": true,
     "example-skills@anthropic-agent-skills": true,
-    "frontend-design@claude-code-plugins": true
+    "frontend-design@claude-code-plugins": true,
+    "giga-ux@giga-agents": true
   },
   "extraKnownMarketplaces": {
     "nx-claude-plugins": {
       "source": {
         "source": "github",
         "repo": "nrwl/nx-ai-agents-config"
+      }
+    },
+    "giga-agents": {
+      "source": {
+        "source": "github",
+        "repo": "jerryorta/giga-agents"
       }
     }
   }
