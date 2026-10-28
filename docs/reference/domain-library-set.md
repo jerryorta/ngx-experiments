@@ -9,9 +9,9 @@ apps/[domain]/          ← main Angular application
 libs/[domain]/          ← the supporting libraries
 ```
 
-Examples: `concierge`, `cognition`, `got-you`, `media-workbench`, `nge-marketing`, `jerryorta`, `real-estate`, `evolving-cognition`.
+Examples: `concierge`, `cognition`, `got-you`, `media-workbench`, `nge-marketing`, `jerryorta`.
 
-Every domain carries the same **six core libraries** — `models`, `store`, `themes`, `ui`, `design-library`, `utils` — and adds the optional ones it needs: `mocks` (cognition, concierge, jerryorta), `secrets` (cognition, concierge, got-you, evolving-cognition, real-estate) and a `docs/` folder. The canonical example is `libs/media-workbench/` backed by `apps/media-workbench/app`.
+Every domain carries the same **six core libraries** — `models`, `store`, `themes`, `ui`, `design-library`, `utils` — and adds the optional ones it needs: `mocks` (cognition, concierge, jerryorta), `secrets` (cognition, concierge, got-you) and a `docs/` folder. The canonical example is `libs/media-workbench/` backed by `apps/media-workbench/app`.
 
 ---
 
@@ -51,9 +51,9 @@ libs/
 | `design-library` | `[domain]-design-library` | `@nge/[domain]-design-library` | `[prefix]`       |
 | `utils`          | `[domain]-utils`          | `@nge/[domain]-utils`          | —                |
 
-> **Path-alias separator — use the dash form for a new domain.** The alias mirrors the Nx project name: `@nge/[domain]-[lib-type]`. `cognition`, `concierge`, `nge-marketing`, `got-you` and `jerryorta` follow it throughout. Three older domains use a slash for everything except the store, which is dash in all eight: `@nge/media-workbench/{models,ui,design-library,utils}`, `@nge/evolving-cognition/{ui,utils,api}`, `@nge/real-estate/{ui,api}`. Read the alias out of `tsconfig.base.json` rather than deriving it.
+> **Path-alias separator — use the dash form for a new domain.** The alias mirrors the Nx project name: `@nge/[domain]-[lib-type]`. `cognition`, `concierge`, `nge-marketing`, `got-you` and `jerryorta` follow it throughout. One older domain uses a slash for everything except the store, which is dash in all six: `@nge/media-workbench/{models,ui,design-library,utils}`. Read the alias out of `tsconfig.base.json` rather than deriving it.
 >
-> **Nx tags** are declared in each library's `project.json` and enforced by the workspace `eslint.config.mjs` module-boundary rule — read them there.
+> **Nx tags** are declared in each library's `project.json` and enforced by the root ESLint config's module-boundary rule. Every project carries one `scope:[domain]` and one `type:[lib-type]` tag, as each generator command below passes.
 
 ---
 
@@ -63,9 +63,11 @@ libs/
 
 Domain-specific types, interfaces, enums, and pure reusable functions. No Angular, no DI, no side effects.
 
+This is also the lib the domain's Firebase backend compiles from source, aliased as `@nge/<domain>-models` in its `functions/tsconfig.json`, `jest.config.cjs` and `esbuild.config.mjs`. Domain code a backend needs lives here, never in `@nge/api`. Framework-free is lint-enforced: each models lib's `eslint.config.mjs` spreads `frameworkFreeLib`, which makes an `@angular/*`, `@ngrx/*`, `@capacitor/*`, `@ionic/*`, `rxjs` or `zone.js` import an error.
+
 - **What goes here:** data models (`*.model.ts`), DTOs, enums, type guards, domain-specific pure transformation functions
 - **What does NOT go here:** services, components, state, anything with Angular DI
-- **Depends on:** nothing (foundation — no internal workspace deps)
+- **Depends on:** `@nge/api` only, for cross-domain primitives (e.g. `IanaTimeZone`, `DocumentState`); no other workspace lib
 
 ### `store` — Global NgRx State
 
@@ -148,21 +150,19 @@ The direction is **self-contained domain apps** — each domain owns its own cor
 | Presentational component / directive / pipe | `libs/<domain>/design-library` first — promote to `libs/shared/ui-design-library` only when shared across apps |
 | Smart / container component | `libs/<domain>/ui` |
 | Cross-domain infra (Firebase, RxJS, dates, charts, …) | the existing `@nge/*` shared lib — reuse, don't duplicate |
+| Public / open-data endpoints (a state registry, a government or open-data API, a public dataset) | `libs/shared/data` (`@nge/data`), `src/lib/static/endpoints/` — the base-URL const, URL builders and typed responses, with a companion `.md` recording what the API returns and why it is here (pattern: `texas-comptroller.ts`) |
 
-**Design-library components — build here first, share second.** A new presentational primitive (`<prefix>-*`) starts in the **consuming domain's own `libs/<domain>/design-library`**. Promote it to the cross-app **`libs/shared/ui-design-library`** (`dlc-*`) ONLY once a second application genuinely needs it — the domain lib is the default, shared is the exception. Both use the same Material-free, own-namespace `--<prefix>-*` token architecture (see `libs/shared/ui-design-library/COMPONENT-ARCHITECTURE-BEST-PRACTICES.md`).
+**Public endpoints are the cross-domain exception to place-by-altitude.** An open endpoint discovered while working one domain (the Texas Comptroller franchise-tax API turned up in Got You's vendor onboarding) is by nature usable by every other domain — an entity-status lookup is as relevant to a real-estate cross-reference as to an A2P brand check — so it goes straight into `@nge/data`'s `static/endpoints/`, never into `libs/<domain>/…`. Keep the entry to the endpoint itself (URLs, builders, response types, explainer); the domain-specific analysis that consumes it stays in the domain.
 
-### Deprecated shared libraries — do not add to or reuse for new code
+**Design-library components — build here first, share second.** A new presentational primitive (`<prefix>-*`) starts in the **consuming domain's own `libs/<domain>/design-library`**. Promote it to the cross-app **`libs/shared/ui-design-library`** (`dlc-*`) ONLY once a second application genuinely needs it — the domain lib is the default, shared is the exception. Both use the same Material-free, own-namespace `--<prefix>-*` token architecture (see `libs/shared/ui-design-library/AGENTS.md` § Tokens).
 
-These cross-domain libs are being **phased out**. Don't treat them as the home for new shared code, and migrate off them when you touch a consumer:
+### Shared libraries in transition
 
-- `@nge/ui-design-library-deprecated` (`libs/shared/ui-design-library-deprecated`) — **superseded by the shared successor `@nge/ui-design-library` (`libs/shared/ui-design-library`)**, the go-forward home for cross-app `dlc-*` primitives.
-- `@nge/material` (`libs/shared/material`) — being phased out as domains become self-contained; its reusable parts are reimplemented in each domain's own `design-library` / `themes` (no shared successor).
+Every `@nge/*` alias in `tsconfig.base.json` is valid shared infrastructure — reuse it rather than duplicating. Two need care:
+- `@nge/api` (`libs/shared/api`) — framework-free, truly cross-domain code: the MCP core (`@nge/api/mcp-server`) and shared primitives (`NgeTimeStamp`, `DocumentState`, `IanaTimeZone`). A backend aliases it only when it imports that shared code (today, cognition's). A concept one domain owns belongs in that domain's `models` lib instead.
+- `@nge/store` (`libs/shared/store`) — shared state infrastructure rather than the primary store; domains may depend on it (e.g. `QueryEngineCache` is consumed by every domain store). Build on it as shared infra; put NEW domain state slices in `libs/<domain>/store`, not here.
 
-> All other `@nge/*` aliases in `tsconfig.base.json` remain valid shared infrastructure — reuse them rather than duplicating. Two are in transition but still supported:
-> - `@nge/api` (`libs/shared/api`) — being trimmed of deprecated-app code as those apps are removed, but the library is kept. Reuse is fine.
-> - `@nge/store` (`libs/shared/store`) — shared state infrastructure rather than the primary store; domains may depend on it (e.g. `QueryEngineCache` is consumed by every domain store). Build on it as shared infra; put NEW domain state slices in `libs/<domain>/store`, not here.
-
-> **Worked example (REX-443).** `toIsoTimestamp` had been copied into three concierge store slices. The fix extracted a single helper into `libs/concierge/store/src/lib/firestore-timestamp/` (domain-owned, store-internal concern folder), reusing the existing per-slice pattern (REX-397). The shared `convertToUnixTimestamp` in `@nge/api` was NOT reusable here anyway — it returns epoch-ms `number` (wrong type for these ISO-`string` fields) and ignores live `Timestamp` instances / already-ISO strings — but the deciding factor was the **"prefer the domain's own libs"** altitude rule: keep domain-specific logic in the domain, not in a cross-domain shared lib.
+> **Worked example.** The concierge store slices share one `toIsoTimestamp`, in `libs/concierge/store/src/lib/firestore-timestamp/`: a domain-owned, store-internal concern folder. The shared `convertToUnixTimestamp` in `@nge/api` would not fit anyway. It returns an epoch-ms `number`, the wrong type for these ISO-`string` fields, and it ignores live `Timestamp` instances and already-ISO strings. The deciding rule, though, is **"prefer the domain's own libs"**: domain-specific logic stays in the domain, not in a cross-domain shared lib.
 
 ---
 
@@ -208,7 +208,7 @@ npx nx generate @nx/angular:application apps/[domain]/app \
   --prefix=[prefix] \
   --routing=true \
   --e2eTestRunner=none \
-  --tags="[domain],app"
+  --tags="scope:[domain],type:app"
 ```
 
 **Post-generation — `tailwind.config.js`:** add a Tailwind config at `apps/[domain]/app/tailwind.config.js`. This is the single Tailwind entry point for the entire domain — it covers the app and all its lib dependencies automatically via `createGlobPatternsForDependencies`:
@@ -242,7 +242,7 @@ Tailwind classes used in `ui`, `design-library`, and any other lib consumed by t
 @include [prefix]-themes.[prefix]-theme-mixin();
 ```
 
-> See the themes section below for the full `[prefix]-themes` setup. The `@use 'tailwindcss'` line sits between the `@use` and the mixin call — the pattern in `apps/media-workbench/app/src/styles.scss`, shared by cognition, concierge, nge-marketing, jerryorta and real-estate. Got You is the one variant: `apps/got-you/app/src/styles.scss` uses `@import "tailwindcss" source(none)` so Sass passes the line through to `@tailwindcss/postcss` untouched.
+> See the themes section below for the full `[prefix]-themes` setup. The `@use 'tailwindcss'` line sits between the `@use` and the mixin call — the pattern in `apps/media-workbench/app/src/styles.scss`, shared by cognition, concierge, nge-marketing and jerryorta. Got You is the one variant: `apps/got-you/app/src/styles.scss` uses `@import "tailwindcss" source(none)` so Sass passes the line through to `@tailwindcss/postcss` untouched.
 
 **Custom components + GSAP:** `@angular/cdk` and `gsap` are workspace dependencies — no installation needed. Use GSAP for sophisticated animations in the app.
 
@@ -259,6 +259,13 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
+**Post-generation — release updates (required for any app users keep open):**
+- Add `apps/[domain]/app/src/app/app-version.ts` and a served `app-version.json`.
+- Wire the shared watcher with `provideNgeAppRelease({ firestorePath: '<APP_COLLECTION>/[domain]-app-release', servedVersionUrl: 'app-version.json', version: appInstalledBuildVersion })` (`@nge/store/app-release`). Never write a domain watcher; anti-pattern `domain-release-watcher` blocks one.
+- The domain's prompt component (in its design library), the publish tool and the release doc's READ rule follow once the design library and backend exist.
+
+Contract: `docs/ai/CONSTRAINTS.md` § App Release Updates. Steps: `docs/service-worker/README.md` § Onboard a new app, step 4.
+
 ### `models` — `@nx/js:library`
 
 Pure TypeScript — no Angular, no Zone.js, CommonJS module system.
@@ -266,8 +273,10 @@ Pure TypeScript — no Angular, no Zone.js, CommonJS module system.
 ```bash
 npx nx generate @nx/js:library libs/[domain]/models \
   --name=[domain]-models \
-  --tags="models,lib"
+  --tags="scope:[domain],type:models"
 ```
+
+Then spread `frameworkFreeLib` (from the root `eslint.config.js`) in the lib's `eslint.config.mjs`, as `libs/cognition/models/eslint.config.mjs` does.
 
 ### `store` — `@nx/angular:library`
 
@@ -277,7 +286,7 @@ Angular library. Uses `jest-preset-angular` with **zoneless** test setup.
 npx nx generate @nx/angular:library libs/[domain]/store \
   --name=[domain]-store \
   --prefix=[prefix] \
-  --tags="lib"
+  --tags="scope:[domain],type:store"
 ```
 
 **Post-generation:** replace the generated `src/test-setup.ts` with the zoneless setup:
@@ -300,7 +309,7 @@ npx nx generate @nx/angular:library libs/[domain]/themes \
   --name=[domain]-themes \
   --prefix=[prefix] \
   --unitTestRunner=none \
-  --tags="[domain],themes,lib"
+  --tags="scope:[domain],type:themes"
 ```
 
 **Post-generation — remove generated component and barrel.** The generator creates a stub Angular component and `src/index.ts` that must be deleted — `themes` is a style-only library with no TypeScript exports:
@@ -388,7 +397,7 @@ Smart/container Angular components. Uses `jest-preset-angular` with **zoneless**
 npx nx generate @nx/angular:library libs/[domain]/ui \
   --name=[domain]-ui \
   --prefix=[prefix] \
-  --tags="lib"
+  --tags="scope:[domain],type:ui"
 ```
 
 **Post-generation:** replace `src/test-setup.ts` with the zoneless setup (same as `store` above).
@@ -401,7 +410,7 @@ Reusable presentational components, directives, pipes. Uses `jest-preset-angular
 npx nx generate @nx/angular:library libs/[domain]/design-library \
   --name=[domain]-design-library \
   --prefix=[prefix] \
-  --tags="[domain],lib"
+  --tags="scope:[domain],type:design-library"
 ```
 
 **Post-generation — `src/test-setup.ts`:** replace with the zoneless setup (same as `store` above).
@@ -466,10 +475,20 @@ Pure utility functions. Uses `@nx/angular:library` (not `@nx/js:library`) so it 
 npx nx generate @nx/angular:library libs/[domain]/utils \
   --name=[domain]-utils \
   --prefix=[prefix] \
-  --tags="lib"
+  --tags="scope:[domain],type:utils"
 ```
 
 **Post-generation:** replace `src/test-setup.ts` with the zoneless setup (same as `store` above).
+
+### `mocks` — `@nx/js:library` (optional)
+
+Test fixtures shaped by the domain's models, for the domain's specs and stories. Pure TypeScript, like `models`, so no `--prefix`.
+
+```bash
+npx nx generate @nx/js:library libs/[domain]/mocks \
+  --name=[domain]-mocks \
+  --tags="scope:[domain],type:mocks"
+```
 
 ---
 
@@ -534,7 +553,13 @@ Add serve and build scripts to the root `package.json` following the workspace c
 "b.app.[domain]": "npx nx run [domain]-app:build --configuration=production --skip-nx-cache"
 ```
 
-Use a unique port for each domain app (media-workbench uses `4201`, real-estate uses `4200`).
+Use a unique port for each domain app. The `s.app.*` scripts in the root `package.json` show the ports already taken (media-workbench uses `4201`).
+
+### Post-Generation — module boundaries
+
+Register the new scope in the root ESLint config. In the `@nx/enforce-module-boundaries` `depConstraints`, find every constraint whose `sourceTag` is an existing domain's `scope:*`, and add the same constraint for `scope:[domain]`, with that domain's name replaced by `[domain]` in its tag lists. Change no other constraint.
+
+Every generated project already matches a `type:*` constraint, so lint passes without this step. But a scope that no constraint names goes unchecked, and the new domain could then import another domain's libraries with no lint error.
 
 ### Post-Generation — Verification
 
@@ -603,7 +628,7 @@ After all libraries are generated, add entries to `tsconfig.base.json`:
 "@nge/[domain]-utils":          ["libs/[domain]/utils/src/index.ts"]
 ```
 
-> Note: every alias uses a dash separator matching the Nx project name — the form `cognition`, `concierge`, `nge-marketing`, `got-you` and `jerryorta` use throughout. `media-workbench`, `evolving-cognition` and `real-estate` predate it and keep a slash for their non-store libs; the store is dash in all eight.
+> Note: every alias uses a dash separator matching the Nx project name — the form `cognition`, `concierge`, `nge-marketing`, `got-you` and `jerryorta` use throughout. `media-workbench` predates it and keeps a slash for its non-store libs; the store is dash in all six.
 
 > Note: `themes` has no TypeScript exports and is not registered here — it is consumed via SCSS `includePaths` in the app's build config, not via a TypeScript import.
 
@@ -611,9 +636,8 @@ After all libraries are generated, add entries to `tsconfig.base.json`:
 
 ## AGENTS.md
 
-Each library must have an `AGENTS.md` at its root describing its purpose, commands, guidelines, and review checklist. Use the existing media-workbench libs as the template:
+Each library must have an `AGENTS.md` at its root: a one-page **rulebook** — its purpose, commands, the paradigms it follows (component-scoped vs global state, where logic lives, token and theme wiring, the test gate) and the invariants its code cannot state (a frozen public surface, a banned engine API). It is not a log of feature decisions; the code and its specs are the record of how a feature is built, and a story's narrative lives in its `~/Dev/gigasoftware-plans/<board>/<KEY>.md`. Keep it short enough to auto-load (≤ 25 KB).
 
 - `libs/media-workbench/store/AGENTS.md`
 - `libs/media-workbench/ui/AGENTS.md`
 - `libs/media-workbench/utils/AGENTS.md`
-- `libs/real-estate/api/AGENTS.md`
