@@ -468,7 +468,7 @@ Fix minor issues. Report structural issues without fixing.
 
 ## Phase 4b: AGENTS.md (thin pointers, after QA completes)
 
-Each library's AGENTS.md is a **thin pointer** to its per-library-TYPE standard at `docs/ai-instructions/standards/lib-types/<type>.md` — the single source of truth, auto-injected on write by the standards hook (`.claude/hooks/inject-standards.sh`) and shared by every library of that type (across domains and the type-named shared libs). The generated file carries ONLY genuine domain-specific deltas (a concrete primitive inventory, a domain rule), added later as the domain develops — never a copy of the type standard.
+Each library's AGENTS.md is a **thin pointer** to its per-library-TYPE standard at `docs/ai-instructions/standards/lib-types/<type>.md` — the single source of truth, auto-injected on write by the `giga-standards` plugin hook and shared by every library of that type (across domains and the type-named shared libs). The generated file carries ONLY genuine domain-specific deltas (a concrete primitive inventory, a domain rule), added later as the domain develops — never a copy of the type standard.
 
 > **State-layer split (encoded in the `store` + `ui` type standards).** Two layers, kept separate:
 >
