@@ -12,10 +12,10 @@ Add only genuine Ledger-specific content below (concrete primitive inventory, do
   (`overview.store.ts`, `transactions.store.ts`, `budgets.store.ts`) that owns all local UI state.
 - **Facade-only:** these components inject `LedgerFacade`, never `Store`. This lib has zero
   `@ngrx/store` imports — keep it that way.
-- Reference idiom for the colocated stores is the **in-repo**
-  `libs/shared/calendar/.../nge-calendar-store.ts` (`withState` / `withComputed((store, facade =
-  inject(LedgerFacade)) => …)` / `withMethods`), not the Firestore-flavoured examples in the
-  mirrored `ngrx-component-state` skill.
+- Reference idiom for the colocated stores is the single-file ledger store (`withState` /
+  `withComputed((store, facade = inject(LedgerFacade)) => …)` / `withMethods`); the multi-file
+  case is `libs/shared/calendar/.../nge-calendar-store.ts`. The `giga-angular:ngrx-component-state`
+  skill reads both from `angular.componentState.references` in `.claude/giga/config.json`.
 - **Jest:** any spec rendering `<nge-chart>` / `<nge-calendar>` needs the guarded `ResizeObserver`
   no-op stub in `test-setup.ts` (jsdom lacks it) plus the d3 `transformIgnorePatterns` in
   `jest.config.cts`.

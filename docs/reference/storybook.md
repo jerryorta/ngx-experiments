@@ -127,7 +127,7 @@ Stories sit next to their components — in a `stories/` subdirectory in the des
 table and the Ledger design library; the calendar keeps the composed calendar's stories under
 `nge-calendar/stories/` and the pickers' and views' story files directly beside their components.
 Charts and table add a facet level (`usage/`, `theming/`, `interaction/`) under each story name — the
-`create-chart-storybook` and `create-table-storybook` skills generate that shape, `create-storybook`
+`create-chart-storybook` and `create-table-storybook` skills generate that shape, `giga-angular:create-storybook`
 the plain one:
 
 ```

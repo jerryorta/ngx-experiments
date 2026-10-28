@@ -2,6 +2,65 @@
   "ux": {
     "devServerSkill": "giga-workflow:dev-server"
   },
+  "angular": {
+    "prefix": "nge",
+    "storybook": {
+      "reviewContainerImport": "@nge/storybook",
+      "storyExamples": [
+        {
+          "name": "Input",
+          "path": "libs/shared/ui-design-library/src/lib/dlc-input/stories/"
+        },
+        {
+          "name": "Button",
+          "path": "libs/shared/ui-design-library/src/lib/dlc-button/stories/"
+        },
+        {
+          "name": "Select",
+          "path": "libs/shared/ui-design-library/src/lib/dlc-select/stories/"
+        },
+        {
+          "name": "Address Autocomplete",
+          "path": "libs/shared/ui-design-library/src/lib/dlc-address-autocomplete/stories/"
+        },
+        {
+          "name": "Charts",
+          "path": "libs/shared/charts/src/lib/nge-chart/stories/"
+        },
+        {
+          "name": "Calendar",
+          "path": "libs/shared/calendar/src/lib/nge-calendar/stories/generic/"
+        }
+      ]
+    },
+    "componentState": {
+      "references": [
+        {
+          "path": "libs/shared/calendar/src/lib/nge-calendar/store/",
+          "note": "Multi-component system, multi-file root composing features/: a 31-line nge-calendar-store.ts, nge-calendar-store.state.ts and nge-calendar-store.types.ts, one features/with-calendar-<concern>.ts per concern (drag, filter, navigation, popover, selection, viewmodel). Provided on nge-calendar.component.ts; its views inject it."
+        },
+        {
+          "path": "libs/ledger/ui/src/lib/overview/overview.store.ts",
+          "note": "Single-file page store: withState, withProps, withComputed and withMethods in one file, provided on its screen component. As canonical as the multi-file root while its concerns stay few and cohesive. A page store over LedgerFacade: the facade injected in withComputed, reads projected there, writes delegated from withMethods."
+        },
+        {
+          "path": "libs/ledger/ui/src/lib/transactions/transactions.store.ts",
+          "note": "Single-file page store for search, filters, date range, sort, selected row and dialog state. A page store over LedgerFacade: the facade injected in withComputed, reads projected there, writes delegated from withMethods."
+        },
+        {
+          "path": "libs/ledger/ui/src/lib/budgets/budgets.store.ts",
+          "note": "Single-file page store with withProps-injected dependencies. A page store over LedgerFacade: the facade injected in withComputed, reads projected there, writes delegated from withMethods."
+        }
+      ],
+      "standards": [
+        "docs/ai/CONSTRAINTS.md § Component-Scoped State",
+        "docs/ai-instructions/reference/multi-component-signal-store.instructions.md",
+        "docs/ai-instructions/standards/signal-store.md"
+      ]
+    },
+    "ngrxDocs": "~/Dev/open-source/platform",
+    "globalStoreSkill": "ngrx-global-store"
+  },
   "workflow": {
     "plans": {
       "repo": "~/Dev/gigasoftware-plans",

@@ -5,7 +5,7 @@ description: Generate the 3-subdirectory Storybook story set for a NgeChart char
 
 # Create Chart Storybook Stories
 
-Generate the complete 3-subdirectory Storybook story set for a chart type. Each chart type gets **usage**, **theming**, and **interaction** subdirectories — 4 files each, 12 files total. This is different from the `/create-storybook` skill which creates a single 4-file story set for UI components.
+Generate the complete 3-subdirectory Storybook story set for a chart type. Each chart type gets **usage**, **theming**, and **interaction** subdirectories — 4 files each, 12 files total. This is different from the `/giga-angular:create-storybook` skill which creates a single 4-file story set for UI components.
 
 ## When to Use
 
