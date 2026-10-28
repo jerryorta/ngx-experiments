@@ -5,6 +5,7 @@
   "angular": {
     "prefix": "nge",
     "storybook": {
+      "app": "apps/storybook-app",
       "reviewContainerImport": "@nge/storybook",
       "storyExamples": [
         {
@@ -59,7 +60,155 @@
       ]
     },
     "ngrxDocs": "~/Dev/open-source/platform",
-    "globalStoreSkill": "ngrx-global-store"
+    "globalStoreSkill": "ngrx-global-store",
+    "globalStore": {
+      "layout": "flat",
+      "standards": [
+        "docs/reference/ngrx/facades-and-selectors.md",
+        "docs/ai/CONSTRAINTS.md § NgRx Facades & Selectors"
+      ],
+      "stores": [
+        {
+          "name": "ledger",
+          "lib": "libs/ledger/store",
+          "alias": "@nge/ledger-store",
+          "registration": "libs/ledger/store/src/lib/provide-ledger-store.ts",
+          "registrationNote": "provideLedgerStore() returns makeEnvironmentProviders([provideState(ledgerFeature), provideEffects(LedgerEffects)]); apps/ledger/app/src/app/app.config.ts calls it after the root provideStore(). A second slice gets its own provide-<slice>-store.ts called there too.",
+          "references": [
+            {
+              "path": "libs/ledger/store/src/lib/ledger.feature.ts",
+              "note": "createFeature with its reducer and extraSelectors in one file, one createEntityAdapter per collection; derived selectors (cashflow, net worth, spending by category) over pure @nge/ledger-utils functions."
+            },
+            {
+              "path": "libs/ledger/store/src/lib/ledger.effects.ts",
+              "note": "An @Injectable() effects class; the load effect writes switchMap + catchError out, and a latency InjectionToken lets specs resolve on the next macrotask (zoneless: no fakeAsync / tick)."
+            },
+            {
+              "path": "libs/ledger/store/src/lib/ledger.facade.ts",
+              "note": "The only surface components inject."
+            },
+            {
+              "path": "libs/ledger/store/src/lib/provide-ledger-store.ts",
+              "note": "Registration through makeEnvironmentProviders, called once at the app root."
+            }
+          ],
+          "standards": [
+            "libs/ledger/store/AGENTS.md"
+          ]
+        }
+      ]
+    },
+    "newDomain": {
+      "scope": "@nge",
+      "appsRoot": "apps",
+      "libsRoot": "libs",
+      "app": {
+        "generator": "@nx/angular:application",
+        "flags": [
+          "--routing=true",
+          "--e2eTestRunner=none"
+        ]
+      },
+      "libs": [
+        {
+          "type": "models",
+          "generator": "@nx/js:library"
+        },
+        {
+          "type": "store",
+          "generator": "@nx/angular:library"
+        },
+        {
+          "type": "themes",
+          "generator": "@nx/angular:library",
+          "flags": [
+            "--unitTestRunner=none"
+          ],
+          "tests": false
+        },
+        {
+          "type": "ui",
+          "generator": "@nx/angular:library"
+        },
+        {
+          "type": "design-library",
+          "generator": "@nx/angular:library"
+        },
+        {
+          "type": "utils",
+          "generator": "@nx/angular:library"
+        },
+        {
+          "type": "mocks",
+          "generator": "@nx/js:library"
+        }
+      ],
+      "tags": [
+        "scope:<domain>",
+        "type:<type>"
+      ],
+      "guide": "docs/reference/domain-library-set.md",
+      "referenceDomain": "ledger",
+      "themeExample": "libs/ledger/themes/src/lib/styles/",
+      "scripts": {
+        "serve": {
+          "name": "s.app.<domain>",
+          "command": "npx nx run <domain>-app:serve:local-dev --skip-nx-cache --port <port>"
+        },
+        "build": {
+          "name": "b.app.<domain>",
+          "command": "npx nx run <domain>-app:build --configuration=production --skip-nx-cache"
+        }
+      },
+      "moduleBoundaries": "eslint.config.mjs",
+      "agentsMd": {
+        "typeStandards": "docs/ai-instructions/standards/lib-types",
+        "constraints": "docs/ai/CONSTRAINTS.md",
+        "deltaExample": "libs/ledger/store/AGENTS.md"
+      }
+    },
+    "theming": {
+      "tokenFile": "libs/<domain>/themes/src/lib/styles/_<prefix>-tokens.scss",
+      "tokenDocs": "libs/<domain>/themes/AGENTS.md",
+      "standards": [
+        "docs/ai/CONSTRAINTS.md § Angular Material",
+        "docs/ai-instructions/standards/styling.md",
+        "docs/reference/styling-conventions.md"
+      ],
+      "bannedTokens": [
+        "--mat-sys-"
+      ]
+    },
+    "accessibility": {
+      "standards": [
+        {
+          "doc": "docs/ai-instructions/reference/accessibility-selectors.instructions.md"
+        }
+      ]
+    },
+    "promote": {
+      "sharedLibrary": {
+        "path": "libs/shared/ui-design-library",
+        "prefix": "dlc",
+        "alias": "@nge/ui-design-library",
+        "storyTitle": "UI Design Library"
+      },
+      "domains": [
+        {
+          "domain": "ledger",
+          "prefix": "ldg",
+          "storyTitle": "Ledger Design Library"
+        }
+      ],
+      "domainLibraryPath": "libs/<domain>/design-library",
+      "libraryDoc": "docs/reference/domain-library-set.md",
+      "banned": [
+        "@angular/material",
+        "<mat-",
+        "--mat-sys-"
+      ],
+      "verify": "npx nx affected -t build lint test"
+    }
   },
   "workflow": {
     "plans": {
