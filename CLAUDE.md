@@ -21,7 +21,8 @@ Most of `docs/` and `.claude/skills/` is a **one-directional curated mirror** pu
 - `docs/demos/` (`ledger-build-plan.md`, `fieldwork-demo-prompt.md`, `personal-finance-demo-prompt.md`)
 - every `libs/**/AGENTS.md` (authored per library, never rsync'd), `README.md`, and this file
 - `.claude/commands/` (`ci`, `explain`, `setup`, `update`) and `.claude/hooks/inject-standards.sh`
-- `.claude/skills/`: `epic-config`, `epic-cross-actor-test`, `epic-evolution-audit`, `epic-next`, `epic-pipeline`, `epic-plan`, `epic-story-complete`, `epic-triage`, `create-storybook`, `create-chart-storybook`, `create-table-storybook`, `ui-storybook`, `ngrx-global-store`, `ngrx-component-state` — adapted to this workspace's namespace, libraries and boards; improvements from `arch` are hand-ported, never rsync'd
+- `.claude/giga/config.json`: this repo's values for the `giga-workflow` and `giga-ux` plugins (the epic workflow — `/giga-workflow:epic-next`, `/giga-workflow:jira`, … — and the UX skill and agents), installed from `jerryorta/giga-agents` via `.claude/settings.json`; update a plugin with `claude plugin marketplace update giga-agents`
+- `.claude/skills/`: `create-storybook`, `create-chart-storybook`, `create-table-storybook`, `ui-storybook`, `ngrx-global-store`, `ngrx-component-state` — adapted to this workspace's namespace, libraries and boards; improvements from `arch` are hand-ported, never rsync'd
 
 ⚠️ Mirrored docs are namespace-normalized (`giga` → `nge`) but still describe the source repo's shape in places — they can name apps and libraries that do not exist here. This file, `docs/reference/commands.md`, and `tsconfig.base.json` are the authority on what ngx actually contains.
 

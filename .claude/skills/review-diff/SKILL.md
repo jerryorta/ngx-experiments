@@ -2,7 +2,7 @@ Review all local changes (staged and unstaged), iterate with Codex in a ralph-wi
 
 ## Overview
 
-This skill bridges "coding done" and "PR open". It runs after `/jira` finishes coding.
+This skill bridges "coding done" and "PR open". It runs after `/giga-workflow:jira` finishes coding.
 
 Flow:
 1. Collect all local changes

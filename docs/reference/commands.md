@@ -1,7 +1,7 @@
 # Commands Reference
 
-Repo-local command reference. Skills read this file to resolve serve commands, ports and verification targets
-(`/jira` Phase 7 test plans, `/epic-pipeline` Step 3a dev-server lookup).
+Repo-local command reference. The `giga-workflow` skills read their dev-server table from `.claude/giga/config.json`
+(`workflow.devServers`); keep the two in step.
 
 > This file is **ngx-owned** — it is not part of the curated `docs/` mirror from gigasoftware, so edit it here.
 

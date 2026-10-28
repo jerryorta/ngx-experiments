@@ -1,0 +1,125 @@
+{
+  "ux": {
+    "devServerSkill": "giga-workflow:dev-server"
+  },
+  "workflow": {
+    "plans": {
+      "repo": "~/Dev/gigasoftware-plans",
+      "script": "~/Dev/gigasoftware-plans/scripts/jira_to_md.py",
+      "guide": "~/Dev/gigasoftware-plans/AGENTS.md",
+      "autoPush": true
+    },
+    "jira": {
+      "site": "gigasoftware.atlassian.net",
+      "cloudId": "0c34459b-6029-4c84-962e-da03ad010fd0",
+      "credentialsFile": "~/Dev/gigasoftware_secrets/jira.json",
+      "mcpPrefix": "mcp__claude_ai_Atlassian__",
+      "createStatus": "To Do"
+    },
+    "git": {
+      "mainBranch": "main",
+      "branchPrefix": "feat/",
+      "mergeMethod": "squash",
+      "autoMerge": false,
+      "hasCI": true
+    },
+    "commit": {
+      "format": "<type>(<scope>): <KEY> <subject>",
+      "hooks": false,
+      "refactorCommitFirst": true
+    },
+    "checks": {
+      "gate": "npx nx run-many -t build lint test -p <projects> --output-style=stream",
+      "affected": "npx nx affected -t build lint test",
+      "single": "npx nx run <project>:<target>"
+    },
+    "docs": {
+      "constraints": "docs/ai/CONSTRAINTS.md",
+      "antiPatterns": "docs/ai/ANTI-PATTERNS.json",
+      "commands": "docs/reference/commands.md",
+      "testingStrategy": "docs/reference/testing-strategy.md",
+      "agentsMd": [
+        "AGENTS.md",
+        "apps/<app>/app/AGENTS.md",
+        "libs/<domain>/ui/AGENTS.md",
+        "libs/<domain>/store/AGENTS.md",
+        "libs/<domain>/design-library/AGENTS.md",
+        "libs/<domain>/themes/AGENTS.md",
+        "libs/shared/ui-design-library/AGENTS.md"
+      ]
+    },
+    "devServers": [
+      {
+        "app": "ledger",
+        "command": "npm run s.app.ledger",
+        "port": 4203,
+        "logFile": "/tmp/ledger-dev-server.log",
+        "kind": "app"
+      },
+      {
+        "app": "storybook",
+        "command": "npm run storybook",
+        "port": 4400,
+        "logFile": "/tmp/ngx-storybook.log",
+        "kind": "storybook"
+      }
+    ],
+    "storybook": {
+      "ports": [
+        4400
+      ]
+    },
+    "planning": {
+      "dependencySignals": [
+        "design-token set",
+        "theme persona",
+        "chart core/* primitive",
+        "with-* signalStore feature",
+        "public barrel export",
+        "nx.json",
+        "eslint.config.mjs",
+        "jest.config.cts",
+        ".storybook/",
+        "generator",
+        "migration"
+      ],
+      "frontendGlobs": [
+        "libs/<domain>/store",
+        "libs/<domain>/ui"
+      ],
+      "designLibrary": {
+        "prefix": "dlc-",
+        "path": "libs/shared/ui-design-library"
+      }
+    },
+    "loop": {
+      "ledgerDir": "~/.claude/epic-loop",
+      "neverUnattended": [
+        "anything touching secrets, credentials, or a deploy"
+      ],
+      "decisionSkills": {
+        "chart": "dataviz",
+        "accessibility": "verify-accessibility"
+      },
+      "precedentClones": "~/Dev/open-source",
+      "precedentPaths": {
+        "domain": [
+          "libs/<domain>/*",
+          "apps/<domain>/*"
+        ],
+        "global": [
+          "docs/reference/*",
+          "docs/ai-instructions/*",
+          "libs/shared/*"
+        ]
+      }
+    },
+    "browser": {
+      "renderingFiles": "\\.component\\.ts$|\\.html$|\\.scss$",
+      "runProfileLabel": "DEVELOPER",
+      "chromeBinary": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+    },
+    "notify": "~/.claude/bin/claude-notify",
+    "memoryDir": "~/Dev/gigasoftware-memory/memory"
+  }
+}
