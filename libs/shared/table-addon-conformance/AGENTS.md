@@ -6,7 +6,7 @@
 
 **Bespoke shared library** — outside the auto-injected lib-type standard system; these notes are
 the guidance. The directory name matches no `libs/*/<type>/**` glob, so for a file written here
-`.claude/hooks/inject-standards.sh` injects only the global constraints and anti-patterns plus this
+the `giga-standards` hook injects only the global constraints and anti-patterns plus this
 file — no lib-type standard. The `type:design-library` tag in `project.json` is there because the
 lib extends a component kit (`@nge/table`) and must sit on that kit's rung of the dependency ladder;
 it routes ESLint's boundaries, not the hook (`docs/ai-instructions/standards/lib-types/design-library.md`

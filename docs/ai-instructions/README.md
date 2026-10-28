@@ -4,7 +4,7 @@ Docs for AI assistants working in this repo, organized by **when** they're neede
 
 ## How the write-time layer works
 
-`.claude/hooks/inject-standards.sh` (a `PreToolUse` hook on `Write` / `Edit` / `MultiEdit`) inspects the file being written, infers the artifact type from its path, and injects **only** the matching standards into context — **nothing loads at session start**. Per write it assembles:
+The `giga-standards` plugin's `PreToolUse` hook (`inject-standards.sh`, on `Write` / `Edit` / `MultiEdit`, and on `Bash` when the command writes a source file), routed by the `standards` table in `.claude/giga/config.json`, inspects the file being written, infers the artifact type from its path, and injects **only** the matching standards into context — **nothing loads at session start**. Per write it assembles:
 
 1. **Invariants** — the mapped sections of `docs/ai/CONSTRAINTS.md`
 2. **Patterns & shapes** — the matching `standards/*.md` fragment bodies (below)

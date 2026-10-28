@@ -8,7 +8,7 @@ Single Nx workspace — Angular 22.0.7, NgRx 21.1.1, Nx 23.1.0, TypeScript 6.0.3
 2. Root `CLAUDE.md` — coding standards, discovery map, mirrored-vs-owned map, key reminders
 3. `docs/ai/*.{md,json}` — constraints, anti-patterns
 4. `docs/reference/*.md` and `docs/ai-instructions/**` — detailed guides
-5. `libs/**/AGENTS.md` — library-specific contributor notes (auto-injected on write by `.claude/hooks/inject-standards.sh`)
+5. `libs/**/AGENTS.md` — library-specific contributor notes (auto-injected on write by the `giga-standards` plugin hook)
 
 ## Project Structure
 
@@ -24,7 +24,7 @@ Single Nx workspace — Angular 22.0.7, NgRx 21.1.1, Nx 23.1.0, TypeScript 6.0.3
 
 `docs/ai/`, `docs/ai-instructions/`, most of `docs/reference/`, `docs/architecture/`, and most of `.claude/skills/` are a **one-directional mirror** from the sibling `arch` repo (`/Users/gigasoftware_developer/Dev/DEV_ARCH/arch`). Editing a mirrored file here is wasted work — the next sync reverts it; change it in `arch` instead.
 
-ngx owns and you may edit: `docs/reference/commands.md`, `docs/reference/storybook.md`, `docs/demos/`, every `libs/**/AGENTS.md`, `README.md`, `CLAUDE.md`, this file, `.claude/commands/`, `.claude/hooks/`, and the adapted skills listed in `CLAUDE.md` § Mirrored vs ngx-Owned (the chart and table storybook generators, `ui-storybook`, `ngrx-global-store`).
+ngx owns and you may edit: `docs/reference/commands.md`, `docs/reference/storybook.md`, `docs/demos/`, every `libs/**/AGENTS.md`, `README.md`, `CLAUDE.md`, this file, `.claude/commands/`, and the adapted skills listed in `CLAUDE.md` § Mirrored vs ngx-Owned (the chart and table storybook generators, `ui-storybook`, `ngrx-global-store`).
 
 ## Build & Test
 

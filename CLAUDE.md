@@ -20,8 +20,8 @@ Most of `docs/` and `.claude/skills/` is a **one-directional curated mirror** pu
 - `docs/reference/storybook.md` (this workspace's Storybook: the `apps/storybook-app` config, story globs, the Welcome page, commands, the Firebase Hosting workflow)
 - `docs/demos/` (`ledger-build-plan.md`, `fieldwork-demo-prompt.md`, `personal-finance-demo-prompt.md`)
 - every `libs/**/AGENTS.md` (authored per library, never rsync'd), `README.md`, and this file
-- `.claude/commands/` (`ci`, `explain`, `setup`, `update`) and `.claude/hooks/inject-standards.sh`
-- `.claude/giga/config.json`: this repo's values for the `giga-workflow`, `giga-ux` and `giga-angular` plugins (the epic workflow — `/giga-workflow:epic-next`, `/giga-workflow:jira`, … — the UX skill and agents, and `/giga-angular:create-storybook` and `/giga-angular:ngrx-component-state`), installed from `jerryorta/giga-agents` via `.claude/settings.json`; update a plugin with `claude plugin marketplace update giga-agents`
+- `.claude/commands/` (`ci`, `explain`, `setup`, `update`)
+- `.claude/giga/config.json`: this repo's values for the `giga-workflow`, `giga-ux`, `giga-angular` and `giga-standards` plugins (the epic workflow — `/giga-workflow:epic-next`, `/giga-workflow:jira`, … — the UX skill and agents, `/giga-angular:create-storybook` and `/giga-angular:ngrx-component-state`, and the write-time standards hook, routed by `standards`), installed from `jerryorta/giga-agents` via `.claude/settings.json`; update a plugin with `claude plugin marketplace update giga-agents`
 - `.claude/skills/`: `create-chart-storybook`, `create-table-storybook`, `ui-storybook`, `ngrx-global-store` — adapted to this workspace's namespace, libraries and boards; improvements from `arch` are hand-ported, never rsync'd
 
 ⚠️ Mirrored docs are namespace-normalized (`giga` → `nge`) but still describe the source repo's shape in places — they can name apps and libraries that do not exist here. This file, `docs/reference/commands.md`, and `tsconfig.base.json` are the authority on what ngx actually contains.
@@ -60,7 +60,7 @@ Most of `docs/` and `.claude/skills/` is a **one-directional curated mirror** pu
 
 - `docs/ai/CONSTRAINTS.md` — authoritative invariants + PR review checklist (wins all conflicts)
 - `docs/ai/ANTI-PATTERNS.json` — regex-detectable violations with severities
-- `docs/ai-instructions/` — role-organized AI docs; `standards/` fragments auto-inject on Write/Edit via `.claude/hooks/inject-standards.sh`, which also injects the matching `standards/lib-types/<type>.md` and the nearest `AGENTS.md` above the file (taxonomy: `docs/ai-instructions/README.md`)
+- `docs/ai-instructions/` — role-organized AI docs; `standards/` fragments auto-inject on Write/Edit via the `giga-standards` plugin hook, routed by `standards` in `.claude/giga/config.json`, which also injects the matching `standards/lib-types/<type>.md` and the nearest `AGENTS.md` above the file (taxonomy: `docs/ai-instructions/README.md`)
 
 ## Shared Code — Search Before You Write
 

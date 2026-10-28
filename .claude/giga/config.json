@@ -180,5 +180,172 @@
     },
     "notify": "~/.claude/bin/claude-notify",
     "memoryDir": "~/Dev/gigasoftware-memory/memory"
+  },
+  "standards": {
+    "constraintsFile": "docs/ai/CONSTRAINTS.md",
+    "antiPatternsFile": "docs/ai/ANTI-PATTERNS.json",
+    "fragmentsDir": "docs/ai-instructions/standards",
+    "libTypesDir": "docs/ai-instructions/standards/lib-types",
+    "guidesDir": "docs/ai-instructions",
+    "sourceFilePattern": "(apps|libs)/[A-Za-z0-9_./-]+\\.(ts|html|scss)",
+    "budgetBytes": 9800,
+    "artifacts": [
+      {
+        "match": [
+          "*.spec.ts"
+        ],
+        "artifact": "test",
+        "sections": [
+          "Testing",
+          "Zoneless Change Detection"
+        ],
+        "antiPatterns": [
+          "jasmine-import"
+        ],
+        "guide": "docs/reference/testing-strategy.md"
+      },
+      {
+        "match": [
+          "*.component.html"
+        ],
+        "artifact": "template",
+        "sections": [
+          "Angular Conventions"
+        ],
+        "antiPatterns": [
+          "legacy-ngIf",
+          "legacy-ngFor",
+          "legacy-ngSwitch",
+          "mat-component-selector"
+        ]
+      },
+      {
+        "match": [
+          "*libs/shared/ui-design-library/*.component.ts"
+        ],
+        "artifact": "uidl",
+        "sections": [
+          "UI Design Library",
+          "Component File Structure"
+        ],
+        "antiPatterns": [
+          "uidl-host-selector",
+          "uidl-missing-host-class",
+          "inline-template",
+          "inline-styles"
+        ],
+        "guide": "libs/shared/ui-design-library/COMPONENT-ARCHITECTURE-BEST-PRACTICES.md"
+      },
+      {
+        "match": [
+          "*/src/app/*.component.ts"
+        ],
+        "artifact": "component",
+        "sections": [
+          "Component File Structure",
+          "Angular Conventions",
+          "Component-Scoped State",
+          "Application Components"
+        ],
+        "antiPatterns": [
+          "constructor-injection",
+          "input-decorator",
+          "output-decorator",
+          "inline-template",
+          "inline-styles",
+          "angular-material-import"
+        ]
+      },
+      {
+        "match": [
+          "*.component.ts"
+        ],
+        "artifact": "component",
+        "sections": [
+          "Component File Structure",
+          "Angular Conventions",
+          "Component-Scoped State"
+        ],
+        "antiPatterns": [
+          "constructor-injection",
+          "input-decorator",
+          "output-decorator",
+          "inline-template",
+          "inline-styles",
+          "angular-material-import"
+        ]
+      },
+      {
+        "match": [
+          "*.service.ts"
+        ],
+        "artifact": "service",
+        "sections": [
+          "Angular Conventions"
+        ],
+        "antiPatterns": [
+          "constructor-injection",
+          "service-lifecycle-hook"
+        ]
+      },
+      {
+        "match": [
+          "*.selectors.ts",
+          "*.reducer.ts",
+          "*.effects.ts",
+          "*.actions.ts",
+          "*.facade.ts"
+        ],
+        "artifact": "ngrx",
+        "sections": [
+          "NgRx Facades & Selectors"
+        ],
+        "antiPatterns": [
+          "constructor-injection"
+        ],
+        "guide": "docs/reference/ngrx/facades-and-selectors.md"
+      },
+      {
+        "match": [
+          "*.store.ts",
+          "*/store/*"
+        ],
+        "artifact": "store",
+        "sections": [
+          "Component-Scoped State",
+          "NgRx Facades & Selectors"
+        ],
+        "antiPatterns": [
+          "constructor-injection"
+        ]
+      },
+      {
+        "match": [
+          "*.scss"
+        ],
+        "artifact": "styling",
+        "sections": [
+          "Styling",
+          "Angular Material — Legacy Only (NOT for New Development)"
+        ],
+        "antiPatterns": [
+          "mat-sys-token"
+        ],
+        "guide": "docs/reference/styling-conventions.md"
+      },
+      {
+        "match": [
+          "*.ts"
+        ],
+        "artifact": "angular",
+        "sections": [
+          "Angular Conventions"
+        ],
+        "antiPatterns": [
+          "constructor-injection",
+          "any-type"
+        ]
+      }
+    ]
   }
 }
