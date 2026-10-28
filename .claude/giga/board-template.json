@@ -1,0 +1,37 @@
+{
+  "_template": "Template only, not a board. `/giga-workflow:epic-plan <EPIC-KEY>` seeds a new board from it through `workflow.boardTemplate` in `.claude/giga/config.json`, dropping every `_` key. The filename deliberately does not match `epic.*.json`, so no epic skill reads it as a board. The Jira project is NGE; ticket content lives in the plans repo as `nge/<KEY>.md`, and Jira holds status only.",
+  "_workspaceShapes": "Library/Storybook epic (the common case here): app=apps/storybook-app, libraries.ui=libs/shared/<lib>, buildCommand='npx nx run storybook-app:build-storybook'. Ledger demo-app epic: app=apps/ledger/app, libraries.ui=libs/ledger/ui, libraries.store=libs/ledger/store, libraries.designLibrary=libs/ledger/design-library, routingFiles=['apps/ledger/app/src/app/app.routes.ts'], buildCommand='npm run b.app.ledger'.",
+  "name": "<epic summary, e.g. NgeChart layer expansion>",
+  "epicKey": "NGE-<n>",
+  "jql": "parent = NGE-<n> AND status = \"To Do\"",
+  "storyOrdering": "epic-description",
+  "groupLabel": "Wave",
+  "completionMessage": "All NGE-<n> stories are complete!",
+  "hybridMode": false,
+  "crossActor": null,
+  "mergeMode": "direct",
+  "epicBranch": null,
+  "commitScope": "charts",
+  "buildCommand": "npx nx run storybook-app:build-storybook",
+  "app": "apps/storybook-app",
+  "libraries": {
+    "ui": "libs/shared/ui-design-library",
+    "store": null,
+    "designLibrary": "libs/shared/ui-design-library"
+  },
+  "routingFiles": [],
+  "conventions": [
+    "Angular control flow only — @if / @for / @switch, never *ngIf / *ngFor",
+    "DI via inject(); signal inputs/outputs via input() / output() — never constructor injection or @Input() / @Output()",
+    "Separate .ts / .html / .scss / .spec.ts files per component — never inline template or styles",
+    "Component-scoped @ngrx/signals SignalStore for internal reactive state, provided at the component and colocated with it; design-library primitives keep intrinsic widget mechanics (CVA internals)",
+    "Tailwind utility classes by default; SCSS + BEM only for complex layout/animation Tailwind cannot express",
+    "No Angular Material — @angular/material is not installed and must never be added; own-namespace CSS-var tokens (--nge-* / --dlc-*) with literal defaults instead, never mat-* / --mat-sys-*",
+    "Design-library components: ViewEncapsulation.None + host class, SCSS wrapped in .dlc-<component> (never :host), dlc- selector prefix",
+    "Jest only — never Jasmine",
+    "Verify through Nx — this repo has no npm lint/test scripts: `npx nx affected -t lint test` (one project: `npx nx run <project>:lint` / `:test`), plus `npm run build-storybook` for UI work"
+  ],
+  "designReferences": null,
+  "domainMemoryIndex": null,
+  "epicEvolutionRules": []
+}

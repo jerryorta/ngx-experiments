@@ -179,7 +179,8 @@
       "chromeBinary": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
     },
     "notify": "~/.claude/bin/claude-notify",
-    "memoryDir": "~/Dev/gigasoftware-memory/memory"
+    "memoryDir": "~/Dev/gigasoftware-memory/memory",
+    "boardTemplate": ".claude/giga/board-template.json"
   },
   "standards": {
     "constraintsFile": "docs/ai/CONSTRAINTS.md",
