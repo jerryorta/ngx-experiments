@@ -221,7 +221,7 @@
       "site": "gigasoftware.atlassian.net",
       "cloudId": "0c34459b-6029-4c84-962e-da03ad010fd0",
       "credentialsFile": "~/Dev/gigasoftware_secrets/jira.json",
-      "mcpPrefix": "mcp__claude_ai_Atlassian__",
+      "mcpPrefix": "mcp__claude_ai_Atlassian_MCP__",
       "createStatus": "To Do"
     },
     "git": {
