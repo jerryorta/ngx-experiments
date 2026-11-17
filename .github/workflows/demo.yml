@@ -59,7 +59,8 @@ jobs:
           set -euo pipefail
           rm -rf _site
           mkdir -p _site/demo
-          cp landing/index.html _site/index.html
+          # The whole landing folder: index.html plus its self-hosted font.
+          cp -r landing/. _site/
           cp -r dist/apps/ledger/app/browser/. _site/demo/
 
       - name: Deploy to Firebase Hosting

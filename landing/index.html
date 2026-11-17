@@ -31,97 +31,138 @@
       document.head.appendChild(tag);
     })();
   </script>
+  <!-- Blueprint theme — the same tokens as jerryorta.dev (giga-marketing's Blueprint, live
+       on gigasoftware.io). Light uses Blueprint's values exactly; dark is derived in the
+       same slate/cobalt family. Follows the device's light/dark setting; no switch. -->
+  <link rel="preload" href="./fonts/schibsted-grotesk-variable.woff2" as="font" type="font/woff2" crossorigin />
   <style>
+    @font-face {
+      font-family: "Schibsted Grotesk";
+      src: url("./fonts/schibsted-grotesk-variable.woff2") format("woff2");
+      font-weight: 400 900;
+      font-display: swap;
+    }
     :root {
-      --bg: #0b0f1a; --bg-2: #0f1524; --surface: #141b2d;
-      --border: #26314b; --text: #e6ebf5; --muted: #9aa7c2;
-      --accent: #8b7bf0; --accent-2: #35d0ba; --accent-3: #f0a35e;
+      color-scheme: dark;
+      /* Dark (derived) */
+      --bg: #0f1420; --surface: #161d2b; --surface-2: #1d2636; --border: #263043;
+      --text: #e6eaf2; --muted: #a3adbf; --accent: #7d96ff; --accent-rgb: 125, 150, 255;
+      --grid-line: #182033; --surface-tint: #1f2b52;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        color-scheme: light;
+        /* Light (Blueprint's values). Steel fails AA on Paper, so secondary text is Slate. */
+        --bg: #f3f5f8; --surface: #ffffff; --surface-2: #e8ecf2; --border: #d5dbe5;
+        --text: #1a2333; --muted: #1a2333; --accent: #2d4bdb; --accent-rgb: 45, 75, 219;
+        --grid-line: #e3e8f0; --surface-tint: #dce3fa;
+      }
     }
     * { box-sizing: border-box; }
+    html { overflow-x: clip; }
     body {
-      margin: 0; color: var(--text); line-height: 1.55; min-height: 100vh;
-      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0; min-height: 100vh; color: var(--text); background: var(--bg);
+      font: 400 16px/1.6 "Schibsted Grotesk", ui-sans-serif, system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: var(--text); text-decoration: underline; }
+    :is(a, button, summary, [tabindex]):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px 56px; }
+
+    /* Hero, on Blueprint's 28px drafting grid — full width, behind the hero only. */
+    .hero { position: relative; z-index: 0; padding: 72px 0 40px; margin: 0 0 44px; }
+    .hero::before {
+      content: ""; position: absolute; z-index: -1; inset: 0 calc(50% - 50vw);
       background:
-        radial-gradient(1200px 600px at 12% -10%, rgba(139,123,240,0.18), transparent 60%),
-        radial-gradient(1000px 520px at 100% 0%, rgba(53,208,186,0.12), transparent 55%),
-        var(--bg);
+        linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
     }
-    a { color: inherit; text-decoration: none; }
-    .wrap { max-width: 1040px; margin: 0 auto; padding: 72px 24px 56px; }
-    .eyebrow {
-      display: inline-flex; align-items: center; gap: 8px; margin-bottom: 22px;
-      font-size: 13px; font-weight: 600; letter-spacing: 0.02em; color: var(--accent);
-      background: rgba(139,123,240,0.10); border: 1px solid rgba(139,123,240,0.28);
-      border-radius: 999px; padding: 6px 14px;
+    .eyebrow { display: block; margin: 0 0 12px; font-size: 0.875rem; font-weight: 600; color: var(--text); }
+    h1 {
+      margin: 0 0 16px; font-size: clamp(2.25rem, 6vw, 3.75rem); line-height: 1.05;
+      letter-spacing: -0.025em; font-weight: 500;
     }
-    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-2); box-shadow: 0 0 8px var(--accent-2); }
-    h1 { font-size: clamp(34px, 6vw, 54px); line-height: 1.05; letter-spacing: -0.02em; font-weight: 800; margin: 0 0 16px; }
-    h1 .grad { background: linear-gradient(100deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .lede { font-size: clamp(16px, 2.3vw, 20px); color: var(--muted); max-width: 700px; margin: 0 0 38px; }
+    h1 .accent { color: var(--accent); }
+    .lede { margin: 0; max-width: 700px; font-size: 1rem; color: var(--muted); }
     .lede strong { color: var(--text); font-weight: 600; }
 
-    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(238px, 1fr)); gap: 16px; margin: 0 0 56px; }
+    h2 { margin: 0; letter-spacing: -0.02em; font-weight: 500; }
+    .section-title { font-size: 1.5rem; line-height: 1.2; margin: 0 0 16px; }
+
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(238px, 1fr)); gap: 16px; margin: 0 0 44px; }
     .card {
-      display: flex; flex-direction: column; gap: 10px; padding: 24px;
-      background: linear-gradient(180deg, var(--surface), var(--bg-2));
-      border: 1px solid var(--border); border-radius: 16px;
-      transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+      display: flex; flex-direction: column; gap: 8px; padding: 22px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      transition: border-color .15s ease;
     }
-    .card:hover { transform: translateY(-3px); border-color: rgba(139,123,240,0.55); box-shadow: 0 14px 44px -14px rgba(0,0,0,0.65); }
-    .ico { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-size: 22px; }
-    .c-demo .ico { background: rgba(139,123,240,0.16); }
-    .c-sb .ico { background: rgba(53,208,186,0.16); }
-    .c-src .ico { background: rgba(240,163,94,0.16); font: 700 15px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--accent-3); }
-    .card h3 { margin: 4px 0 0; font-size: 19px; font-weight: 700; }
-    .card p { margin: 0; color: var(--muted); font-size: 14.5px; }
-    .go { margin-top: auto; padding-top: 8px; font-weight: 600; font-size: 14px; color: var(--accent); }
+    .card:hover { color: inherit; text-decoration: none; border-color: rgba(var(--accent-rgb), 0.55); }
+    .ico {
+      width: 40px; height: 40px; border-radius: 8px; display: grid; place-items: center;
+      font-size: 20px; background: var(--surface-tint);
+    }
+    .c-src .ico { font: 700 14px ui-monospace, "SF Mono", Menlo, Consolas, monospace; color: var(--accent); }
+    .card h2 { margin-top: 4px; font-size: 1.125rem; line-height: 1.3; color: var(--accent); }
+    .card p { margin: 0; font-size: 14px; color: var(--text); }
+    .go { margin-top: auto; padding-top: 10px; font-size: 13.5px; font-weight: 600; color: var(--accent); }
+    .card:hover .go { text-decoration: underline; }
 
-    .section-title { font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 0 0 18px; }
-    .concepts { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px 30px; margin: 0 0 52px; }
+    .concepts { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px 30px; margin: 0 0 44px; }
     .concept { border-left: 2px solid var(--border); padding: 1px 0 1px 16px; }
-    .concept b { display: block; color: var(--text); font-weight: 650; margin-bottom: 3px; font-size: 15px; }
-    .concept span { color: var(--muted); font-size: 14px; }
-    code { color: var(--accent-2); font-size: 0.88em; background: rgba(53,208,186,0.09); padding: 1px 6px; border-radius: 6px; }
+    .concept b { display: block; margin-bottom: 3px; font-size: 1rem; font-weight: 600; }
+    .concept span { font-size: 14px; color: var(--text); }
+    code {
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.88em;
+      color: var(--text); background: var(--surface-2); padding: 1px 5px; border-radius: 4px;
+    }
 
-    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 48px; }
-    .chip { font-size: 12.5px; font-weight: 600; color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 5px 11px; }
+    /* Stack: plain text separated by bullets, as on jerryorta.dev. */
+    .chips { display: flex; flex-wrap: wrap; gap: 0.25rem 0; margin: 0 0 48px; }
+    .chip { font-size: 0.875rem; color: var(--text); }
+    .chip:not(:last-child)::after { content: "•"; margin: 0 0.5em; }
 
-    footer { border-top: 1px solid var(--border); padding-top: 22px; color: var(--muted); font-size: 13.5px; display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; justify-content: space-between; }
-    footer a { color: var(--accent); font-weight: 600; }
+    footer {
+      display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; justify-content: space-between;
+      padding-top: 22px; border-top: 1px solid var(--border); font-size: 0.875rem; color: var(--muted);
+    }
   </style>
 </head>
 <body>
   <main class="wrap">
-    <span class="eyebrow"><span class="dot"></span>@nge — modern Angular, framework-pure</span>
-    <h1>ngx-experiments<br><span class="grad">a clean-room Angular design system</span></h1>
-    <p class="lede">
-      A standalone <strong>Nx&nbsp;+&nbsp;Angular</strong> reference workspace — standalone components,
-      signals, and <strong>zero Angular Material</strong>. Each shared library is a self-contained answer
-      to one architecture question, small enough to read end-to-end.
-    </p>
+    <header class="hero">
+      <span class="eyebrow">@nge — modern Angular, framework-pure</span>
+      <h1>ngx-experiments<br><span class="accent">a clean-room Angular design system</span></h1>
+      <p class="lede">
+        A standalone <strong>Nx&nbsp;+&nbsp;Angular</strong> reference workspace — standalone components,
+        signals, and <strong>zero Angular Material</strong>. Each shared library is a self-contained answer
+        to one architecture question, small enough to read end-to-end.
+      </p>
+    </header>
 
     <div class="cards">
       <a class="card c-demo" href="./demo/">
         <span class="ico" aria-hidden="true">📊</span>
-        <h3>Ledger demo</h3>
+        <h2>Ledger demo</h2>
         <p>A charts-forward personal-finance dashboard — the worked example, fully themed and signal-driven.</p>
         <span class="go">Open the app →</span>
       </a>
       <a class="card c-sb" href="https://jerryorta-storybook.web.app/">
         <span class="ico" aria-hidden="true">📚</span>
-        <h3>Storybook</h3>
+        <h2>Storybook</h2>
         <p>Browse the NGE Design Library, charts, and calendar in isolation — across six persona themes.</p>
         <span class="go">Explore components →</span>
       </a>
       <a class="card c-src" href="https://github.com/jerryorta/ngx-experiments">
         <span class="ico" aria-hidden="true">&lt;/&gt;</span>
-        <h3>Source</h3>
+        <h2>Source</h2>
         <p>Read the Nx monorepo end-to-end — conventions mirrored from a production workspace.</p>
         <span class="go">View on GitHub →</span>
       </a>
     </div>
 
-    <p class="section-title">Concepts</p>
+    <h2 class="section-title">Concepts</h2>
     <div class="concepts">
       <div class="concept"><b>A custom design library</b><span>Standalone, OnPush components with signal <code>input()</code>/<code>output()</code>, themed entirely through CSS-variable tokens — a full system with zero Material.</span></div>
       <div class="concept"><b>An extensible charts library</b><span>One <code>&lt;nge-chart&gt;</code> driven by composable layers; each chart type is a pure D3 render fn + config a domain can promote upstream by <em>moving files</em>.</span></div>
@@ -129,7 +170,7 @@
       <div class="concept"><b>Custom app domains</b><span>Scaffold a full library-set — models · store · ui · design-library · utils · mocks · themes — plus an app. Ledger is the worked example.</span></div>
     </div>
 
-    <p class="section-title">Stack</p>
+    <h2 class="section-title">Stack</h2>
     <div class="chips">
       <span class="chip">Angular 22</span>
       <span class="chip">Nx 23</span>
