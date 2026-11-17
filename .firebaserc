@@ -6,7 +6,7 @@
     "gigasoft-svc-prd": {
       "hosting": {
         "storybook": ["jerryorta-storybook"],
-        "demo": ["jerryorta-ledger"]
+        "demo": ["jerryorta-ledger-demo"]
       }
     }
   }

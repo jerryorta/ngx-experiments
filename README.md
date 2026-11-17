@@ -9,7 +9,7 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06B6D4?logo=tailwindcss&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)
 
-**🔗 Live:** [Ledger demo](https://jerryorta-ledger.web.app/demo/) · [Storybook](https://jerryorta-storybook.web.app/)
+**🔗 Live:** [Ledger demo](https://jerryorta-ledger-demo.web.app/demo/) · [Storybook](https://jerryorta-storybook.web.app/)
 
 ## What it is
 
@@ -70,10 +70,10 @@ Claude Code commands (`.claude/commands/`):
 
 The Ledger demo and Storybook each publish to their own **Firebase Hosting** site automatically on every push to `main`:
 
-| Workflow                          | Hosting target (`.firebaserc`) | Site                                |
-| --------------------------------- | ------------------------------ | ----------------------------------- |
-| `.github/workflows/demo.yml`      | `demo`                         | https://jerryorta-ledger.web.app    |
-| `.github/workflows/storybook.yml` | `storybook`                    | https://jerryorta-storybook.web.app |
+| Workflow                          | Hosting target (`.firebaserc`) | Site                                  |
+| --------------------------------- | ------------------------------ | ------------------------------------- |
+| `.github/workflows/demo.yml`      | `demo`                         | https://jerryorta-ledger-demo.web.app |
+| `.github/workflows/storybook.yml` | `storybook`                    | https://jerryorta-storybook.web.app   |
 
 ```bash
 git add -A

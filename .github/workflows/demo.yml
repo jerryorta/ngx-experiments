@@ -1,6 +1,6 @@
 name: Deploy Ledger demo (Firebase Hosting)
 
-# Publishes the landing hub + Ledger demo to https://jerryorta-ledger.web.app
+# Publishes the landing hub + Ledger demo to https://jerryorta-ledger-demo.web.app
 #   /       -> landing hub
 #   /demo/  -> Ledger demo (Angular SPA)
 #
